@@ -288,7 +288,7 @@ namespace MyRevit.EarthWork.UI
                 , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(m_Doc));
             recorder.WriteValue(nameof(EarthworkBlocking), Newtonsoft.Json.JsonConvert.SerializeObject(Blocking));
             //更新视图内容
-            Block.CPSettings.ApplySetting(Blocking.View3D, Block.ElementIds);
+            Block.CPSettings.ApplySetting(Blocking, Block.ElementIds);
         }
         /// <summary>
         /// 预览
@@ -391,18 +391,6 @@ namespace MyRevit.EarthWork.UI
             this.Hide();
             this.TopMost = false;
 
-            #region NoHook
-            //try
-            //{
-            //    Elements = m_UIDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件").Select(p => m_Doc.GetElement(p.ElementId)).ToList();
-            //}
-            //catch
-            //{
-            //    Elements = null;
-            //}
-            //Block.AddElements(Blocking, Elements); 
-            #endregion
-
             #region Hook
             using (var mouseHook = new PickObjectsMouseHook())
             {
@@ -421,7 +409,6 @@ namespace MyRevit.EarthWork.UI
                 }
             }
             #endregion
-
             this.TopMost = true;
             this.Show();
             ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
@@ -440,19 +427,6 @@ namespace MyRevit.EarthWork.UI
             }
             this.Hide();
             this.TopMost = false;
-
-            #region NoHook
-            //try
-            //{
-            //    Elements = m_UIDoc.Selection.PickObjects(ObjectType.Element, "选择要删除的构件").Select(p => m_Doc.GetElement(p.ElementId)).ToList();
-            //}
-            //catch
-            //{
-            //    Elements = null;
-            //}
-            //Block.RemoveElements(Blocking, Elements); 
-            #endregion
-
             #region Hook
             using (var mouseHook = new PickObjectsMouseHook())
             {
@@ -471,7 +445,6 @@ namespace MyRevit.EarthWork.UI
                 }
             }
             #endregion
-
             this.TopMost = true;
             this.Show();
             ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");

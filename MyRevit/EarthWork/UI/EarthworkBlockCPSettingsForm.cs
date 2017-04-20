@@ -78,7 +78,7 @@ namespace MyRevit.EarthWork.UI
                 , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(Mainform.m_Doc));
             recorder.WriteValue(nameof(EarthworkBlocking), Newtonsoft.Json.JsonConvert.SerializeObject(Mainform.Blocking));
             //更新视图内容
-            CPSettings.ApplySetting(Mainform.Blocking.View3D, Mainform.Block.ElementIds);
+            CPSettings.ApplySetting(Mainform.Blocking, Mainform.Block.ElementIds);
         }
         /// <summary>
         /// 重置透明值

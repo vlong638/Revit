@@ -8,6 +8,77 @@ using System.Linq;
 
 namespace MyRevit.EarthWork.Entity
 {
+    #region 应用(新增,更改) 删除 区间化集合
+    interface SectionalData
+    {
+        void ApplyNew();
+        void ApplyDelete();
+    }
+    interface MemorableData<T>
+    {
+        void Clone();
+        void Rollback();
+    }
+    interface Cloneable<T>
+   { 
+        T Clone();
+    }
+    class SectionedCollection<T> : MemorableData<T>
+        where T : SectionalData, Cloneable<T>
+    {
+        public SectionedCollection(List<T> datas)
+        {
+            Datas = datas;
+            Clone();
+        }
+
+        List<T> Datas { set; get; } = new List<T>();
+        List<T> News { set; get; } = new List<T>();
+        List<T> Deletes { set; get; } = new List<T>();
+        IEnumerable<T> Memo { set; get; }
+
+
+        public void Add(T data)
+        {
+            News.Add(data);
+            Datas.Add(data);
+        }
+        public void Delete(T data)
+        {
+            Deletes.Add(data);
+            Datas.Remove(data);
+        }
+        public void Apply()
+        {
+            foreach (var New in News)
+            {
+                New.ApplyNew();
+            }
+            News = new List<T>();
+            foreach (var Delete in Deletes)
+            {
+                Delete.ApplyDelete();
+            }
+            Deletes = new List<T>();
+            Clone();
+        }
+        public void Cancel()
+        {
+            News = new List<T>();
+            Deletes = new List<T>();
+            Rollback();
+        }
+        public void Clone()
+        {
+            Memo = Datas.Select(c => c.Clone());
+        }
+        public void Rollback()
+        {
+            Datas = Memo.Select(c => c.Clone()).ToList();
+        }
+    }
+    #endregion
+
     public class EarthworkBlockingConstraints
     {
         public static OverrideGraphicSettings DefaultCPSettings = new OverrideGraphicSettings();
@@ -27,14 +98,16 @@ namespace MyRevit.EarthWork.Entity
         public Dictionary<int, int> ElementToBlockMapper { set; get; } = new Dictionary<int, int>();
 
         #region DocRelatedInfo
+        public Document Doc{ set; get; }
         public View3D View3D { private set; get; }
         public void InitByDocument(Document doc)
         {
+            Doc = doc;
             string viewName = "土方分块";
             View3D = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
             if (View3D == null)
             {
-                using (var transaction = new Transaction(doc, "创建(土方分块)视图"))
+                using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(InitByDocument)))
                 {
                     transaction.Start();
                     try
@@ -52,6 +125,11 @@ namespace MyRevit.EarthWork.Entity
                         TaskDialog.Show("消息", "视图(土方分块)新建失败,错误详情:" + ex.ToString());
                     }
                 }
+            }
+            //加载ElementId
+            foreach (var block in Blocks)
+            {
+                block.ElementIds.AddRange(block.ElementIdValues.Select(c => doc.GetElement(new ElementId(c)).Id));
             }
         }
         #endregion
@@ -94,11 +172,8 @@ namespace MyRevit.EarthWork.Entity
         /// <returns></returns>
         public void Remove(EarthworkBlock block)
         {
-            //索引处理
-            foreach (var pair in ElementToBlockMapper.Where(c => c.Value == block.Id))
-            {
-                ElementToBlockMapper.Remove(pair.Key);
-            }
+            //移除节点的所有元素(目的:解除图形配置),然后移除节点
+            block.RemoveElementIds(this, block.ElementIds);
             Blocks.Remove(block);
         }
         #endregion
@@ -211,26 +286,7 @@ namespace MyRevit.EarthWork.Entity
 
         [JsonIgnore]
         public List<ElementId> ElementIds { get; set; } = new List<ElementId>();
-
-        ////TEST
-        //public List<int> ElementIds { get; set; } = new List<int>();
-        ///// <summary>
-        ///// 添加构建元素Id
-        ///// </summary>
-        ///// <param name="elementId"></param>
-        //public void AddElement(int elementId)
-        //{
-        //    ElementIds.Add(elementId);
-        //}
-        ///// <summary>
-        ///// 删除构建元素Id
-        ///// </summary>
-        ///// <param name="elementId"></param>
-        ///// <returns></returns>
-        //public bool RemoveElement(int elementId)
-        //{
-        //    return ElementIds.Remove(elementId);
-        //}
+        
         /// <summary>
         /// 添加构件元素
         /// </summary>
@@ -250,7 +306,7 @@ namespace MyRevit.EarthWork.Entity
             //对象处理
             ElementIds.Add(elementId);
             ElementIdValues.Add(elementId.IntegerValue);
-            CPSettings.ApplySetting(blocking.View3D, elementId);
+            CPSettings.ApplySetting(blocking, new List<ElementId>() { elementId });
         }
         /// <summary>
         /// 添加构件元素(批量)
@@ -307,7 +363,7 @@ namespace MyRevit.EarthWork.Entity
         }
 
         /// <summary>
-        /// 可见
+        /// 图元可见
         /// </summary>
         public bool IsVisible { set; get; }
         /// <summary>
@@ -315,11 +371,15 @@ namespace MyRevit.EarthWork.Entity
         /// </summary>
         public bool IsHalftone { set; get; }
         /// <summary>
-        /// 颜色
+        /// 表面可见
+        /// </summary>
+        public bool IsSurfaceVisible { set; get; }
+        /// <summary>
+        /// 颜色 Surface即Projection
         /// </summar>y
         public System.Drawing.Color Color { set; get; } = System.Drawing.Color.White;
         /// <summary>
-        /// 填充物
+        /// 填充物 Surface即Projection
         /// </summary>
         public int FillerId { set; get; }
         /// <summary>
@@ -336,6 +396,7 @@ namespace MyRevit.EarthWork.Entity
             return new EarthworkBlockCPSettings()
             {
                 IsVisible = IsVisible,
+                IsSurfaceVisible = IsSurfaceVisible,
                 IsHalftone = IsHalftone,
                 Color = Color,
                 FillerId = FillerId,
@@ -349,6 +410,7 @@ namespace MyRevit.EarthWork.Entity
         public void Copy(EarthworkBlockCPSettings cpSettings)
         {
             this.IsVisible = cpSettings.IsVisible;
+            this.IsSurfaceVisible = cpSettings.IsSurfaceVisible;
             this.IsHalftone = cpSettings.IsHalftone;
             this.Color = cpSettings.Color;
             this.FillerId = cpSettings.FillerId;
@@ -359,29 +421,34 @@ namespace MyRevit.EarthWork.Entity
         /// 对元素增加节点的配置
         /// </summary>
         /// <param name="element"></param>
-        public void ApplySetting(View view, ElementId elementId, OverrideGraphicSettings setting)
+        void ApplySetting(View view, ElementId elementId, OverrideGraphicSettings setting)
         {
             view.SetElementOverrides(elementId, setting);
             TaskDialog.Show("INFO", $"elementId:{elementId.IntegerValue}颜色/透明度设置已更新");
         }
-        public void ApplySetting(View view, ElementId elementId)
+        void ApplySetting(View view, ElementId elementId)
         {
             OverrideGraphicSettings setting = GetOverrideGraphicSettings();
             ApplySetting(view, elementId, setting);
         }
-        public void ApplySetting(View view, List<ElementId> elementIds)
+        public void ApplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
-            OverrideGraphicSettings setting = GetOverrideGraphicSettings();
-            foreach (var elementId in elementIds)
-                ApplySetting(view, elementId, setting);
+            using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(ApplySetting)))
+            {
+                OverrideGraphicSettings setting = GetOverrideGraphicSettings();
+                transaction.Start();
+                foreach (var elementId in elementIds)
+                    ApplySetting(blocking.View3D, elementId, setting);
+                transaction.Commit();
+            }
         }
         OverrideGraphicSettings GetOverrideGraphicSettings()
         {
             var setting = new OverrideGraphicSettings();
-            setting.SetCutFillPatternVisible(IsVisible);
+            setting.SetProjectionFillPatternVisible(IsVisible);
             setting.SetHalftone(IsHalftone);
-            setting.SetCutFillColor(new Color(Color.R, Color.G, Color.B));
-            setting.SetCutFillPatternId(new ElementId(FillerId));
+            setting.SetProjectionFillColor(new Color(Color.R, Color.G, Color.B));
+            setting.SetProjectionFillPatternId(new ElementId(FillerId));
             setting.SetSurfaceTransparency(SurfaceTransparency);
             return setting;
         }

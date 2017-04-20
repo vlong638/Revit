@@ -15,16 +15,29 @@ namespace MyRevit.Entities
         {
             try
             {
-                StringBuilder sb = new StringBuilder();
+                #region 验证elementId=new ElementId(elementId.IntegerValue)
+                //ElementId new ElementId(ElementId.IntegerValue)
+                //Document.GetElement(@ElementId)
                 var doc = commandData.Application.ActiveUIDocument.Document;
-                var fillPatternElements = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElements();
-                foreach (var fillPatternElement in fillPatternElements)
-                {
-                    sb.AppendLine($"fillPatternElement.Name:{fillPatternElement.Name}");
-                }
+                var elementId = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElementIds().First();
+                var elementByElementId = doc.GetElement(elementId);
+                var elementByIntegerElementId = doc.GetElement(new ElementId(elementId.IntegerValue));
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"elementByElementId:{elementByElementId.Name}");
+                sb.AppendLine($"elementByIntegerElementId:{elementByIntegerElementId.Name}");
                 TaskDialog.Show("消息", sb.ToString());
+                #endregion
 
-
+                #region 获取所有的FillPatternElement类
+                //StringBuilder sb = new StringBuilder();
+                //var doc = commandData.Application.ActiveUIDocument.Document;
+                //var fillPatternElements = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElements();
+                //foreach (var fillPatternElement in fillPatternElements)
+                //{
+                //    sb.AppendLine($"fillPatternElement.Name:{fillPatternElement.Name}");
+                //}
+                //TaskDialog.Show("消息", sb.ToString()); 
+                #endregion
 
                 #region 视图检测,创建视图
                 //string viewName = "土方分块";

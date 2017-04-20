@@ -106,6 +106,7 @@
     <Compile Include="EarthWork\UI\EarthworkBlockingForm.Designer.cs">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entities\EventsCommand.cs" />
     <Compile Include="Entities\ViewCommand.cs" />
     <Compile Include="Entities\MyExternalApplication.cs" />
     <Compile Include="Entities\FilterElementCommand.cs" />

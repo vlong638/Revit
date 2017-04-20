@@ -1,27 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
   <AddIn Type="Command">
-    <Assembly>E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9A</ClientId>
     <FullClassName>MyRevit.Entities.MyExternalCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
-    <Assembly>E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9B</ClientId>
     <FullClassName>MyRevit.Entities.SelectElementCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
-    <Assembly>E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9C</ClientId>
     <FullClassName>MyRevit.Entities.FilterElementCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
-    <Assembly>E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9D</ClientId>
     <FullClassName>MyRevit.Entities.ViewCommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9E</ClientId>
+    <FullClassName>MyRevit.Entities.EventsCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
 </RevitAddIns>

@@ -32,3 +32,14 @@ E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.xml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll.config
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.xml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockCPSettingsForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb

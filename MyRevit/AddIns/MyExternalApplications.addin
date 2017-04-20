@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
   <AddIn Type="Application">
-    <Assembly>C:\Users\Administrator\Documents\visual studio 2015\Projects\MyRevit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <AddInId>B593F2C4-F38C-41D7-AE2C-369BB0149D9D</AddInId>
     <Name>VLApplication</Name>
     <FullClassName>MyRevit.Entities.MyExternalApplication</FullClassName>
