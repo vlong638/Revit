@@ -1,0 +1,34 @@
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\bin\Debug\MyRevit.pdb
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\bin\Debug\RevitAPI.dll
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\bin\Debug\RevitAPIUI.dll
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\obj\Debug\MyRevit.pdb
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\bin\Debug\MyRevit.dll
+c:\users\administrator\documents\visual studio 2015\Projects\MyRevit\MyRevit\obj\Debug\MyRevit.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.CommonClass.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.MainModel.EntData.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.CADBase20_x64.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.Geometry.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockCPSettingsForm.resources
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.RevitClass.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.Controls.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Common.MFCDll20_x64.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.General.MFCDll20_x64.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PMSoft.Common.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\PmSoft.Log.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\log4net.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll.config
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.dll
+E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.xml
