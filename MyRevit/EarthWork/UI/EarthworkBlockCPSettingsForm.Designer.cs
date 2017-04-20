@@ -45,6 +45,7 @@
             this.btn_Submit = new System.Windows.Forms.Button();
             this.btn_Apply = new System.Windows.Forms.Button();
             this.btn_Cancel = new System.Windows.Forms.Button();
+            this.cb_IsSurfaceVisible = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.traceBar_Transparency)).BeginInit();
@@ -72,6 +73,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cb_IsSurfaceVisible);
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.btn_Color);
@@ -79,7 +81,7 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 34);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(328, 92);
+            this.groupBox1.Size = new System.Drawing.Size(328, 105);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "表面填充图案";
@@ -87,7 +89,7 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(96, 59);
+            this.comboBox1.Location = new System.Drawing.Point(96, 72);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(187, 20);
             this.comboBox1.TabIndex = 10;
@@ -95,7 +97,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(289, 57);
+            this.button2.Location = new System.Drawing.Point(289, 70);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(33, 23);
             this.button2.TabIndex = 9;
@@ -105,7 +107,7 @@
             // btn_Color
             // 
             this.btn_Color.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btn_Color.Location = new System.Drawing.Point(96, 30);
+            this.btn_Color.Location = new System.Drawing.Point(96, 43);
             this.btn_Color.Name = "btn_Color";
             this.btn_Color.Size = new System.Drawing.Size(226, 23);
             this.btn_Color.TabIndex = 7;
@@ -115,7 +117,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(31, 62);
+            this.label2.Location = new System.Drawing.Point(31, 75);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 6;
@@ -124,7 +126,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(55, 35);
+            this.label1.Location = new System.Drawing.Point(55, 48);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(35, 12);
             this.label1.TabIndex = 0;
@@ -135,7 +137,7 @@
             this.groupBox2.Controls.Add(this.traceBar_Transparency);
             this.groupBox2.Controls.Add(this.tb_Transparency);
             this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Location = new System.Drawing.Point(13, 132);
+            this.groupBox2.Location = new System.Drawing.Point(12, 145);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(328, 56);
             this.groupBox2.TabIndex = 3;
@@ -172,7 +174,7 @@
             // 
             // btn_ResetTransparency
             // 
-            this.btn_ResetTransparency.Location = new System.Drawing.Point(13, 194);
+            this.btn_ResetTransparency.Location = new System.Drawing.Point(12, 207);
             this.btn_ResetTransparency.Name = "btn_ResetTransparency";
             this.btn_ResetTransparency.Size = new System.Drawing.Size(55, 23);
             this.btn_ResetTransparency.TabIndex = 4;
@@ -182,7 +184,7 @@
             // 
             // btn_Submit
             // 
-            this.btn_Submit.Location = new System.Drawing.Point(163, 194);
+            this.btn_Submit.Location = new System.Drawing.Point(162, 207);
             this.btn_Submit.Name = "btn_Submit";
             this.btn_Submit.Size = new System.Drawing.Size(55, 23);
             this.btn_Submit.TabIndex = 5;
@@ -192,7 +194,7 @@
             // 
             // btn_Apply
             // 
-            this.btn_Apply.Location = new System.Drawing.Point(285, 194);
+            this.btn_Apply.Location = new System.Drawing.Point(284, 207);
             this.btn_Apply.Name = "btn_Apply";
             this.btn_Apply.Size = new System.Drawing.Size(55, 23);
             this.btn_Apply.TabIndex = 6;
@@ -202,7 +204,7 @@
             // 
             // btn_Cancel
             // 
-            this.btn_Cancel.Location = new System.Drawing.Point(224, 194);
+            this.btn_Cancel.Location = new System.Drawing.Point(223, 207);
             this.btn_Cancel.Name = "btn_Cancel";
             this.btn_Cancel.Size = new System.Drawing.Size(55, 23);
             this.btn_Cancel.TabIndex = 7;
@@ -210,11 +212,21 @@
             this.btn_Cancel.UseVisualStyleBackColor = true;
             this.btn_Cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
             // 
+            // cb_IsSurfaceVisible
+            // 
+            this.cb_IsSurfaceVisible.AutoSize = true;
+            this.cb_IsSurfaceVisible.Location = new System.Drawing.Point(15, 20);
+            this.cb_IsSurfaceVisible.Name = "cb_IsSurfaceVisible";
+            this.cb_IsSurfaceVisible.Size = new System.Drawing.Size(48, 16);
+            this.cb_IsSurfaceVisible.TabIndex = 11;
+            this.cb_IsSurfaceVisible.Text = "可见";
+            this.cb_IsSurfaceVisible.UseVisualStyleBackColor = true;
+            // 
             // EarthworkBlockCPSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(352, 227);
+            this.ClientSize = new System.Drawing.Size(353, 240);
             this.Controls.Add(this.btn_Cancel);
             this.Controls.Add(this.btn_Apply);
             this.Controls.Add(this.btn_Submit);
@@ -254,5 +266,6 @@
         private System.Windows.Forms.TextBox tb_Transparency;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TrackBar traceBar_Transparency;
+        private System.Windows.Forms.CheckBox cb_IsSurfaceVisible;
     }
 }

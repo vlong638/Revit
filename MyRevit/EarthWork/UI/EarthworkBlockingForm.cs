@@ -61,11 +61,6 @@ namespace MyRevit.EarthWork.UI
             else
                 Blocking = new EarthworkBlocking();
             Blocking.InitByDocument(m_Doc);
-            ////TEST测试数据
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    Blocking.Add(Blocking.CreateNew());
-            //}
             dgv_Blocks.AutoGenerateColumns = false;
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
@@ -379,6 +374,37 @@ namespace MyRevit.EarthWork.UI
             }
         }
 
+        #region 构件变更
+        static List<int> SelectedRows=new List<int>();
+        static List<int> SelectedCell=new List<int>();
+        void SaveDataGridViewSelection()
+        {
+            SelectedRows = new List<int>();
+            foreach (DataGridViewRow row in dgv_Blocks.SelectedRows)
+            {
+                SelectedRows.Add(row.Index);
+            }
+            SelectedCell = new List<int>();
+            if (dgv_Blocks.SelectedCells.Count>0)
+            {
+                SelectedCell.Add(dgv_Blocks.SelectedCells[0].RowIndex);
+                SelectedCell.Add(dgv_Blocks.SelectedCells[0].ColumnIndex);
+            }
+        }
+        public void LoadDataGridViewSelection()
+        {
+            if (SelectedRows.Count()>0)
+            {
+                foreach (int rowIndex in SelectedRows)
+                {
+                    dgv_Blocks.Rows[rowIndex].Selected = true;
+                }
+            }
+            if (SelectedCell.Count()>0)
+            {
+                dgv_Blocks.CurrentCell= dgv_Blocks[SelectedCell[1], SelectedCell[0]];
+            }
+        }
         /// <summary>
         /// 增加构件
         /// </summary>
@@ -393,6 +419,7 @@ namespace MyRevit.EarthWork.UI
             }
             DialogResult = DialogResult.Retry;
             ShowDialogType = ShowDialogType.AddElements;
+            SaveDataGridViewSelection();
             Close();
         }
         /// <summary>
@@ -409,8 +436,10 @@ namespace MyRevit.EarthWork.UI
             }
             DialogResult = DialogResult.Retry;
             ShowDialogType = ShowDialogType.DeleleElements;
+            SaveDataGridViewSelection();
             Close();
-        }
+        } 
+        #endregion
         /// <summary>
         /// 颜色/透明配置
         /// </summary>
@@ -439,6 +468,11 @@ namespace MyRevit.EarthWork.UI
         public void ShowMessage(string title, string content)
         {
             MessageBox.Show(content);
+        }
+
+        private void EarthworkBlockingForm_Shown(object sender, EventArgs e)
+        {
+            LoadDataGridViewSelection();
         }
     }
 }

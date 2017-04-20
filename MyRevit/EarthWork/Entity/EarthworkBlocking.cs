@@ -129,7 +129,10 @@ namespace MyRevit.EarthWork.Entity
             //加载ElementId
             foreach (var block in Blocks)
             {
-                block.ElementIds.AddRange(block.ElementIdValues.Select(c => doc.GetElement(new ElementId(c)).Id));
+                var elements = block.ElementIdValues.Select(c => doc.GetElement(new ElementId(c)));
+                foreach (var element in elements)
+                    if (element != null)
+                        block.ElementIds.Add(element.Id);
             }
         }
         #endregion
@@ -336,20 +339,20 @@ namespace MyRevit.EarthWork.Entity
             //对象处理
             ElementIds.Remove(ElementIds.First(c => c == elementId));
             ElementIdValues.Remove(elementId.IntegerValue);
-            CPSettings.DeapplySetting(blocking.View3D, elementId);
+            CPSettings.DeapplySetting(blocking, new List<ElementId>() { elementId });
         }
         /// <summary>
         /// 删除构件元素(批量)
         /// </summary>
         /// <param name="elementId"></param>
         /// <returns></returns>
-        public void RemoveElementIds(EarthworkBlocking blocking, IEnumerable<ElementId> elementIds)
+        public void RemoveElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
             if (elementIds == null)
                 return;
-            foreach (var elementId in elementIds)
+            for (int i = elementIds.Count()-1; i>=0; i--)
             {
-                RemoveElementId(blocking, elementId);
+                RemoveElementId(blocking, elementIds[i]);
             }
         }
     }
@@ -365,15 +368,15 @@ namespace MyRevit.EarthWork.Entity
         /// <summary>
         /// 图元可见
         /// </summary>
-        public bool IsVisible { set; get; }
+        public bool IsVisible { set; get; } = true;
         /// <summary>
         /// 半色调
         /// </summary>
-        public bool IsHalftone { set; get; }
+        public bool IsHalftone { set; get; } = false;
         /// <summary>
         /// 表面可见
         /// </summary>
-        public bool IsSurfaceVisible { set; get; }
+        public bool IsSurfaceVisible { set; get; } = true;
         /// <summary>
         /// 颜色 Surface即Projection
         /// </summar>y
@@ -381,7 +384,7 @@ namespace MyRevit.EarthWork.Entity
         /// <summary>
         /// 填充物 Surface即Projection
         /// </summary>
-        public int FillerId { set; get; }
+        public int FillerId { set; get; } = -1;
         /// <summary>
         /// 曲面透明度
         /// </summary>
@@ -428,27 +431,45 @@ namespace MyRevit.EarthWork.Entity
         }
         void ApplySetting(View view, ElementId elementId)
         {
-            OverrideGraphicSettings setting = GetOverrideGraphicSettings();
+            OverrideGraphicSettings setting = GetOverrideGraphicSettings(view.Document);
             ApplySetting(view, elementId, setting);
         }
         public void ApplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
             using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(ApplySetting)))
             {
-                OverrideGraphicSettings setting = GetOverrideGraphicSettings();
+                OverrideGraphicSettings setting = GetOverrideGraphicSettings(blocking.Doc);
                 transaction.Start();
+                //元素可见性
+                if (IsVisible)
+                    blocking.View3D.UnhideElements(elementIds);
+                else
+                    blocking.View3D.HideElements(elementIds);
+                //元素表面填充物配置
                 foreach (var elementId in elementIds)
                     ApplySetting(blocking.View3D, elementId, setting);
                 transaction.Commit();
             }
         }
-        OverrideGraphicSettings GetOverrideGraphicSettings()
+        static ElementId _DefaultFillPatternId = null;
+        static ElementId GetDefaultFillPatternId(Document doc)
+        {
+            if (_DefaultFillPatternId != null)
+                return _DefaultFillPatternId;
+
+            _DefaultFillPatternId = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElements().First(c => c.Name == "实体填充").Id;
+            return _DefaultFillPatternId;
+        }
+        OverrideGraphicSettings GetOverrideGraphicSettings(Document doc)
         {
             var setting = new OverrideGraphicSettings();
-            setting.SetProjectionFillPatternVisible(IsVisible);
             setting.SetHalftone(IsHalftone);
+            setting.SetProjectionFillPatternVisible(IsSurfaceVisible);
             setting.SetProjectionFillColor(new Color(Color.R, Color.G, Color.B));
-            setting.SetProjectionFillPatternId(new ElementId(FillerId));
+            if (FillerId == -1)
+                setting.SetProjectionFillPatternId(GetDefaultFillPatternId(doc));
+            else
+                setting.SetProjectionFillPatternId(new ElementId(FillerId));
             setting.SetSurfaceTransparency(SurfaceTransparency);
             return setting;
         }
@@ -457,7 +478,7 @@ namespace MyRevit.EarthWork.Entity
         /// 解除对元素增加的节点的配置
         /// </summary>
         /// <param name="element"></param>
-        public void DeapplySetting(View view, ElementId elementId)
+        void DeapplySetting(View view, ElementId elementId)
         {
             view.SetElementOverrides(elementId, EarthworkBlockingConstraints.DefaultCPSettings);
         }
@@ -465,11 +486,18 @@ namespace MyRevit.EarthWork.Entity
         /// 解除对元素增加的节点的配置
         /// </summary>
         /// <param name="element"></param>
-        public void DeapplySetting(View view, List<ElementId> elementIds)
+        public void DeapplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
-            foreach (var elementId in elementIds)
+            using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(DeapplySetting)))
             {
-                DeapplySetting(view, elementId);
+                OverrideGraphicSettings setting = GetOverrideGraphicSettings(blocking.Doc);
+                transaction.Start();
+                //元素可见性
+                blocking.View3D.UnhideElements(elementIds);
+                //元素表面填充物配置
+                foreach (var elementId in elementIds)
+                    DeapplySetting(blocking.View3D, elementId);
+                transaction.Commit();
             }
         }
     }

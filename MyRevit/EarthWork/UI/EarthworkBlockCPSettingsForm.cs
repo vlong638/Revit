@@ -23,6 +23,7 @@ namespace MyRevit.EarthWork.UI
             traceBar_Transparency.Minimum = 0;
             traceBar_Transparency.Maximum = 100;
             cb_IsVisible.Checked = CPSettings.IsVisible;
+            cb_IsSurfaceVisible.Checked = CPSettings.IsSurfaceVisible;
             cb_IsHalftone.Checked = CPSettings.IsHalftone;
             traceBar_Transparency.Value = CPSettings.SurfaceTransparency;
             tb_Transparency.Text = CPSettings.SurfaceTransparency.ToString();
@@ -70,6 +71,7 @@ namespace MyRevit.EarthWork.UI
         private void btn_Apply_Click(object sender, EventArgs e)
         {
             CPSettings.IsVisible = cb_IsVisible.Checked;
+            CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
             CPSettings.IsHalftone = cb_IsHalftone.Checked;
             CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
             CPSettingsMemo = CPSettings.Clone();

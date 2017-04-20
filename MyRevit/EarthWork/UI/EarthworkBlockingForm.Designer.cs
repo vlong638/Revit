@@ -51,12 +51,12 @@
             this.Node_Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Node_Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.btn_Preview = new System.Windows.Forms.Button();
             this.btn_Save = new System.Windows.Forms.Button();
             this.btn_cancel = new System.Windows.Forms.Button();
             this.btn_Commit = new System.Windows.Forms.Button();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -289,6 +289,15 @@
             this.tabPage2.Text = "实际施工节点信息";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowTemplate.Height = 23;
+            this.dataGridView1.Size = new System.Drawing.Size(575, 330);
+            this.dataGridView1.TabIndex = 0;
+            // 
             // btn_Preview
             // 
             this.btn_Preview.Location = new System.Drawing.Point(317, 370);
@@ -335,15 +344,6 @@
             this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // dataGridView1
-            // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 23;
-            this.dataGridView1.Size = new System.Drawing.Size(575, 330);
-            this.dataGridView1.TabIndex = 0;
-            // 
             // EarthworkBlockingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -357,6 +357,7 @@
             this.Name = "EarthworkBlockingForm";
             this.Text = "土方";
             this.Load += new System.EventHandler(this.EarthworkBlockingForm_Load);
+            this.Shown += new System.EventHandler(this.EarthworkBlockingForm_Shown);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
