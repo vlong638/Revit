@@ -10,6 +10,7 @@ using PmSoft.Common.Controls.RevitMethod;
 using System.Diagnostics;
 using System.Linq;
 using System;
+using Autodesk.Revit.UI.Selection;
 
 namespace MyRevit.EarthWork.Command
 {
@@ -51,24 +52,51 @@ namespace MyRevit.EarthWork.Command
         {
         }
 
+        EarthworkBlockingForm Form;
         protected override bool DoUI()
         {
-            try
+            Form = new EarthworkBlockingForm(this.m_app);
+            PickObjectsMouseHook mouseHook = new PickObjectsMouseHook();
+            DialogResult result = DialogResult.Retry;
+            while ((result = Form.ShowDialog(new RevitHandle(Process.GetCurrentProcess().MainWindowHandle))) == DialogResult.Retry)
             {
-                if (ConfigPathManager.IniProjectDB(this.m_doc))
+                try
                 {
-                    EarthworkBlockingForm form = new EarthworkBlockingForm(this.m_app);
-                    form.Show();
-                    return true;
+                    mouseHook.InstallHook();
+                    Form.SelectedElementIds= m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                        .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                    mouseHook.UninstallHook();
                 }
-                else
+                catch
+                {
+                    mouseHook.UninstallHook();
+                }
+                Form.FinishElementSelection();
+                if (result==DialogResult.Cancel)
                     return false;
+                if (result == DialogResult.OK)
+                    return true ;
             }
-            catch(Exception ex)
-            {
-                TaskDialog.Show("错误", ex.Message);
-                return false;
-            }
+            return true;
+
+            #region 非模态
+            //try
+            //{
+            //    if (ConfigPathManager.IniProjectDB(this.m_doc))
+            //    {
+            //        Form = new EarthworkBlockingForm(this.m_app);
+            //        Form.ShowDialog();
+            //        return true;
+            //    }
+            //    else
+            //        return false;
+            //}
+            //catch(Exception ex)
+            //{
+            //    TaskDialog.Show("错误", ex.Message);
+            //    return false;
+            //} 
+            #endregion
         }
     }
 }

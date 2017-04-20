@@ -21,14 +21,13 @@ namespace MyRevit.EarthWork.UI
     public partial class EarthworkBlockingForm : System.Windows.Forms.Form
     {
         public EarthworkBlocking Blocking;
-        public ShowDialogType ShowDialogType { set; get; }
         public DataGridViewRow Row { set; get; }
         public EarthworkBlock Block { set; get; }
-        public List<ElementId> ElementIds { set; get; } = new List<ElementId>();
         public UIApplication m_UIApp;
         public UIDocument m_UIDoc;
         public Document m_Doc;
 
+        #region 初始化
         /// <summary>
         /// 测试处理
         /// </summary>
@@ -38,7 +37,15 @@ namespace MyRevit.EarthWork.UI
 
             InitForm();
         }
+        public EarthworkBlockingForm(UIApplication uiApp)
+        {
+            InitializeComponent();
 
+            m_UIApp = uiApp;
+            m_UIDoc = uiApp.ActiveUIDocument;
+            m_Doc = m_UIDoc.Document;
+            InitForm();
+        }
         private void InitForm()
         {
             //初始化参数
@@ -72,36 +79,32 @@ namespace MyRevit.EarthWork.UI
             tip.SetToolTip(btn_AddElement, "新增构件");
             tip.SetToolTip(btn_DeleteElement, "删除构件");
         }
+        #endregion
 
-        public EarthworkBlockingForm(UIApplication uiApp)
-        {
-            InitializeComponent();
-
-            m_UIApp = uiApp;
-            m_UIDoc = uiApp.ActiveUIDocument;
-            m_Doc = m_UIDoc.Document;
-            InitForm();
-        }
-
-        public new DialogResult ShowDialog(IWin32Window owner)
+        #region 模态,元素选取
+        public ShowDialogType ShowDialogType { set; get; }
+        public List<ElementId> SelectedElementIds { set; get; } = new List<ElementId>();
+        public void FinishElementSelection()
         {
             switch (ShowDialogType)
             {
                 case ShowDialogType.AddElements:
-                    if (ElementIds != null)
-                        Block.AddElementIds(Blocking, ElementIds);
+                    if (SelectedElementIds != null)
+                        Block.AddElementIds(Blocking, SelectedElementIds);
                     ShowDialogType = ShowDialogType.Idle;
                     break;
                 case ShowDialogType.DeleleElements:
-                    if (ElementIds != null)
-                        Block.RemoveElementIds(Blocking, ElementIds);
+                    if (SelectedElementIds != null)
+                        Block.RemoveElementIds(Blocking, SelectedElementIds);
                     ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
                     break;
             }
-            return base.ShowDialog(owner);
+            //TEST
+            ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
         }
+        #endregion
 
         /// <summary>
         /// 加载选中行
@@ -274,7 +277,8 @@ namespace MyRevit.EarthWork.UI
         private void btn_Commit_Click(object sender, System.EventArgs e)
         {
             btn_Save_Click(sender, e);
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
         /// <summary>
         /// 应用-保存
@@ -307,9 +311,8 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Cancel_Click(object sender, System.EventArgs e)
         {
-            this.ShowDialogType = ShowDialogType.Idle;
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
         /// <summary>
         /// 在选中项前插入新节点
@@ -388,30 +391,9 @@ namespace MyRevit.EarthWork.UI
             {
                 return;
             }
-            this.Hide();
-            this.TopMost = false;
-
-            #region Hook
-            using (var mouseHook = new PickObjectsMouseHook())
-            {
-                try
-                {
-                    mouseHook.InstallHook();
-                    ElementIds = m_UIApp.ActiveUIDocument.Selection.PickObjects(ObjectType.Element, "选择要添加的构件").Select(p => m_Doc.GetElement(p.ElementId).Id).ToList();
-                    mouseHook.UninstallHook();
-                    if (ElementIds != null)
-                        Block.AddElementIds(Blocking, ElementIds);
-                }
-                catch(Exception ex)
-                {
-                    ElementIds = null;
-                    mouseHook.UninstallHook();
-                }
-            }
-            #endregion
-            this.TopMost = true;
-            this.Show();
-            ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
+            DialogResult = DialogResult.Retry;
+            ShowDialogType = ShowDialogType.AddElements;
+            Close();
         }
         /// <summary>
         /// 删除构件
@@ -425,29 +407,9 @@ namespace MyRevit.EarthWork.UI
             {
                 return;
             }
-            this.Hide();
-            this.TopMost = false;
-            #region Hook
-            using (var mouseHook = new PickObjectsMouseHook())
-            {
-                try
-                {
-                    mouseHook.InstallHook();
-                    ElementIds = m_UIApp.ActiveUIDocument.Selection.PickObjects(Autodesk.Revit.UI.Selection.ObjectType.Element, "选择要删除的构件").Select(p => m_Doc.GetElement(p.ElementId).Id).ToList();
-                    mouseHook.UninstallHook();
-                    if (ElementIds != null)
-                        Block.RemoveElementIds(Blocking, ElementIds);
-                }
-                catch
-                {
-                    ElementIds = null;
-                    mouseHook.UninstallHook();
-                }
-            }
-            #endregion
-            this.TopMost = true;
-            this.Show();
-            ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
+            DialogResult = DialogResult.Retry;
+            ShowDialogType = ShowDialogType.DeleleElements;
+            Close();
         }
         /// <summary>
         /// 颜色/透明配置
