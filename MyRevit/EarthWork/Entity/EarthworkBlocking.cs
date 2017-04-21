@@ -9,6 +9,7 @@ using System.Linq;
 namespace MyRevit.EarthWork.Entity
 {
     #region 应用(新增,更改) 删除 区间化集合
+    //准备开始应用抽象
     interface SectionalData
     {
         void ApplyNew();
