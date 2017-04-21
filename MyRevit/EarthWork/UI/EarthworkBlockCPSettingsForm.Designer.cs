@@ -31,6 +31,7 @@
             this.cb_IsVisible = new System.Windows.Forms.CheckBox();
             this.cb_IsHalftone = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cb_IsSurfaceVisible = new System.Windows.Forms.CheckBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button2 = new System.Windows.Forms.Button();
             this.btn_Color = new System.Windows.Forms.Button();
@@ -45,7 +46,6 @@
             this.btn_Submit = new System.Windows.Forms.Button();
             this.btn_Apply = new System.Windows.Forms.Button();
             this.btn_Cancel = new System.Windows.Forms.Button();
-            this.cb_IsSurfaceVisible = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.traceBar_Transparency)).BeginInit();
@@ -60,6 +60,7 @@
             this.cb_IsVisible.TabIndex = 0;
             this.cb_IsVisible.Text = "可见";
             this.cb_IsVisible.UseVisualStyleBackColor = true;
+            this.cb_IsVisible.CheckedChanged += new System.EventHandler(this.ValueChanged);
             // 
             // cb_IsHalftone
             // 
@@ -70,6 +71,7 @@
             this.cb_IsHalftone.TabIndex = 1;
             this.cb_IsHalftone.Text = "半色调";
             this.cb_IsHalftone.UseVisualStyleBackColor = true;
+            this.cb_IsHalftone.CheckedChanged += new System.EventHandler(this.ValueChanged);
             // 
             // groupBox1
             // 
@@ -86,6 +88,17 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "表面填充图案";
             // 
+            // cb_IsSurfaceVisible
+            // 
+            this.cb_IsSurfaceVisible.AutoSize = true;
+            this.cb_IsSurfaceVisible.Location = new System.Drawing.Point(15, 20);
+            this.cb_IsSurfaceVisible.Name = "cb_IsSurfaceVisible";
+            this.cb_IsSurfaceVisible.Size = new System.Drawing.Size(48, 16);
+            this.cb_IsSurfaceVisible.TabIndex = 11;
+            this.cb_IsSurfaceVisible.Text = "可见";
+            this.cb_IsSurfaceVisible.UseVisualStyleBackColor = true;
+            this.cb_IsSurfaceVisible.CheckedChanged += new System.EventHandler(this.ValueChanged);
+            // 
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
@@ -94,6 +107,7 @@
             this.comboBox1.Size = new System.Drawing.Size(187, 20);
             this.comboBox1.TabIndex = 10;
             this.comboBox1.Text = "<按材质>";
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.ValueChanged);
             // 
             // button2
             // 
@@ -211,16 +225,6 @@
             this.btn_Cancel.Text = "取消";
             this.btn_Cancel.UseVisualStyleBackColor = true;
             this.btn_Cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
-            // 
-            // cb_IsSurfaceVisible
-            // 
-            this.cb_IsSurfaceVisible.AutoSize = true;
-            this.cb_IsSurfaceVisible.Location = new System.Drawing.Point(15, 20);
-            this.cb_IsSurfaceVisible.Name = "cb_IsSurfaceVisible";
-            this.cb_IsSurfaceVisible.Size = new System.Drawing.Size(48, 16);
-            this.cb_IsSurfaceVisible.TabIndex = 11;
-            this.cb_IsSurfaceVisible.Text = "可见";
-            this.cb_IsSurfaceVisible.UseVisualStyleBackColor = true;
             // 
             // EarthworkBlockCPSettingsForm
             // 

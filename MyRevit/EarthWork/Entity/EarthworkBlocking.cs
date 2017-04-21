@@ -5,79 +5,81 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace MyRevit.EarthWork.Entity
 {
     #region 应用(新增,更改) 删除 区间化集合
-    //准备开始应用抽象
-    interface SectionalData
-    {
-        void ApplyNew();
-        void ApplyDelete();
-    }
-    interface MemorableData<T>
-    {
-        void Clone();
-        void Rollback();
-    }
-    interface Cloneable<T>
-   { 
-        T Clone();
-    }
-    class SectionedCollection<T> : MemorableData<T>
-        where T : SectionalData, Cloneable<T>
-    {
-        public SectionedCollection(List<T> datas)
-        {
-            Datas = datas;
-            Clone();
-        }
+   // //准备开始应用抽象(区间化集合)
+   // interface SectionalData<TRoot,TElement>
+   // {
+   //     void ApplyNew(TRoot root, TElement element);
+   //     void ApplyDelete(TRoot root, TElement element);
+   // }
+   // interface MemorableData<T>
+   // {
+   //     void Clone();
+   //     void Rollback();
+   // }
+   // interface Cloneable<TNode>
+   //{
+   //     TNode Clone();
+   // }
+   // class SectionalDataCollection<TRoot,TNode,TElement> : MemorableData<TNode>
+   //     where TNode : SectionalData<TRoot, TElement>, Cloneable<TNode>
+   // {
+   //     public SectionalDataCollection(List<TNode> nodes)
+   //     {
+   //         Datas = nodes;
+   //         Clone();
+   //     }
 
-        List<T> Datas { set; get; } = new List<T>();
-        List<T> News { set; get; } = new List<T>();
-        List<T> Deletes { set; get; } = new List<T>();
-        IEnumerable<T> Memo { set; get; }
+   //     List<TNode> Datas { set; get; } = new List<TNode>();
+   //     List<TNode> News { set; get; } = new List<TNode>();
+   //     List<TNode> Deletes { set; get; } = new List<TNode>();
+   //     IEnumerable<TData> Memo { set; get; }
 
 
-        public void Add(T data)
-        {
-            News.Add(data);
-            Datas.Add(data);
-        }
-        public void Delete(T data)
-        {
-            Deletes.Add(data);
-            Datas.Remove(data);
-        }
-        public void Apply()
-        {
-            foreach (var New in News)
-            {
-                New.ApplyNew();
-            }
-            News = new List<T>();
-            foreach (var Delete in Deletes)
-            {
-                Delete.ApplyDelete();
-            }
-            Deletes = new List<T>();
-            Clone();
-        }
-        public void Cancel()
-        {
-            News = new List<T>();
-            Deletes = new List<T>();
-            Rollback();
-        }
-        public void Clone()
-        {
-            Memo = Datas.Select(c => c.Clone());
-        }
-        public void Rollback()
-        {
-            Datas = Memo.Select(c => c.Clone()).ToList();
-        }
-    }
+   //     public void Add(TData data)
+   //     {
+   //         News.Add(data);
+   //         Datas.Add(data);
+   //     }
+   //     public void Delete(TData data)
+   //     {
+   //         Deletes.Add(data);
+   //         Datas.Remove(data);
+   //     }
+   //     public void Apply()
+   //     {
+   //         foreach (var New in News)
+   //         {
+   //             New.ApplyNew();
+   //         }
+   //         News = new List<TData>();
+   //         foreach (var Delete in Deletes)
+   //         {
+   //             Delete.ApplyDelete();
+   //         }
+   //         Deletes = new List<TData>();
+   //         Clone();
+   //     }
+   //     public void Cancel()
+   //     {
+   //         News = new List<TData>();
+   //         Deletes = new List<TData>();
+   //         Rollback();
+   //     }
+   //     public void Clone()
+   //     {
+   //         Memo = Datas.Select(c => c.Clone());
+   //     }
+   //     public void Rollback()
+   //     {
+   //         Datas = Memo.Select(c => c.Clone()).ToList();
+   //     }
+   // }
     #endregion
 
     public class EarthworkBlockingConstraints
@@ -286,27 +288,6 @@ namespace MyRevit.EarthWork.Entity
         public List<ElementId> ElementIds { get; set; } = new List<ElementId>();
         
         /// <summary>
-        /// 添加构件元素
-        /// </summary>
-        /// <param name="elementId"></param>
-        public void AddElement(EarthworkBlocking blocking, ElementId elementId)
-        {
-            //索引处理
-            if (blocking.ElementToBlockMapper.ContainsKey(elementId.IntegerValue))
-            {
-                var i = blocking.ElementToBlockMapper.First(c => c.Key == elementId.IntegerValue);
-                if (i.Value == Id)//已在本节点存在不作处理
-                    return;
-                else
-                    blocking.Blocks.First(c => c.Id == i.Value).RemoveElementId(blocking, elementId);
-            }
-            blocking.ElementToBlockMapper.Add(elementId.IntegerValue, Id);
-            //对象处理
-            ElementIds.Add(elementId);
-            ElementIdValues.Add(elementId.IntegerValue);
-            CPSettings.ApplySetting(blocking, new List<ElementId>() { elementId });
-        }
-        /// <summary>
         /// 添加构件元素(批量)
         /// </summary>
         /// <param name="elementId"></param>
@@ -316,15 +297,46 @@ namespace MyRevit.EarthWork.Entity
                 return;
             for (int i = elementIds.Count(); i > 0; i--)
             {
-                AddElement(blocking, elementIds[i - 1]);
+                ApplyStorage(blocking, elementIds[i - 1]);
+                ApplySetting(blocking, elementIds[i - 1]);
             }
         }
+        void ApplyStorage(EarthworkBlocking blocking, ElementId elementId)
+        {
+            if (blocking.ElementToBlockMapper.ContainsKey(elementId.IntegerValue))
+            {
+                var i = blocking.ElementToBlockMapper.First(c => c.Key == elementId.IntegerValue);//如果存在映射关系
+                if (i.Value == Id)//已在本节点存在不作处理
+                    return;
+                else
+                    blocking.Blocks.First(c => c.Id == i.Value).RemoveElementIds(blocking, new List<ElementId>() { elementId });//不在本节点存在,需在其所属节点删除元素
+            }
+            blocking.ElementToBlockMapper.Add(elementId.IntegerValue, Id);
+            ElementIds.Add(elementId);
+            ElementIdValues.Add(elementId.IntegerValue);
+        }
+        void ApplySetting(EarthworkBlocking blocking, ElementId elementId)
+        {
+            CPSettings.ApplySetting(blocking, new List<ElementId>() { elementId });
+        }
+
         /// <summary>
-        /// 删除构件元素
+        /// 删除构件元素(批量)
         /// </summary>
         /// <param name="elementId"></param>
         /// <returns></returns>
-        public void RemoveElementId(EarthworkBlocking blocking, ElementId elementId)
+        public void RemoveElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
+        {
+            if (elementIds == null)
+                return;
+            for (int i = elementIds.Count()-1; i>=0; i--)
+            {
+                ApplyDelete(blocking, elementIds[i]);
+            }
+        }
+
+
+        public void ApplyDelete(EarthworkBlocking blocking, ElementId elementId)
         {
             //索引处理
             if (!blocking.ElementToBlockMapper.ContainsKey(elementId.IntegerValue))//元素不存在
@@ -337,20 +349,6 @@ namespace MyRevit.EarthWork.Entity
             ElementIds.Remove(ElementIds.First(c => c == elementId));
             ElementIdValues.Remove(elementId.IntegerValue);
             CPSettings.DeapplySetting(blocking, new List<ElementId>() { elementId });
-        }
-        /// <summary>
-        /// 删除构件元素(批量)
-        /// </summary>
-        /// <param name="elementId"></param>
-        /// <returns></returns>
-        public void RemoveElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
-        {
-            if (elementIds == null)
-                return;
-            for (int i = elementIds.Count()-1; i>=0; i--)
-            {
-                RemoveElementId(blocking, elementIds[i]);
-            }
         }
     }
     /// <summary>
@@ -417,6 +415,19 @@ namespace MyRevit.EarthWork.Entity
             this.SurfaceTransparency = cpSettings.SurfaceTransparency;
         }
 
+        public override int GetHashCode()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(IsVisible);
+            sb.Append(IsHalftone);
+            sb.Append(IsSurfaceVisible);
+            sb.Append(Color.R);
+            sb.Append(Color.G);
+            sb.Append(Color.B);
+            sb.Append(FillerId);
+            sb.Append(SurfaceTransparency);
+            return sb.ToString().GetHashCode();
+        }
         /// <summary>
         /// 对元素增加节点的配置
         /// </summary>

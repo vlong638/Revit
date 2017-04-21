@@ -9,9 +9,10 @@ namespace MyRevit.EarthWork.UI
     {
         EarthworkBlockCPSettings CPSettings;
         EarthworkBlockCPSettings CPSettingsMemo;
+        int CPSettingMemoHashCode;
         EarthworkBlockingForm Mainform;
 
-        public EarthworkBlockCPSettingsForm(EarthworkBlockingForm form,EarthworkBlockCPSettings cpSettings)
+        public EarthworkBlockCPSettingsForm(EarthworkBlockingForm form, EarthworkBlockCPSettings cpSettings)
         {
             InitializeComponent();
 
@@ -19,6 +20,8 @@ namespace MyRevit.EarthWork.UI
             Mainform = form;
             CPSettings = cpSettings;
             CPSettingsMemo = CPSettings.Clone();
+            CPSettingMemoHashCode = CPSettingsMemo.GetHashCode();
+            btn_Apply.Enabled = false;//应用只在内容更改时可用
             //控件参数初始化
             traceBar_Transparency.Minimum = 0;
             traceBar_Transparency.Maximum = 100;
@@ -29,10 +32,10 @@ namespace MyRevit.EarthWork.UI
             tb_Transparency.Text = CPSettings.SurfaceTransparency.ToString();
             btn_Color.ImageAlign = ContentAlignment.MiddleLeft;
             btn_Color.TextAlign = ContentAlignment.MiddleLeft;
-            UpdateCPSettings(CPSettings.Color);
+            RenderColorButton(CPSettings.Color);
         }
 
-        private void UpdateCPSettings(Color color)
+        private void RenderColorButton(Color color)
         {
             int width = 18;
             var height = width;
@@ -50,7 +53,8 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Submit_Click(object sender, EventArgs e)
         {
-            btn_Apply_Click(sender, e);
+            if (btn_Apply.Enabled)
+                btn_Apply_Click(sender, e);
             this.Close();
         }
         /// <summary>
@@ -70,11 +74,9 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Apply_Click(object sender, EventArgs e)
         {
-            CPSettings.IsVisible = cb_IsVisible.Checked;
-            CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
-            CPSettings.IsHalftone = cb_IsHalftone.Checked;
-            CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
             CPSettingsMemo = CPSettings.Clone();
+            CPSettingMemoHashCode = CPSettingsMemo.GetHashCode();
+            btn_Apply.Enabled = false;
             //保存数据
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm)
                 , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(Mainform.m_Doc));
@@ -101,6 +103,7 @@ namespace MyRevit.EarthWork.UI
             tb_Transparency.TextChanged -= tb_Transparency_TextChanged;
             tb_Transparency.Text = traceBar_Transparency.Value.ToString();
             tb_Transparency.TextChanged += tb_Transparency_TextChanged;
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 设置透明值
@@ -113,11 +116,11 @@ namespace MyRevit.EarthWork.UI
             int t = 0;
             if (int.TryParse(tb_Transparency.Text, out t))
             {
-                if (t>100)
+                if (t > 100)
                 {
                     t = 100;
                 }
-                if (t<0)
+                if (t < 0)
                 {
                     t = 0;
                 }
@@ -129,6 +132,7 @@ namespace MyRevit.EarthWork.UI
             tb_Transparency.Text = t.ToString();
             traceBar_Transparency.Value = t;
             traceBar_Transparency.Scroll += traceBar_Transparency_Scroll;
+            ValueChanged(sender, e);
         }
         private void btn_Color_Click(object sender, EventArgs e)
         {
@@ -137,11 +141,21 @@ namespace MyRevit.EarthWork.UI
             //提供自己给定的颜色  
             colorDialog1.CustomColors = new int[] { 6916092, 15195440, 16107657, 1836924, 3758726, 12566463, 7526079, 7405793, 6945974, 241502, 2296476, 5130294, 3102017, 7324121, 14993507, 11730944 };
             colorDialog1.ShowHelp = true;
-            if (colorDialog1.ShowDialog()==DialogResult.OK)
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
                 CPSettings.Color = colorDialog1.Color;
-                UpdateCPSettings(CPSettings.Color);
+                RenderColorButton(CPSettings.Color);
+                ValueChanged(sender, e);
             }
+        }
+
+        private void ValueChanged(object sender, EventArgs e)
+        {
+            CPSettings.IsVisible = cb_IsVisible.Checked;
+            CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
+            CPSettings.IsHalftone = cb_IsHalftone.Checked;
+            CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
+            btn_Apply.Enabled = CPSettingMemoHashCode != CPSettings.GetHashCode();
         }
     }
 }
