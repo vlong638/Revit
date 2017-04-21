@@ -201,6 +201,13 @@ namespace MyRevit.EarthWork.UI
         {
             if (rows.Count == 0)
             {
+                if (dgv_Blocks.CurrentCell!=null)
+                {
+                    Row = rows[dgv_Blocks.CurrentCell.RowIndex];
+                    Block = Row.DataBoundItem as EarthworkBlock;
+                    return true;
+                }
+
                 ShowMessage("警告", "请选中迁移项");
                 return false;
             }
@@ -210,7 +217,7 @@ namespace MyRevit.EarthWork.UI
                 return false;
             }
             Row = rows[0];
-            Block = rows[0].DataBoundItem as EarthworkBlock;
+            Block = Row.DataBoundItem as EarthworkBlock;
             return true;
         }
         /// <summary>
@@ -451,8 +458,9 @@ namespace MyRevit.EarthWork.UI
             if (IsSingleBlockSelected(rows))
             {
                 var row = rows[0];
-                if (row.Index == Blocking.Count() - 1)
-                    return;
+                //含义不明,可能误加
+                //if (row.Index == Blocking.Count() - 1)
+                //    return;
                 var block = row.DataBoundItem as EarthworkBlock;
                 this.Hide();
                 EarthworkBlockCPSettingsForm form = new EarthworkBlockCPSettingsForm(this, block.CPSettings);

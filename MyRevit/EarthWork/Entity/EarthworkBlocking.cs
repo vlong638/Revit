@@ -188,7 +188,7 @@ namespace MyRevit.EarthWork.Entity
         /// <param name="index1">所选节点Index1,从0开始</param>
         /// <param name="index2">所选节点Index2,从0开始</param>
         /// <returns></returns>
-        public bool Combine(int index1, int index2)
+        public bool Combine(EarthworkBlocking blocking,int index1, int index2)
         {
             if (index1 == index2 ||
                 (index1 < 0 || index1 >= Blocks.Count) ||
@@ -196,26 +196,20 @@ namespace MyRevit.EarthWork.Entity
             {
                 return false;
             }
-
+            //合并处理
             var b1 = Blocks[index1];
             var b2 = Blocks[index2];
-            //TODO 还需细化合并处理 如属性的合并处理?
-            var newB = CreateNew();
-            newB.ElementIds.AddRange(b1.ElementIds);
-            newB.ElementIds.AddRange(b2.ElementIds);
-            newB.ElementIdValues = newB.ElementIds.Select(c => c.IntegerValue).ToList();
-            Insert(index1, newB);
-            Remove(b1);
+            b1.AddElementIds(blocking, b2.ElementIds);
             Remove(b2);
             return true;
         }
         public bool CombineBefore(int index)
         {
-            return Combine(index, index - 1);
+            return Combine(this,index, index - 1);
         }
         public bool CombineAfter(int index)
         {
-            return Combine(index, index + 1);
+            return Combine(this, index, index + 1);
         }
         #endregion
 
@@ -315,12 +309,14 @@ namespace MyRevit.EarthWork.Entity
         /// 添加构件元素(批量)
         /// </summary>
         /// <param name="elementId"></param>
-        public void AddElementIds(EarthworkBlocking blocking, IEnumerable<ElementId> elementIds)
+        public void AddElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
             if (elementIds == null)
                 return;
-            foreach (var elementId in elementIds)
-                AddElement(blocking, elementId);
+            for (int i = elementIds.Count(); i > 0; i--)
+            {
+                AddElement(blocking, elementIds[i - 1]);
+            }
         }
         /// <summary>
         /// 删除构件元素
