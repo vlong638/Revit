@@ -205,7 +205,7 @@ namespace MyRevit.EarthWork.UI
         }
         private bool IsSingleBlockSelected(DataGridViewSelectedRowCollection rows)
         {
-            if (rows == null || rows.Count == 0)
+            if (rows == null || rows.Count == 0 || rows[0].DataBoundItem == null)
             {
                 if (dgv_Blocks.CurrentCell != null)
                 {

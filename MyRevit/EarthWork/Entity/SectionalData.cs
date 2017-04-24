@@ -8,6 +8,8 @@ namespace MyRevit.EarthWork.Entity
         protected int MemoHashCode { set; get; }
         protected abstract TSelf Clone();
         public abstract int GetSimpleHashCode();
+        protected List<TNode> Adds { set; get; } = new List<TNode>();
+        protected List<TNode> Deletes { set; get; } = new List<TNode>();
         public void Add(List<TNode> elements)
         {
             if (elements != null && elements.Count > 0)

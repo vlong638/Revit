@@ -89,8 +89,7 @@ namespace MyRevit.EarthWork.Entity
 
         public static FaceRecorderForRevit GetRecorder(string segName, Document doc)
         {
-            return new FaceRecorderForRevit(segName + doc.Title
-                , ApplicationPath.GetCurrentPath(doc));
+            return new FaceRecorderForRevit(segName, ApplicationPath.GetCurrentPath(doc));
         }
     }
     /// <summary>
@@ -269,6 +268,7 @@ namespace MyRevit.EarthWork.Entity
             //    }
             //}
             Blocks.Insert(index, block);
+            Adds.Add(block);
         }
         public override void Add(EarthworkBlock element)
         {
@@ -294,23 +294,40 @@ namespace MyRevit.EarthWork.Entity
         {
             BlockIdIndexMapper = new Dictionary<int, int>();
             int index = 0;
-            foreach (var Block in Blocks)
+            foreach (var block in Blocks)
             {
-                BlockIdIndexMapper.Add(Block.Id,index);
+                BlockIdIndexMapper.Add(block.Id,index);
                 index++;
-                if (Block.IsChanged)
-                    Block.Commit(storage);
+                if (block.IsChanged)
+                    block.Commit(storage);
             }
             FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
             var jsonObj = JsonConvert.SerializeObject(this);
             recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockingSize(), jsonObj.Length.ToString());
             recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), jsonObj);
+            foreach (var block in Deletes)
+            {
+                //TODO Block的删除或需优化
+                recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockSize(block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettingsSize(block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(block.Id), "");
+            }
+            Adds.Clear();
+            Deletes.Clear();
         }
         public override void Delete(EarthworkBlock block)
         {
             //移除节点的所有元素(目的:解除图形配置),然后移除节点
             block.Delete(this, block.ElementIds);
             Blocks.Remove(block);
+            Deletes.Add(block);
+            ////TODO 清空相关的信息
+            //FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), Doc);
+            //recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockSize(block.Id), "");
+            //recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(block.Id), "");
+            //recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettingsSize(block.Id), "");
+            //recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(block.Id), "");
         }
         public override void Rollback()
         {
@@ -321,6 +338,8 @@ namespace MyRevit.EarthWork.Entity
             {
                 Block.Rollback();
             }
+            Adds.Clear();
+            Deletes.Clear();
         }
         protected override EarthworkBlocking Clone()
         {
