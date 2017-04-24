@@ -51,14 +51,26 @@
             this.Node_Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Node_Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.dgv_ImplementationInfo = new System.Windows.Forms.DataGridView();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.btn_Preview = new System.Windows.Forms.Button();
             this.btn_Save = new System.Windows.Forms.Button();
-            this.btn_cancel = new System.Windows.Forms.Button();
+            this.btn_Cancel = new System.Windows.Forms.Button();
             this.btn_Commit = new System.Windows.Forms.Button();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.lable_OrderByTime = new System.Windows.Forms.Label();
+            this.btn_OrderByTime = new System.Windows.Forms.Button();
+            this.lbl_BlockingColor = new System.Windows.Forms.Label();
+            this.lbl_Completed = new System.Windows.Forms.Label();
+            this.btn_Completed = new System.Windows.Forms.Button();
+            this.lbl_Uncompleted = new System.Windows.Forms.Label();
+            this.btn_Uncompleted = new System.Windows.Forms.Button();
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.dtp = new System.Windows.Forms.DateTimePicker();
+            this.ConstructionNode_Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_StartTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_ExposureTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_EndTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -67,6 +79,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Blocks)).BeginInit();
             this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_ImplementationInfo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -79,6 +92,7 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(583, 352);
             this.tabControl1.TabIndex = 0;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tabPage1
             // 
@@ -283,14 +297,33 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.dgv_ImplementationInfo);
             this.tabPage2.Controls.Add(this.dataGridView1);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(575, 326);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "实际施工节点信息";
+            this.tabPage2.Text = "实际施工节点信息管理";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // dgv_ImplementationInfo
+            // 
+            this.dgv_ImplementationInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_ImplementationInfo.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ConstructionNode_Name,
+            this.ConstructionNode_StartTime,
+            this.ConstructionNode_ExposureTime,
+            this.ConstructionNode_EndTime});
+            this.dgv_ImplementationInfo.Location = new System.Drawing.Point(-4, 0);
+            this.dgv_ImplementationInfo.Name = "dgv_ImplementationInfo";
+            this.dgv_ImplementationInfo.RowTemplate.Height = 23;
+            this.dgv_ImplementationInfo.Size = new System.Drawing.Size(579, 330);
+            this.dgv_ImplementationInfo.TabIndex = 1;
+            this.dgv_ImplementationInfo.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ConstructionInfo_CellDoubleClick);
+            this.dgv_ImplementationInfo.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ImplementationInfo_CellEndEdit);
+            this.dgv_ImplementationInfo.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dgv_ImplementationInfo_RowPostPaint);
+            this.dgv_ImplementationInfo.SelectionChanged += new System.EventHandler(this.dgv_ImplementationInfo_SelectionChanged);
             // 
             // dataGridView1
             // 
@@ -321,15 +354,15 @@
             this.btn_Save.UseVisualStyleBackColor = true;
             this.btn_Save.Click += new System.EventHandler(this.btn_Save_Click);
             // 
-            // btn_cancel
+            // btn_Cancel
             // 
-            this.btn_cancel.Location = new System.Drawing.Point(461, 370);
-            this.btn_cancel.Name = "btn_cancel";
-            this.btn_cancel.Size = new System.Drawing.Size(66, 23);
-            this.btn_cancel.TabIndex = 3;
-            this.btn_cancel.Text = "取消";
-            this.btn_cancel.UseVisualStyleBackColor = true;
-            this.btn_cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
+            this.btn_Cancel.Location = new System.Drawing.Point(461, 370);
+            this.btn_Cancel.Name = "btn_Cancel";
+            this.btn_Cancel.Size = new System.Drawing.Size(66, 23);
+            this.btn_Cancel.TabIndex = 3;
+            this.btn_Cancel.Text = "取消";
+            this.btn_Cancel.UseVisualStyleBackColor = true;
+            this.btn_Cancel.Click += new System.EventHandler(this.btn_Cancel_Click);
             // 
             // btn_Commit
             // 
@@ -347,33 +380,115 @@
             this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             // 
-            // label1
+            // lable_OrderByTime
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(437, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 12);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "按时间查看:";
+            this.lable_OrderByTime.AutoSize = true;
+            this.lable_OrderByTime.Location = new System.Drawing.Point(437, 13);
+            this.lable_OrderByTime.Name = "lable_OrderByTime";
+            this.lable_OrderByTime.Size = new System.Drawing.Size(71, 12);
+            this.lable_OrderByTime.TabIndex = 1;
+            this.lable_OrderByTime.Text = "按时间查看:";
             // 
-            // button1
+            // btn_OrderByTime
             // 
-            this.button1.Location = new System.Drawing.Point(517, 8);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "2017/4/12";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btn_OrderByTime.Location = new System.Drawing.Point(517, 8);
+            this.btn_OrderByTime.Name = "btn_OrderByTime";
+            this.btn_OrderByTime.Size = new System.Drawing.Size(75, 23);
+            this.btn_OrderByTime.TabIndex = 5;
+            this.btn_OrderByTime.Text = "2017/4/12";
+            this.btn_OrderByTime.UseVisualStyleBackColor = true;
+            // 
+            // lbl_BlockingColor
+            // 
+            this.lbl_BlockingColor.AutoSize = true;
+            this.lbl_BlockingColor.Location = new System.Drawing.Point(10, 375);
+            this.lbl_BlockingColor.Name = "lbl_BlockingColor";
+            this.lbl_BlockingColor.Size = new System.Drawing.Size(59, 12);
+            this.lbl_BlockingColor.TabIndex = 6;
+            this.lbl_BlockingColor.Text = "分块颜色:";
+            // 
+            // lbl_Completed
+            // 
+            this.lbl_Completed.AutoSize = true;
+            this.lbl_Completed.Location = new System.Drawing.Point(75, 375);
+            this.lbl_Completed.Name = "lbl_Completed";
+            this.lbl_Completed.Size = new System.Drawing.Size(41, 12);
+            this.lbl_Completed.TabIndex = 7;
+            this.lbl_Completed.Text = "已完工";
+            // 
+            // btn_Completed
+            // 
+            this.btn_Completed.Location = new System.Drawing.Point(122, 372);
+            this.btn_Completed.Name = "btn_Completed";
+            this.btn_Completed.Size = new System.Drawing.Size(18, 18);
+            this.btn_Completed.TabIndex = 8;
+            this.btn_Completed.UseVisualStyleBackColor = true;
+            this.btn_Completed.Click += new System.EventHandler(this.btn_Completed_Click);
+            // 
+            // lbl_Uncompleted
+            // 
+            this.lbl_Uncompleted.AutoSize = true;
+            this.lbl_Uncompleted.Location = new System.Drawing.Point(146, 375);
+            this.lbl_Uncompleted.Name = "lbl_Uncompleted";
+            this.lbl_Uncompleted.Size = new System.Drawing.Size(41, 12);
+            this.lbl_Uncompleted.TabIndex = 9;
+            this.lbl_Uncompleted.Text = "未完工";
+            // 
+            // btn_Uncompleted
+            // 
+            this.btn_Uncompleted.Location = new System.Drawing.Point(193, 372);
+            this.btn_Uncompleted.Name = "btn_Uncompleted";
+            this.btn_Uncompleted.Size = new System.Drawing.Size(18, 18);
+            this.btn_Uncompleted.TabIndex = 11;
+            this.btn_Uncompleted.UseVisualStyleBackColor = true;
+            this.btn_Uncompleted.Click += new System.EventHandler(this.btn_Uncompleted_Click);
+            // 
+            // dtp
+            // 
+            this.dtp.Location = new System.Drawing.Point(231, 4);
+            this.dtp.Name = "dtp";
+            this.dtp.Size = new System.Drawing.Size(200, 21);
+            this.dtp.TabIndex = 12;
+            // 
+            // ConstructionNode_Name
+            // 
+            this.ConstructionNode_Name.HeaderText = "名称";
+            this.ConstructionNode_Name.Name = "ConstructionNode_Name";
+            // 
+            // ConstructionNode_StartTime
+            // 
+            this.ConstructionNode_StartTime.HeaderText = "节点开始";
+            this.ConstructionNode_StartTime.Name = "ConstructionNode_StartTime";
+            this.ConstructionNode_StartTime.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.ConstructionNode_StartTime.Width = 150;
+            // 
+            // ConstructionNode_ExposureTime
+            // 
+            this.ConstructionNode_ExposureTime.HeaderText = "无支撑暴露时间(h)";
+            this.ConstructionNode_ExposureTime.Name = "ConstructionNode_ExposureTime";
+            this.ConstructionNode_ExposureTime.Width = 140;
+            // 
+            // ConstructionNode_EndTime
+            // 
+            this.ConstructionNode_EndTime.HeaderText = "节点完成";
+            this.ConstructionNode_EndTime.Name = "ConstructionNode_EndTime";
+            this.ConstructionNode_EndTime.Width = 150;
             // 
             // EarthworkBlockingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(611, 399);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.dtp);
+            this.Controls.Add(this.btn_Uncompleted);
+            this.Controls.Add(this.lbl_Uncompleted);
+            this.Controls.Add(this.btn_Completed);
+            this.Controls.Add(this.lbl_Completed);
+            this.Controls.Add(this.lbl_BlockingColor);
+            this.Controls.Add(this.btn_OrderByTime);
+            this.Controls.Add(this.lable_OrderByTime);
             this.Controls.Add(this.btn_Commit);
-            this.Controls.Add(this.btn_cancel);
+            this.Controls.Add(this.btn_Cancel);
             this.Controls.Add(this.btn_Save);
             this.Controls.Add(this.btn_Preview);
             this.Controls.Add(this.tabControl1);
@@ -389,6 +504,7 @@
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Blocks)).EndInit();
             this.tabPage2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_ImplementationInfo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -402,7 +518,7 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Button btn_Preview;
         private System.Windows.Forms.Button btn_Save;
-        private System.Windows.Forms.Button btn_cancel;
+        private System.Windows.Forms.Button btn_Cancel;
         private System.Windows.Forms.Button btn_Commit;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btn_InsertBefore;
@@ -424,7 +540,19 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Node_Name;
         private System.Windows.Forms.DataGridViewTextBoxColumn Node_Description;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label lable_OrderByTime;
+        private System.Windows.Forms.Button btn_OrderByTime;
+        private System.Windows.Forms.Label lbl_BlockingColor;
+        private System.Windows.Forms.Label lbl_Completed;
+        private System.Windows.Forms.Button btn_Completed;
+        private System.Windows.Forms.Label lbl_Uncompleted;
+        private System.Windows.Forms.Button btn_Uncompleted;
+        private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.DataGridView dgv_ImplementationInfo;
+        private System.Windows.Forms.DateTimePicker dtp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_Name;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_StartTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_ExposureTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_EndTime;
     }
 }

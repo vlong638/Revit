@@ -30,6 +30,7 @@ namespace MyRevit.EarthWork.Entity
         public string Description { get; set; }
         [JsonIgnore]//TODO InitByDocument()中根据Document初始化
         public EarthworkBlockCPSettings CPSettings { set; get; }
+        //[JsonIgnore]//TODO InitByDocument()中根据Document初始化
         public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
         public List<int> ElementIdValues { get; set; } = new List<int>();
         [JsonIgnore]//InitByDocument()中根据Document初始化
@@ -51,13 +52,19 @@ namespace MyRevit.EarthWork.Entity
             sb.Append(Name);
             sb.Append("Adds:" + string.Join(",", Adds.Select(c => c.IntegerValue)));
             sb.Append("Deletes:" + string.Join(",", Deletes.Select(c => c.IntegerValue)));
+            sb.Append(ImplementationInfo.ColorForSettled);
+            sb.Append(ImplementationInfo.ColorForUnsettled);
+            sb.Append(ImplementationInfo.StartTime);
+            sb.Append(ImplementationInfo.ExposureTime);
+            sb.Append(ImplementationInfo.EndTime);
             return sb.ToString().GetHashCode();
         }
         public override void Commit(EarthworkBlockingForm storage)
         {
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + storage.m_Doc.Title
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(storage.m_Doc));
-            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(Id), JsonConvert.SerializeObject(this));
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
+            var jsonObj = JsonConvert.SerializeObject(this);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockSize(Id), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(Id), jsonObj);
         }
         public override void Rollback()
         {

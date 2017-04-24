@@ -22,6 +22,13 @@ namespace MyRevit.EarthWork.UI
             //控件参数初始化
             traceBar_Transparency.Minimum = 0;
             traceBar_Transparency.Maximum = 100;
+            //解除变更事件
+            cb_IsVisible.CheckedChanged -= ValueChanged;
+            cb_IsSurfaceVisible.CheckedChanged -= ValueChanged;
+            cb_IsHalftone.CheckedChanged -= ValueChanged;
+            tb_Transparency.TextChanged -= tb_Transparency_TextChanged;
+            traceBar_Transparency.Scroll -= traceBar_Transparency_Scroll;
+
             cb_IsVisible.Checked = CPSettings.IsVisible;
             cb_IsSurfaceVisible.Checked = CPSettings.IsSurfaceVisible;
             cb_IsHalftone.Checked = CPSettings.IsHalftone;
@@ -30,6 +37,12 @@ namespace MyRevit.EarthWork.UI
             btn_Color.ImageAlign = ContentAlignment.MiddleLeft;
             btn_Color.TextAlign = ContentAlignment.MiddleLeft;
             RenderColorButton(CPSettings.Color);
+            //绑定变更事件
+            cb_IsVisible.CheckedChanged += ValueChanged;
+            cb_IsSurfaceVisible.CheckedChanged += ValueChanged;
+            cb_IsHalftone.CheckedChanged += ValueChanged;
+            tb_Transparency.TextChanged += tb_Transparency_TextChanged;
+            traceBar_Transparency.Scroll += traceBar_Transparency_Scroll;
         }
 
         private void RenderColorButton(Color color)
@@ -107,13 +120,9 @@ namespace MyRevit.EarthWork.UI
             if (int.TryParse(tb_Transparency.Text, out t))
             {
                 if (t > 100)
-                {
                     t = 100;
-                }
                 if (t < 0)
-                {
                     t = 0;
-                }
             }
             else
             {

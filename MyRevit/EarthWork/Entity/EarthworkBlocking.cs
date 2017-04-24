@@ -3,6 +3,7 @@ using Autodesk.Revit.UI;
 using MyRevit.EarthWork.UI;
 using MyRevit.Utilities;
 using Newtonsoft.Json;
+using PmSoft.Common.CommonClass;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,6 +86,12 @@ namespace MyRevit.EarthWork.Entity
     public class EarthworkBlockingConstraints
     {
         public static OverrideGraphicSettings DefaultCPSettings = new OverrideGraphicSettings();
+
+        public static FaceRecorderForRevit GetRecorder(string segName, Document doc)
+        {
+            return new FaceRecorderForRevit(segName + doc.Title
+                , ApplicationPath.GetCurrentPath(doc));
+        }
     }
     /// <summary>
     /// 土方分块
@@ -134,18 +141,17 @@ namespace MyRevit.EarthWork.Entity
                 }
             }
             //加载 EarthworkBlock
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + doc.Title
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(doc));
+            FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), doc);
             var orderedBlockIdIndexs = BlockIdIndexMapper.OrderBy(c => c.Value);
             foreach (var orderedBlockIdIndex in orderedBlockIdIndexs)
             {
                 string blockStr = "";
-                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(orderedBlockIdIndex.Key), ref blockStr, 10000);
+                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(orderedBlockIdIndex.Key), ref blockStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKeyOfEarthworkBlockSize(orderedBlockIdIndex.Key), 1000) + 2);
                 var block = JsonConvert.DeserializeObject<EarthworkBlock>(blockStr);
                 if (block == null)
                     return;
                 string cpSettingsStr = "";
-                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(orderedBlockIdIndex.Key), ref cpSettingsStr, 10000);
+                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(orderedBlockIdIndex.Key), ref cpSettingsStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettingsSize(orderedBlockIdIndex.Key), 1000) + 2);
                 var cpSettings = JsonConvert.DeserializeObject<EarthworkBlockCPSettings>(cpSettingsStr);
                 if (cpSettings!=null)
                     block.CPSettings = cpSettings;
@@ -153,6 +159,14 @@ namespace MyRevit.EarthWork.Entity
                 foreach (var element in elements)
                     if (element != null)
                         block.ElementIds.Add(element.Id);
+                //var implementationStr = "";
+                //recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockImplementationInfo(orderedBlockIdIndex.Key), ref implementationStr, int.MaxValue);
+                //var implementationInfo = JsonConvert.DeserializeObject<EarthworkBlockImplementationInfo>(implementationStr);
+                //if (implementationInfo != null)
+                //{
+                //    implementationInfo.Name = block.Name;
+                //    block.ImplementationInfo = implementationInfo;
+                //}
                 Blocks.Add(block);
             }
         }
@@ -220,7 +234,17 @@ namespace MyRevit.EarthWork.Entity
             Indexer++;
             return block;
         }
-
+        public List<EarthworkBlockImplementationInfo> GetBlockingImplementationInfos()
+        {
+            var result = new List<EarthworkBlockImplementationInfo>();
+            foreach (var Block in Blocks)
+            {
+                if (Block.ImplementationInfo.Name == null)
+                    Block.ImplementationInfo.Name = Block.Name;
+                result.Add(Block.ImplementationInfo);
+            }
+            return result;
+        }
 
         //用于下一页面实现
         //public bool IsExistChanging { set; get; }
@@ -274,11 +298,13 @@ namespace MyRevit.EarthWork.Entity
             {
                 BlockIdIndexMapper.Add(Block.Id,index);
                 index++;
-                Block.Commit(storage);
+                if (Block.IsChanged)
+                    Block.Commit(storage);
             }
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + storage.m_Doc.Title
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(storage.m_Doc));
-            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), JsonConvert.SerializeObject(this));
+            FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
+            var jsonObj = JsonConvert.SerializeObject(this);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockingSize(), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), jsonObj);
         }
         public override void Delete(EarthworkBlock block)
         {

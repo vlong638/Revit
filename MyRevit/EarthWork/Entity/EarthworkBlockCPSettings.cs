@@ -50,9 +50,10 @@ namespace MyRevit.EarthWork.Entity
             //更新视图内容
             ApplySetting(storage.Blocking, storage.Block.ElementIds);
             //保存数据
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + storage.m_Doc.Title
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(storage.m_Doc));
-            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(storage.Block.Id), JsonConvert.SerializeObject(this));
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
+            var jsonObj = JsonConvert.SerializeObject(this);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettingsSize(storage.Block.Id), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(storage.Block.Id), jsonObj);
         }
         public override void Rollback()
         {

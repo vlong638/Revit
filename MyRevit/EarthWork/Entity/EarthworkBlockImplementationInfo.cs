@@ -13,6 +13,8 @@ namespace MyRevit.EarthWork.Entity
         {
         }
 
+        [JsonIgnore]
+        public string Name { set; get; }
         /// <summary>
         /// 开始时间
         /// </summary>
@@ -38,6 +40,7 @@ namespace MyRevit.EarthWork.Entity
               && ExposureTime != 0;
             }
         }
+        public bool IsConflicted { set; get; }
         public System.Drawing.Color ColorForUnsettled { set; get; }
         public System.Drawing.Color ColorForSettled { set; get; }
         /// <summary>

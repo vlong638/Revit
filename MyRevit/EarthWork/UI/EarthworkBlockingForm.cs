@@ -49,28 +49,30 @@ namespace MyRevit.EarthWork.UI
             //初始化参数
             TopMost = true;
             ShowDialogType = ShowDialogType.Idle;
-            //初始化DataGridView
+            //dgv_Blocks
             dgv_Blocks.AutoGenerateColumns = false;
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + m_Doc.Title
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(m_Doc));
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
             var blockingStr = "";
-            recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), ref blockingStr, 10000);
+            recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), ref blockingStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKeyOfEarthworkBlockingSize(), 1000) + 2);
             if (blockingStr != "")
-            {
-
                 Blocking = Newtonsoft.Json.JsonConvert.DeserializeObject<EarthworkBlocking>(blockingStr);
-            }
             else
-            {
                 Blocking = new EarthworkBlocking();
-                //Blocking.Add(Blocking.CreateNew());
-            }
             Blocking.InitByDocument(m_Doc);
             Blocking.Start();
             if (Blocking.Count() > 0)
                 dgv_Blocks.DataSource = Blocking.Blocks;
+            //dgv_ConstructionInfo
+            dgv_ImplementationInfo.AutoGenerateColumns = false;
+            ConstructionNode_Name.DataPropertyName = nameof(EarthworkBlockImplementationInfo.Name);
+            ConstructionNode_Name.ReadOnly = true;
+            ConstructionNode_StartTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.StartTime);
+            ConstructionNode_StartTime.Tag = nameof(DateTime);
+            ConstructionNode_ExposureTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.ExposureTime);
+            ConstructionNode_EndTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.EndTime);
+            ConstructionNode_EndTime.Tag = nameof(DateTime);
             //初始化按钮
             btn_Save.Enabled = false;
             ToolTip tip = new ToolTip();
@@ -80,6 +82,10 @@ namespace MyRevit.EarthWork.UI
             tip.SetToolTip(btn_DownNode, "下移节点");
             tip.SetToolTip(btn_AddElement, "新增构件");
             tip.SetToolTip(btn_DeleteElement, "删除构件");
+            //DateTimePicker
+            dtp.Hide();
+            dtp.Format = DateTimePickerFormat.Custom;
+            dtp.CustomFormat = "yyyy/MM/dd HH:mm:ss";
         }
         #endregion
 
@@ -108,6 +114,7 @@ namespace MyRevit.EarthWork.UI
         }
         #endregion
 
+        #region Tab_土方分块
         /// <summary>
         /// 加载选中行
         /// </summary>
@@ -149,16 +156,6 @@ namespace MyRevit.EarthWork.UI
             int CIndex = e.ColumnIndex;
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
-                DataGridViewComboBoxColumn combo = dgv_Blocks.Columns[e.ColumnIndex] as DataGridViewComboBoxColumn;
-                if (combo != null)  //如果该列是ComboBox列
-                {
-                    dgv_Blocks.BeginEdit(false); //结束该列的编辑状态
-                    DataGridViewComboBoxEditingControl comboEdite = dgv_Blocks.EditingControl as DataGridViewComboBoxEditingControl;
-                    if (comboEdite != null)
-                    {
-                        comboEdite.DroppedDown = true; //展现下拉列表
-                    }
-                }
                 DataGridViewTextBoxColumn textbox = dgv_Blocks.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
                 if (textbox != null) //如果该列是TextBox列
                 {
@@ -280,48 +277,6 @@ namespace MyRevit.EarthWork.UI
                 var cell = dgv_Blocks.Rows.Count > 0 ? dgv_Blocks.Rows[endIndex].Cells[0] : null;
                 dgv_Blocks.CurrentCell = cell;
             }
-        }
-        /// <summary>
-        /// 确定-提交
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Commit_Click(object sender, System.EventArgs e)
-        {
-            Blocking.Commit(this);
-            DialogResult = DialogResult.OK;
-            Close();
-        }
-        /// <summary>
-        /// 应用-保存
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Save_Click(object sender, System.EventArgs e)
-        {
-            Blocking.Commit(this);
-            Blocking.Start();
-            btn_Save.Enabled = false;
-        }
-        /// <summary>
-        /// 预览
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Preview_Click(object sender, System.EventArgs e)
-        {
-            //TODO 预览
-            throw new NotImplementedException();
-        }
-        /// <summary>
-        /// 取消
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Cancel_Click(object sender, System.EventArgs e)
-        {
-            DialogResult = DialogResult.Cancel;
-            Close();
         }
         /// <summary>
         /// 在选中项前插入新节点
@@ -485,21 +440,14 @@ namespace MyRevit.EarthWork.UI
             }
         }
         /// <summary>
-        /// 消息反馈
-        /// </summary>
-        /// <param name="title"></param>
-        /// <param name="content"></param>
-        public void ShowMessage(string title, string content)
-        {
-            MessageBox.Show(content);
-        }
-        /// <summary>
         /// 列表编辑结束
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void dgv_Blocks_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
+            //TODO 变更检测
+            //TODO 名称更改影响ConstructionInfo
             ValueChanged(sender, e);
         }
         private void ValueChanged(object sender, EventArgs e)
@@ -515,5 +463,202 @@ namespace MyRevit.EarthWork.UI
         {
             LoadDataGridViewSelection();
         }
+        #endregion
+
+        #region Tab_Common
+        /// <summary>
+        /// 确定-提交
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Commit_Click(object sender, System.EventArgs e)
+        {
+            Blocking.Commit(this);
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+        /// <summary>
+        /// 应用-保存
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Save_Click(object sender, System.EventArgs e)
+        {
+            Blocking.Commit(this);
+            Blocking.Start();
+            btn_Save.Enabled = false;
+        }
+        /// <summary>
+        /// 预览
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Preview_Click(object sender, System.EventArgs e)
+        {
+            //TODO 预览
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// 取消
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Cancel_Click(object sender, System.EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
+        /// <summary>
+        /// 消息反馈
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="content"></param>
+        public void ShowMessage(string title, string content)
+        {
+            MessageBox.Show(content);
+        }
+        /// <summary>
+        /// tab切换
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedIndex == 0)
+            {
+                lable_OrderByTime.Hide();
+                btn_OrderByTime.Hide();
+                lbl_BlockingColor.Hide();
+                lbl_Completed.Hide();
+                lbl_Uncompleted.Hide();
+                btn_Completed.Hide();
+                btn_Uncompleted.Hide();
+
+                //btn_Preview.Show();
+                //btn_Commit.Show();
+                //btn_Cancel.Show();
+                //btn_Save.Show();
+            }
+            else
+            {
+                //打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
+                dgv_ImplementationInfo.DataSource = null;
+                var implementationInfos = Blocking.GetBlockingImplementationInfos();
+                dgv_ImplementationInfo.DataSource = implementationInfos;
+                //TODO 分段内容有变动 高亮or...
+                if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
+                {
+                    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
+                }
+
+                lable_OrderByTime.Show();
+                btn_OrderByTime.Show();
+                lbl_BlockingColor.Show();
+                lbl_Completed.Show();
+                lbl_Uncompleted.Show();
+                btn_Completed.Show();
+                btn_Uncompleted.Show();
+
+                //btn_Preview.Show();
+                //btn_Commit.Show();
+                //btn_Cancel.Show();
+                //btn_Save.Show();
+            }
+        }
+        #endregion
+
+        #region Tab_实际施工节点信息管理
+        /// <summary>
+        /// dgv_Implementation更新首列序号
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgv_ImplementationInfo_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            SolidBrush b = new SolidBrush(this.dgv_Blocks.RowHeadersDefaultCellStyle.ForeColor);
+            e.Graphics.DrawString((e.RowIndex + 1).ToString(System.Globalization.CultureInfo.CurrentUICulture)
+                , this.dgv_Blocks.DefaultCellStyle.Font, b, e.RowBounds.Location.X + 20, e.RowBounds.Location.Y + 4);
+        }
+        public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
+        private void dgv_ImplementationInfo_SelectionChanged(object sender, EventArgs e)
+        {
+            var cell = dgv_ImplementationInfo.CurrentCell;
+            if (ImplementationInfo != Blocking.Blocks[cell.RowIndex].ImplementationInfo)
+            {
+                ImplementationInfo = Blocking.Blocks[cell.RowIndex].ImplementationInfo;
+                RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
+                RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
+            }
+        }
+        private void RenderColorButton(Button button, System.Drawing.Color color)
+        {
+            int width = button.Width;
+            var height = button.Height;
+            var image = new Bitmap(width, height);
+            Graphics graphics = Graphics.FromImage(image);
+            graphics.FillRectangle(new SolidBrush(color), new System.Drawing.Rectangle(0, 0, width, height));
+            button.Image = image;
+        }
+        private void btn_Completed_Click(object sender, EventArgs e)
+        {
+            //禁止使用自定义颜色  
+            colorDialog1.AllowFullOpen = false;
+            //提供自己给定的颜色  
+            colorDialog1.CustomColors = new int[] { 6916092, 15195440, 16107657, 1836924, 3758726, 12566463, 7526079, 7405793, 6945974, 241502, 2296476, 5130294, 3102017, 7324121, 14993507, 11730944 };
+            colorDialog1.ShowHelp = true;
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (colorDialog1.Color != ImplementationInfo.ColorForSettled)
+                {
+                    ImplementationInfo.ColorForSettled = colorDialog1.Color;
+                    RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
+                    ValueChanged(sender, e);
+                }
+            }
+        }
+        private void btn_Uncompleted_Click(object sender, EventArgs e)
+        {
+            //禁止使用自定义颜色  
+            colorDialog1.AllowFullOpen = false;
+            //提供自己给定的颜色  
+            colorDialog1.CustomColors = new int[] { 6916092, 15195440, 16107657, 1836924, 3758726, 12566463, 7526079, 7405793, 6945974, 241502, 2296476, 5130294, 3102017, 7324121, 14993507, 11730944 };
+            colorDialog1.ShowHelp = true;
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (colorDialog1.Color != ImplementationInfo.ColorForUnsettled)
+                {
+                    ImplementationInfo.ColorForUnsettled = colorDialog1.Color;
+                    RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
+                    ValueChanged(sender, e);
+                }
+            }
+        }
+        public List<int> CellLocation;
+        private void dgv_ConstructionInfo_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int CIndex = e.ColumnIndex;
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+                if (textbox != null) //如果该列是TextBox列
+                {
+                    CellLocation = new List<int>();
+                    if (textbox.Tag.ToString() == nameof(DateTime))
+                    {
+                        CellLocation.Add(e.RowIndex);
+                        CellLocation.Add(e.ColumnIndex);
+                        dtp.Show();
+                        //TODO 日期的编辑处理
+                    }
+                    dgv_ImplementationInfo.BeginEdit(true); //开始编辑状态
+                }
+            }
+        }
+        private void dgv_ImplementationInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            //TODO发生变更检测
+            ValueChanged(sender, e);
+        }
+        #endregion
     }
 }
