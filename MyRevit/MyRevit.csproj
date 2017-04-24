@@ -93,7 +93,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
+    <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
+    <Compile Include="EarthWork\Entity\EarthworkBlockImplementationInfo.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlocking.cs" />
+    <Compile Include="EarthWork\Entity\MemorableData.cs" />
+    <Compile Include="EarthWork\Entity\SaveKeyHelper.cs" />
+    <Compile Include="EarthWork\Entity\SectionalData.cs" />
     <Compile Include="EarthWork\UI\EarthworkBlockCPSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,85 +1,85 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MyRevit.EarthWork.UI;
 using MyRevit.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace MyRevit.EarthWork.Entity
 {
     #region 应用(新增,更改) 删除 区间化集合
-   // //准备开始应用抽象(区间化集合)
-   // interface SectionalData<TRoot,TElement>
-   // {
-   //     void ApplyNew(TRoot root, TElement element);
-   //     void ApplyDelete(TRoot root, TElement element);
-   // }
-   // interface MemorableData<T>
-   // {
-   //     void Clone();
-   //     void Rollback();
-   // }
-   // interface Cloneable<TNode>
-   //{
-   //     TNode Clone();
-   // }
-   // class SectionalDataCollection<TRoot,TNode,TElement> : MemorableData<TNode>
-   //     where TNode : SectionalData<TRoot, TElement>, Cloneable<TNode>
-   // {
-   //     public SectionalDataCollection(List<TNode> nodes)
-   //     {
-   //         Datas = nodes;
-   //         Clone();
-   //     }
+    // //准备开始应用抽象(区间化集合)
+    // interface SectionalData<TRoot,TElement>
+    // {
+    //     void ApplyNew(TRoot root, TElement element);
+    //     void ApplyDelete(TRoot root, TElement element);
+    // }
+    // interface MemorableData<T>
+    // {
+    //     void Clone();
+    //     void Rollback();
+    // }
+    // interface Cloneable<TNode>
+    //{
+    //     TNode Clone();
+    // }
+    // class SectionalDataCollection<TRoot,TNode,TElement> : MemorableData<TNode>
+    //     where TNode : SectionalData<TRoot, TElement>, Cloneable<TNode>
+    // {
+    //     public SectionalDataCollection(List<TNode> nodes)
+    //     {
+    //         Datas = nodes;
+    //         Clone();
+    //     }
 
-   //     List<TNode> Datas { set; get; } = new List<TNode>();
-   //     List<TNode> News { set; get; } = new List<TNode>();
-   //     List<TNode> Deletes { set; get; } = new List<TNode>();
-   //     IEnumerable<TData> Memo { set; get; }
+    //     List<TNode> Datas { set; get; } = new List<TNode>();
+    //     List<TNode> News { set; get; } = new List<TNode>();
+    //     List<TNode> Deletes { set; get; } = new List<TNode>();
+    //     IEnumerable<TData> Memo { set; get; }
 
 
-   //     public void Add(TData data)
-   //     {
-   //         News.Add(data);
-   //         Datas.Add(data);
-   //     }
-   //     public void Delete(TData data)
-   //     {
-   //         Deletes.Add(data);
-   //         Datas.Remove(data);
-   //     }
-   //     public void Apply()
-   //     {
-   //         foreach (var New in News)
-   //         {
-   //             New.ApplyNew();
-   //         }
-   //         News = new List<TData>();
-   //         foreach (var Delete in Deletes)
-   //         {
-   //             Delete.ApplyDelete();
-   //         }
-   //         Deletes = new List<TData>();
-   //         Clone();
-   //     }
-   //     public void Cancel()
-   //     {
-   //         News = new List<TData>();
-   //         Deletes = new List<TData>();
-   //         Rollback();
-   //     }
-   //     public void Clone()
-   //     {
-   //         Memo = Datas.Select(c => c.Clone());
-   //     }
-   //     public void Rollback()
-   //     {
-   //         Datas = Memo.Select(c => c.Clone()).ToList();
-   //     }
-   // }
+    //     public void Add(TData data)
+    //     {
+    //         News.Add(data);
+    //         Datas.Add(data);
+    //     }
+    //     public void Delete(TData data)
+    //     {
+    //         Deletes.Add(data);
+    //         Datas.Remove(data);
+    //     }
+    //     public void Apply()
+    //     {
+    //         foreach (var New in News)
+    //         {
+    //             New.ApplyNew();
+    //         }
+    //         News = new List<TData>();
+    //         foreach (var Delete in Deletes)
+    //         {
+    //             Delete.ApplyDelete();
+    //         }
+    //         Deletes = new List<TData>();
+    //         Clone();
+    //     }
+    //     public void Cancel()
+    //     {
+    //         News = new List<TData>();
+    //         Deletes = new List<TData>();
+    //         Rollback();
+    //     }
+    //     public void Clone()
+    //     {
+    //         Memo = Datas.Select(c => c.Clone());
+    //     }
+    //     public void Rollback()
+    //     {
+    //         Datas = Memo.Select(c => c.Clone()).ToList();
+    //     }
+    // }
     #endregion
 
     public class EarthworkBlockingConstraints
@@ -90,18 +90,22 @@ namespace MyRevit.EarthWork.Entity
     /// 土方分块
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public class EarthworkBlocking
+    public class EarthworkBlocking : SectionalData<EarthworkBlockingForm, EarthworkBlocking, EarthworkBlock>
     {
-
+        #region 属性
         [JsonProperty]
         protected int Indexer = 1;
         [JsonProperty]
+        public Dictionary<int, int> BlockIdIndexMapper = new Dictionary<int, int>();
         public List<EarthworkBlock> Blocks { private set; get; } = new List<EarthworkBlock>();
-        [JsonProperty]
-        public Dictionary<int, int> ElementToBlockMapper { set; get; } = new Dictionary<int, int>();
+        public int Count()
+        {
+            return Blocks.Count();
+        }
+        #endregion
 
         #region DocRelatedInfo
-        public Document Doc{ set; get; }
+        public Document Doc { set; get; }
         public View3D View3D { private set; get; }
         public void InitByDocument(Document doc)
         {
@@ -129,58 +133,28 @@ namespace MyRevit.EarthWork.Entity
                     }
                 }
             }
-            //加载ElementId
-            foreach (var block in Blocks)
+            //加载 EarthworkBlock
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + doc.Title
+                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(doc));
+            var orderedBlockIdIndexs = BlockIdIndexMapper.OrderBy(c => c.Value);
+            foreach (var orderedBlockIdIndex in orderedBlockIdIndexs)
             {
+                string blockStr = "";
+                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlock(orderedBlockIdIndex.Key), ref blockStr, 10000);
+                var block = JsonConvert.DeserializeObject<EarthworkBlock>(blockStr);
+                if (block == null)
+                    return;
+                string cpSettingsStr = "";
+                recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(orderedBlockIdIndex.Key), ref cpSettingsStr, 10000);
+                var cpSettings = JsonConvert.DeserializeObject<EarthworkBlockCPSettings>(cpSettingsStr);
+                if (cpSettings!=null)
+                    block.CPSettings = cpSettings;
                 var elements = block.ElementIdValues.Select(c => doc.GetElement(new ElementId(c)));
                 foreach (var element in elements)
                     if (element != null)
                         block.ElementIds.Add(element.Id);
+                Blocks.Add(block);
             }
-        }
-        #endregion
-
-        #region Insert
-        /// <summary>
-        /// 在选择节点后面插入(默认)
-        /// </summary>
-        /// <param name="index">所选节点Index,从0开始</param>
-        /// <returns></returns>
-        public void Insert(int index, EarthworkBlock block)
-        {
-            Blocks.Insert(index, block);
-        }
-        public void InsertBefore(int index, EarthworkBlock block)
-        {
-            Insert(index, block);
-        }
-        public void InsertAfter(int index, EarthworkBlock block)
-        {
-            Insert(index + 1, block);
-        }
-        /// <summary>
-        /// 在尾部增加节点,默认节点+(index+1)
-        /// </summary>
-        /// <returns></returns>
-        public void Add(EarthworkBlock block)
-        {
-            Insert(Blocks.Count(), block);
-        }
-        public EarthworkBlock CreateNew()
-        {
-            var block = new EarthworkBlock(Indexer, "节点" + Indexer);
-            Indexer++;
-            return block;
-        }
-        /// <summary>
-        /// 删除节点
-        /// </summary>
-        /// <returns></returns>
-        public void Remove(EarthworkBlock block)
-        {
-            //移除节点的所有元素(目的:解除图形配置),然后移除节点
-            block.RemoveElementIds(this, block.ElementIds);
-            Blocks.Remove(block);
         }
         #endregion
 
@@ -191,7 +165,7 @@ namespace MyRevit.EarthWork.Entity
         /// <param name="index1">所选节点Index1,从0开始</param>
         /// <param name="index2">所选节点Index2,从0开始</param>
         /// <returns></returns>
-        public bool Combine(EarthworkBlocking blocking,int index1, int index2)
+        public bool Combine(EarthworkBlocking blocking, int index1, int index2)
         {
             if (index1 == index2 ||
                 (index1 < 0 || index1 >= Blocks.Count) ||
@@ -202,13 +176,13 @@ namespace MyRevit.EarthWork.Entity
             //合并处理
             var b1 = Blocks[index1];
             var b2 = Blocks[index2];
-            b1.AddElementIds(blocking, b2.ElementIds);
-            Remove(b2);
+            b1.Add(blocking, b2.ElementIds);
+            Delete(b2);
             return true;
         }
         public bool CombineBefore(int index)
         {
-            return Combine(this,index, index - 1);
+            return Combine(this, index, index - 1);
         }
         public bool CombineAfter(int index)
         {
@@ -219,7 +193,7 @@ namespace MyRevit.EarthWork.Entity
         #region Move
         public bool Move(int indexOrient, int indexTarget)
         {
-            if (indexTarget < 0)
+            if (indexTarget < 0 || indexTarget >= Blocks.Count())
                 return false;
             if (indexOrient < 0 || indexOrient >= Blocks.Count())
                 return false;
@@ -240,9 +214,49 @@ namespace MyRevit.EarthWork.Entity
         }
         #endregion
 
-        public int Count()
+        public EarthworkBlock CreateNew()
         {
-            return Blocks.Count();
+            var block = new EarthworkBlock(Indexer, "节点" + Indexer);
+            Indexer++;
+            return block;
+        }
+
+
+        //用于下一页面实现
+        //public bool IsExistChanging { set; get; }
+        //public string ShowOnChanging()
+        //{
+        //    return "分段内容有变动，请修改相应工期设置";
+        //}
+
+        #region SectionalData
+        /// <summary>
+        /// 在选择节点后面插入(默认)
+        /// </summary>
+        /// <param name="index">所选节点Index,从0开始</param>
+        /// <returns></returns>
+        void add(int index, EarthworkBlock block)
+        {
+            //foreach (var IndexBlockId in BlockIdIndexMapper)
+            //{
+            //    if (IndexBlockId.Value >= index)
+            //    {
+            //        BlockIdIndexMapper[IndexBlockId.Key]++;
+            //    }
+            //}
+            Blocks.Insert(index, block);
+        }
+        public override void Add(EarthworkBlock element)
+        {
+            add(Blocks.Count(), element);
+        }
+        public void InsertBefore(int index, EarthworkBlock block)
+        {
+            add(index, block);
+        }
+        public void InsertAfter(int index, EarthworkBlock block)
+        {
+            add(index + 1, block);
         }
         public void UpdateBlockName(int index, string name)
         {
@@ -252,313 +266,58 @@ namespace MyRevit.EarthWork.Entity
                 Blocks[index].ImplementationInfo.Unsettle();
             }
         }
-
-        //用于下一页面实现
-        //public bool IsExistChanging { set; get; }
-        //public string ShowOnChanging()
-        //{
-        //    return "分段内容有变动，请修改相应工期设置";
-        //}
-    }
-    /// <summary>
-    /// 土方分块节点
-    /// </summary>
-
-    [JsonObject(MemberSerialization.OptOut)]
-    public class EarthworkBlock
-    {
-        public EarthworkBlock(int id, string name)
+        public override void Commit(EarthworkBlockingForm storage)
         {
-            //Parent = parent;
-            CPSettings = new EarthworkBlockCPSettings();
-            ImplementationInfo = new EarthworkBlockImplementationInfo();
-
-            Id = id;
-            Name = name;
-        }
-
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public EarthworkBlockCPSettings CPSettings { set; get; }
-        public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
-        public List<int> ElementIdValues { get; set; } = new List<int>();
-
-        [JsonIgnore]
-        public List<ElementId> ElementIds { get; set; } = new List<ElementId>();
-        
-        /// <summary>
-        /// 添加构件元素(批量)
-        /// </summary>
-        /// <param name="elementId"></param>
-        public void AddElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
-        {
-            if (elementIds == null)
-                return;
-            for (int i = elementIds.Count(); i > 0; i--)
+            BlockIdIndexMapper = new Dictionary<int, int>();
+            int index = 0;
+            foreach (var Block in Blocks)
             {
-                ApplyStorage(blocking, elementIds[i - 1]);
-                ApplySetting(blocking, elementIds[i - 1]);
+                BlockIdIndexMapper.Add(Block.Id,index);
+                index++;
+                Block.Commit(storage);
+            }
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + storage.m_Doc.Title
+                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(storage.m_Doc));
+            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), JsonConvert.SerializeObject(this));
+        }
+        public override void Delete(EarthworkBlock block)
+        {
+            //移除节点的所有元素(目的:解除图形配置),然后移除节点
+            block.Delete(this, block.ElementIds);
+            Blocks.Remove(block);
+        }
+        public override void Rollback()
+        {
+            Blocks = new List<EarthworkBlock>();
+            Blocks.AddRange(Memo.Blocks);
+            BlockIdIndexMapper = Memo.BlockIdIndexMapper;
+            foreach (var Block in Blocks)
+            {
+                Block.Rollback();
             }
         }
-        void ApplyStorage(EarthworkBlocking blocking, ElementId elementId)
+        protected override EarthworkBlocking Clone()
         {
-            if (blocking.ElementToBlockMapper.ContainsKey(elementId.IntegerValue))
+            return new EarthworkBlocking()
             {
-                var i = blocking.ElementToBlockMapper.First(c => c.Key == elementId.IntegerValue);//如果存在映射关系
-                if (i.Value == Id)//已在本节点存在不作处理
-                    return;
-                else
-                    blocking.Blocks.First(c => c.Id == i.Value).RemoveElementIds(blocking, new List<ElementId>() { elementId });//不在本节点存在,需在其所属节点删除元素
-            }
-            blocking.ElementToBlockMapper.Add(elementId.IntegerValue, Id);
-            ElementIds.Add(elementId);
-            ElementIdValues.Add(elementId.IntegerValue);
-        }
-        void ApplySetting(EarthworkBlocking blocking, ElementId elementId)
-        {
-            CPSettings.ApplySetting(blocking, new List<ElementId>() { elementId });
-        }
-
-        /// <summary>
-        /// 删除构件元素(批量)
-        /// </summary>
-        /// <param name="elementId"></param>
-        /// <returns></returns>
-        public void RemoveElementIds(EarthworkBlocking blocking, List<ElementId> elementIds)
-        {
-            if (elementIds == null)
-                return;
-            for (int i = elementIds.Count()-1; i>=0; i--)
-            {
-                ApplyDelete(blocking, elementIds[i]);
-            }
-        }
-
-
-        public void ApplyDelete(EarthworkBlocking blocking, ElementId elementId)
-        {
-            //索引处理
-            if (!blocking.ElementToBlockMapper.ContainsKey(elementId.IntegerValue))//元素不存在
-                return;
-            var i = blocking.ElementToBlockMapper.First(c => c.Key == elementId.IntegerValue);
-            if (i.Value != Id)//元素非本块
-                return;
-            blocking.ElementToBlockMapper.Remove(i.Key);
-            //对象处理
-            ElementIds.Remove(ElementIds.First(c => c == elementId));
-            ElementIdValues.Remove(elementId.IntegerValue);
-            CPSettings.DeapplySetting(blocking, new List<ElementId>() { elementId });
-        }
-    }
-    /// <summary>
-    /// 颜色/透明度配置
-    /// </summary>
-    public class EarthworkBlockCPSettings
-    {
-        public EarthworkBlockCPSettings()
-        {
-        }
-
-        /// <summary>
-        /// 图元可见
-        /// </summary>
-        public bool IsVisible { set; get; } = true;
-        /// <summary>
-        /// 半色调
-        /// </summary>
-        public bool IsHalftone { set; get; } = false;
-        /// <summary>
-        /// 表面可见
-        /// </summary>
-        public bool IsSurfaceVisible { set; get; } = true;
-        /// <summary>
-        /// 颜色 Surface即Projection
-        /// </summar>y
-        public System.Drawing.Color Color { set; get; } = System.Drawing.Color.White;
-        /// <summary>
-        /// 填充物 Surface即Projection
-        /// </summary>
-        public int FillerId { set; get; } = -1;
-        /// <summary>
-        /// 曲面透明度
-        /// </summary>
-        public int SurfaceTransparency { set; get; }
-
-        /// <summary>
-        /// 克隆(用于回退)
-        /// </summary>
-        /// <returns></returns>
-        public EarthworkBlockCPSettings Clone()
-        {
-            return new EarthworkBlockCPSettings()
-            {
-                IsVisible = IsVisible,
-                IsSurfaceVisible = IsSurfaceVisible,
-                IsHalftone = IsHalftone,
-                Color = Color,
-                FillerId = FillerId,
-                SurfaceTransparency = SurfaceTransparency,
+                Blocks = Blocks,
+                BlockIdIndexMapper = BlockIdIndexMapper,
             };
         }
-        /// <summary>
-        /// 复制(用于回退)
-        /// </summary>
-        /// <param name="cpSettings"></param>
-        public void Copy(EarthworkBlockCPSettings cpSettings)
+        public override int GetSimpleHashCode()
         {
-            this.IsVisible = cpSettings.IsVisible;
-            this.IsSurfaceVisible = cpSettings.IsSurfaceVisible;
-            this.IsHalftone = cpSettings.IsHalftone;
-            this.Color = cpSettings.Color;
-            this.FillerId = cpSettings.FillerId;
-            this.SurfaceTransparency = cpSettings.SurfaceTransparency;
+            return 0;//不做区分判断,根据用户更改行为来设置
         }
 
-        public override int GetHashCode()
+        public override void Start()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(IsVisible);
-            sb.Append(IsHalftone);
-            sb.Append(IsSurfaceVisible);
-            sb.Append(Color.R);
-            sb.Append(Color.G);
-            sb.Append(Color.B);
-            sb.Append(FillerId);
-            sb.Append(SurfaceTransparency);
-            return sb.ToString().GetHashCode();
-        }
-        /// <summary>
-        /// 对元素增加节点的配置
-        /// </summary>
-        /// <param name="element"></param>
-        void ApplySetting(View view, ElementId elementId, OverrideGraphicSettings setting)
-        {
-            view.SetElementOverrides(elementId, setting);
-            TaskDialog.Show("INFO", $"elementId:{elementId.IntegerValue}颜色/透明度设置已更新");
-        }
-        void ApplySetting(View view, ElementId elementId)
-        {
-            OverrideGraphicSettings setting = GetOverrideGraphicSettings(view.Document);
-            ApplySetting(view, elementId, setting);
-        }
-        public void ApplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
-        {
-            using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(ApplySetting)))
+            Memo = Clone();
+            MemoHashCode = GetSimpleHashCode();
+            foreach (var Block in Blocks)
             {
-                OverrideGraphicSettings setting = GetOverrideGraphicSettings(blocking.Doc);
-                transaction.Start();
-                //元素可见性
-                if (IsVisible)
-                    blocking.View3D.UnhideElements(elementIds);
-                else
-                    blocking.View3D.HideElements(elementIds);
-                //元素表面填充物配置
-                foreach (var elementId in elementIds)
-                    ApplySetting(blocking.View3D, elementId, setting);
-                transaction.Commit();
+                Block.Start();
             }
         }
-        static ElementId _DefaultFillPatternId = null;
-        static ElementId GetDefaultFillPatternId(Document doc)
-        {
-            if (_DefaultFillPatternId != null)
-                return _DefaultFillPatternId;
-
-            _DefaultFillPatternId = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElements().First(c => c.Name == "实体填充").Id;
-            return _DefaultFillPatternId;
-        }
-        OverrideGraphicSettings GetOverrideGraphicSettings(Document doc)
-        {
-            var setting = new OverrideGraphicSettings();
-            setting.SetHalftone(IsHalftone);
-            setting.SetProjectionFillPatternVisible(IsSurfaceVisible);
-            setting.SetProjectionFillColor(new Color(Color.R, Color.G, Color.B));
-            if (FillerId == -1)
-                setting.SetProjectionFillPatternId(GetDefaultFillPatternId(doc));
-            else
-                setting.SetProjectionFillPatternId(new ElementId(FillerId));
-            setting.SetSurfaceTransparency(SurfaceTransparency);
-            return setting;
-        }
-
-        /// <summary>
-        /// 解除对元素增加的节点的配置
-        /// </summary>
-        /// <param name="element"></param>
-        void DeapplySetting(View view, ElementId elementId)
-        {
-            view.SetElementOverrides(elementId, EarthworkBlockingConstraints.DefaultCPSettings);
-        }
-        /// <summary>
-        /// 解除对元素增加的节点的配置
-        /// </summary>
-        /// <param name="element"></param>
-        public void DeapplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
-        {
-            using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(DeapplySetting)))
-            {
-                OverrideGraphicSettings setting = GetOverrideGraphicSettings(blocking.Doc);
-                transaction.Start();
-                //元素可见性
-                blocking.View3D.UnhideElements(elementIds);
-                //元素表面填充物配置
-                foreach (var elementId in elementIds)
-                    DeapplySetting(blocking.View3D, elementId);
-                transaction.Commit();
-            }
-        }
-    }
-    /// <summary>
-    /// 节点施工信息
-    /// </summary>
-    [JsonObject(MemberSerialization.OptOut)]
-    public class EarthworkBlockImplementationInfo
-    {
-        public EarthworkBlockImplementationInfo()
-        {
-        }
-
-        /// <summary>
-        /// 开始时间
-        /// </summary>
-        public DateTime StartTime { set; get; }
-        /// <summary>
-        /// 无支撑暴露时间
-        /// </summary>
-        public int ExposureTime { set; get; }
-        /// <summary>
-        /// 完成事件
-        /// </summary>
-        public DateTime EndTime { set; get; }
-        /// <summary>
-        /// 已被完成
-        /// </summary>
-        [JsonIgnore]
-        public bool IsSettled
-        {
-            get
-            {
-                return StartTime != DateTime.MinValue
-              && EndTime != DateTime.MinValue
-              && ExposureTime != 0;
-            }
-        }
-        public System.Drawing.Color ColorForUnsettled { set; get; }
-        public System.Drawing.Color ColorForSettled { set; get; }
-        /// <summary>
-        /// 已完成的节点更改节点名称后
-        /// </summary>
-        public void Unsettle()
-        {
-            //TODO 节点名称变更后
-            //当前面土方分块节点重命名或有增减后，用户再次打开此界面则提示“分段内容有变动，请修改相应工期设置”
-            throw new NotImplementedException();
-        }
-        public void Preview()
-        {
-            //TODO 预览
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

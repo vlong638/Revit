@@ -1,8 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 using MyRevit.EarthWork.Entity;
-using PmSoft.Common.RevitClass;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -52,20 +50,29 @@ namespace MyRevit.EarthWork.UI
             TopMost = true;
             ShowDialogType = ShowDialogType.Idle;
             //初始化DataGridView
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm)
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(m_Doc));
-            var blockingStr = "";
-            recorder.ReadValue(nameof(EarthworkBlocking), ref blockingStr, 10000);
-            if (blockingStr != "")
-                Blocking = Newtonsoft.Json.JsonConvert.DeserializeObject<EarthworkBlocking>(blockingStr);
-            else
-                Blocking = new EarthworkBlocking();
-            Blocking.InitByDocument(m_Doc);
             dgv_Blocks.AutoGenerateColumns = false;
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
-            dgv_Blocks.DataSource = Blocking.Blocks;
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm) + m_Doc.Title
+                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(m_Doc));
+            var blockingStr = "";
+            recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), ref blockingStr, 10000);
+            if (blockingStr != "")
+            {
+
+                Blocking = Newtonsoft.Json.JsonConvert.DeserializeObject<EarthworkBlocking>(blockingStr);
+            }
+            else
+            {
+                Blocking = new EarthworkBlocking();
+                //Blocking.Add(Blocking.CreateNew());
+            }
+            Blocking.InitByDocument(m_Doc);
+            Blocking.Start();
+            if (Blocking.Count() > 0)
+                dgv_Blocks.DataSource = Blocking.Blocks;
             //初始化按钮
+            btn_Save.Enabled = false;
             ToolTip tip = new ToolTip();
             tip.SetToolTip(btn_AddNode, "新增节点");
             tip.SetToolTip(btn_DeleteNode, "删除选中节点");
@@ -85,18 +92,18 @@ namespace MyRevit.EarthWork.UI
             {
                 case ShowDialogType.AddElements:
                     if (SelectedElementIds != null)
-                        Block.AddElementIds(Blocking, SelectedElementIds);
+                        Block.Add(Blocking, SelectedElementIds);
                     ShowDialogType = ShowDialogType.Idle;
                     break;
                 case ShowDialogType.DeleleElements:
                     if (SelectedElementIds != null)
-                        Block.RemoveElementIds(Blocking, SelectedElementIds);
+                        Block.Delete(Blocking, SelectedElementIds);
                     ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
                     break;
             }
-            //TEST
+            ValueChanged(null, null);
             ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
         }
         #endregion
@@ -168,6 +175,7 @@ namespace MyRevit.EarthWork.UI
         {
             Blocking.Add(Blocking.CreateNew());
             Updatedgv_BlockWithSelectionChanged(-1, Blocking.Blocks.Count - 1);
+            ValueChanged(sender, e);
         }
         /// <summary>
         // 更新DataGridView
@@ -189,26 +197,26 @@ namespace MyRevit.EarthWork.UI
             var index = -1;
             if (rows.Count > 0)
             {
-                index = rows[0].Index - 1;// rows[0].Index > 0 ? rows[0].Index - 1 : 0;
+                index = rows[0].Index > 0 ? rows[0].Index - 1 : 0;//删除项为0时 选中项重置为0
             }
             foreach (DataGridViewRow row in rows)
             {
-                Blocking.Remove(row.DataBoundItem as EarthworkBlock);
+                Blocking.Delete(row.DataBoundItem as EarthworkBlock);
             }
             Updatedgv_BlockWithSelectionChanged(-1, index);
+            ValueChanged(sender, e);
         }
         private bool IsSingleBlockSelected(DataGridViewSelectedRowCollection rows)
         {
-            if (rows.Count == 0)
+            if (rows == null || rows.Count == 0)
             {
-                if (dgv_Blocks.CurrentCell!=null)
+                if (dgv_Blocks.CurrentCell != null)
                 {
                     Row = rows[dgv_Blocks.CurrentCell.RowIndex];
                     Block = Row.DataBoundItem as EarthworkBlock;
                     return true;
                 }
-
-                ShowMessage("警告", "请选中迁移项");
+                ShowMessage("警告", "请选中节点");
                 return false;
             }
             if (rows.Count > 1)
@@ -236,6 +244,7 @@ namespace MyRevit.EarthWork.UI
                     Updatedgv_BlockWithSelectionChanged(row.Index, row.Index - 1);
                 }
             }
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 下移节点
@@ -253,6 +262,7 @@ namespace MyRevit.EarthWork.UI
                     Updatedgv_BlockWithSelectionChanged(row.Index, row.Index + 1);
                 }
             }
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 刷新DataGridView数据并且更新选中
@@ -264,7 +274,7 @@ namespace MyRevit.EarthWork.UI
             Updatedgv_Block();
             if (startIndex >= 0)
                 dgv_Blocks.Rows[startIndex].Selected = false;
-            if (endIndex >= 0)
+            if (dgv_Blocks.Rows.Count > 0 && endIndex >= 0)
             {
                 dgv_Blocks.Rows[endIndex].Selected = true;
                 var cell = dgv_Blocks.Rows.Count > 0 ? dgv_Blocks.Rows[endIndex].Cells[0] : null;
@@ -278,7 +288,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Commit_Click(object sender, System.EventArgs e)
         {
-            btn_Save_Click(sender, e);
+            Blocking.Commit(this);
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -289,12 +299,9 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Save_Click(object sender, System.EventArgs e)
         {
-            //保存数据
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm)
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(m_Doc));
-            recorder.WriteValue(nameof(EarthworkBlocking), Newtonsoft.Json.JsonConvert.SerializeObject(Blocking));
-            //更新视图内容
-            Block.CPSettings.ApplySetting(Blocking, Block.ElementIds);
+            Blocking.Commit(this);
+            Blocking.Start();
+            btn_Save.Enabled = false;
         }
         /// <summary>
         /// 预览
@@ -330,6 +337,7 @@ namespace MyRevit.EarthWork.UI
                 Blocking.InsertBefore(row.Index, Blocking.CreateNew());
                 Updatedgv_BlockWithSelectionChanged(row.Index, row.Index);
             }
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 在选中项后插入新节点
@@ -345,6 +353,7 @@ namespace MyRevit.EarthWork.UI
                 Blocking.InsertAfter(row.Index, Blocking.CreateNew());
                 Updatedgv_BlockWithSelectionChanged(row.Index, row.Index + 1);
             }
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 组合选中项和前项
@@ -362,6 +371,7 @@ namespace MyRevit.EarthWork.UI
                 Blocking.CombineBefore(row.Index);
                 Updatedgv_BlockWithSelectionChanged(-1, row.Index - 1);
             }
+            ValueChanged(sender, e);
         }
         /// <summary>
         /// 组合选中项和后项
@@ -379,11 +389,14 @@ namespace MyRevit.EarthWork.UI
                 Blocking.CombineAfter(row.Index);
                 Updatedgv_BlockWithSelectionChanged(-1, row.Index);
             }
+            ValueChanged(sender, e);
         }
-
         #region 构件变更
-        static List<int> SelectedRows=new List<int>();
-        static List<int> SelectedCell=new List<int>();
+        static List<int> SelectedRows = new List<int>();
+        static List<int> SelectedCell = new List<int>();
+        /// <summary>
+        /// 保存列表选中项,由于采用了模态形式,页面显示总是刷新掉选中项
+        /// </summary>
         void SaveDataGridViewSelection()
         {
             SelectedRows = new List<int>();
@@ -392,24 +405,27 @@ namespace MyRevit.EarthWork.UI
                 SelectedRows.Add(row.Index);
             }
             SelectedCell = new List<int>();
-            if (dgv_Blocks.SelectedCells.Count>0)
+            if (dgv_Blocks.SelectedCells.Count > 0)
             {
                 SelectedCell.Add(dgv_Blocks.SelectedCells[0].RowIndex);
                 SelectedCell.Add(dgv_Blocks.SelectedCells[0].ColumnIndex);
             }
         }
+        /// <summary>
+        /// 加载列表选中项
+        /// </summary>
         public void LoadDataGridViewSelection()
         {
-            if (SelectedRows.Count()>0)
+            if (SelectedRows.Count() > 0)
             {
                 foreach (int rowIndex in SelectedRows)
                 {
                     dgv_Blocks.Rows[rowIndex].Selected = true;
                 }
             }
-            if (SelectedCell.Count()>0)
+            if (SelectedCell.Count() > 0)
             {
-                dgv_Blocks.CurrentCell= dgv_Blocks[SelectedCell[1], SelectedCell[0]];
+                dgv_Blocks.CurrentCell = dgv_Blocks[SelectedCell[1], SelectedCell[0]];
             }
         }
         /// <summary>
@@ -445,7 +461,7 @@ namespace MyRevit.EarthWork.UI
             ShowDialogType = ShowDialogType.DeleleElements;
             SaveDataGridViewSelection();
             Close();
-        } 
+        }
         #endregion
         /// <summary>
         /// 颜色/透明配置
@@ -477,7 +493,24 @@ namespace MyRevit.EarthWork.UI
         {
             MessageBox.Show(content);
         }
-
+        /// <summary>
+        /// 列表编辑结束
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgv_Blocks_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            ValueChanged(sender, e);
+        }
+        private void ValueChanged(object sender, EventArgs e)
+        {
+            btn_Save.Enabled = true;
+        }
+        /// <summary>
+        /// 页面加载时
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void EarthworkBlockingForm_Shown(object sender, EventArgs e)
         {
             LoadDataGridViewSelection();

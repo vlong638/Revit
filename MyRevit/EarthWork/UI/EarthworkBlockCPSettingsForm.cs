@@ -8,8 +8,6 @@ namespace MyRevit.EarthWork.UI
     public partial class EarthworkBlockCPSettingsForm : Form
     {
         EarthworkBlockCPSettings CPSettings;
-        EarthworkBlockCPSettings CPSettingsMemo;
-        int CPSettingMemoHashCode;
         EarthworkBlockingForm Mainform;
 
         public EarthworkBlockCPSettingsForm(EarthworkBlockingForm form, EarthworkBlockCPSettings cpSettings)
@@ -19,8 +17,7 @@ namespace MyRevit.EarthWork.UI
             //传值存储
             Mainform = form;
             CPSettings = cpSettings;
-            CPSettingsMemo = CPSettings.Clone();
-            CPSettingMemoHashCode = CPSettingsMemo.GetHashCode();
+            CPSettings.Start();
             btn_Apply.Enabled = false;//应用只在内容更改时可用
             //控件参数初始化
             traceBar_Transparency.Minimum = 0;
@@ -64,7 +61,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
-            CPSettings.Copy(CPSettingsMemo);
+            CPSettings.Rollback();
             this.Close();
         }
         /// <summary>
@@ -74,15 +71,8 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Apply_Click(object sender, EventArgs e)
         {
-            CPSettingsMemo = CPSettings.Clone();
-            CPSettingMemoHashCode = CPSettingsMemo.GetHashCode();
+            CPSettings.Commit(Mainform);
             btn_Apply.Enabled = false;
-            //保存数据
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = new PmSoft.Common.CommonClass.FaceRecorderForRevit(nameof(EarthworkBlockingForm)
-                , PmSoft.Common.CommonClass.ApplicationPath.GetCurrentPath(Mainform.m_Doc));
-            recorder.WriteValue(nameof(EarthworkBlocking), Newtonsoft.Json.JsonConvert.SerializeObject(Mainform.Blocking));
-            //更新视图内容
-            CPSettings.ApplySetting(Mainform.Blocking, Mainform.Block.ElementIds);
         }
         /// <summary>
         /// 重置透明值
@@ -148,14 +138,13 @@ namespace MyRevit.EarthWork.UI
                 ValueChanged(sender, e);
             }
         }
-
         private void ValueChanged(object sender, EventArgs e)
         {
             CPSettings.IsVisible = cb_IsVisible.Checked;
             CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
             CPSettings.IsHalftone = cb_IsHalftone.Checked;
             CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
-            btn_Apply.Enabled = CPSettingMemoHashCode != CPSettings.GetHashCode();
+            btn_Apply.Enabled = CPSettings.IsChanged;
         }
     }
 }

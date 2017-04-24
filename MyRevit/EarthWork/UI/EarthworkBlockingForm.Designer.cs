@@ -267,6 +267,7 @@
             this.dgv_Blocks.TabIndex = 0;
             this.dgv_Blocks.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellClick);
             this.dgv_Blocks.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellDoubleClick);
+            this.dgv_Blocks.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellEndEdit);
             this.dgv_Blocks.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dgv_Blocks_RowPostPaint);
             // 
             // Node_Name
