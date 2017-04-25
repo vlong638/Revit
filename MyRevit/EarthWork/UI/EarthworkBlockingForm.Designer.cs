@@ -52,9 +52,12 @@
             this.Node_Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dgv_ImplementationInfo = new System.Windows.Forms.DataGridView();
+            this.ConstructionNode_Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_StartTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_ExposureTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConstructionNode_EndTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.btn_Preview = new System.Windows.Forms.Button();
-            this.btn_Save = new System.Windows.Forms.Button();
             this.btn_Cancel = new System.Windows.Forms.Button();
             this.btn_Commit = new System.Windows.Forms.Button();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
@@ -67,10 +70,6 @@
             this.btn_Uncompleted = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.dtp = new System.Windows.Forms.DateTimePicker();
-            this.ConstructionNode_Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConstructionNode_StartTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConstructionNode_ExposureTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConstructionNode_EndTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -325,6 +324,30 @@
             this.dgv_ImplementationInfo.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dgv_ImplementationInfo_RowPostPaint);
             this.dgv_ImplementationInfo.SelectionChanged += new System.EventHandler(this.dgv_ImplementationInfo_SelectionChanged);
             // 
+            // ConstructionNode_Name
+            // 
+            this.ConstructionNode_Name.HeaderText = "名称";
+            this.ConstructionNode_Name.Name = "ConstructionNode_Name";
+            // 
+            // ConstructionNode_StartTime
+            // 
+            this.ConstructionNode_StartTime.HeaderText = "节点开始";
+            this.ConstructionNode_StartTime.Name = "ConstructionNode_StartTime";
+            this.ConstructionNode_StartTime.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.ConstructionNode_StartTime.Width = 150;
+            // 
+            // ConstructionNode_ExposureTime
+            // 
+            this.ConstructionNode_ExposureTime.HeaderText = "无支撑暴露时间(h)";
+            this.ConstructionNode_ExposureTime.Name = "ConstructionNode_ExposureTime";
+            this.ConstructionNode_ExposureTime.Width = 140;
+            // 
+            // ConstructionNode_EndTime
+            // 
+            this.ConstructionNode_EndTime.HeaderText = "节点完成";
+            this.ConstructionNode_EndTime.Name = "ConstructionNode_EndTime";
+            this.ConstructionNode_EndTime.Width = 150;
+            // 
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -336,7 +359,7 @@
             // 
             // btn_Preview
             // 
-            this.btn_Preview.Location = new System.Drawing.Point(317, 370);
+            this.btn_Preview.Location = new System.Drawing.Point(382, 372);
             this.btn_Preview.Name = "btn_Preview";
             this.btn_Preview.Size = new System.Drawing.Size(66, 23);
             this.btn_Preview.TabIndex = 1;
@@ -344,19 +367,9 @@
             this.btn_Preview.UseVisualStyleBackColor = true;
             this.btn_Preview.Click += new System.EventHandler(this.btn_Preview_Click);
             // 
-            // btn_Save
-            // 
-            this.btn_Save.Location = new System.Drawing.Point(533, 370);
-            this.btn_Save.Name = "btn_Save";
-            this.btn_Save.Size = new System.Drawing.Size(66, 23);
-            this.btn_Save.TabIndex = 2;
-            this.btn_Save.Text = "应用";
-            this.btn_Save.UseVisualStyleBackColor = true;
-            this.btn_Save.Click += new System.EventHandler(this.btn_Save_Click);
-            // 
             // btn_Cancel
             // 
-            this.btn_Cancel.Location = new System.Drawing.Point(461, 370);
+            this.btn_Cancel.Location = new System.Drawing.Point(526, 372);
             this.btn_Cancel.Name = "btn_Cancel";
             this.btn_Cancel.Size = new System.Drawing.Size(66, 23);
             this.btn_Cancel.TabIndex = 3;
@@ -366,7 +379,7 @@
             // 
             // btn_Commit
             // 
-            this.btn_Commit.Location = new System.Drawing.Point(389, 370);
+            this.btn_Commit.Location = new System.Drawing.Point(454, 372);
             this.btn_Commit.Name = "btn_Commit";
             this.btn_Commit.Size = new System.Drawing.Size(66, 23);
             this.btn_Commit.TabIndex = 4;
@@ -450,30 +463,6 @@
             this.dtp.Size = new System.Drawing.Size(200, 21);
             this.dtp.TabIndex = 12;
             // 
-            // ConstructionNode_Name
-            // 
-            this.ConstructionNode_Name.HeaderText = "名称";
-            this.ConstructionNode_Name.Name = "ConstructionNode_Name";
-            // 
-            // ConstructionNode_StartTime
-            // 
-            this.ConstructionNode_StartTime.HeaderText = "节点开始";
-            this.ConstructionNode_StartTime.Name = "ConstructionNode_StartTime";
-            this.ConstructionNode_StartTime.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ConstructionNode_StartTime.Width = 150;
-            // 
-            // ConstructionNode_ExposureTime
-            // 
-            this.ConstructionNode_ExposureTime.HeaderText = "无支撑暴露时间(h)";
-            this.ConstructionNode_ExposureTime.Name = "ConstructionNode_ExposureTime";
-            this.ConstructionNode_ExposureTime.Width = 140;
-            // 
-            // ConstructionNode_EndTime
-            // 
-            this.ConstructionNode_EndTime.HeaderText = "节点完成";
-            this.ConstructionNode_EndTime.Name = "ConstructionNode_EndTime";
-            this.ConstructionNode_EndTime.Width = 150;
-            // 
             // EarthworkBlockingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -489,7 +478,6 @@
             this.Controls.Add(this.lable_OrderByTime);
             this.Controls.Add(this.btn_Commit);
             this.Controls.Add(this.btn_Cancel);
-            this.Controls.Add(this.btn_Save);
             this.Controls.Add(this.btn_Preview);
             this.Controls.Add(this.tabControl1);
             this.Name = "EarthworkBlockingForm";
@@ -517,7 +505,6 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Button btn_Preview;
-        private System.Windows.Forms.Button btn_Save;
         private System.Windows.Forms.Button btn_Cancel;
         private System.Windows.Forms.Button btn_Commit;
         private System.Windows.Forms.GroupBox groupBox1;

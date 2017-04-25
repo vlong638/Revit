@@ -74,7 +74,6 @@ namespace MyRevit.EarthWork.UI
             ConstructionNode_EndTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.EndTime);
             ConstructionNode_EndTime.Tag = nameof(DateTime);
             //初始化按钮
-            btn_Save.Enabled = false;
             ToolTip tip = new ToolTip();
             tip.SetToolTip(btn_AddNode, "新增节点");
             tip.SetToolTip(btn_DeleteNode, "删除选中节点");
@@ -452,9 +451,11 @@ namespace MyRevit.EarthWork.UI
             //TODO 名称更改影响ConstructionInfo
             ValueChanged(sender, e);
         }
+        //TODO 存在更改时,关闭时提示保存
+        bool IsChanged = false;
         private void ValueChanged(object sender, EventArgs e)
         {
-            btn_Save.Enabled = true;
+            IsChanged = true;
         }
         /// <summary>
         /// 页面加载时
@@ -480,24 +481,13 @@ namespace MyRevit.EarthWork.UI
             Close();
         }
         /// <summary>
-        /// 应用-保存
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Save_Click(object sender, System.EventArgs e)
-        {
-            Blocking.Commit(this);
-            Blocking.Start();
-            btn_Save.Enabled = false;
-        }
-        /// <summary>
         /// 预览
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btn_Preview_Click(object sender, System.EventArgs e)
         {
-            //TODO 预览
+            //TODO 预览 如果非当前视图,则打开默认视图
             throw new NotImplementedException();
         }
         /// <summary>
