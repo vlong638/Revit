@@ -124,6 +124,8 @@ namespace MyRevit.EarthWork.UI
         {
             if (dgv_Blocks.Rows.Count > 0)
                 dgv_Blocks.Rows[0].Selected = true;
+
+            tabControl1_SelectedIndexChanged(null, null);
         }
         /// <summary>
         /// 首列序号

@@ -108,6 +108,8 @@ namespace MyRevit.EarthWork.Entity
         }
         public void ApplySetting(EarthworkBlocking blocking, List<ElementId> elementIds)
         {
+            if (elementIds == null || elementIds.Count == 0)
+                return;
             using (var transaction = new Transaction(blocking.Doc, "EarthworkBlocking." + nameof(ApplySetting)))
             {
                 OverrideGraphicSettings setting = GetOverrideGraphicSettings(blocking.Doc);
