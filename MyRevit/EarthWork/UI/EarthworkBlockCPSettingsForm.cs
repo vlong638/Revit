@@ -17,7 +17,7 @@ namespace MyRevit.EarthWork.UI
         {
             if (_fillPatterns==null)
             {
-                _fillPatterns = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToList();
+                _fillPatterns = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).Where(p=>(p as FillPatternElement).GetFillPattern().Target == FillPatternTarget.Drafting).ToList();
             }
             return _fillPatterns;
         }
