@@ -32,8 +32,7 @@
             this.cb_IsHalftone = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cb_IsSurfaceVisible = new System.Windows.Forms.CheckBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.cb_FillPattern = new System.Windows.Forms.ComboBox();
             this.btn_Color = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -76,8 +75,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.cb_IsSurfaceVisible);
-            this.groupBox1.Controls.Add(this.comboBox1);
-            this.groupBox1.Controls.Add(this.button2);
+            this.groupBox1.Controls.Add(this.cb_FillPattern);
             this.groupBox1.Controls.Add(this.btn_Color);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
@@ -99,24 +97,15 @@
             this.cb_IsSurfaceVisible.UseVisualStyleBackColor = true;
             this.cb_IsSurfaceVisible.CheckedChanged += new System.EventHandler(this.ValueChanged);
             // 
-            // comboBox1
+            // cb_FillPattern
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(96, 72);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(187, 20);
-            this.comboBox1.TabIndex = 10;
-            this.comboBox1.Text = "<按材质>";
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.ValueChanged);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(289, 70);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(33, 23);
-            this.button2.TabIndex = 9;
-            this.button2.Text = "...";
-            this.button2.UseVisualStyleBackColor = true;
+            this.cb_FillPattern.FormattingEnabled = true;
+            this.cb_FillPattern.Location = new System.Drawing.Point(96, 72);
+            this.cb_FillPattern.Name = "cb_FillPattern";
+            this.cb_FillPattern.Size = new System.Drawing.Size(226, 20);
+            this.cb_FillPattern.TabIndex = 10;
+            this.cb_FillPattern.Text = "<按材质>";
+            this.cb_FillPattern.SelectedIndexChanged += new System.EventHandler(this.ValueChanged);
             // 
             // btn_Color
             // 
@@ -260,8 +249,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ColorDialog colorDialog1;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ComboBox cb_FillPattern;
         private System.Windows.Forms.Button btn_Color;
         private System.Windows.Forms.Button btn_ResetTransparency;
         private System.Windows.Forms.Button btn_Submit;

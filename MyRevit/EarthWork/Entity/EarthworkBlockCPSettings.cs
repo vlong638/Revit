@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System;
 
 namespace MyRevit.EarthWork.Entity
 {
@@ -45,6 +46,11 @@ namespace MyRevit.EarthWork.Entity
         #endregion
 
         #region MemorableData
+        public override void Preview(EarthworkBlockingForm storage)
+        {
+            //更新视图内容
+            ApplySetting(storage.Blocking, storage.Block.ElementIds);
+        }
         public override void Commit(EarthworkBlockingForm storage)
         {
             //更新视图内容
@@ -99,7 +105,7 @@ namespace MyRevit.EarthWork.Entity
         void ApplySetting(View view, ElementId elementId, OverrideGraphicSettings setting)
         {
             view.SetElementOverrides(elementId, setting);
-            TaskDialog.Show("INFO", $"elementId:{elementId.IntegerValue}颜色/透明度设置已更新");
+            //TaskDialog.Show("INFO", $"elementId:{elementId.IntegerValue}颜色/透明度设置已更新");
         }
         void ApplySetting(View view, ElementId elementId)
         {

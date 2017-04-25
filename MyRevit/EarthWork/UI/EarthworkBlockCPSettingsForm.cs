@@ -1,14 +1,26 @@
-﻿using MyRevit.EarthWork.Entity;
+﻿using Autodesk.Revit.DB;
+using MyRevit.EarthWork.Entity;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MyRevit.EarthWork.UI
 {
-    public partial class EarthworkBlockCPSettingsForm : Form
+    public partial class EarthworkBlockCPSettingsForm : System.Windows.Forms.Form
     {
         EarthworkBlockCPSettings CPSettings;
         EarthworkBlockingForm Mainform;
+        static List<Element> _fillPatterns;
+        static List<Element> GetFillPatterns(Document doc)
+        {
+            if (_fillPatterns==null)
+            {
+                _fillPatterns = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToList();
+            }
+            return _fillPatterns;
+        }
 
         public EarthworkBlockCPSettingsForm(EarthworkBlockingForm form, EarthworkBlockCPSettings cpSettings)
         {
@@ -28,7 +40,11 @@ namespace MyRevit.EarthWork.UI
             cb_IsHalftone.CheckedChanged -= ValueChanged;
             tb_Transparency.TextChanged -= tb_Transparency_TextChanged;
             traceBar_Transparency.Scroll -= traceBar_Transparency_Scroll;
-
+            cb_FillPattern.SelectedIndexChanged -= ValueChanged;
+            //赋值
+            cb_FillPattern.DisplayMember = "Name";
+            cb_FillPattern.ValueMember = "Id";
+            cb_FillPattern.DataSource = GetFillPatterns(form.m_Doc);
             cb_IsVisible.Checked = CPSettings.IsVisible;
             cb_IsSurfaceVisible.Checked = CPSettings.IsSurfaceVisible;
             cb_IsHalftone.Checked = CPSettings.IsHalftone;
@@ -43,9 +59,13 @@ namespace MyRevit.EarthWork.UI
             cb_IsHalftone.CheckedChanged += ValueChanged;
             tb_Transparency.TextChanged += tb_Transparency_TextChanged;
             traceBar_Transparency.Scroll += traceBar_Transparency_Scroll;
+            cb_FillPattern.SelectedIndexChanged += ValueChanged;
         }
-
-        private void RenderColorButton(Color color)
+        /// <summary>
+        /// 将选中颜色的内容渲染到按钮上
+        /// </summary>
+        /// <param name="color"></param>
+        private void RenderColorButton(System.Drawing.Color color)
         {
             int width = 18;
             var height = width;
@@ -55,7 +75,6 @@ namespace MyRevit.EarthWork.UI
             btn_Color.Image = image;
             btn_Color.Text = $"   RGB {color.R}-{color.G}-{color.B}";
         }
-
         /// <summary>
         /// 确定
         /// </summary>
@@ -64,7 +83,7 @@ namespace MyRevit.EarthWork.UI
         private void btn_Submit_Click(object sender, EventArgs e)
         {
             if (btn_Apply.Enabled)
-                btn_Apply_Click(sender, e);
+                CPSettings.Commit(Mainform);
             this.Close();
         }
         /// <summary>
@@ -84,7 +103,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_Apply_Click(object sender, EventArgs e)
         {
-            CPSettings.Commit(Mainform);
+            CPSettings.Preview(Mainform);
             btn_Apply.Enabled = false;
         }
         /// <summary>
@@ -153,6 +172,7 @@ namespace MyRevit.EarthWork.UI
             CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
             CPSettings.IsHalftone = cb_IsHalftone.Checked;
             CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
+            CPSettings.FillerId = ((ElementId)cb_FillPattern.SelectedValue).IntegerValue;
             btn_Apply.Enabled = CPSettings.IsChanged;
         }
     }

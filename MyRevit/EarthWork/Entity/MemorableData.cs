@@ -12,6 +12,7 @@
             Memo = Clone();
             MemoHashCode = Memo.GetHashCode();
         }
+        public abstract void Preview(TStorage storage);
         public abstract void Commit(TStorage storage);
         public abstract void Rollback();
     }
