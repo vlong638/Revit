@@ -52,6 +52,7 @@ namespace MyRevit.EarthWork.UI
             //dgv_Blocks
             dgv_Blocks.AutoGenerateColumns = false;
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
+            Node_Name.Tag = nameof(EarthworkBlock.Name);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
             var blockingStr = "";
@@ -98,7 +99,6 @@ namespace MyRevit.EarthWork.UI
             DateTimePicker.Format = DateTimePickerFormat.Custom;
             DateTimePicker.CustomFormat = "yyyy/MM/dd HH:mm";
             DateTimePicker.LostFocus += DateTimePicker_LostFocus;
-            DateTimePicker.TextChanged += DateTimePicker_TextChanged;
             dgv_ImplementationInfo.Controls.Add(DateTimePicker);
         }
         DateTimePicker DateTimePicker;
@@ -464,9 +464,30 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void dgv_Blocks_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            //TODO 变更检测
-            //TODO 名称更改影响ConstructionInfo
+            DataGridViewTextBoxColumn textbox = dgv_Blocks.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+            if (textbox != null && textbox.Tag.ToString() == nameof(EarthworkBlock.Name))
+            {
+                var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
+                if (data.ImplementationInfo.IsSettled&& PreName!=data.Name)
+                    data.ImplementationInfo.IsConflicted = true;
+            }
             ValueChanged(sender, e);
+        }
+        public string PreName = "";
+        /// <summary>
+        /// 列表开始编辑
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgv_Blocks_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            DataGridViewTextBoxColumn textbox = dgv_Blocks.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+            if (textbox != null && textbox.Tag.ToString() == nameof(EarthworkBlock.Name))
+            {
+                var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
+                if (data.ImplementationInfo.IsSettled)
+                    PreName = data.Name;
+            }
         }
         //TODO 存在更改时,关闭时提示保存
         bool IsChanged = false;
@@ -542,6 +563,7 @@ namespace MyRevit.EarthWork.UI
                 lbl_Uncompleted.Hide();
                 btn_Completed.Hide();
                 btn_Uncompleted.Hide();
+                btn_ViewGt6.Hide();
 
                 //btn_Preview.Show();
                 //btn_Commit.Show();
@@ -550,16 +572,6 @@ namespace MyRevit.EarthWork.UI
             }
             else
             {
-                ////打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
-                //dgv_ImplementationInfo.DataSource = null;
-                //var implementationInfos = Blocking.GetBlockingImplementationInfos();
-                //dgv_ImplementationInfo.DataSource = implementationInfos;
-                ////TODO 分段内容有变动 高亮or...
-                //if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
-                //{
-                //    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
-                //}
-
                 if (string.IsNullOrEmpty(btn_SortByDate.Text))
                     btn_SortByDate.Text = SortAll;
                 btn_SortByDate_TextChanged(null, null);//打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
@@ -570,6 +582,7 @@ namespace MyRevit.EarthWork.UI
                 lbl_Uncompleted.Show();
                 btn_Completed.Show();
                 btn_Uncompleted.Show();
+                btn_ViewGt6.Show();
 
                 //btn_Preview.Show();
                 //btn_Commit.Show();
@@ -682,6 +695,16 @@ namespace MyRevit.EarthWork.UI
             DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
             if (textbox != null) //如果该列是TextBox列
             {
+                //冲被编突辑认为已被受理,则解除冲突
+                var data = dgv_ImplementationInfo.Rows[e.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo;
+                if (data.IsConflicted)
+                {
+                    data.IsConflicted = false;
+                    foreach (DataGridViewCell cell in dgv_ImplementationInfo.Rows[e.RowIndex].Cells)
+                    {
+                        cell.Style.BackColor = System.Drawing.Color.White;
+                    }
+                }
                 if (textbox.Tag != null && textbox.Tag.ToString() == nameof(DateTime))
                 {
                     if (dgv_ImplementationInfo.Rows.Count != 0)
@@ -699,80 +722,6 @@ namespace MyRevit.EarthWork.UI
             }
         }
         DataGridViewCellCancelEventArgs DataGridViewCellCancelEventArgs;
-        ///// <summary>
-        ///// 双击
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //private void dgv_ConstructionInfo_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        //{
-        //    int CIndex = e.ColumnIndex;
-        //    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-        //    {
-        //        DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
-        //        if (textbox != null) //如果该列是TextBox列
-        //        {
-
-        //            if (textbox.Tag.ToString() == nameof(DateTime))
-        //            {
-        //                if (dgv_ImplementationInfo.Rows.Count != 0)
-        //                {
-        //                    DataGridViewCellEventArgs = null;
-        //                    var text = dgv_ImplementationInfo[e.ColumnIndex, e.RowIndex].Value.ToString();
-        //                    DateTimePicker.Value = string.IsNullOrEmpty(text) ? DateTime.Now : DateTime.Parse(text);
-        //                    DataGridViewCellEventArgs = e;
-        //                    var rectangle = dgv_ImplementationInfo.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
-        //                    DateTimePicker.Size = new Size(rectangle.Width, rectangle.Height);
-        //                    DateTimePicker.Location = new System.Drawing.Point(rectangle.X, rectangle.Y);
-        //                    DateTimePicker.Show();
-        //                }
-        //            }
-        //            else
-        //            {
-        //                dgv_ImplementationInfo.BeginEdit(true); //开始编辑状态
-        //            }
-
-        //            //CellLocation = new List<int>();
-        //            //if (textbox.Tag.ToString() == nameof(DateTime))
-        //            //{
-        //            //    CellLocation.Add(e.RowIndex);
-        //            //    CellLocation.Add(e.ColumnIndex);
-        //            //    //TODO 日期的编辑处理
-
-        //            //    if (IsDateTimePickerFocused)
-        //            //    {
-        //            //        IsDateTimePickerFocused = false;
-        //            //    }
-        //            //    else
-        //            //    {
-        //            //        //var btnLocation = dgv_ImplementationInfo.Rows[CellLocation[0]].Cells[CellLocation[1]] as DataGridViewTextBoxColumn;
-        //            //        //DatePicker.Location = new System.Drawing.Point(btnLocation.X - (DatePicker.Width - btn_SortByDate.Width) / 2, btnLocation.Y + 24);
-        //            //        //DatePicker.Show();
-        //            //        //DatePicker.BringToFront();
-        //            //        //DatePicker.Focus();
-        //            //        //IsDateTimePickerFocused = true;
-        //            //    }
-        //            //}
-        //        }
-        //    }
-        //}
-        /// <summary>
-        /// 文本变更事件,检测日期限制,总是将DateTimePicker的内容更新到Cell
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DateTimePicker_TextChanged(object sender, EventArgs e)
-        {
-            //if (DataGridViewCellEventArgs != null)
-            //{
-            //    if (DateTimePicker.Value < DateTime.Now)
-            //    {
-            //        MessageBox.Show("设置的时间必须大于当前时间");
-            //        return;
-            //    }
-            //    dgv_ImplementationInfo[DataGridViewCellEventArgs.ColumnIndex, DataGridViewCellEventArgs.RowIndex].Value = DateTimePicker.Value;
-            //}
-        }
         /// <summary>
         /// DateTimePicker失去焦点,认为此时完成编辑,隐藏控件,并退出编辑模式
         /// </summary>
@@ -858,23 +807,33 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_SortByDate_TextChanged(object sender, EventArgs e)
         {
-            ////TODO 分段内容有变动 高亮or...
-            //if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
-            //{
-            //    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
-            //}
+            List<EarthworkBlockImplementationInfo> infos = null;
             if (btn_SortByDate.Text == SortAll)
             {
                 dgv_ImplementationInfo.DataSource = null;
                 if (Blocking.Blocks.Count > 0)
-                    dgv_ImplementationInfo.DataSource = Blocking.GetBlockingImplementationInfos();
+                    infos = Blocking.GetBlockingImplementationInfos();
             }
             else
             {
                 var date = DateTime.Parse(btn_SortByDate.Text);
                 dgv_ImplementationInfo.DataSource = null;
                 if (Blocking.Blocks.Count > 0)
-                    dgv_ImplementationInfo.DataSource = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date);
+                    infos = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date).ToList();
+            }
+            dgv_ImplementationInfo.DataSource = null;
+            if (infos.Count() > 0)
+            {
+                dgv_ImplementationInfo.DataSource = infos;
+                var conflicts = infos.Where(c => c.IsConflicted == true);
+                foreach (var conflict in conflicts)
+                {
+                    var index= infos.IndexOf(conflict);
+                    foreach (DataGridViewCell cell in dgv_ImplementationInfo.Rows[index].Cells)
+                    {
+                        cell.Style.BackColor = System.Drawing.Color.Red;//将冲突行置为红色显示
+                    }
+                }
             }
         }
         bool IsDatePickerFocused { get; set; }
@@ -891,9 +850,6 @@ namespace MyRevit.EarthWork.UI
                 this.Focus();
             }
         }
-
-
-
         #endregion
     }
 }

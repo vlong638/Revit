@@ -233,6 +233,13 @@ namespace MyRevit.EarthWork.Entity
             Indexer++;
             return block;
         }
+        public void SetNameForBlockingImplementationInfos()
+        {
+            foreach (var Block in Blocks)
+            {
+                Block.ImplementationInfo.Name = Block.Name;
+            }
+        }
         public List<EarthworkBlockImplementationInfo> GetBlockingImplementationInfos()
         {
             var result = new List<EarthworkBlockImplementationInfo>();
@@ -240,6 +247,12 @@ namespace MyRevit.EarthWork.Entity
             {
                 if (Block.ImplementationInfo.Name == null)
                     Block.ImplementationInfo.Name = Block.Name;
+                if (Block.ImplementationInfo.Name != Block.Name)
+                {
+                    Block.ImplementationInfo.Name = Block.Name;
+                    if (Block.ImplementationInfo.IsSettled)
+                        Block.ImplementationInfo.IsConflicted = true;
+                }
                 result.Add(Block.ImplementationInfo);
             }
             return result;
@@ -282,14 +295,14 @@ namespace MyRevit.EarthWork.Entity
         {
             add(index + 1, block);
         }
-        public void UpdateBlockName(int index, string name)
-        {
-            Blocks[index].Name = name;
-            if (Blocks[index].ImplementationInfo.IsSettled)
-            {
-                Blocks[index].ImplementationInfo.Unsettle();
-            }
-        }
+        //public void UpdateBlockName(int index, string name)
+        //{
+        //    Blocks[index].Name = name;
+        //    if (Blocks[index].ImplementationInfo.IsSettled)
+        //    {
+        //        Blocks[index].ImplementationInfo.Unsettle();
+        //    }
+        //}
         public override void Commit(EarthworkBlockingForm storage)
         {
             BlockIdIndexMapper = new Dictionary<int, int>();

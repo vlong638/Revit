@@ -68,6 +68,7 @@
             this.lbl_Uncompleted = new System.Windows.Forms.Label();
             this.btn_Uncompleted = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.btn_ViewGt6 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -275,6 +276,7 @@
             this.dgv_Blocks.RowTemplate.Height = 23;
             this.dgv_Blocks.Size = new System.Drawing.Size(443, 325);
             this.dgv_Blocks.TabIndex = 0;
+            this.dgv_Blocks.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgv_Blocks_CellBeginEdit);
             this.dgv_Blocks.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellClick);
             this.dgv_Blocks.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellDoubleClick);
             this.dgv_Blocks.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Blocks_CellEndEdit);
@@ -444,11 +446,21 @@
             this.btn_Uncompleted.UseVisualStyleBackColor = true;
             this.btn_Uncompleted.Click += new System.EventHandler(this.btn_Uncompleted_Click);
             // 
+            // btn_ViewGt6
+            // 
+            this.btn_ViewGt6.Location = new System.Drawing.Point(310, 372);
+            this.btn_ViewGt6.Name = "btn_ViewGt6";
+            this.btn_ViewGt6.Size = new System.Drawing.Size(66, 23);
+            this.btn_ViewGt6.TabIndex = 12;
+            this.btn_ViewGt6.Text = "查看(>6)";
+            this.btn_ViewGt6.UseVisualStyleBackColor = true;
+            // 
             // EarthworkBlockingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(611, 399);
+            this.Controls.Add(this.btn_ViewGt6);
             this.Controls.Add(this.btn_Uncompleted);
             this.Controls.Add(this.lbl_Uncompleted);
             this.Controls.Add(this.btn_Completed);
@@ -519,5 +531,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_StartTime;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_ExposureTime;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConstructionNode_EndTime;
+        private System.Windows.Forms.Button btn_ViewGt6;
     }
 }

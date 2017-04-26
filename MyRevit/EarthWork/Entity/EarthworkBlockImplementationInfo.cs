@@ -75,15 +75,6 @@ namespace MyRevit.EarthWork.Entity
         public bool IsConflicted { set; get; }
         public System.Drawing.Color ColorForUnsettled { set; get; }
         public System.Drawing.Color ColorForSettled { set; get; }
-        /// <summary>
-        /// 已完成的节点更改节点名称后
-        /// </summary>
-        public void Unsettle()
-        {
-            //TODO 节点名称变更后
-            //当前面土方分块节点重命名或有增减后，用户再次打开此界面则提示“分段内容有变动，请修改相应工期设置”
-            throw new NotImplementedException();
-        }
         public void Preview()
         {
             //TODO 预览
