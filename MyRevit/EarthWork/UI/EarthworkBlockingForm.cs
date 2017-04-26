@@ -68,10 +68,10 @@ namespace MyRevit.EarthWork.UI
             dgv_ImplementationInfo.AutoGenerateColumns = false;
             ConstructionNode_Name.DataPropertyName = nameof(EarthworkBlockImplementationInfo.Name);
             ConstructionNode_Name.ReadOnly = true;
-            ConstructionNode_StartTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.StartTime);
+            ConstructionNode_StartTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.StartTimeStr);
             ConstructionNode_StartTime.Tag = nameof(DateTime);
             ConstructionNode_ExposureTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.ExposureTime);
-            ConstructionNode_EndTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.EndTime);
+            ConstructionNode_EndTime.DataPropertyName = nameof(EarthworkBlockImplementationInfo.EndTimeStr);
             ConstructionNode_EndTime.Tag = nameof(DateTime);
             //初始化按钮
             ToolTip tip = new ToolTip();
@@ -81,11 +81,28 @@ namespace MyRevit.EarthWork.UI
             tip.SetToolTip(btn_DownNode, "下移节点");
             tip.SetToolTip(btn_AddElement, "新增构件");
             tip.SetToolTip(btn_DeleteElement, "删除构件");
+            //DatePicker
+            DatePicker = new DateTimePicker();
+            DatePicker.Parent = this;
+            DatePicker.Width = 100;
+            DatePicker.Format = DateTimePickerFormat.Custom;
+            DatePicker.CustomFormat = "yyyy/MM/dd";
+            DatePicker.ShowCheckBox = true;
+            DatePicker.Hide();
+            DatePicker.LostFocus += DatePicker_LostFocus;
+            DatePicker.TextChanged += DatePicker_TextChanged;
             //DateTimePicker
-            dtp.Hide();
-            dtp.Format = DateTimePickerFormat.Custom;
-            dtp.CustomFormat = "yyyy/MM/dd HH:mm:ss";
+            DateTimePicker = new DateTimePicker();
+            DatePicker.Parent = this;
+            DateTimePicker.Hide();
+            DateTimePicker.Format = DateTimePickerFormat.Custom;
+            DateTimePicker.CustomFormat = "yyyy/MM/dd HH:mm";
+            DateTimePicker.LostFocus += DateTimePicker_LostFocus;
+            DateTimePicker.TextChanged += DateTimePicker_TextChanged;
+            dgv_ImplementationInfo.Controls.Add(DateTimePicker);
         }
+        DateTimePicker DateTimePicker;
+        DateTimePicker DatePicker;
         #endregion
 
         #region 模态,元素选取
@@ -519,7 +536,7 @@ namespace MyRevit.EarthWork.UI
             if (tabControl1.SelectedIndex == 0)
             {
                 lable_OrderByTime.Hide();
-                btn_OrderByTime.Hide();
+                btn_SortByDate.Hide();
                 lbl_BlockingColor.Hide();
                 lbl_Completed.Hide();
                 lbl_Uncompleted.Hide();
@@ -533,18 +550,21 @@ namespace MyRevit.EarthWork.UI
             }
             else
             {
-                //打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
-                dgv_ImplementationInfo.DataSource = null;
-                var implementationInfos = Blocking.GetBlockingImplementationInfos();
-                dgv_ImplementationInfo.DataSource = implementationInfos;
-                //TODO 分段内容有变动 高亮or...
-                if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
-                {
-                    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
-                }
+                ////打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
+                //dgv_ImplementationInfo.DataSource = null;
+                //var implementationInfos = Blocking.GetBlockingImplementationInfos();
+                //dgv_ImplementationInfo.DataSource = implementationInfos;
+                ////TODO 分段内容有变动 高亮or...
+                //if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
+                //{
+                //    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
+                //}
 
+                if (string.IsNullOrEmpty(btn_SortByDate.Text))
+                    btn_SortByDate.Text = SortAll;
+                btn_SortByDate_TextChanged(null, null);//打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
                 lable_OrderByTime.Show();
-                btn_OrderByTime.Show();
+                btn_SortByDate.Show();
                 lbl_BlockingColor.Show();
                 lbl_Completed.Show();
                 lbl_Uncompleted.Show();
@@ -572,6 +592,11 @@ namespace MyRevit.EarthWork.UI
                 , this.dgv_Blocks.DefaultCellStyle.Font, b, e.RowBounds.Location.X + 20, e.RowBounds.Location.Y + 4);
         }
         public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
+        /// <summary>
+        /// 选中项变更
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgv_ImplementationInfo_SelectionChanged(object sender, EventArgs e)
         {
             var cell = dgv_ImplementationInfo.CurrentCell;
@@ -582,6 +607,11 @@ namespace MyRevit.EarthWork.UI
                 RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
             }
         }
+        /// <summary>
+        /// 渲染选中颜色到按钮
+        /// </summary>
+        /// <param name="button"></param>
+        /// <param name="color"></param>
         private void RenderColorButton(Button button, System.Drawing.Color color)
         {
             int width = button.Width;
@@ -591,8 +621,16 @@ namespace MyRevit.EarthWork.UI
             graphics.FillRectangle(new SolidBrush(color), new System.Drawing.Rectangle(0, 0, width, height));
             button.Image = image;
         }
+        /// <summary>
+        /// 设置"已完工"颜色
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_Completed_Click(object sender, EventArgs e)
         {
+            if (dgv_ImplementationInfo.Rows.Count == 0)
+                return;
+
             //禁止使用自定义颜色  
             colorDialog1.AllowFullOpen = false;
             //提供自己给定的颜色  
@@ -608,8 +646,16 @@ namespace MyRevit.EarthWork.UI
                 }
             }
         }
+        /// <summary>
+        /// 设置"未完工"颜色
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_Uncompleted_Click(object sender, EventArgs e)
         {
+            if (dgv_ImplementationInfo.Rows.Count == 0)
+                return;
+
             //禁止使用自定义颜色  
             colorDialog1.AllowFullOpen = false;
             //提供自己给定的颜色  
@@ -626,31 +672,228 @@ namespace MyRevit.EarthWork.UI
             }
         }
         public List<int> CellLocation;
-        private void dgv_ConstructionInfo_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        /// <summary>
+        /// 进入编辑状态
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgv_ImplementationInfo_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-            int CIndex = e.ColumnIndex;
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+            if (textbox != null) //如果该列是TextBox列
             {
-                DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
-                if (textbox != null) //如果该列是TextBox列
+                if (textbox.Tag != null && textbox.Tag.ToString() == nameof(DateTime))
                 {
-                    CellLocation = new List<int>();
-                    if (textbox.Tag.ToString() == nameof(DateTime))
+                    if (dgv_ImplementationInfo.Rows.Count != 0)
                     {
-                        CellLocation.Add(e.RowIndex);
-                        CellLocation.Add(e.ColumnIndex);
-                        dtp.Show();
-                        //TODO 日期的编辑处理
+                        DataGridViewCellCancelEventArgs = null;
+                        var text = dgv_ImplementationInfo[e.ColumnIndex, e.RowIndex].Value.ToString();
+                        DateTimePicker.Value = string.IsNullOrEmpty(text) ? DateTime.Now : DateTime.Parse(text);
+                        DataGridViewCellCancelEventArgs = e;
+                        var rectangle = dgv_ImplementationInfo.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+                        DateTimePicker.Size = new Size(rectangle.Width, rectangle.Height);
+                        DateTimePicker.Location = new System.Drawing.Point(rectangle.X, rectangle.Y);
+                        DateTimePicker.Show();
                     }
-                    dgv_ImplementationInfo.BeginEdit(true); //开始编辑状态
                 }
             }
         }
+        DataGridViewCellCancelEventArgs DataGridViewCellCancelEventArgs;
+        ///// <summary>
+        ///// 双击
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //private void dgv_ConstructionInfo_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        //{
+        //    int CIndex = e.ColumnIndex;
+        //    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+        //    {
+        //        DataGridViewTextBoxColumn textbox = dgv_ImplementationInfo.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+        //        if (textbox != null) //如果该列是TextBox列
+        //        {
+
+        //            if (textbox.Tag.ToString() == nameof(DateTime))
+        //            {
+        //                if (dgv_ImplementationInfo.Rows.Count != 0)
+        //                {
+        //                    DataGridViewCellEventArgs = null;
+        //                    var text = dgv_ImplementationInfo[e.ColumnIndex, e.RowIndex].Value.ToString();
+        //                    DateTimePicker.Value = string.IsNullOrEmpty(text) ? DateTime.Now : DateTime.Parse(text);
+        //                    DataGridViewCellEventArgs = e;
+        //                    var rectangle = dgv_ImplementationInfo.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+        //                    DateTimePicker.Size = new Size(rectangle.Width, rectangle.Height);
+        //                    DateTimePicker.Location = new System.Drawing.Point(rectangle.X, rectangle.Y);
+        //                    DateTimePicker.Show();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                dgv_ImplementationInfo.BeginEdit(true); //开始编辑状态
+        //            }
+
+        //            //CellLocation = new List<int>();
+        //            //if (textbox.Tag.ToString() == nameof(DateTime))
+        //            //{
+        //            //    CellLocation.Add(e.RowIndex);
+        //            //    CellLocation.Add(e.ColumnIndex);
+        //            //    //TODO 日期的编辑处理
+
+        //            //    if (IsDateTimePickerFocused)
+        //            //    {
+        //            //        IsDateTimePickerFocused = false;
+        //            //    }
+        //            //    else
+        //            //    {
+        //            //        //var btnLocation = dgv_ImplementationInfo.Rows[CellLocation[0]].Cells[CellLocation[1]] as DataGridViewTextBoxColumn;
+        //            //        //DatePicker.Location = new System.Drawing.Point(btnLocation.X - (DatePicker.Width - btn_SortByDate.Width) / 2, btnLocation.Y + 24);
+        //            //        //DatePicker.Show();
+        //            //        //DatePicker.BringToFront();
+        //            //        //DatePicker.Focus();
+        //            //        //IsDateTimePickerFocused = true;
+        //            //    }
+        //            //}
+        //        }
+        //    }
+        //}
+        /// <summary>
+        /// 文本变更事件,检测日期限制,总是将DateTimePicker的内容更新到Cell
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DateTimePicker_TextChanged(object sender, EventArgs e)
+        {
+            //if (DataGridViewCellEventArgs != null)
+            //{
+            //    if (DateTimePicker.Value < DateTime.Now)
+            //    {
+            //        MessageBox.Show("设置的时间必须大于当前时间");
+            //        return;
+            //    }
+            //    dgv_ImplementationInfo[DataGridViewCellEventArgs.ColumnIndex, DataGridViewCellEventArgs.RowIndex].Value = DateTimePicker.Value;
+            //}
+        }
+        /// <summary>
+        /// DateTimePicker失去焦点,认为此时完成编辑,隐藏控件,并退出编辑模式
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DateTimePicker_LostFocus(object sender, EventArgs e)
+        {
+            if (DataGridViewCellCancelEventArgs != null)
+            {
+                if (DateTimePicker.Value < DateTime.Now)
+                {
+                    MessageBox.Show("设置的时间必须大于当前时间");
+                    return;
+                }
+                dgv_ImplementationInfo[DataGridViewCellCancelEventArgs.ColumnIndex, DataGridViewCellCancelEventArgs.RowIndex].Value = DateTimePicker.Value;
+            }
+            DateTimePicker.Hide();
+            dgv_ImplementationInfo.EndEdit();
+        }
+        /// <summary>
+        /// 退出编辑状态
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgv_ImplementationInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             //TODO发生变更检测
             ValueChanged(sender, e);
         }
+        /// <summary>
+        /// 根据时间过滤
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_SortByTime_Click(object sender, EventArgs e)
+        {
+            if (IsDatePickerFocused)
+            {
+                IsDatePickerFocused = false;
+            }
+            else
+            {
+                var btnLocation = btn_SortByDate.Location;
+                DatePicker.Location = new System.Drawing.Point(btnLocation.X - (DatePicker.Width - btn_SortByDate.Width) / 2, btnLocation.Y + 24);
+                DatePicker.Show();
+                DatePicker.BringToFront();
+                DatePicker.Focus();
+                IsDatePickerFocused = true;
+            }
+        }
+        /// <summary>
+        /// DatePicker失去焦点
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DatePicker_LostFocus(object sender, EventArgs e)
+        {
+            DatePicker_TextChanged(null, null);
+            DatePicker.Hide();
+
+        }
+        string SortAll = "全部";
+        /// <summary>
+        /// 文本改变
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DatePicker_TextChanged(object sender, EventArgs e)
+        {
+            if (DatePicker.Checked)
+            {
+                btn_SortByDate.Text = DatePicker.Text;
+            }
+            else
+            {
+                btn_SortByDate.Text = SortAll;
+            }
+        }
+        /// <summary>
+        /// 时间过滤_文本更新
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_SortByDate_TextChanged(object sender, EventArgs e)
+        {
+            ////TODO 分段内容有变动 高亮or...
+            //if (implementationInfos.FirstOrDefault(c => c.IsConflicted != false) != null)
+            //{
+            //    TaskDialog.Show("警告", "分段内容存在变动,变化部分已高亮显示");
+            //}
+            if (btn_SortByDate.Text == SortAll)
+            {
+                dgv_ImplementationInfo.DataSource = null;
+                if (Blocking.Blocks.Count > 0)
+                    dgv_ImplementationInfo.DataSource = Blocking.GetBlockingImplementationInfos();
+            }
+            else
+            {
+                var date = DateTime.Parse(btn_SortByDate.Text);
+                dgv_ImplementationInfo.DataSource = null;
+                if (Blocking.Blocks.Count > 0)
+                    dgv_ImplementationInfo.DataSource = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date);
+            }
+        }
+        bool IsDatePickerFocused { get; set; }
+        /// <summary>
+        /// Form的Click事件,主要用于DateTimePicker控件的焦点解除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EarthworkBlockingForm_Click(object sender, EventArgs e)
+        {
+            if (DatePicker.Focused)
+            {
+                var contained = DatePicker.Bounds.Contains((e as MouseEventArgs).X, (e as MouseEventArgs).Y);
+                this.Focus();
+            }
+        }
+
+
+
         #endregion
     }
 }

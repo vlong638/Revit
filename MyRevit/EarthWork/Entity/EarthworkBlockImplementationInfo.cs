@@ -18,7 +18,23 @@ namespace MyRevit.EarthWork.Entity
         /// <summary>
         /// 开始时间
         /// </summary>
-        public DateTime StartTime { set; get; }
+        public DateTime StartTime { set; get; } = DateTime.MinValue;
+        [JsonIgnore]
+        public string StartTimeStr
+        {
+            set
+            {
+                StartTime = DateTime.Parse(value);
+            }
+            get
+            {
+                if (StartTime == DateTime.MinValue)
+                {
+                    return "";
+                }
+                return StartTime.ToString("yyyy/MM/dd HH:mm");
+            }
+        }
         /// <summary>
         /// 无支撑暴露时间
         /// </summary>
@@ -26,7 +42,23 @@ namespace MyRevit.EarthWork.Entity
         /// <summary>
         /// 完成事件
         /// </summary>
-        public DateTime EndTime { set; get; }
+        public DateTime EndTime { set; get; } = DateTime.MinValue;
+        [JsonIgnore]
+        public string EndTimeStr
+        {
+            set
+            {
+                EndTime = DateTime.Parse(value);
+            }
+            get
+            {
+                if (EndTime == DateTime.MinValue)
+                {
+                    return "";
+                }
+                return EndTime.ToString("yyyy/MM/dd HH:mm");
+            }
+        }
         /// <summary>
         /// 已被完成
         /// </summary>

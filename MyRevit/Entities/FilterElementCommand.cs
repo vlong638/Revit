@@ -17,8 +17,10 @@ namespace MyRevit.Entities
             {
                 StringBuilder sb = new StringBuilder();
                 Document document = commandData.Application.ActiveUIDocument.Document;
-                //类型过滤器
+                //类型过滤器 快
                 ElementClassFilter classFilter = new ElementClassFilter(typeof(FamilyInstance));
+                //族实例过滤器 慢
+                FamilyInstanceFilter familyInstanceFilter = new FamilyInstanceFilter(document, new ElementId(1));
                 //内建类型过滤
                 ElementCategoryFilter categoryFilter = new ElementCategoryFilter(BuiltInCategory.OST_Doors);
                 //逻辑过滤器,组合前两者过滤
