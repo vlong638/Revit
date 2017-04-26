@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MyRevit.EarthWork.Entity;
+using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,6 +15,7 @@ namespace MyRevit.EarthWork.UI
         Idle,
         AddElements,
         DeleleElements,
+        View,
     }
 
     public partial class EarthworkBlockingForm : System.Windows.Forms.Form
@@ -43,6 +45,7 @@ namespace MyRevit.EarthWork.UI
             m_UIDoc = uiApp.ActiveUIDocument;
             m_Doc = m_UIDoc.Document;
             InitForm();
+            DisplayTab1Controls();
         }
         private void InitForm()
         {
@@ -82,6 +85,8 @@ namespace MyRevit.EarthWork.UI
             tip.SetToolTip(btn_DownNode, "下移节点");
             tip.SetToolTip(btn_AddElement, "新增构件");
             tip.SetToolTip(btn_DeleteElement, "删除构件");
+            tip.SetToolTip(btn_ViewGt6, "查看(无支撑暴露时间)>6被标红的视图");
+            tip.SetToolTip(btn_Preview, "查看按完工和未完工标注颜色的视图");
             //DatePicker
             DatePicker = new DateTimePicker();
             DatePicker.Parent = this;
@@ -100,7 +105,14 @@ namespace MyRevit.EarthWork.UI
             DateTimePicker.CustomFormat = "yyyy/MM/dd HH:mm";
             DateTimePicker.LostFocus += DateTimePicker_LostFocus;
             dgv_ImplementationInfo.Controls.Add(DateTimePicker);
+            this.FormClosing += EarthworkBlockingForm_FormClosing;
         }
+
+        private void EarthworkBlockingForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveDataGridViewSelection();
+        }
+
         DateTimePicker DateTimePicker;
         DateTimePicker DatePicker;
         #endregion
@@ -141,7 +153,7 @@ namespace MyRevit.EarthWork.UI
             if (dgv_Blocks.Rows.Count > 0)
                 dgv_Blocks.Rows[0].Selected = true;
 
-            tabControl1_SelectedIndexChanged(null, null);
+            //tabControl1_SelectedIndexChanged(null, null);
         }
         /// <summary>
         /// 首列序号
@@ -162,7 +174,8 @@ namespace MyRevit.EarthWork.UI
         private void dgv_Blocks_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int rIndex = e.RowIndex;
-            dgv_Blocks.Rows[rIndex].Selected = true;
+            if (rIndex != -1)
+                dgv_Blocks.Rows[rIndex].Selected = true;
         }
         /// <summary>
         /// 双击编辑
@@ -365,8 +378,8 @@ namespace MyRevit.EarthWork.UI
             ValueChanged(sender, e);
         }
         #region 构件变更
-        static List<int> SelectedRows = new List<int>();
-        static List<int> SelectedCell = new List<int>();
+        static List<int> SelectedRows { get; set; } = new List<int>();
+        static List<int> SelectedCell { get; set; } = new List<int>();
         /// <summary>
         /// 保存列表选中项,由于采用了模态形式,页面显示总是刷新掉选中项
         /// </summary>
@@ -408,6 +421,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_AddElement_Click(object sender, System.EventArgs e)
         {
+            m_UIDoc.ActiveView = Blocking.View3D;
             var rows = dgv_Blocks.SelectedRows;
             if (!IsSingleBlockSelected(rows))
             {
@@ -415,7 +429,7 @@ namespace MyRevit.EarthWork.UI
             }
             DialogResult = DialogResult.Retry;
             ShowDialogType = ShowDialogType.AddElements;
-            SaveDataGridViewSelection();
+            //SaveDataGridViewSelection();
             Close();
         }
         /// <summary>
@@ -425,6 +439,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_DeleteElement_Click(object sender, System.EventArgs e)
         {
+            m_UIDoc.ActiveView = Blocking.View3D;
             var rows = dgv_Blocks.SelectedRows;
             if (!IsSingleBlockSelected(rows))
             {
@@ -432,7 +447,7 @@ namespace MyRevit.EarthWork.UI
             }
             DialogResult = DialogResult.Retry;
             ShowDialogType = ShowDialogType.DeleleElements;
-            SaveDataGridViewSelection();
+            //SaveDataGridViewSelection();
             Close();
         }
         #endregion
@@ -468,7 +483,7 @@ namespace MyRevit.EarthWork.UI
             if (textbox != null && textbox.Tag.ToString() == nameof(EarthworkBlock.Name))
             {
                 var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
-                if (data.ImplementationInfo.IsSettled&& PreName!=data.Name)
+                if (data.ImplementationInfo.IsSettled && PreName != data.Name)
                 {
                     data.ImplementationInfo.IsConflicted = true;
                     Blocking.IsImplementationInfoConflicted = true;
@@ -520,22 +535,11 @@ namespace MyRevit.EarthWork.UI
             Blocking.Commit(this);
             DialogResult = DialogResult.OK;
             Close();
-        }
-        /// <summary>
-        /// 预览
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_Preview_Click(object sender, System.EventArgs e)
-        {
-            //TODO 预览 如果非当前视图,则打开默认视图
-            throw new NotImplementedException();
-        }
-        /// <summary>
-        /// 取消
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        }/// <summary>
+         /// 取消
+         /// </summary>
+         /// <param name="sender"></param>
+         /// <param name="e"></param>
         private void btn_Cancel_Click(object sender, System.EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
@@ -559,22 +563,17 @@ namespace MyRevit.EarthWork.UI
         {
             if (tabControl1.SelectedIndex == 0)
             {
-                lable_OrderByTime.Hide();
-                btn_SortByDate.Hide();
-                lbl_BlockingColor.Hide();
-                lbl_Completed.Hide();
-                lbl_Uncompleted.Hide();
-                btn_Completed.Hide();
-                btn_Uncompleted.Hide();
-                btn_ViewGt6.Hide();
+                LoadDataGridViewSelection();
 
-                //btn_Preview.Show();
+                DisplayTab1Controls();
                 //btn_Commit.Show();
                 //btn_Cancel.Show();
                 //btn_Save.Show();
             }
             else
             {
+                SaveDataGridViewSelection();
+
                 if (Blocking.IsImplementationInfoConflicted)
                 {
                     ShowMessage("警告", "分段内容有变动，请修改相应工期设置");
@@ -583,20 +582,38 @@ namespace MyRevit.EarthWork.UI
                 if (string.IsNullOrEmpty(btn_SortByDate.Text))
                     btn_SortByDate.Text = SortAll;
                 btn_SortByDate_TextChanged(null, null);//打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
-                lable_OrderByTime.Show();
-                btn_SortByDate.Show();
-                lbl_BlockingColor.Show();
-                lbl_Completed.Show();
-                lbl_Uncompleted.Show();
-                btn_Completed.Show();
-                btn_Uncompleted.Show();
-                btn_ViewGt6.Show();
 
-                //btn_Preview.Show();
+                DisplayTab2Controls();
                 //btn_Commit.Show();
                 //btn_Cancel.Show();
                 //btn_Save.Show();
             }
+        }
+
+        private void DisplayTab2Controls()
+        {
+            lable_OrderByTime.Show();
+            btn_SortByDate.Show();
+            lbl_BlockingColor.Show();
+            lbl_Completed.Show();
+            lbl_Uncompleted.Show();
+            btn_Completed.Show();
+            btn_Uncompleted.Show();
+            btn_ViewGt6.Show();
+            btn_Preview.Show();
+        }
+
+        private void DisplayTab1Controls()
+        {
+            lable_OrderByTime.Hide();
+            btn_SortByDate.Hide();
+            lbl_BlockingColor.Hide();
+            lbl_Completed.Hide();
+            lbl_Uncompleted.Hide();
+            btn_Completed.Hide();
+            btn_Uncompleted.Hide();
+            btn_ViewGt6.Hide();
+            btn_Preview.Hide();
         }
         #endregion
 
@@ -827,7 +844,7 @@ namespace MyRevit.EarthWork.UI
                 var date = DateTime.Parse(btn_SortByDate.Text);
                 dgv_ImplementationInfo.DataSource = null;
                 if (Blocking.Blocks.Count > 0)
-                    infos = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date).ToList();
+                    infos = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date || c.EndTime.Date == date.Date).ToList();
             }
             dgv_ImplementationInfo.DataSource = null;
             if (infos.Count() > 0)
@@ -836,7 +853,7 @@ namespace MyRevit.EarthWork.UI
                 var conflicts = infos.Where(c => c.IsConflicted == true);
                 foreach (var conflict in conflicts)
                 {
-                    var index= infos.IndexOf(conflict);
+                    var index = infos.IndexOf(conflict);
                     foreach (DataGridViewCell cell in dgv_ImplementationInfo.Rows[index].Cells)
                     {
                         cell.Style.BackColor = System.Drawing.Color.Red;//将冲突行置为红色显示
@@ -857,6 +874,128 @@ namespace MyRevit.EarthWork.UI
                 var contained = DatePicker.Bounds.Contains((e as MouseEventArgs).X, (e as MouseEventArgs).Y);
                 this.Focus();
             }
+        }
+        /// <summary>
+        /// 查看(无支撑暴露时间)>6被标红的视图
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewGt6_Click(object sender, EventArgs e)
+        {
+            //if (Blocking.Blocks.Count==0|| Blocking.Blocks.Where(c=>c.ElementIds.Count()>0).Count()==0)
+            //    return;
+
+            var doc = m_Doc;
+            string viewName = "ViewGt6";
+            var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
+            if (view == null)
+            {
+                using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_ViewGt6_Click)))
+                {
+                    transaction.Start();
+                    try
+                    {
+                        var viewFamilyType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).ToElements()
+                            .First(c => c.Name == "三维视图");
+                        view = View3D.CreateIsometric(doc, viewFamilyType.Id);
+                        view.Name = viewName;
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.RollBack();
+                        ShowMessage("消息", $"视图({viewName})新建失败,错误详情:" + ex.ToString());
+                    }
+                }
+            }
+            //// 渲染处理
+            using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_ViewGt6_Click)))
+            {
+                transaction.Start();
+                foreach (var block in Blocking.Blocks)
+                {
+                    OverrideGraphicSettings setting = new OverrideGraphicSettings();
+                    setting.SetProjectionFillPatternId(EarthworkBlockCPSettings.GetDefaultFillPatternId(doc));
+                    if (block.ImplementationInfo.ExposureTime > 6)
+                    {
+                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(255, 0, 0));
+                    }
+                    foreach (var elementId in block.ElementIds)
+                    {
+                        view.SetElementOverrides(elementId, setting);
+                    }
+                }
+                transaction.Commit();
+            }
+            m_UIDoc.ActiveView = view;
+            ShowDialogType = ShowDialogType.View;
+            DialogResult = DialogResult.Retry;
+            //SaveDataGridViewSelection();
+            this.Close();
+            //ShowMessage("消息", $"三维视图({viewName})更新成功");
+        }
+        /// <summary>
+        /// 查看按完工和未完工标注颜色的视图
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Preview_Click(object sender, System.EventArgs e)
+        {
+            //if (Blocking.Blocks.Count == 0 || Blocking.Blocks.Where(c => c.ElementIds.Count() > 0).Count() == 0)
+            //    return;
+
+            var doc = m_Doc;
+            string viewName = "ViewCompletion";
+            var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
+            if (view == null)
+            {
+                using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))
+                {
+                    transaction.Start();
+                    try
+                    {
+                        var viewFamilyType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).ToElements()
+                            .First(c => c.Name == "三维视图");
+                        view = View3D.CreateIsometric(doc, viewFamilyType.Id);
+                        view.Name = viewName;
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.RollBack();
+                        ShowMessage("消息", $"视图({viewName})新建失败,错误详情:" + ex.ToString());
+                    }
+                }
+            }
+            // 渲染处理
+            using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))
+            {
+                transaction.Start();
+                foreach (var block in Blocking.Blocks)
+                {
+                    OverrideGraphicSettings setting = new OverrideGraphicSettings();
+                    setting.SetProjectionFillPatternId(EarthworkBlockCPSettings.GetDefaultFillPatternId(doc));
+                    if (block.ImplementationInfo.IsSettled)
+                    {
+                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForSettled.R, block.ImplementationInfo.ColorForSettled.G, block.ImplementationInfo.ColorForSettled.B));
+                    }
+                    else
+                    {
+                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForUnsettled.R, block.ImplementationInfo.ColorForUnsettled.G, block.ImplementationInfo.ColorForUnsettled.B));
+                    }
+                    foreach (var elementId in block.ElementIds)
+                    {
+                        view.SetElementOverrides(elementId, setting);
+                    }
+                }
+                transaction.Commit();
+            }
+            m_UIDoc.ActiveView = view;
+            ShowDialogType = ShowDialogType.View;
+            DialogResult = DialogResult.Retry;
+            //SaveDataGridViewSelection();
+            this.Close();
+            //ShowMessage("消息", $"三维视图({viewName})更新成功");
         }
         #endregion
     }

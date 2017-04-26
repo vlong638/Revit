@@ -131,8 +131,8 @@ namespace MyRevit.EarthWork.Entity
                 transaction.Commit();
             }
         }
-        static ElementId _DefaultFillPatternId = null;
-        static ElementId GetDefaultFillPatternId(Document doc)
+        public static ElementId _DefaultFillPatternId = null;
+        public static ElementId GetDefaultFillPatternId(Document doc)
         {
             if (_DefaultFillPatternId != null)
                 return _DefaultFillPatternId;

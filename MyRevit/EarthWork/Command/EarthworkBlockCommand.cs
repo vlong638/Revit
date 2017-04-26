@@ -60,22 +60,38 @@ namespace MyRevit.EarthWork.Command
             DialogResult result = DialogResult.Retry;
             while ((result = Form.ShowDialog(new RevitHandle(Process.GetCurrentProcess().MainWindowHandle))) == DialogResult.Retry)
             {
-                try
-                {
-                    mouseHook.InstallHook();
-                    Form.SelectedElementIds= m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
-                        .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
-                    mouseHook.UninstallHook();
-                }
-                catch
-                {
-                    mouseHook.UninstallHook();
-                }
-                Form.FinishElementSelection();
-                if (result==DialogResult.Cancel)
+                if (result == DialogResult.Cancel)
                     return false;
                 if (result == DialogResult.OK)
-                    return true ;
+                    return true;
+                if (Form.ShowDialogType==ShowDialogType.AddElements|| Form.ShowDialogType == ShowDialogType.DeleleElements)
+                {
+                    try
+                    {
+                        mouseHook.InstallHook();
+                        Form.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                            .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                        mouseHook.UninstallHook();
+                    }
+                    catch
+                    {
+                        mouseHook.UninstallHook();
+                    }
+                    Form.FinishElementSelection();
+                }
+                if (Form.ShowDialogType==ShowDialogType.View)
+                {
+                    try
+                    {
+                        mouseHook.InstallHook();
+                        m_uiDoc.Selection.PickObjects(ObjectType.Element, "");
+                        mouseHook.UninstallHook();
+                    }
+                    catch
+                    {
+                        mouseHook.UninstallHook();
+                    }
+                }
             }
             return true;
 

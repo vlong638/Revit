@@ -352,7 +352,7 @@
             this.btn_Preview.Name = "btn_Preview";
             this.btn_Preview.Size = new System.Drawing.Size(66, 23);
             this.btn_Preview.TabIndex = 1;
-            this.btn_Preview.Text = "预览";
+            this.btn_Preview.Text = "查看";
             this.btn_Preview.UseVisualStyleBackColor = true;
             this.btn_Preview.Click += new System.EventHandler(this.btn_Preview_Click);
             // 
@@ -454,6 +454,7 @@
             this.btn_ViewGt6.TabIndex = 12;
             this.btn_ViewGt6.Text = "查看(>6)";
             this.btn_ViewGt6.UseVisualStyleBackColor = true;
+            this.btn_ViewGt6.Click += new System.EventHandler(this.btn_ViewGt6_Click);
             // 
             // EarthworkBlockingForm
             // 
