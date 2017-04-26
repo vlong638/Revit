@@ -108,6 +108,8 @@ namespace MyRevit.EarthWork.Entity
         {
             return Blocks.Count();
         }
+        [JsonProperty]
+        public bool IsImplementationInfoConflicted { get; set; }
         #endregion
 
         #region DocRelatedInfo

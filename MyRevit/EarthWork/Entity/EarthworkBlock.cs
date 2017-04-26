@@ -28,9 +28,9 @@ namespace MyRevit.EarthWork.Entity
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        [JsonIgnore]//TODO InitByDocument()中根据Document初始化
+        [JsonIgnore]//InitByDocument()中根据Document初始化
         public EarthworkBlockCPSettings CPSettings { set; get; }
-        //[JsonIgnore]//TODO InitByDocument()中根据Document初始化
+        //[JsonIgnore]//InitByDocument()中根据Document初始化
         public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
         public List<int> ElementIdValues { get; set; } = new List<int>();
         [JsonIgnore]//InitByDocument()中根据Document初始化
@@ -57,6 +57,7 @@ namespace MyRevit.EarthWork.Entity
             sb.Append(ImplementationInfo.StartTime);
             sb.Append(ImplementationInfo.ExposureTime);
             sb.Append(ImplementationInfo.EndTime);
+            sb.Append(ImplementationInfo.IsConflicted);
             return sb.ToString().GetHashCode();
         }
         public override void Commit(EarthworkBlockingForm storage)

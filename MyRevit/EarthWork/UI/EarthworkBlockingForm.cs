@@ -469,7 +469,10 @@ namespace MyRevit.EarthWork.UI
             {
                 var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
                 if (data.ImplementationInfo.IsSettled&& PreName!=data.Name)
+                {
                     data.ImplementationInfo.IsConflicted = true;
+                    Blocking.IsImplementationInfoConflicted = true;
+                }
             }
             ValueChanged(sender, e);
         }
@@ -572,6 +575,11 @@ namespace MyRevit.EarthWork.UI
             }
             else
             {
+                if (Blocking.IsImplementationInfoConflicted)
+                {
+                    ShowMessage("警告", "分段内容有变动，请修改相应工期设置");
+                    Blocking.IsImplementationInfoConflicted = false;
+                }
                 if (string.IsNullOrEmpty(btn_SortByDate.Text))
                     btn_SortByDate.Text = SortAll;
                 btn_SortByDate_TextChanged(null, null);//打开"实际施工节点信息管理".加载对应的窗体信息,因为dgv_实际施工节点信息管理总是受dgv_土方分块影响
@@ -731,7 +739,7 @@ namespace MyRevit.EarthWork.UI
         {
             if (DataGridViewCellCancelEventArgs != null)
             {
-                if (DateTimePicker.Value < DateTime.Now)
+                if (DateTimePicker.Value < DateTime.Now.AddMinutes(-1))
                 {
                     MessageBox.Show("设置的时间必须大于当前时间");
                     return;
