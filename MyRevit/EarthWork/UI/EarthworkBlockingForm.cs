@@ -15,7 +15,8 @@ namespace MyRevit.EarthWork.UI
         Idle,
         AddElements,
         DeleleElements,
-        View,
+        ViewGT6,
+        ViewCompletion,
     }
 
     public partial class EarthworkBlockingForm : System.Windows.Forms.Form
@@ -132,13 +133,19 @@ namespace MyRevit.EarthWork.UI
                 case ShowDialogType.DeleleElements:
                     if (SelectedElementIds != null)
                         Block.Delete(Blocking, SelectedElementIds);
+                    using (var transaction = new Transaction(m_Doc, "EarthworkBlocking." + nameof(FinishElementSelection)))
+                    {
+                        transaction.Start();
+                        m_UIDoc.ActiveView.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);//解除隔离显示
+                        transaction.Commit();
+                    }
                     ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
                     break;
             }
             ValueChanged(null, null);
-            ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
+            //ShowMessage("添加节点结束", $"节点:{Block.Name}现有:{Block.ElementIds.Count()}个元素");
         }
         #endregion
 
@@ -444,6 +451,12 @@ namespace MyRevit.EarthWork.UI
             if (!IsSingleBlockSelected(rows))
             {
                 return;
+            }
+            using (var transaction = new Transaction(m_Doc, "EarthworkBlocking." + nameof(btn_DeleteElement_Click)))
+            {
+                transaction.Start();
+                m_UIDoc.ActiveView.IsolateElementsTemporary(Block.ElementIds);//隔离显示
+                transaction.Commit();
             }
             DialogResult = DialogResult.Retry;
             ShowDialogType = ShowDialogType.DeleleElements;
@@ -756,9 +769,21 @@ namespace MyRevit.EarthWork.UI
         {
             if (DataGridViewCellCancelEventArgs != null)
             {
-                if (DateTimePicker.Value < DateTime.Now.AddMinutes(-1))
+                if (DateTimePicker.Value > DateTime.Now.AddMinutes(1))
                 {
-                    MessageBox.Show("设置的时间必须大于当前时间");
+                    MessageBox.Show("限制输入晚于系统的时间");
+                    return;
+                }
+                if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName == nameof(EarthworkBlockImplementationInfo.StartTimeStr)
+                    && DateTimePicker.Value > (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).EndTime)
+                {
+                    MessageBox.Show("开始时间不可晚于结束时间");
+                    return;
+                }
+                if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName==nameof(EarthworkBlockImplementationInfo.EndTimeStr)
+                    && DateTimePicker.Value< (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).StartTime)
+                {
+                    MessageBox.Show("结束时间不可早于开始时间");
                     return;
                 }
                 dgv_ImplementationInfo[DataGridViewCellCancelEventArgs.ColumnIndex, DataGridViewCellCancelEventArgs.RowIndex].Value = DateTimePicker.Value;
@@ -912,6 +937,10 @@ namespace MyRevit.EarthWork.UI
             using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_ViewGt6_Click)))
             {
                 transaction.Start();
+                //var instances = new FilteredElementCollector(doc).WherePasses(new ElementIsElementTypeFilter(true)).ToElements();
+                //var defaultSettings = new OverrideGraphicSettings();
+                //defaultSettings.SetSurfaceTransparency(50);
+                //SetAllCategories(view, defaultSettings);
                 foreach (var block in Blocking.Blocks)
                 {
                     OverrideGraphicSettings setting = new OverrideGraphicSettings();
@@ -919,6 +948,10 @@ namespace MyRevit.EarthWork.UI
                     if (block.ImplementationInfo.ExposureTime > 6)
                     {
                         setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(255, 0, 0));
+                    }
+                    else
+                    {
+                        setting.SetSurfaceTransparency(50);//<6的提升透明度
                     }
                     foreach (var elementId in block.ElementIds)
                     {
@@ -928,7 +961,7 @@ namespace MyRevit.EarthWork.UI
                 transaction.Commit();
             }
             m_UIDoc.ActiveView = view;
-            ShowDialogType = ShowDialogType.View;
+            ShowDialogType = ShowDialogType.ViewGT6;
             DialogResult = DialogResult.Retry;
             //SaveDataGridViewSelection();
             this.Close();
@@ -947,7 +980,7 @@ namespace MyRevit.EarthWork.UI
             var doc = m_Doc;
             string viewName = "ViewCompletion";
             var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
-            if (view == null)
+            if (view != null)
             {
                 using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))
                 {
@@ -971,16 +1004,21 @@ namespace MyRevit.EarthWork.UI
             using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))
             {
                 transaction.Start();
+                //var defaultSettings = new OverrideGraphicSettings();
+                //defaultSettings.SetSurfaceTransparency(50);
+                //SetAllCategories(view, defaultSettings);
                 foreach (var block in Blocking.Blocks)
                 {
                     OverrideGraphicSettings setting = new OverrideGraphicSettings();
                     setting.SetProjectionFillPatternId(EarthworkBlockCPSettings.GetDefaultFillPatternId(doc));
                     if (block.ImplementationInfo.IsSettled)
                     {
+                        setting.SetSurfaceTransparency(0);
                         setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForSettled.R, block.ImplementationInfo.ColorForSettled.G, block.ImplementationInfo.ColorForSettled.B));
                     }
                     else
                     {
+                        setting.SetSurfaceTransparency(0);
                         setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForUnsettled.R, block.ImplementationInfo.ColorForUnsettled.G, block.ImplementationInfo.ColorForUnsettled.B));
                     }
                     foreach (var elementId in block.ElementIds)
@@ -991,12 +1029,35 @@ namespace MyRevit.EarthWork.UI
                 transaction.Commit();
             }
             m_UIDoc.ActiveView = view;
-            ShowDialogType = ShowDialogType.View;
+            ShowDialogType = ShowDialogType.ViewCompletion;
             DialogResult = DialogResult.Retry;
             //SaveDataGridViewSelection();
             this.Close();
             //ShowMessage("消息", $"三维视图({viewName})更新成功");
         }
+        //public void SetAllCategories(Autodesk.Revit.DB.View view, OverrideGraphicSettings settings)
+        //{
+        //    Categories categories = view.Document.Settings.Categories;
+        //    foreach (Category category in categories)
+        //    {
+        //        try
+        //        {
+        //            view.SetCategoryOverrides(category.Id, settings);
+        //        }
+        //        catch 
+        //        {
+        //        }
+        //    }
+        //    //需要另外设置以下元素，因为在Categories找不到
+        //    view.SetCategoryOverrides(Category.GetCategory(view.Document, BuiltInCategory.OST_EdgeSlab).Id, settings);
+        //    //// 隐藏以下线条
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_DuctCurvesCenterLine).set_Visible(view, false);//风管中心线
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_DuctFittingCenterLine).set_Visible(view, false);//风管管件中心线
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_PipeFittingCenterLine).set_Visible(view, false);//管件中心线
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_PipeCurvesCenterLine).set_Visible(view, false);//管道中心线
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_CableTrayFittingCenterLine).set_Visible(view, false);//电缆桥架配件中心线
+        //    //Category.GetCategory(view.Document, BuiltInCategory.OST_CableTrayCenterLine).set_Visible(view, false);//电缆桥架中心线
+        //}
         #endregion
     }
 }

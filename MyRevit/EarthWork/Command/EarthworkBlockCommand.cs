@@ -79,7 +79,7 @@ namespace MyRevit.EarthWork.Command
                     }
                     Form.FinishElementSelection();
                 }
-                if (Form.ShowDialogType==ShowDialogType.View)
+                if (Form.ShowDialogType==ShowDialogType.ViewGT6|| Form.ShowDialogType == ShowDialogType.ViewCompletion)
                 {
                     try
                     {

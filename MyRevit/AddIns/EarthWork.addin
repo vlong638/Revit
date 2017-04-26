@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
-  <AddIn Type="Application">
+  <AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
-    <AddInId>B593F2C4-F38C-41D7-AE2C-369BB0149D90</AddInId>
+    <AddInId>BA0A7429-858C-4AD3-B9D2-EB3722BFFC99</AddInId>
     <Name>VLApplication</Name>
-    <FullClassName>MyRevit.Entities.MyExternalApplication</FullClassName>
+    <FullClassName>MyRevit.EarthWork.Command.EarthworkBlockingCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
 </RevitAddIns>

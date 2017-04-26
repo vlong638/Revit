@@ -150,6 +150,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AddIns\EarthWork.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\MyExternalApplications.addin">
       <SubType>Designer</SubType>
     </Content>
