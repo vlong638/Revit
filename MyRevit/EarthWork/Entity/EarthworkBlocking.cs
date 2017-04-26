@@ -156,6 +156,18 @@ namespace MyRevit.EarthWork.Entity
                 var cpSettings = JsonConvert.DeserializeObject<EarthworkBlockCPSettings>(cpSettingsStr);
                 if (cpSettings!=null)
                     block.CPSettings = cpSettings;
+                //foreach (KeyValuePair<int,int> elementIdValue in block.ElementIdValues)
+                //{
+                //    var element = doc.GetElement(new ElementId(elementIdValue.Key));
+                //    if (element!=null)
+                //    {
+                //        block.ElementIds.Add(element.Id);
+                //    }
+                //    else
+                //    {
+                //        block.info
+                //    }
+                //}
                 var elements = block.ElementIdValues.Select(c => doc.GetElement(new ElementId(c)));
                 foreach (var element in elements)
                     if (element != null)

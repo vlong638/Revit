@@ -780,8 +780,8 @@ namespace MyRevit.EarthWork.UI
                     MessageBox.Show("开始时间不可晚于结束时间");
                     return;
                 }
-                if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName==nameof(EarthworkBlockImplementationInfo.EndTimeStr)
-                    && DateTimePicker.Value< (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).StartTime)
+                if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName == nameof(EarthworkBlockImplementationInfo.EndTimeStr)
+                    && DateTimePicker.Value < (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).StartTime)
                 {
                     MessageBox.Show("结束时间不可早于开始时间");
                     return;
@@ -955,6 +955,7 @@ namespace MyRevit.EarthWork.UI
                     }
                     foreach (var elementId in block.ElementIds)
                     {
+                        //if (view.Document.GetElement(elementId) != null)
                         view.SetElementOverrides(elementId, setting);
                     }
                 }
@@ -980,7 +981,7 @@ namespace MyRevit.EarthWork.UI
             var doc = m_Doc;
             string viewName = "ViewCompletion";
             var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
-            if (view != null)
+            if (view == null)
             {
                 using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))
                 {
@@ -1023,6 +1024,7 @@ namespace MyRevit.EarthWork.UI
                     }
                     foreach (var elementId in block.ElementIds)
                     {
+                        //if (view.Document.GetElement(elementId) != null)
                         view.SetElementOverrides(elementId, setting);
                     }
                 }
