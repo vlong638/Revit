@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Operators;
+using Autodesk.Revit.DB;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
-    public partial class ListForm : Form
+    public partial class ListForm : System.Windows.Forms.Form
     {
         #region Init
-        public ListForm(object doc)
+        public ListForm(Document doc)
         {
             InitializeComponent();
 
@@ -21,14 +21,14 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
 
         public SubsidenceMonitorForm SubForm { set; get; }
-        protected object Doc { set; get; }
+        protected Document Doc { set; get; }
         private void InitControls()
         {
             //MonthPicker
             MonthPicker = new DateTimePicker();
             MonthPicker.Parent = this;
             MonthPicker.Width = 100;
-            MonthPicker.Location = new Point(btn_IssueMonth.Location.X - (MonthPicker.Width - btn_IssueMonth.Width) / 2, btn_IssueMonth.Location.Y + 24);
+            MonthPicker.Location = new System.Drawing.Point(btn_IssueMonth.Location.X - (MonthPicker.Width - btn_IssueMonth.Width) / 2, btn_IssueMonth.Location.Y + 24);
             MonthPicker.Format = DateTimePickerFormat.Custom;
             MonthPicker.CustomFormat = "   yyyy/MM";
             MonthPicker.ShowUpDown = true;

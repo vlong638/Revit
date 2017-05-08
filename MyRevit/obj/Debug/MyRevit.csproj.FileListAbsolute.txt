@@ -45,7 +45,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\EntityFramework.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\EntityFramework.SqlServer.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\System.Data.SQLite.xml
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockCPSettingsForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
@@ -57,3 +56,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SubsidenceMonitorForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.Office.Interop.Excel.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\stdole.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache

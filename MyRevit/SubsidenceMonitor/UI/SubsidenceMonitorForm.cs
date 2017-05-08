@@ -28,7 +28,7 @@ namespace MyRevit.SubsidenceMonitor.UI
     public partial class SubsidenceMonitorForm : System.Windows.Forms.Form
     {
         #region 初始化和主要参数
-        public SubsidenceMonitorForm(object doc, TList list) : base()
+        public SubsidenceMonitorForm(Document doc, TList list) : base()
         {
             InitializeComponent();
 

@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -122,6 +122,8 @@
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
+    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorExe.cs" />
+    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorSet.cs" />
     <Compile Include="SubsidenceMonitor\Controls\ComplexHeaderDGV.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
@@ -234,6 +236,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AddIns\SubsidenceMonitor.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\EarthWork.addin">
       <SubType>Designer</SubType>
     </Content>

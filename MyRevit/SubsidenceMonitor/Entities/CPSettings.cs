@@ -10,7 +10,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
     /// </summary>
     public class CPSettings : ITNodeData
     {
-        #region 属性
+        #region Properties
         /// <summary>
         /// 图元可见
         /// </summary>
@@ -37,6 +37,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public Color Color { set; get; } = Color.White;
         #endregion
 
+        #region Constructors
         public CPSettings(bool isVisible, bool isHalftone, bool isSurfaceVisible, Color color, int fillerId, int surfaceTransparency)
         {
             Init(isVisible, isHalftone, isSurfaceVisible, color, fillerId, surfaceTransparency);
@@ -55,7 +56,6 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             DeserializeFromString(str);
         }
-
         static char SeperatorChar = ',';
         static string SeperatorString = ",";
         public string SerializeToString()
@@ -80,6 +80,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             Color = ColorTranslator.FromHtml(args[3]);
             FillerId = Convert.ToInt32(args[4]);
             SurfaceTransparency = Convert.ToInt32(args[5]);
-        }
+        } 
+        #endregion
     }
 }

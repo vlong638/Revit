@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿using Autodesk.Revit.DB;
+using Microsoft.Office.Interop.Excel;
 using MyRevit.SubsidenceMonitor.Entities;
 
 namespace MyRevit.SubsidenceMonitor.Interfaces
@@ -8,7 +9,7 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
         public MultipleSingleMemorableDetails() : base()
         {
         }
-        public MultipleSingleMemorableDetails(object storage, TList list) : base(storage, list)
+        public MultipleSingleMemorableDetails(Document storage, TList list) : base(storage, list)
         {
         }
 
