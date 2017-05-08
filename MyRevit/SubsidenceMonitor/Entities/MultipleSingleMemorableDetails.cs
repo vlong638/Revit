@@ -1,8 +1,9 @@
 ﻿using Autodesk.Revit.DB;
 using Microsoft.Office.Interop.Excel;
-using MyRevit.SubsidenceMonitor.Entities;
+using MyRevit.SubsidenceMonitor.Interfaces;
+using System.Collections.Generic;
 
-namespace MyRevit.SubsidenceMonitor.Interfaces
+namespace MyRevit.SubsidenceMonitor.Entities
 {
     public class MultipleSingleMemorableDetails : MultipleSingleMemorableData<object, TList, TDetail>
     {
@@ -27,11 +28,21 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
         {
             return MemorableData.Data.IssueType.GetEntity().ParseInto(workbook, MemorableData.Data);
         }
-
         protected override void UpdateMemorableData()
         {
             MemorableData = new MemorableDetail(Storage, Datas[DataIndex]);
             MemorableData.Start();
+        }
+        public void AddElementIds(List<ElementId> elementIds)
+        {
+            //TODO 添加构件
+        
+
+        }
+        public void DeleteElementIds(List<ElementId> elementIds)
+        {
+            //TODO 删除构件
+
         }
     }
 }

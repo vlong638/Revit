@@ -5,19 +5,12 @@ using System.IO;
 using System.Linq;
 using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Interfaces;
-using MyRevit.SubsidenceMonitor.Controls;
 using Microsoft.Office.Interop.Excel;
 using Autodesk.Revit.DB;
 //using Autodesk.Revit.DB;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
-    public enum ShowDialogType
-    {
-        Idle,
-        AddElements,
-        DeleleElements,
-    }
 
     /// <summary>
     /// 几个注意点
@@ -28,13 +21,14 @@ namespace MyRevit.SubsidenceMonitor.UI
     public partial class SubsidenceMonitorForm : System.Windows.Forms.Form
     {
         #region 初始化和主要参数
-        public SubsidenceMonitorForm(Document doc, TList list) : base()
+        public SubsidenceMonitorForm(ListForm listForm,Document doc, TList list) : base()
         {
             InitializeComponent();
 
             //初始化控件配置
             InitControlSettings();
             ////更新主要参数
+            ListForm = listForm;
             Model = new MultipleSingleMemorableDetails();
             //如果有详情则加载详情数据
             Model.OnDataChanged += Model_OnDataChanged;
@@ -46,8 +40,8 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.Init(doc, list);
             IssueTypeEntity = list.IssueType.GetEntity();
         }
+        public ListForm ListForm { set; get; }
         public List<ElementId> SelectedElementIds { set; get; } = new List<ElementId>();
-        public ShowDialogType ShowDialogType { set; get; }
         MultipleSingleMemorableDetails Model { set; get; }
         EIssueTypeEntity IssueTypeEntity { set; get; }
 
@@ -142,7 +136,10 @@ namespace MyRevit.SubsidenceMonitor.UI
             dgv_left.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             dgv_right.HeaderNodes = headerNodes;
             dgv_right.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            dgv_left.Click += dgv_left_Click;
+            dgv_right.Click += dgv_right_Click;
         }
+
         private void Model_OnDataChanged(TDetail detail)
         {
             tb_ReportName.Text = detail.ReportName;//报告名称
@@ -370,7 +367,21 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_AddComponent_Click(object sender, EventArgs e)
         {
-
+            if (SelectedNodes.Count == 0)
+            {
+                MessageBox.Show("需选中节点");
+            }
+            else if (SelectedNodes.Count > 1)
+            {
+                MessageBox.Show("需选中单一节点");
+            }
+            else
+            {
+                ListForm.ShowDialogType = ShowDialogType.AddElements_ForDetail;
+                Close();
+                ListForm.DialogResult = DialogResult.Retry;
+                ListForm.Close();
+            }
         }
         /// <summary>
         /// 删除构件
@@ -379,7 +390,92 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_DeleteComponent_Click(object sender, EventArgs e)
         {
-
+            if (SelectedNodes.Count == 0)
+            {
+                MessageBox.Show("需选中节点");
+            }
+            else if (SelectedNodes.Count > 1)
+            {
+                MessageBox.Show("需选中单一节点");
+            }
+            else
+            {
+                ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
+                Close();
+                ListForm.DialogResult = DialogResult.Retry;
+                ListForm.Close();
+            }
         }
+        /// <summary>
+        /// 结束构件选择
+        /// </summary>
+        public void FinishElementSelection()
+        {
+            switch (ListForm.ShowDialogType)
+            {
+                case ShowDialogType.AddElements_ForDetail:
+                    if (SelectedElementIds != null)
+                    {
+                        Model.AddElementIds(SelectedElementIds);
+                    }
+                    ListForm.ShowDialogType = ShowDialogType.Idle;
+                    break;
+                case ShowDialogType.DeleleElements_ForDetail:
+                    if (SelectedElementIds != null)
+                    {
+                        Model.DeleteElementIds(SelectedElementIds);
+                    }
+                    ListForm.ShowDialogType = ShowDialogType.Idle;
+                    break;
+                default:
+                    break;
+            }
+            Model.Edited();
+        }
+        #region 节点选中处理
+        List<TNode> SelectedNodes = new List<TNode>();
+        private void dgv_left_Click(object sender, EventArgs e)
+        {
+            var dgv = dgv_left;
+            dgv_right.ClearSelection();
+            ChangeCurrentNode(dgv);
+        }
+        private void dgv_right_Click(object sender, EventArgs e)
+        {
+            var dgv = dgv_right;
+            dgv_left.ClearSelection();
+            ChangeCurrentNode(dgv);
+        }
+        private void ChangeCurrentNode(MyDGV0427 dgv)
+        {
+            SelectedNodes = new List<TNode>();
+            if (dgv.SelectedRows.Count > 0)
+            {
+                SelectedNodes.Clear();
+                foreach (DataGridViewRow row in dgv.SelectedRows)
+                {
+                    var data = dgv.Rows[0].DataBoundItem as BuildingSubsidenceDataV1;
+                    SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
+                }
+                return;
+            }
+            else if (dgv.SelectedCells.Count > 0)
+            {
+                List<int> rowIndexes = new List<int>();
+                foreach (DataGridViewCell cell in dgv.SelectedCells)
+                {
+                    if (!rowIndexes.Contains(cell.RowIndex))
+                    {
+                        rowIndexes.Add(cell.RowIndex);
+                    }
+                }
+                foreach (var rowIndex in rowIndexes)
+                {
+                    var data = dgv.Rows[rowIndex].DataBoundItem as BuildingSubsidenceDataV1;
+                    SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
+                }
+            }
+        } 
+        #endregion
     }
 }

@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -124,7 +124,6 @@
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorExe.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorSet.cs" />
-    <Compile Include="SubsidenceMonitor\Controls\ComplexHeaderDGV.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockImplementationInfo.cs" />
@@ -152,7 +151,7 @@
     <Compile Include="Entities\MyExternalCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SubsidenceMonitor\Controls\MyDGV0427.cs" />
+    <Compile Include="Controls\MyDGV0427.cs" />
     <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueType.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
@@ -171,7 +170,7 @@
     <Compile Include="SubsidenceMonitor\Interfaces\ITNodeData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableDetails.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />
     <Compile Include="SubsidenceMonitor\Operators\BLLResult.cs" />
     <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />

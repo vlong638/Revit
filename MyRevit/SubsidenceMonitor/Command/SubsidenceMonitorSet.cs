@@ -1,9 +1,11 @@
 ﻿using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using MyRevit.SubsidenceMonitor.UI;
 using PmSoft.Common.Controls.RevitMethod;
 using PmSoft.Common.RevitClass;
 using PmSoft.MainModel.EntData;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MyRevit.SubsidenceMonitor.Command
@@ -31,25 +33,21 @@ namespace MyRevit.SubsidenceMonitor.Command
             DialogResult result = DialogResult.Retry;
             while ((result = Form.ShowDialog(new RevitHandle(Process.GetCurrentProcess().MainWindowHandle))) == DialogResult.Retry)
             {
-                if (result == DialogResult.Cancel)
-                    return false;
-                if (result == DialogResult.OK)
-                    return true;
-                //if (Form.ShowDialogType == ShowDialogType.AddElements || Form.ShowDialogType == ShowDialogType.DeleleElements)
-                //{
-                //    try
-                //    {
-                //        mouseHook.InstallHook();
-                //        Form.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
-                //            .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
-                //        mouseHook.UninstallHook();
-                //    }
-                //    catch
-                //    {
-                //        mouseHook.UninstallHook();
-                //    }
-                //    Form.FinishElementSelection();
-                //}
+                if (Form.ShowDialogType==ShowDialogType.AddElements_ForDetail||Form.ShowDialogType==ShowDialogType.DeleleElements_ForDetail)
+                {
+                    try
+                    {
+                        mouseHook.InstallHook();
+                        Form.SubForm.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                            .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                        mouseHook.UninstallHook();
+                    }
+                    catch
+                    {
+                        mouseHook.UninstallHook();
+                    }
+                    Form.SubForm.FinishElementSelection();
+                }
                 //if (Form.ShowDialogType == ShowDialogType.ViewGT6 || Form.ShowDialogType == ShowDialogType.ViewCompletion)
                 //{
                 //    try
