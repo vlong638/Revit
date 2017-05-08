@@ -48,6 +48,11 @@
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <HintPath>..\packages\Microsoft.Office.Interop.Excel.15.0.4795.1000\lib\net20\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -116,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
     <Compile Include="SubsidenceMonitor\Controls\ComplexHeaderDGV.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
@@ -144,6 +150,51 @@
     <Compile Include="Entities\MyExternalCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubsidenceMonitor\Controls\MyDGV0427.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueType.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidenceData.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ParseResult.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\TList.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\TNode.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\ICloneableData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\IContainer.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\ILazyLoadData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\IMemorableData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\IPDMTBase.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\ITNodeData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\MemorableData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableDetails.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\BLLResult.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\TDetailOperator.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\TNodeOperator.cs" />
+    <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.Designer.cs">
+      <DependentUpon>CPSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\ListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\ListForm.Designer.cs">
+      <DependentUpon>ListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.Designer.cs">
+      <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\Utilities\ExcelHelper.cs" />
+    <Compile Include="SubsidenceMonitor\Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\DocumentHelper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
@@ -161,6 +212,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\CPSettingsForm.resx">
+      <DependentUpon>CPSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\ListForm.resx">
+      <DependentUpon>ListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.resx">
+      <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

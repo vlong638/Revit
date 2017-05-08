@@ -152,6 +152,11 @@ namespace MyRevit.EarthWork.UI
             traceBar_Transparency.Scroll += traceBar_Transparency_Scroll;
             ValueChanged(sender, e);
         }
+        /// <summary>
+        /// 颜色选择
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_Color_Click(object sender, EventArgs e)
         {
             //禁止使用自定义颜色  
@@ -166,6 +171,11 @@ namespace MyRevit.EarthWork.UI
                 ValueChanged(sender, e);
             }
         }
+        /// <summary>
+        /// 值变更刷新
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ValueChanged(object sender, EventArgs e)
         {
             CPSettings.IsVisible = cb_IsVisible.Checked;

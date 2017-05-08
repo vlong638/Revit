@@ -52,3 +52,8 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.Properties.Resour
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.CPSettingsForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ListForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SubsidenceMonitorForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.Office.Interop.Excel.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\stdole.dll
