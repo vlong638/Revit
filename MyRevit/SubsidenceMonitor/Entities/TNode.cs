@@ -1,4 +1,5 @@
-﻿using MyRevit.SubsidenceMonitor.Interfaces;
+﻿using Autodesk.Revit.DB;
+using MyRevit.SubsidenceMonitor.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -29,13 +30,13 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// </summary>
         public String Data { get; set; }
         /// <summary>
-        /// 测点构件
-        /// </summary>
-        public String ElementIds { get; set; }
-        /// <summary>
         /// 顺序号
         /// </summary>
         public Int16 Index { get; set; }
+        /// <summary>
+        /// 测点构件
+        /// </summary>
+        public String ElementIds { get; set; }
         #endregion
 
         #region Constructors
@@ -100,6 +101,25 @@ namespace MyRevit.SubsidenceMonitor.Entities
         #endregion
 
         #region Manual
+        List<int> _ElementIds_Int;
+        public List<int> ElementIds_Int
+        {
+            set
+            {
+                _ElementIds_Int = value;
+                ElementIds = string.Join(",", _ElementIds_Int);
+            }
+            get
+            {
+                if (_ElementIds_Int==null)
+                {
+                    _ElementIds_Int = new List<int>();
+                    if (!string.IsNullOrEmpty(ElementIds))
+                        _ElementIds_Int = ElementIds.Split(',').Select(c => Convert.ToInt32(c)).ToList();
+                }
+                return _ElementIds_Int;
+            }
+        }
         #endregion
     }
 }

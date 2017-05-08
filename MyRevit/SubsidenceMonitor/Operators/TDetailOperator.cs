@@ -9,7 +9,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
     public static partial class EntityOperator
     {
         #region Methods
-        public static bool DbInsertOrReplace(this TDetail entity, SQLiteConnection connection)
+        public static bool DbInsert(this TDetail entity, SQLiteConnection connection)
         {
             var command = connection.CreateCommand();
             Dictionary<string, string> NameValues = new Dictionary<string, string>();
@@ -24,7 +24,26 @@ namespace MyRevit.SubsidenceMonitor.Operators
             NameValues.Add(nameof(entity.InstrumentCode), SQLiteHelper.ToSQLiteString(entity.InstrumentCode));
             NameValues.Add(nameof(entity.CloseCTSettings), SQLiteHelper.ToSQLiteString(entity.CloseCTSettings));
             NameValues.Add(nameof(entity.OverCTSettings), SQLiteHelper.ToSQLiteString(entity.OverCTSettings));
-            command.CommandText = $"insert or replace into {entity.TableName}({string.Join(",", NameValues.Keys)}) values({string.Join(",", NameValues.Values)})";
+            command.CommandText = $"insert into {entity.TableName}({string.Join(",", NameValues.Keys)}) values({string.Join(",", NameValues.Values)})";
+            return command.ExecuteNonQuery() == 1;
+        }
+        public static bool DbUpdate(this TDetail entity, SQLiteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            Dictionary<string, string> Sets = new Dictionary<string, string>();
+            Sets.Add(nameof(entity.ReportName), SQLiteHelper.ToSQLiteString(entity.ReportName));
+            Sets.Add(nameof(entity.IssueTimeRange), SQLiteHelper.ToSQLiteString(entity.IssueTimeRange));
+            Sets.Add(nameof(entity.Contractor), SQLiteHelper.ToSQLiteString(entity.Contractor));
+            Sets.Add(nameof(entity.Supervisor), SQLiteHelper.ToSQLiteString(entity.Supervisor));
+            Sets.Add(nameof(entity.Monitor), SQLiteHelper.ToSQLiteString(entity.Monitor));
+            Sets.Add(nameof(entity.InstrumentName), SQLiteHelper.ToSQLiteString(entity.InstrumentName));
+            Sets.Add(nameof(entity.InstrumentCode), SQLiteHelper.ToSQLiteString(entity.InstrumentCode));
+            Sets.Add(nameof(entity.CloseCTSettings), SQLiteHelper.ToSQLiteString(entity.CloseCTSettings));
+            Sets.Add(nameof(entity.OverCTSettings), SQLiteHelper.ToSQLiteString(entity.OverCTSettings));
+            Dictionary<string, string> Wheres = new Dictionary<string, string>();
+            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
+            Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
+            command.CommandText = $"update {entity.TableName} set {SQLiteHelper.ToSQLiteSets(Sets)} where {SQLiteHelper.ToSQLiteWheres(Wheres)}";
             return command.ExecuteNonQuery() == 1;
         }
         public static bool DbDelete(this TDetail entity, SQLiteConnection connection)
@@ -33,7 +52,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
             Dictionary<string, string> NameValues = new Dictionary<string, string>();
             NameValues.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
             NameValues.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
-            command.CommandText = $"delete from {entity.TableName} where {string.Join(" and ", NameValues.Select(c => c.Key + "=" + c.Value))}";
+            command.CommandText = $"delete from {entity.TableName}  where {SQLiteHelper.ToSQLiteWheres(NameValues)}";
             return command.ExecuteNonQuery() == 1;
         }
         public static void FetchNodes(this TDetail entity, SQLiteConnection connection)

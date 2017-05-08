@@ -182,11 +182,11 @@
             this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgv_left.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_left.HeaderNodes = null;
-            this.dgv_left.Location = new System.Drawing.Point(571, 108);
+            this.dgv_left.Location = new System.Drawing.Point(2, 122);
             this.dgv_left.Name = "dgv_left";
             this.dgv_left.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.dgv_left.RowTemplate.Height = 23;
-            this.dgv_left.Size = new System.Drawing.Size(568, 418);
+            this.dgv_left.Size = new System.Drawing.Size(568, 404);
             this.dgv_left.TabIndex = 36;
             // 
             // dgv_right
@@ -205,11 +205,11 @@
             this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dgv_right.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_right.HeaderNodes = null;
-            this.dgv_right.Location = new System.Drawing.Point(1, 108);
+            this.dgv_right.Location = new System.Drawing.Point(572, 122);
             this.dgv_right.Name = "dgv_right";
             this.dgv_right.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.dgv_right.RowTemplate.Height = 23;
-            this.dgv_right.Size = new System.Drawing.Size(568, 418);
+            this.dgv_right.Size = new System.Drawing.Size(568, 404);
             this.dgv_right.TabIndex = 35;
             // 
             // tb_InstrumentCode

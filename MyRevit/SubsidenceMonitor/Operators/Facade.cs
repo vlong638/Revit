@@ -7,7 +7,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
 {
     public class WriteFacade
     {
-        public static BLLResult DataCommit(TList list, TDetail detail, List<TNode> nodes)
+        public static BLLResult CreateDetail(TList list, TDetail detail, List<TNode> nodes)
         {
             var result = new BLLResult();
             using (var connection = SQLiteHelper.Connect())
@@ -19,10 +19,35 @@ namespace MyRevit.SubsidenceMonitor.Operators
                     list.DataCount = (short)list.Datas.Count;
                     if (!list.DbInsertOrReplace(connection))
                         throw new NotImplementedException("List数据未按预期存储");
-                    if (!detail.DbInsertOrReplace(connection))
+                    if (!detail.DbInsert(connection))
                         throw new NotImplementedException("Detail数据未按预期存储");
-                    nodes.DbDeleteByDetailKey(connection);//由于提交时,Nodes数量发生了变更,这里省略对原有Nodes数量删除的监测
+                    //nodes.DbDeleteByDetailKey(connection);//由于提交时,Nodes数量发生了变更,这里省略对原有Nodes数量删除的监测
                     if (!nodes.DbInsert(connection))
+                        throw new NotImplementedException("Nodes数据未按预期存储");
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    result.IsSuccess = false;
+                    result.Message = ex.ToString();
+                }
+                connection.Close();
+            }
+            return result;
+        }
+        public static BLLResult UpdateDetail(TDetail detail, List<TNode> nodes)
+        {
+            var result = new BLLResult();
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                var transaction = connection.BeginTransaction();
+                try
+                {
+                    if (!detail.DbUpdate(connection))
+                        throw new NotImplementedException("Detail数据未按预期存储");
+                    if (!nodes.DbUpdate(connection))
                         throw new NotImplementedException("Nodes数据未按预期存储");
                     transaction.Commit();
                 }

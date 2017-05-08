@@ -21,7 +21,7 @@ namespace MyRevit.SubsidenceMonitor.UI
     public partial class SubsidenceMonitorForm : System.Windows.Forms.Form
     {
         #region 初始化和主要参数
-        public SubsidenceMonitorForm(ListForm listForm,Document doc, TList list) : base()
+        public SubsidenceMonitorForm(ListForm listForm, Document doc, TList list) : base()
         {
             InitializeComponent();
 
@@ -69,7 +69,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             btn_CreateNew.Enabled = canCreateNew;
             btn_Delete.Enabled = canDelete;
             btn_Submit.Enabled = canSave;
-            if (canDelete|| canSave)//可保存或可删除意味着编辑主体的存在
+            if (canDelete || canSave)//可保存或可删除意味着编辑主体的存在
             {
                 btn_AddComponent.Enabled = true;
                 btn_DeleteComponent.Enabled = true;
@@ -138,8 +138,12 @@ namespace MyRevit.SubsidenceMonitor.UI
             dgv_right.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             dgv_left.Click += dgv_left_Click;
             dgv_right.Click += dgv_right_Click;
+            this.Shown += SubsidenceMonitorForm_Shown;
         }
-
+        private void SubsidenceMonitorForm_Shown(object sender, EventArgs e)
+        {
+            LoadDataGridViewSelection();
+        }
         private void Model_OnDataChanged(TDetail detail)
         {
             tb_ReportName.Text = detail.ReportName;//报告名称
@@ -183,6 +187,44 @@ namespace MyRevit.SubsidenceMonitor.UI
             dgv_left.DataSource = leftNodes.Select(c => new BuildingSubsidenceDataV1(c.NodeCode, c.Data)).ToList();
             dgv_right.DataSource = null;
             dgv_right.DataSource = rightNodes.Select(c => new BuildingSubsidenceDataV1(c.NodeCode, c.Data)).ToList();
+            dgv_left.BindingContextChanged += Dgv_left_BindingContextChanged;
+            dgv_right.BindingContextChanged += Dgv_right_BindingContextChanged; ;
+        }
+        /// <summary>
+        /// 清空绑定时的默认选项
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Dgv_right_BindingContextChanged(object sender, EventArgs e)
+        {
+            dgv_right.ClearSelection();
+        }
+        /// <summary>
+        /// 清空绑定时的默认选项
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Dgv_left_BindingContextChanged(object sender, EventArgs e)
+        {
+            dgv_left.ClearSelection();
+        }
+        /// <summary>
+        /// 关闭页面
+        /// </summary>
+        /// <param name="senedr"></param>
+        /// <param name="e"></param>
+        private void SubsidenceMonitorForm_FormClosing(object senedr, FormClosingEventArgs e)
+        {
+            //退出窗口时 需要清空未保存的内容
+            //编辑控件或者进行浏览时,不进行回滚处理
+            if (DialogResult == DialogResult.Retry)
+            {
+                SaveDataGridViewSelection();
+            }
+            else
+            {
+                Model.Rollback(true);
+            }
         }
         #endregion
 
@@ -314,16 +356,6 @@ namespace MyRevit.SubsidenceMonitor.UI
                 MessageBox.Show(message);
             }
         }
-        /// <summary>
-        /// 关闭页面
-        /// </summary>
-        /// <param name="senedr"></param>
-        /// <param name="e"></param>
-        private void SubsidenceMonitorForm_FormClosing(object senedr, FormClosingEventArgs e)
-        {
-            //退出窗口时 需要清空未保存的内容
-            Model.Rollback(true);
-        }
         #endregion
 
         #region 浏览操作
@@ -357,7 +389,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 Model.MemorableData.Data.OverCTSettings = form.Data;
                 Model.Edited();
             }
-        } 
+        }
         #endregion
 
         /// <summary>
@@ -378,7 +410,8 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
             {
                 ListForm.ShowDialogType = ShowDialogType.AddElements_ForDetail;
-                Close();
+                this.DialogResult = DialogResult.Retry;
+                this.Close();
                 ListForm.DialogResult = DialogResult.Retry;
                 ListForm.Close();
             }
@@ -401,7 +434,8 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
             {
                 ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
-                Close();
+                this.DialogResult = DialogResult.Retry;
+                this.Close();
                 ListForm.DialogResult = DialogResult.Retry;
                 ListForm.Close();
             }
@@ -416,21 +450,70 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case ShowDialogType.AddElements_ForDetail:
                     if (SelectedElementIds != null)
                     {
-                        Model.AddElementIds(SelectedElementIds);
+                        Model.AddElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
+                        Model.Edited();
                     }
                     ListForm.ShowDialogType = ShowDialogType.Idle;
                     break;
                 case ShowDialogType.DeleleElements_ForDetail:
                     if (SelectedElementIds != null)
                     {
-                        Model.DeleteElementIds(SelectedElementIds);
+                        Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
+                        Model.Edited();
                     }
                     ListForm.ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
                     break;
             }
-            Model.Edited();
+        }
+        static List<int> SelectedRows_left { get; set; } = new List<int>();
+        static List<int> SelectedCells_left { get; set; } = new List<int>();
+        static List<int> SelectedRows_right { get; set; } = new List<int>();
+        static List<int> SelectedCells_right { get; set; } = new List<int>();
+        /// <summary>
+        /// 保存列表选中项,由于采用了模态形式,页面显示总是刷新掉选中项
+        /// </summary>
+        void SaveDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<int> cells)
+        {
+            rows.Clear();
+            foreach (DataGridViewRow row in dgv.SelectedRows)
+            {
+                rows.Add(row.Index);
+            }
+            cells.Clear();
+            if (dgv.SelectedCells.Count > 0)
+            {
+                cells.Add(dgv.SelectedCells[0].RowIndex);
+                cells.Add(dgv.SelectedCells[0].ColumnIndex);
+            }
+        }
+        private void SaveDataGridViewSelection()
+        {
+            SaveDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
+            SaveDataGridViewSelection(dgv_right, SelectedRows_right, SelectedRows_right);
+        }
+        /// <summary>
+        /// 加载列表选中项
+        /// </summary>
+        public void LoadDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<int> cells)
+        {
+            if (rows.Count() > 0)
+            {
+                foreach (int rowIndex in rows)
+                {
+                    dgv.Rows[rowIndex].Selected = true;
+                }
+            }
+            if (cells.Count() > 0)
+            {
+                dgv.CurrentCell = dgv[cells[1], cells[0]];
+            }
+        }
+        private void LoadDataGridViewSelection()
+        {
+            LoadDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
+            LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedRows_right);
         }
         #region 节点选中处理
         List<TNode> SelectedNodes = new List<TNode>();
@@ -475,7 +558,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
                 }
             }
-        } 
+        }
         #endregion
     }
 }

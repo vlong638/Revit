@@ -120,6 +120,14 @@ create table TNode
         {
             return ((int)Enum.Parse(typeof(T), input.ToString())).ToString();
         }
+        public static string ToSQLiteSets(Dictionary<string, string> dic)
+        {
+            return string.Join(",", dic.Select(c => c.Key + "=" + c.Value));
+        }
+        public static string ToSQLiteWheres(Dictionary<string, string> dic)
+        {
+            return string.Join(" and ", dic.Select(c => c.Key + "=" + c.Value));
+        }
         #endregion
     }
 }

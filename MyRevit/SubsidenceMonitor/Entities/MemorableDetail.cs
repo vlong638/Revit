@@ -17,9 +17,16 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
         }
 
-        public override BLLResult Commit()
+        public override BLLResult Commit(bool isCreateNew)
         {
-            return WriteFacade.DataCommit(Data.List, Data, Data.Nodes);
+            if (isCreateNew)
+            {
+                return WriteFacade.CreateDetail(Data.List, Data, Data.Nodes);
+            }
+            else
+            {
+                return WriteFacade.UpdateDetail(Data, Data.Nodes);
+            }
         }
         public override BLLResult Delete()
         {

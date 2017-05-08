@@ -29,7 +29,7 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
         {
             Memo = Clone();
         }
-        public abstract BLLResult Commit();
+        public abstract BLLResult Commit(bool isCreateNew);
         public abstract BLLResult Delete();
         public abstract void Rollback();
     }

@@ -2,6 +2,7 @@
 using Microsoft.Office.Interop.Excel;
 using MyRevit.SubsidenceMonitor.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyRevit.SubsidenceMonitor.Entities
 {
@@ -33,16 +34,28 @@ namespace MyRevit.SubsidenceMonitor.Entities
             MemorableData = new MemorableDetail(Storage, Datas[DataIndex]);
             MemorableData.Start();
         }
-        public void AddElementIds(List<ElementId> elementIds)
+        public void AddElementIds(string nodeCode,List<ElementId> elementIds)
         {
-            //TODO 添加构件
-        
-
+            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                var elementNode = MemorableData.Data.Nodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
+                if (elementNode == targetNode)
+                    continue;
+                if (elementNode != null && elementNode != targetNode)
+                    elementNode.ElementIds_Int.Remove(elementId_Int);
+                targetNode.ElementIds_Int.Add(elementId_Int);
+            }
         }
-        public void DeleteElementIds(List<ElementId> elementIds)
+        public void DeleteElementIds(string nodeCode, List<ElementId> elementIds)
         {
-            //TODO 删除构件
-
+            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                targetNode.ElementIds_Int.Remove(elementId_Int);
+            }
         }
     }
 }

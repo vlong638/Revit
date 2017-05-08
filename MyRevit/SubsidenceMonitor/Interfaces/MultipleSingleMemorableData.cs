@@ -133,7 +133,7 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
         /// <returns></returns>
         public BLLResult Commit()
         {
-            var result = MemorableData.Commit();
+            var result = MemorableData.Commit(IsCreateNew);
             if (result.IsSuccess)
             {
                 IsEdited = false;
