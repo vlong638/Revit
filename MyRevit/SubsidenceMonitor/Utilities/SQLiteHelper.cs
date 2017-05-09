@@ -99,6 +99,10 @@ create table TNode
         #endregion
 
         #region SQLite参数处理
+        public static string ToSQLiteReservedField(string input)
+        {
+            return $"[{input}]";
+        }
         public static string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         public static string ToSQLiteString(string input)
         {
@@ -127,6 +131,23 @@ create table TNode
         public static string ToSQLiteWheres(Dictionary<string, string> dic)
         {
             return string.Join(" and ", dic.Select(c => c.Key + "=" + c.Value));
+        }
+        public static string GetSQLiteQuery_Select(List<string> selects, string tableName, Dictionary<string, string> wheres)
+        {
+            var selectsStr = (selects == null || selects.Count == 0 ? "*" : string.Join(",", selects));
+            return $"select {selectsStr} from {tableName} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
+        }
+        public static string GetSQLiteQuery_Insert(string tableName, Dictionary<string, string> nameValues)
+        {
+            return $"insert into {tableName}({string.Join(",", nameValues.Keys)}) values({string.Join(",", nameValues.Values)})";
+        }
+        public static string GetSQLiteQuery_Update(string tableName, Dictionary<string, string> sets, Dictionary<string, string> wheres)
+        {
+            return $"update {tableName} set {SQLiteHelper.ToSQLiteSets(sets)} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
+        }
+        public static string GetSQLiteQuery_Delete(string tableName, Dictionary<string, string> wheres)
+        {
+            return  $"delete from {tableName}  where {SQLiteHelper.ToSQLiteWheres(wheres)}";
         }
         #endregion
     }

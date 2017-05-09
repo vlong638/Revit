@@ -24,7 +24,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
             NameValues.Add(nameof(entity.InstrumentCode), SQLiteHelper.ToSQLiteString(entity.InstrumentCode));
             NameValues.Add(nameof(entity.CloseCTSettings), SQLiteHelper.ToSQLiteString(entity.CloseCTSettings));
             NameValues.Add(nameof(entity.OverCTSettings), SQLiteHelper.ToSQLiteString(entity.OverCTSettings));
-            command.CommandText = $"insert into {entity.TableName}({string.Join(",", NameValues.Keys)}) values({string.Join(",", NameValues.Values)})";
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Insert(entity.TableName, NameValues);
             return command.ExecuteNonQuery() == 1;
         }
         public static bool DbUpdate(this TDetail entity, SQLiteConnection connection)
@@ -43,7 +43,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
             Dictionary<string, string> Wheres = new Dictionary<string, string>();
             Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
             Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
-            command.CommandText = $"update {entity.TableName} set {SQLiteHelper.ToSQLiteSets(Sets)} where {SQLiteHelper.ToSQLiteWheres(Wheres)}";
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Update(entity.TableName, Sets, Wheres);
             return command.ExecuteNonQuery() == 1;
         }
         public static bool DbDelete(this TDetail entity, SQLiteConnection connection)
@@ -52,14 +52,17 @@ namespace MyRevit.SubsidenceMonitor.Operators
             Dictionary<string, string> NameValues = new Dictionary<string, string>();
             NameValues.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
             NameValues.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
-            command.CommandText = $"delete from {entity.TableName}  where {SQLiteHelper.ToSQLiteWheres(NameValues)}";
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(entity.TableName,  NameValues);
             return command.ExecuteNonQuery() == 1;
         }
         public static void FetchNodes(this TDetail entity, SQLiteConnection connection)
         {
             var command = connection.CreateCommand();
             var node = new TNode();
-            command.CommandText = $"select * from {node.TableName} where {nameof(node.IssueType)}=={SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)} and {nameof(node.IssueDateTime)} =={SQLiteHelper.ToSQLiteString(entity.IssueDateTime)}";
+            Dictionary<string, string> Wheres = new Dictionary<string, string>();
+            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
+            Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, node.TableName, Wheres);
             var reader = command.ExecuteReader();
             while (reader.Read())
             {

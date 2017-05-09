@@ -123,7 +123,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         public string GetElementIds()
         {
-            return string.Join(ElementIds_IntSplitter, _ElementIds_Int);
+            return string.Join(ElementIds_IntSplitter, ElementIds_Int);
         }
         #endregion
     }

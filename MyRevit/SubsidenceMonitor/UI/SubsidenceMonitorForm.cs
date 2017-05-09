@@ -437,7 +437,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             else
             {
-                var elementIds=Model.GetElementIds(SelectedNodes[0].NodeCode, UI_Doc.Document);
+                var elementIds = Model.GetElementIds(SelectedNodes[0].NodeCode, UI_Doc.Document);
                 RevitHelper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
                 ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
                 this.DialogResult = DialogResult.Retry;
@@ -454,7 +454,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             switch (ListForm.ShowDialogType)
             {
                 case ShowDialogType.AddElements_ForDetail:
-                    if (SelectedElementIds != null)
+                    if (SelectedElementIds != null && SelectedElementIds.Count > 0)
                     {
                         Model.AddElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
                         Model.Edited();
@@ -462,7 +462,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     ListForm.ShowDialogType = ShowDialogType.Idle;
                     break;
                 case ShowDialogType.DeleleElements_ForDetail:
-                    if (SelectedElementIds != null)
+                    if (SelectedElementIds != null && SelectedElementIds.Count > 0)
                     {
                         Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
                         Model.Edited();
@@ -474,7 +474,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                     break;
             }
         }
-        struct CellLocation {
+        struct CellLocation
+        {
             public int RowIndex;
             public int ColumnIndex;
 
@@ -528,7 +529,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 {
                     dgv.Rows[cell.RowIndex].Cells[cell.ColumnIndex].Selected = true;
                 }
-                dgv.CurrentCell = dgv[cells[0].RowIndex, cells[0].ColumnIndex];
+                dgv.CurrentCell = dgv[cells[0].ColumnIndex, cells[0].RowIndex];
             }
         }
         private void LoadDataGridViewSelection()
