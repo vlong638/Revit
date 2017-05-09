@@ -1,6 +1,9 @@
-﻿using MyRevit.SubsidenceMonitor.Interfaces;
+﻿using Autodesk.Revit.DB;
+using MyRevit.SubsidenceMonitor.Interfaces;
+using MyRevit.Utilities;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 
 namespace MyRevit.SubsidenceMonitor.Entities
@@ -34,15 +37,15 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// <summary>
         /// 颜色 Surface即Projection
         /// </summar>y
-        public Color Color { set; get; } = Color.White;
+        public System.Drawing.Color Color { set; get; } = System.Drawing.Color.White;
         #endregion
 
         #region Constructors
-        public CPSettings(bool isVisible, bool isHalftone, bool isSurfaceVisible, Color color, int fillerId, int surfaceTransparency)
+        public CPSettings(bool isVisible, bool isHalftone, bool isSurfaceVisible, System.Drawing.Color color, int fillerId, int surfaceTransparency)
         {
             Init(isVisible, isHalftone, isSurfaceVisible, color, fillerId, surfaceTransparency);
         }
-        void Init(bool isVisible, bool isHalftone, bool isSurfaceVisible, Color color, int fillerId, int surfaceTransparency)
+        void Init(bool isVisible, bool isHalftone, bool isSurfaceVisible, System.Drawing.Color color, int fillerId, int surfaceTransparency)
         {
             IsVisible = isVisible;
             IsHalftone = isHalftone;
@@ -80,7 +83,28 @@ namespace MyRevit.SubsidenceMonitor.Entities
             Color = ColorTranslator.FromHtml(args[3]);
             FillerId = Convert.ToInt32(args[4]);
             SurfaceTransparency = Convert.ToInt32(args[5]);
-        } 
+        }
+        #endregion
+
+        #region Methods
+        static ElementId _DefaultFillPatternId = null;
+        public static ElementId GetDefaultFillPatternId(Document doc)
+        {
+            if (_DefaultFillPatternId != null)
+                return _DefaultFillPatternId;
+
+            _DefaultFillPatternId = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).ToElements().First(c => (c as FillPatternElement).GetFillPattern().IsSolidFill).Id;
+            return _DefaultFillPatternId;
+        }
+        public static OverrideGraphicSettings _TingledOverrideGraphicSettings = null;
+        public static OverrideGraphicSettings GetTingledOverrideGraphicSettings(Document doc)
+        {
+            if (_TingledOverrideGraphicSettings == null)
+            {
+                _TingledOverrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Autodesk.Revit.DB.Color(185, 185, 185), GetDefaultFillPatternId(doc), 80);
+            }
+            return _TingledOverrideGraphicSettings;
+        }
         #endregion
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 
-namespace MyRevit.SubsidenceMonitor.Utilities
+namespace MyRevit.Utilities
 {
     public class SQLiteHelper
     {

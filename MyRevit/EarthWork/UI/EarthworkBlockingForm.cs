@@ -912,7 +912,7 @@ namespace MyRevit.EarthWork.UI
 
             var doc = m_Doc;
             string viewName = "ViewGt6";
-            var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
+            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(doc, viewName);
             if (view == null)
             {
                 using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_ViewGt6_Click)))
@@ -980,7 +980,7 @@ namespace MyRevit.EarthWork.UI
 
             var doc = m_Doc;
             string viewName = "ViewCompletion";
-            var view = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
+            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(doc, viewName);
             if (view == null)
             {
                 using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(btn_Preview_Click)))

@@ -36,7 +36,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.Eart
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.CPSettingsForm.resources
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ListForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SubsidenceMonitorForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll.config
@@ -57,3 +56,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\System.Data.SQLite.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ShowDialogTypeEx.resources

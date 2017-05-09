@@ -1,10 +1,11 @@
 ﻿using Autodesk.Revit.DB;
 using System.Collections.Generic;
 
-namespace MyRevit.SubsidenceMonitor.Utilities
+namespace MyRevit.Utilities
 {
-    public class RevitHelper
+    public class Revit_View_Helper
     {
+        #region 隔离显示
         /// <summary>
         /// 从视图(隔离元素)
         /// </summary>
@@ -35,6 +36,7 @@ namespace MyRevit.SubsidenceMonitor.Utilities
                 view.DisableTemporaryViewMode(TemporaryViewMode.TemporaryHideIsolate);//解除隔离显示
                 transaction.Commit();
             }
-        }
+        } 
+        #endregion
     }
 }

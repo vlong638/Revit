@@ -119,7 +119,7 @@ namespace MyRevit.EarthWork.Entity
         {
             Doc = doc;
             string viewName = "土方分块";
-            View3D = DocumentHelper.GetElementByNameAs<View3D>(doc, viewName);
+            View3D = Revit_Document_Helper.GetElementByNameAs<View3D>(doc, viewName);
             if (View3D == null)
             {
                 using (var transaction = new Transaction(doc, "EarthworkBlocking." + nameof(InitByDocument)))

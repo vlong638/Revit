@@ -182,9 +182,7 @@
     <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.Designer.cs">
       <DependentUpon>CPSettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\ListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\ListForm.cs" />
     <Compile Include="SubsidenceMonitor\UI\ListForm.Designer.cs">
       <DependentUpon>ListForm.cs</DependentUpon>
     </Compile>
@@ -194,10 +192,12 @@
     <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.Designer.cs">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\Utilities\ExcelHelper.cs" />
-    <Compile Include="SubsidenceMonitor\Utilities\RevitHelper.cs" />
-    <Compile Include="SubsidenceMonitor\Utilities\SQLiteHelper.cs" />
-    <Compile Include="Utilities\DocumentHelper.cs" />
+    <Compile Include="Utilities\ExcelHelper.cs" />
+    <Compile Include="Utilities\Revit_Helper.cs" />
+    <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
+    <Compile Include="Utilities\Revit_View_Helper.cs" />
+    <Compile Include="Utilities\SQLiteHelper.cs" />
+    <Compile Include="Utilities\Revit_Document_Helper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -262,7 +262,9 @@
     <Content Include="Images\logoko.png" />
     <Content Include="Images\UpNode.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SubsidenceMonitor\Utilities\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.0\build\net45\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

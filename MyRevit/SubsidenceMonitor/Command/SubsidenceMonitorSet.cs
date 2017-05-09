@@ -33,34 +33,36 @@ namespace MyRevit.SubsidenceMonitor.Command
             DialogResult result = DialogResult.Retry;
             while ((result = Form.ShowDialog(new RevitHandle(Process.GetCurrentProcess().MainWindowHandle))) == DialogResult.Retry)
             {
-                if (Form.ShowDialogType==ShowDialogType.AddElements_ForDetail||Form.ShowDialogType==ShowDialogType.DeleleElements_ForDetail)
+                switch (Form.ShowDialogType)
                 {
-                    try
-                    {
+                    case ShowDialogType.AddElements_ForDetail:
+                    case ShowDialogType.DeleleElements_ForDetail:
+                        try
+                        {
+                            mouseHook.InstallHook();
+                            Form.SubForm.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                                .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                            mouseHook.UninstallHook();
+                        }
+                        catch
+                        {
+                            mouseHook.UninstallHook();
+                        }
+                        Form.SubForm.FinishElementSelection();
+                        break;
+                    case ShowDialogType.ViewElementsBySelectedNodes:
+                    case ShowDialogType.ViewElementsByAllNodes:
+                    case ShowDialogType.ViewCurrentMaxByRed:
+                    case ShowDialogType.ViewCurrentMaxByAll:
+                    case ShowDialogType.ViewTotalMaxByRed:
+                    case ShowDialogType.ViewTotalMaxByAll:
+                    case ShowDialogType.ViewCloseWarn:
+                    case ShowDialogType.ViewOverWarn:
                         mouseHook.InstallHook();
-                        Form.SubForm.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
-                            .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                        m_uiDoc.Selection.PickObjects(ObjectType.Element, "");
                         mouseHook.UninstallHook();
-                    }
-                    catch
-                    {
-                        mouseHook.UninstallHook();
-                    }
-                    Form.SubForm.FinishElementSelection();
+                        break;
                 }
-                //if (Form.ShowDialogType == ShowDialogType.ViewGT6 || Form.ShowDialogType == ShowDialogType.ViewCompletion)
-                //{
-                //    try
-                //    {
-                //        mouseHook.InstallHook();
-                //        m_uiDoc.Selection.PickObjects(ObjectType.Element, "");
-                //        mouseHook.UninstallHook();
-                //    }
-                //    catch
-                //    {
-                //        mouseHook.UninstallHook();
-                //    }
-                //}
             }
             return true;
         }

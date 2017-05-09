@@ -7,7 +7,7 @@ using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Interfaces;
 using Microsoft.Office.Interop.Excel;
 using Autodesk.Revit.DB;
-using MyRevit.SubsidenceMonitor.Utilities;
+using MyRevit.Utilities;
 using Autodesk.Revit.UI;
 //using Autodesk.Revit.DB;
 
@@ -126,15 +126,15 @@ namespace MyRevit.SubsidenceMonitor.UI
             //560-42-18-500/6 84 504 56 42+16 差不多? 保存还有多2左右 实际是 42的序列号+14的Scroll
             var headerNodes = new List<HeaderNode>()
             {
-                new HeaderNode(0,46,84,"测点编号",nameof(BuildingSubsidenceDataV1.NodeCode)),
-                new HeaderNode(1,23,168,"沉降变化量(mm)",null,
+                new HeaderNode(0,52,84,"测点编号",nameof(BuildingSubsidenceDataV1.NodeCode)),
+                new HeaderNode(1,26,168,"沉降变化量(mm)",null,
                 new List<HeaderNode>() {
-                     new HeaderNode(-1,23,84,"本次变量",nameof(BuildingSubsidenceDataV1.CurrentChanges)),
-                     new HeaderNode(-1,23,84,"累计变量",nameof(BuildingSubsidenceDataV1.SumChanges)),
+                     new HeaderNode(-1,26,84,"本次变量",nameof(BuildingSubsidenceDataV1.CurrentChanges)),
+                     new HeaderNode(-1,26,84,"累计变量",nameof(BuildingSubsidenceDataV1.SumChanges)),
                 }),
-                new HeaderNode(3,46,84,$"围护结构施工{System.Environment.NewLine}期间累计值（mm）",nameof(BuildingSubsidenceDataV1.SumPeriodBuildingEnvelope)),
-                new HeaderNode(4,46,84,"总累计值（mm）",nameof(BuildingSubsidenceDataV1.SumBuildingEnvelope)),
-                new HeaderNode(5,46,84,"备注",nameof(BuildingSubsidenceDataV1.Conment)),
+                new HeaderNode(3,52,84,$"围护结构施工{System.Environment.NewLine}期间累计值（mm）",nameof(BuildingSubsidenceDataV1.SumPeriodBuildingEnvelope)),
+                new HeaderNode(4,52,84,"总累计值（mm）",nameof(BuildingSubsidenceDataV1.SumBuildingEnvelope)),
+                new HeaderNode(5,52,84,"备注",nameof(BuildingSubsidenceDataV1.Conment)),
             };
             dgv_left.HeaderNodes = headerNodes;
             dgv_left.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -228,6 +228,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
             {
                 Model.Rollback(true);
+                ListForm.Activate();
             }
         }
         #endregion
@@ -360,48 +361,12 @@ namespace MyRevit.SubsidenceMonitor.UI
                 MessageBox.Show(message);
             }
         }
-        #endregion
-
-        #region 浏览操作
-        /// <summary>
-        /// 接近警戒值
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_CloseWarn_Click(object sender, EventArgs e)
-        {
-            //TODO Revit
-            var form = new CPSettingsForm(null, Model.MemorableData.Data.CloseCTSettings);
-            var result = form.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                Model.MemorableData.Data.CloseCTSettings = form.Data;
-                Model.Edited();
-            }
-        }
-        /// <summary>
-        /// 超过警戒值
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_OverWarn_Click(object sender, EventArgs e)
-        {
-            var form = new CPSettingsForm(null, Model.MemorableData.Data.OverCTSettings);
-            var result = form.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                Model.MemorableData.Data.OverCTSettings = form.Data;
-                Model.Edited();
-            }
-        }
-        #endregion
-
         /// <summary>
         /// 添加构件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_AddComponent_Click(object sender, EventArgs e)
+        void btn_AddComponent_Click(object sender, EventArgs e)
         {
             if (SelectedNodes.Count == 0)
             {
@@ -425,7 +390,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_DeleteComponent_Click(object sender, EventArgs e)
+        void btn_DeleteComponent_Click(object sender, EventArgs e)
         {
             if (SelectedNodes.Count == 0)
             {
@@ -438,7 +403,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
             {
                 var elementIds = Model.GetElementIds(SelectedNodes[0].NodeCode, UI_Doc.Document);
-                RevitHelper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
+                Revit_View_Helper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
                 ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
                 this.DialogResult = DialogResult.Retry;
                 this.Close();
@@ -467,7 +432,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                         Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
                         Model.Edited();
                     }
-                    RevitHelper.DeisolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(FinishElementSelection), UI_Doc.ActiveView);
+                    Revit_View_Helper.DeisolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(FinishElementSelection), UI_Doc.ActiveView);
                     ListForm.ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
@@ -505,7 +470,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 cells.Add(new CellLocation(dgv.SelectedCells[0].RowIndex, dgv.SelectedCells[0].ColumnIndex));
             }
         }
-        private void SaveDataGridViewSelection()
+        void SaveDataGridViewSelection()
         {
             SaveDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
             SaveDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
@@ -532,7 +497,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 dgv.CurrentCell = dgv[cells[0].ColumnIndex, cells[0].RowIndex];
             }
         }
-        private void LoadDataGridViewSelection()
+        void LoadDataGridViewSelection()
         {
             LoadDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
             LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
@@ -582,15 +547,214 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
         }
         #endregion
-
         /// <summary>
         /// 测点赋值
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_RenderComponent_Click(object sender, EventArgs e)
+        void btn_RenderComponent_Click(object sender, EventArgs e)
         {
 
         }
+        #endregion
+
+        #region 浏览操作
+        /// <summary>
+        /// 接近警戒值
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_CloseWarn_Click(object sender, EventArgs e)
+        {
+            //TODO Revit
+            var form = new CPSettingsForm(null, Model.MemorableData.Data.CloseCTSettings);
+            var result = form.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                Model.MemorableData.Data.CloseCTSettings = form.Data;
+                Model.Edited();
+            }
+        }
+        /// <summary>
+        /// 超过警戒值
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_OverWarn_Click(object sender, EventArgs e)
+        {
+            var form = new CPSettingsForm(null, Model.MemorableData.Data.OverCTSettings);
+            var result = form.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                Model.MemorableData.Data.OverCTSettings = form.Data;
+                Model.Edited();
+            }
+        }
+
+        /// <summary>
+        /// 测点查看-查看选中
+        /// 选中-红色
+        /// 已附加-淡显
+        /// 未附加-隐藏
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void btn_ViewSelection_Click(object sender, EventArgs e)
+        {
+            if (SelectedNodes.Count == 0)
+            {
+                MessageBox.Show("需选中节点");
+                return;
+            }
+            ListForm.ShowDialogType = ShowDialogType.ViewElementsBySelectedNodes;
+            string viewName = ListForm.ShowDialogType.GetViewName();
+            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+            var doc = UI_Doc.Document;
+            //新建
+            using (var transaction = new Transaction(doc, nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click)))
+            {
+                transaction.Start();
+                try
+                {
+                    //已有视图,则重置元素着色配置
+                    if (view != null)
+                    {
+                        ////取消可见
+                        //try
+                        //{
+                        //    foreach (Category category in doc.Settings.Categories)
+                        //    {
+                        //        category.set_Visible(view, false);
+                        //    }
+                        //}
+                        //catch { };//由于存在某些User Hidden的Category暂不明如何针对性的设置
+
+                        //按元素隐藏
+                        var allElements = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElements();
+                        List<ElementId> elementIdsToHid = new List<ElementId>();
+                        foreach (var element in allElements)
+                        {
+                            if (element.CanBeHidden(view) && element.Id != view.Id)
+                            {
+                                elementIdsToHid.Add(element.Id);
+                            }
+                        }
+                        view.HideElements(elementIdsToHid);
+                    }
+                    else
+                    {
+                        //新建视图
+                        view = Revit_Document_Helper.CreateTinged3DView(transaction, doc, viewName);
+                    }
+                    //渲染_所有节点相关的
+                    var nodesElementIds = Model.GetAllElementIds(doc);
+                    view.UnhideElements(nodesElementIds);
+                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                    foreach (var elementId in nodesElementIds)
+                    {
+                        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                    }
+                    //渲染_选中
+                    var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(System.Drawing.Color.Red.R, System.Drawing.Color.Red.G, System.Drawing.Color.Red.B),
+                        CPSettings.GetDefaultFillPatternId(doc), 0);
+                    var selectedElementIds = Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
+                    foreach (var elementId in selectedElementIds)
+                    {
+                        view.SetElementOverrides(elementId, overrideGraphicSettings);
+                    }
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollBack();
+                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    return;
+                }
+            }
+            UI_Doc.ActiveView = view;
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        #region 按元素隐藏和重置
+        //var allElements = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElements();
+        //List<ElementId> elementIdsToHid = new List<ElementId>();
+        //foreach (var element in allElements)
+        //{
+        //    if (element.CanBeHidden(view))
+        //    {
+        //        elementIdsToHid.Add(element.Id);
+        //    }
+        //}
+        //view.HideElements(elementIdsToHid);
+        ////重置所有OverrideGraphicSettings
+        //var defaultOverrideGraphicSettings = new OverrideGraphicSettings();
+        //foreach (var elementId in elementIdsToHid)
+        //{
+        //    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+        //} 
+        #endregion
+        /// <summary>
+        /// 测点查看-整体查看
+        /// 选中-红色
+        /// 其他-淡显
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewAll_Click(object sender, EventArgs e)
+        {
+            if (SelectedNodes.Count == 0)
+            {
+                MessageBox.Show("需选中节点");
+                return;
+            }
+            ListForm.ShowDialogType = ShowDialogType.ViewElementsBySelectedNodes;
+            string viewName = ListForm.ShowDialogType.GetViewName();
+            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+            var doc = UI_Doc.Document;
+            //新建
+            using (var transaction = new Transaction(doc, nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click)))
+            {
+                transaction.Start();
+                try
+                {
+                    //已有视图,则重置元素着色配置
+                    if (view == null)
+                    {
+                        //新建视图
+                        view = Revit_Document_Helper.CreateTinged3DView(transaction, doc, viewName);
+                    }
+                    //渲染_所有节点相关的
+                    var allElementIds = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElementIds();
+                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                    foreach (var elementId in allElementIds)
+                    {
+                        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                    }
+                    //渲染_选中
+                    var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(System.Drawing.Color.Red.R, System.Drawing.Color.Red.G, System.Drawing.Color.Red.B),
+                        CPSettings.GetDefaultFillPatternId(doc), 0);
+                    var selectedElementIds = Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
+                    foreach (var elementId in selectedElementIds)
+                    {
+                        view.SetElementOverrides(elementId, overrideGraphicSettings);
+                    }
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollBack();
+                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    return;
+                }
+            }
+            UI_Doc.ActiveView = view;
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        #endregion
     }
 }
