@@ -252,10 +252,14 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
             }
             else
             {
-                MemorableData.Rollback();
-                Datas[DataIndex] = MemorableData.Data;
-                OnDataChanged?.Invoke(Datas[DataIndex]);
-                OnStateChanged?.Invoke(HasPrevious, HasNext, CanCreateNew, CanDelete, CanSave);
+                //0509 09:57 在编辑后回退,无编辑不回退
+                if (IsEdited)
+                {
+                    MemorableData.Rollback();
+                    Datas[DataIndex] = MemorableData.Data;
+                    OnDataChanged?.Invoke(Datas[DataIndex]);
+                    OnStateChanged?.Invoke(HasPrevious, HasNext, CanCreateNew, CanDelete, CanSave);
+                }
             }
         }
         /// <summary>

@@ -195,6 +195,7 @@
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SubsidenceMonitor\Utilities\ExcelHelper.cs" />
+    <Compile Include="SubsidenceMonitor\Utilities\RevitHelper.cs" />
     <Compile Include="SubsidenceMonitor\Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\DocumentHelper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">

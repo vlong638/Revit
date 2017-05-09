@@ -63,7 +63,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 IssueDateTime = c.IssueDateTime,
                 NodeCode = c.NodeCode,
                 Data = c.Data,
-                ElementIds = c.ElementIds,
+                ElementIds = c.GetElementIds(),//2017/05/09 09:59  ElementIds总是以ElementIds_Int为修改对象,ElementIds_Int是ElementIds的活动的修改对象,ElementIds是静态的存储对象
                 Index = c.Index,
             }));
             return memo;

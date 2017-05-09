@@ -57,5 +57,17 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 targetNode.ElementIds_Int.Remove(elementId_Int);
             }
         }
+        public List<ElementId> GetElementIds(string nodeCode,Document doc)
+        {
+            List<ElementId> availableElementIds = new List<ElementId>();
+            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
+            var storedElements = targetNode.ElementIds_Int.Select(c => doc.GetElement(new ElementId(c)));
+            foreach (var element in storedElements)
+                if (element != null)
+                    availableElementIds.Add(element.Id);
+                else
+                    targetNode.ElementIds_Int.Remove(element.Id.IntegerValue);//获取ElementId的时候,需在文档中监测Element是否存在,移除无效的Element(可能被用户在文档中删除)
+            return availableElementIds;
+        }
     }
 }

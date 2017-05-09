@@ -7,6 +7,8 @@ using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Interfaces;
 using Microsoft.Office.Interop.Excel;
 using Autodesk.Revit.DB;
+using MyRevit.SubsidenceMonitor.Utilities;
+using Autodesk.Revit.UI;
 //using Autodesk.Revit.DB;
 
 namespace MyRevit.SubsidenceMonitor.UI
@@ -21,15 +23,16 @@ namespace MyRevit.SubsidenceMonitor.UI
     public partial class SubsidenceMonitorForm : System.Windows.Forms.Form
     {
         #region 初始化和主要参数
-        public SubsidenceMonitorForm(ListForm listForm, Document doc, TList list) : base()
+        public SubsidenceMonitorForm(ListForm listForm, UIDocument ui_doc, TList list) : base()
         {
             InitializeComponent();
 
-            //初始化控件配置
-            InitControlSettings();
             ////更新主要参数
+            UI_Doc = ui_doc;
             ListForm = listForm;
             Model = new MultipleSingleMemorableDetails();
+            //初始化控件配置
+            InitControlSettings();
             //如果有详情则加载详情数据
             Model.OnDataChanged += Model_OnDataChanged;
             Model.OnStateChanged += Model_OnStateChanged;
@@ -37,9 +40,10 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.OnConfirmChangeCurrentWhileHasCreateNew += Model_OnChangeCurrentWhileHasCreateNew;
             Model.OnConfirmDelete += Model_OnConfirmDelete;
             //事件附加后再作数据的初始化,否则关联的信息无法在初始化的时候渲染出来
-            Model.Init(doc, list);
+            Model.Init(ui_doc.Document, list);
             IssueTypeEntity = list.IssueType.GetEntity();
         }
+        public UIDocument UI_Doc { set; get; }
         public ListForm ListForm { set; get; }
         public List<ElementId> SelectedElementIds { set; get; } = new List<ElementId>();
         MultipleSingleMemorableDetails Model { set; get; }
@@ -433,6 +437,8 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             else
             {
+                var elementIds=Model.GetElementIds(SelectedNodes[0].NodeCode, UI_Doc.Document);
+                RevitHelper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
                 ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
                 this.DialogResult = DialogResult.Retry;
                 this.Close();
@@ -461,20 +467,31 @@ namespace MyRevit.SubsidenceMonitor.UI
                         Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
                         Model.Edited();
                     }
+                    RevitHelper.DeisolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(FinishElementSelection), UI_Doc.ActiveView);
                     ListForm.ShowDialogType = ShowDialogType.Idle;
                     break;
                 default:
                     break;
             }
         }
+        struct CellLocation {
+            public int RowIndex;
+            public int ColumnIndex;
+
+            public CellLocation(int rowIndex, int columnIndex)
+            {
+                this.RowIndex = rowIndex;
+                this.ColumnIndex = columnIndex;
+            }
+        }
         static List<int> SelectedRows_left { get; set; } = new List<int>();
-        static List<int> SelectedCells_left { get; set; } = new List<int>();
+        static List<CellLocation> SelectedCells_left { get; set; } = new List<CellLocation>();
         static List<int> SelectedRows_right { get; set; } = new List<int>();
-        static List<int> SelectedCells_right { get; set; } = new List<int>();
+        static List<CellLocation> SelectedCells_right { get; set; } = new List<CellLocation>();
         /// <summary>
         /// 保存列表选中项,由于采用了模态形式,页面显示总是刷新掉选中项
         /// </summary>
-        void SaveDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<int> cells)
+        void SaveDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<CellLocation> cells)
         {
             rows.Clear();
             foreach (DataGridViewRow row in dgv.SelectedRows)
@@ -484,19 +501,18 @@ namespace MyRevit.SubsidenceMonitor.UI
             cells.Clear();
             if (dgv.SelectedCells.Count > 0)
             {
-                cells.Add(dgv.SelectedCells[0].RowIndex);
-                cells.Add(dgv.SelectedCells[0].ColumnIndex);
+                cells.Add(new CellLocation(dgv.SelectedCells[0].RowIndex, dgv.SelectedCells[0].ColumnIndex));
             }
         }
         private void SaveDataGridViewSelection()
         {
             SaveDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
-            SaveDataGridViewSelection(dgv_right, SelectedRows_right, SelectedRows_right);
+            SaveDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
         }
         /// <summary>
         /// 加载列表选中项
         /// </summary>
-        public void LoadDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<int> cells)
+        void LoadDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<CellLocation> cells)
         {
             if (rows.Count() > 0)
             {
@@ -507,13 +523,18 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             if (cells.Count() > 0)
             {
-                dgv.CurrentCell = dgv[cells[1], cells[0]];
+                //2017/05/09 10:05 修正Cells的选中,CurrentCell是左侧箭头的设置
+                foreach (CellLocation cell in cells)
+                {
+                    dgv.Rows[cell.RowIndex].Cells[cell.ColumnIndex].Selected = true;
+                }
+                dgv.CurrentCell = dgv[cells[0].RowIndex, cells[0].ColumnIndex];
             }
         }
         private void LoadDataGridViewSelection()
         {
             LoadDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
-            LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedRows_right);
+            LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
         }
         #region 节点选中处理
         List<TNode> SelectedNodes = new List<TNode>();
@@ -560,5 +581,15 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
         }
         #endregion
+
+        /// <summary>
+        /// 测点赋值
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_RenderComponent_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

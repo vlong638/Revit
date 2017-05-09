@@ -58,8 +58,8 @@ namespace MyRevit.EarthWork.Entity
             //保存数据
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
             var jsonObj = JsonConvert.SerializeObject(this);
-            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettingsSize(storage.Block.Id), jsonObj.Length.ToString());
-            recorder.WriteValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlockCPSettings(storage.Block.Id), jsonObj);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings_Size, storage.Block.Id), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings, storage.Block.Id), jsonObj);
         }
         public override void Rollback()
         {

@@ -352,6 +352,7 @@
             this.btn_RenderComponent.TabIndex = 4;
             this.btn_RenderComponent.Text = "测点赋值";
             this.btn_RenderComponent.UseVisualStyleBackColor = true;
+            this.btn_RenderComponent.Click += new System.EventHandler(this.btn_RenderComponent_Click);
             // 
             // btn_DeleteComponent
             // 
@@ -501,7 +502,7 @@
             // 
             // btn_Delete
             // 
-            this.btn_Delete.Location = new System.Drawing.Point(1061, 580);
+            this.btn_Delete.Location = new System.Drawing.Point(1061, 589);
             this.btn_Delete.Name = "btn_Delete";
             this.btn_Delete.Size = new System.Drawing.Size(67, 38);
             this.btn_Delete.TabIndex = 36;
@@ -609,7 +610,7 @@
             // 
             // btn_CreateNew
             // 
-            this.btn_CreateNew.Location = new System.Drawing.Point(988, 580);
+            this.btn_CreateNew.Location = new System.Drawing.Point(988, 589);
             this.btn_CreateNew.Name = "btn_CreateNew";
             this.btn_CreateNew.Size = new System.Drawing.Size(67, 38);
             this.btn_CreateNew.TabIndex = 40;

@@ -28,7 +28,7 @@ namespace MyRevit.SubsidenceMonitor.Command
         ListForm Form;
         protected override bool DoUI()
         {
-            Form = new ListForm(this.m_app.ActiveUIDocument.Document);
+            Form = new ListForm(this.m_app.ActiveUIDocument);
             PickObjectsMouseHook mouseHook = new PickObjectsMouseHook();
             DialogResult result = DialogResult.Retry;
             while ((result = Form.ShowDialog(new RevitHandle(Process.GetCurrentProcess().MainWindowHandle))) == DialogResult.Retry)

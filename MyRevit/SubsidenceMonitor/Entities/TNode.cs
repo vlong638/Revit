@@ -36,7 +36,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// <summary>
         /// 测点构件
         /// </summary>
-        public String ElementIds { get; set; }
+        public String ElementIds { private get; set; }
         #endregion
 
         #region Constructors
@@ -101,13 +101,14 @@ namespace MyRevit.SubsidenceMonitor.Entities
         #endregion
 
         #region Manual
+        public static string ElementIds_IntSplitter = ",";
         List<int> _ElementIds_Int;
         public List<int> ElementIds_Int
         {
             set
             {
                 _ElementIds_Int = value;
-                ElementIds = string.Join(",", _ElementIds_Int);
+                //ElementIds = string.Join(ElementIds_IntSplitter, _ElementIds_Int);
             }
             get
             {
@@ -119,6 +120,10 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 }
                 return _ElementIds_Int;
             }
+        }
+        public string GetElementIds()
+        {
+            return string.Join(ElementIds_IntSplitter, _ElementIds_Int);
         }
         #endregion
     }

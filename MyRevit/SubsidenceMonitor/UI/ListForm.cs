@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Operators;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
@@ -18,16 +19,16 @@ namespace MyRevit.SubsidenceMonitor.UI
     public partial class ListForm : System.Windows.Forms.Form
     {
         #region Init
-        public ListForm(Document doc)
+        public ListForm(UIDocument ui_doc)
         {
             InitializeComponent();
 
             InitControls();
-            Doc = doc;
+            UI_Doc = ui_doc;
         }
         public ShowDialogType ShowDialogType { set; get; }
         public SubsidenceMonitorForm SubForm { set; get; }
-        protected Document Doc { set; get; }
+        protected UIDocument UI_Doc { set; get; }
         private void InitControls()
         {
             //MonthPicker
@@ -186,7 +187,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     case EIssueType.建筑物沉降:
                         if (list.Datas.Count() == 0 && list.DataCount > 0)
                             ReadFacade.FetchDetails(list);
-                        SubForm = new SubsidenceMonitorForm(this, Doc, list);
+                        SubForm = new SubsidenceMonitorForm(this, UI_Doc, list);
                         SubForm.ShowDialog();
                         CurrentLists.FirstOrDefault(c => c.IssueDate == list.IssueDate).Datas = list.Datas;
                         dgv.DataSource = null;

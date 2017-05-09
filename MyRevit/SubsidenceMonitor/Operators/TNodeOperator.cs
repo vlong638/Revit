@@ -17,7 +17,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
             NameValues.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
             NameValues.Add(nameof(entity.NodeCode), SQLiteHelper.ToSQLiteString(entity.NodeCode));
             NameValues.Add(nameof(entity.Data), SQLiteHelper.ToSQLiteString(entity.Data));
-            NameValues.Add(nameof(entity.ElementIds), SQLiteHelper.ToSQLiteString(string.Join(",", entity.ElementIds_Int)));
+            NameValues.Add(nameof(entity.ElementIds), entity.GetElementIds());
             NameValues.Add($"[{nameof(entity.Index)}]", $"'{entity.Index.ToString()}'");
             command.CommandText = $"insert into {entity.TableName}({string.Join(",", NameValues.Keys)}) values({string.Join(",", NameValues.Values)})";
             return command.ExecuteNonQuery() == 1;
@@ -36,7 +36,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
             var command = connection.CreateCommand();
             Dictionary<string, string> Sets = new Dictionary<string, string>();
             Sets.Add(nameof(entity.Data), SQLiteHelper.ToSQLiteString(entity.Data));
-            Sets.Add(nameof(entity.ElementIds), SQLiteHelper.ToSQLiteString(string.Join(",", entity.ElementIds_Int)));
+            Sets.Add(nameof(entity.ElementIds), entity.GetElementIds());
             Sets.Add($"[{nameof(entity.Index)}]", $"'{entity.Index.ToString()}'");
             Dictionary<string, string> Wheres = new Dictionary<string, string>();
             Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));

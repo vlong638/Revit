@@ -60,7 +60,7 @@ namespace MyRevit.EarthWork.UI
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
             var blockingStr = "";
-            recorder.ReadValue(SaveKeyHelper.GetSaveKeyOfEarthworkBlocking(), ref blockingStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKeyOfEarthworkBlockingSize(), 1000) + 2);
+            recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlocking, 1), ref blockingStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlocking_Size, 1), 1000) + 2);
             if (blockingStr != "")
                 Blocking = Newtonsoft.Json.JsonConvert.DeserializeObject<EarthworkBlocking>(blockingStr);
             else
