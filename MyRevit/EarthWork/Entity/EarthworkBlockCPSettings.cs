@@ -1,11 +1,10 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using MyRevit.EarthWork.UI;
+using MyRevit.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System;
 
 namespace MyRevit.EarthWork.Entity
 {
@@ -58,8 +57,8 @@ namespace MyRevit.EarthWork.Entity
             //保存数据
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
             var jsonObj = JsonConvert.SerializeObject(this);
-            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings_Size, storage.Block.Id), jsonObj.Length.ToString());
-            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings, storage.Block.Id), jsonObj);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings_Size, storage.Block.Id), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings, storage.Block.Id), jsonObj);
         }
         public override void Rollback()
         {

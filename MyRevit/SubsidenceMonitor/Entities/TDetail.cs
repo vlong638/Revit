@@ -164,6 +164,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// 相关联的Nodes
         /// </summary>
         public List<TNode> Nodes { get; set; } = new List<TNode>();
+        public ITNodeDataCollection<ITNodeData> NodeDatas { set; get; }
         #endregion
     }
 }

@@ -32,7 +32,8 @@ namespace MyRevit.Utilities
                     return "建筑物沉降";
                 case EIssueType.地表沉降:
                     return "地表沉降";
-                case EIssueType.管线沉降:
+                case EIssueType.管线沉降_无压:
+                case EIssueType.管线沉降_有压:
                     return "管线沉降";
                 case EIssueType.侧线监测:
                 case EIssueType.钢支撑轴力监测:

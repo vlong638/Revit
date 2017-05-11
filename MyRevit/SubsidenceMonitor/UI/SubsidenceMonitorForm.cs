@@ -31,6 +31,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             UI_Doc = ui_doc;
             ListForm = listForm;
             Model = new MultipleSingleMemorableDetails();
+            IssueTypeEntity = list.IssueType.GetEntity();
             //初始化控件配置
             InitControlSettings();
             //如果有详情则加载详情数据
@@ -41,7 +42,6 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.OnConfirmDelete += Model_OnConfirmDelete;
             //事件附加后再作数据的初始化,否则关联的信息无法在初始化的时候渲染出来
             Model.Init(ui_doc.Document, list);
-            IssueTypeEntity = list.IssueType.GetEntity();
         }
         public UIDocument UI_Doc { set; get; }
         public ListForm ListForm { set; get; }
@@ -49,63 +49,6 @@ namespace MyRevit.SubsidenceMonitor.UI
         MultipleSingleMemorableDetails Model { set; get; }
         EIssueTypeEntity IssueTypeEntity { set; get; }
 
-        private bool Model_OnConfirmDelete()
-        {
-            throw new NotImplementedException();
-        }
-        private bool Model_OnChangeCurrentWhileHasCreateNew()
-        {
-            //TODO 确认处理
-            MessageBox.Show("用户确定了");
-            return true;
-        }
-        private bool Model_OnChangeCurrentWhileIsEdited()
-        {
-            //TODO 确认处理
-            MessageBox.Show("用户确定了");
-            return true;
-        }
-
-        private void Model_OnStateChanged(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave)
-        {
-            btn_Previous.Enabled = hasPrevious;
-            btn_Next.Enabled = hasNext;
-            btn_CreateNew.Enabled = canCreateNew;
-            btn_Delete.Enabled = canDelete;
-            btn_Submit.Enabled = canSave;
-            if (canDelete || canSave)//可保存或可删除意味着编辑主体的存在
-            {
-                btn_AddComponent.Enabled = true;
-                btn_DeleteComponent.Enabled = true;
-                btn_RenderComponent.Enabled = true;
-                btn_ViewSelection.Enabled = true;
-                btn_ViewAll.Enabled = true;
-                btn_ViewCurrentMax_Red.Enabled = true;
-                btn_ViewCurrentMax_All.Enabled = true;
-                btn_ViewSumMax_Red.Enabled = true;
-                btn_ViewSumMax_All.Enabled = true;
-                btn_CloseWarnSettings.Enabled = true;
-                btn_ViewCloseWarn.Enabled = true;
-                btn_OverWarnSettings.Enabled = true;
-                btn_ViewOverWarn.Enabled = true;
-            }
-            else
-            {
-                btn_AddComponent.Enabled = false;
-                btn_DeleteComponent.Enabled = false;
-                btn_RenderComponent.Enabled = false;
-                btn_ViewSelection.Enabled = false;
-                btn_ViewAll.Enabled = false;
-                btn_ViewCurrentMax_Red.Enabled = false;
-                btn_ViewCurrentMax_All.Enabled = false;
-                btn_ViewSumMax_Red.Enabled = false;
-                btn_ViewSumMax_All.Enabled = false;
-                btn_CloseWarnSettings.Enabled = false;
-                btn_ViewCloseWarn.Enabled = false;
-                btn_OverWarnSettings.Enabled = false;
-                btn_ViewOverWarn.Enabled = false;
-            }
-        }
         private void InitControlSettings()
         {
             //内容不可改
@@ -148,6 +91,76 @@ namespace MyRevit.SubsidenceMonitor.UI
         {
             LoadDataGridViewSelection();
         }
+        private void SubsidenceMonitorForm_FormClosing(object senedr, FormClosingEventArgs e)
+        {
+            //退出窗口时 需要清空未保存的内容
+            //编辑控件或者进行浏览时,不进行回滚处理
+            if (DialogResult == DialogResult.Retry)
+            {
+                SaveDataGridViewSelection();
+            }
+            else
+            {
+                Model.Rollback(true);
+                ListForm.Activate();
+            }
+        }
+        private bool Model_OnConfirmDelete()
+        {
+            throw new NotImplementedException();
+        }
+        private bool Model_OnChangeCurrentWhileHasCreateNew()
+        {
+            //TODO 确认处理
+            MessageBox.Show("用户确定了");
+            return true;
+        }
+        private bool Model_OnChangeCurrentWhileIsEdited()
+        {
+            //TODO 确认处理
+            MessageBox.Show("用户确定了");
+            return true;
+        }
+        private void Model_OnStateChanged(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave)
+        {
+            btn_Previous.Enabled = hasPrevious;
+            btn_Next.Enabled = hasNext;
+            btn_CreateNew.Enabled = canCreateNew;
+            btn_Delete.Enabled = canDelete;
+            btn_Submit.Enabled = canSave;
+            if (canDelete || canSave)//可保存或可删除意味着编辑主体的存在
+            {
+                btn_AddComponent.Enabled = true;
+                btn_DeleteComponent.Enabled = true;
+                btn_RenderComponent.Enabled = true;
+                btn_ViewSelection.Enabled = true;
+                btn_ViewAll.Enabled = true;
+                btn_ViewCurrentMax_Red.Enabled = true;
+                btn_ViewCurrentMax_All.Enabled = true;
+                btn_ViewSumMax_Red.Enabled = true;
+                btn_ViewSumMax_All.Enabled = true;
+                btn_CloseWarnSettings.Enabled = true;
+                btn_ViewCloseWarn.Enabled = true;
+                btn_OverWarnSettings.Enabled = true;
+                btn_ViewOverWarn.Enabled = true;
+            }
+            else
+            {
+                btn_AddComponent.Enabled = false;
+                btn_DeleteComponent.Enabled = false;
+                btn_RenderComponent.Enabled = false;
+                btn_ViewSelection.Enabled = false;
+                btn_ViewAll.Enabled = false;
+                btn_ViewCurrentMax_Red.Enabled = false;
+                btn_ViewCurrentMax_All.Enabled = false;
+                btn_ViewSumMax_Red.Enabled = false;
+                btn_ViewSumMax_All.Enabled = false;
+                btn_CloseWarnSettings.Enabled = false;
+                btn_ViewCloseWarn.Enabled = false;
+                btn_OverWarnSettings.Enabled = false;
+                btn_ViewOverWarn.Enabled = false;
+            }
+        }
         private void Model_OnDataChanged(TDetail detail)
         {
             tb_ReportName.Text = detail.ReportName;//报告名称
@@ -164,11 +177,16 @@ namespace MyRevit.SubsidenceMonitor.UI
             tb_InstrumentCode.Text = detail.InstrumentCode;//仪器编号
             //DGV
             var normalHeight = 20;
-            List<TNode> leftNodes = new List<TNode>();
-            List<TNode> rightNodes = new List<TNode>();
+            detail.NodeDatas = IssueTypeEntity.GetNodeDataCollection();
+            ITNodeDataCollection<ITNodeData> leftNodes = IssueTypeEntity.GetNodeDataCollection();
+            ITNodeDataCollection<ITNodeData> rightNodes = IssueTypeEntity.GetNodeDataCollection();
             if (detail.Nodes.Count <= normalHeight)
             {
-                leftNodes.AddRange(detail.Nodes);
+                foreach (var node in detail.Nodes)
+                {
+                    leftNodes.Add(node.NodeCode, node.Data);
+                    detail.NodeDatas.Add(node.NodeCode, node.Data);
+                }
             }
             else
             {
@@ -177,20 +195,23 @@ namespace MyRevit.SubsidenceMonitor.UI
                     height = detail.Nodes.Count / 2;
                 for (int i = 0; i < detail.Nodes.Count; i++)
                 {
+                    var node = detail.Nodes[i];
                     if (i < height)
                     {
-                        leftNodes.Add(detail.Nodes[i]);
+                        leftNodes.Add(node.NodeCode, node.Data);
+                        detail.NodeDatas.Add(node.NodeCode, node.Data);
                     }
                     else
                     {
-                        rightNodes.Add(detail.Nodes[i]);
+                        rightNodes.Add(node.NodeCode, node.Data);
+                        detail.NodeDatas.Add(node.NodeCode, node.Data);
                     }
                 }
             }
             dgv_left.DataSource = null;
-            dgv_left.DataSource = leftNodes.Select(c => new BuildingSubsidenceDataV1(c.NodeCode, c.Data)).ToList();
+            dgv_left.DataSource = leftNodes.Datas;
             dgv_right.DataSource = null;
-            dgv_right.DataSource = rightNodes.Select(c => new BuildingSubsidenceDataV1(c.NodeCode, c.Data)).ToList();
+            dgv_right.DataSource = rightNodes.Datas;
             dgv_left.BindingContextChanged += Dgv_left_BindingContextChanged;
             dgv_right.BindingContextChanged += Dgv_right_BindingContextChanged; ;
         }
@@ -211,25 +232,6 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void Dgv_left_BindingContextChanged(object sender, EventArgs e)
         {
             dgv_left.ClearSelection();
-        }
-        /// <summary>
-        /// 关闭页面
-        /// </summary>
-        /// <param name="senedr"></param>
-        /// <param name="e"></param>
-        private void SubsidenceMonitorForm_FormClosing(object senedr, FormClosingEventArgs e)
-        {
-            //退出窗口时 需要清空未保存的内容
-            //编辑控件或者进行浏览时,不进行回滚处理
-            if (DialogResult == DialogResult.Retry)
-            {
-                SaveDataGridViewSelection();
-            }
-            else
-            {
-                Model.Rollback(true);
-                ListForm.Activate();
-            }
         }
         #endregion
 
@@ -379,6 +381,20 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
             {
                 ListForm.ShowDialogType = ShowDialogType.AddElements_ForDetail;
+                string viewName = ListForm.ShowDialogType.GetViewName();
+                var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+                var doc = UI_Doc.Document;
+                var transactionName = nameof(SubsidenceMonitor) + nameof(btn_AddComponent_Click);
+                if (view == null)
+                {
+                    bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+                    {
+                        view = Revit_Document_Helper.Create3DView(doc, viewName);
+                    });
+                    if (!isSuccess)
+                        return;
+                }
+                UI_Doc.ActiveView = view;
                 this.DialogResult = DialogResult.Retry;
                 this.Close();
                 ListForm.DialogResult = DialogResult.Retry;
@@ -402,9 +418,23 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             else
             {
+                ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
+                string viewName = ListForm.ShowDialogType.GetViewName();
+                var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+                var doc = UI_Doc.Document;
+                var transactionName = nameof(SubsidenceMonitor) + nameof(btn_AddComponent_Click);
+                if (view == null)
+                {
+                    bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+                    {
+                        view = Revit_Document_Helper.Create3DView(doc, viewName);
+                    });
+                    if (!isSuccess)
+                        return;
+                }
+                UI_Doc.ActiveView = view;
                 var elementIds = Model.GetElementIds(SelectedNodes[0].NodeCode, UI_Doc.Document);
                 Revit_View_Helper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
-                ListForm.ShowDialogType = ShowDialogType.DeleleElements_ForDetail;
                 this.DialogResult = DialogResult.Retry;
                 this.Close();
                 ListForm.DialogResult = DialogResult.Retry;
@@ -554,19 +584,287 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         void btn_RenderComponent_Click(object sender, EventArgs e)
         {
+            //TODO 测点赋值
 
         }
         #endregion
 
         #region 浏览操作
+
+        Color ColorForSelectedElements = new Color(System.Drawing.Color.Red.R, System.Drawing.Color.Red.G, System.Drawing.Color.Red.B);
+
+        #region 辅助函数
+        /// <summary>
+        /// 显示对用户反馈
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="message"></param>
+        public void ShowMessage(string title, string message)
+        {
+            TaskDialog.Show(title, message);
+        }
+        /// <summary>
+        /// 视图逻辑处理
+        /// 支持(隐藏,淡显,红显)和(反隐藏,淡显,红显)
+        /// </summary>
+        /// <param name="showDialogType"></param>
+        /// <param name="needHide"></param>
+        /// <param name="getElementIds"></param>
+        /// <returns></returns>
+        private bool DetailWithView(ShowDialogType showDialogType, bool needHide, Func<Document, List<ElementId>> getElementIds)
+        {
+            ListForm.ShowDialogType = showDialogType;
+            string viewName = ListForm.ShowDialogType.GetViewName();
+            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+            var doc = UI_Doc.Document;
+            var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+            {
+                if (view == null)
+                    view = Revit_Document_Helper.Create3DView(doc, viewName);
+                if (needHide)
+                {
+                    //渲染_所有 隐藏
+                    IList<Element> allElements = GetAllElements(doc);
+                    List<ElementId> elementIdsToHid = new List<ElementId>();
+                    foreach (var element in allElements)
+                        if (element.CanBeHidden(view) && element.Id != view.Id)
+                            elementIdsToHid.Add(element.Id);
+                    view.HideElements(elementIdsToHid);
+                    //渲染_测点 淡显
+                    var nodesElementIds = Model.GetAllNodesElementIds(doc);
+                    view.UnhideElements(nodesElementIds);
+                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                    foreach (var elementId in nodesElementIds)
+                        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                }
+                else
+                {
+                    ////渲染_所有 反隐藏
+                    //IList<Element> allElements = GetAllElements(doc);
+                    //List<ElementId> elementIdsToHid = new List<ElementId>();
+                    //foreach (var element in allElements)
+                    //    if (element.CanBeHidden(view) && element.Id != view.Id)
+                    //        elementIdsToHid.Add(element.Id);
+                    //view.UnhideElements(elementIdsToHid);
+                    //渲染_所有 淡显
+                    var allElementIds = GetAllElements(doc);
+                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                    foreach (var elementId in allElementIds)
+                        view.SetElementOverrides(elementId.Id, defaultOverrideGraphicSettings);
+                }
+                //渲染_选中 红显
+                var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(ColorForSelectedElements, CPSettings.GetDefaultFillPatternId(doc), 0);
+                var selectedElementIds = getElementIds(doc);
+                foreach (var elementId in selectedElementIds)
+                    view.SetElementOverrides(elementId, overrideGraphicSettings);
+            });
+            UI_Doc.ActiveView = view;
+            return isSuccess;
+        }
+        /// <summary>
+        /// 视图处理
+        /// </summary>
+        /// <param name="viewName"></param>
+        /// <param name="view"></param>
+        /// <param name="doc"></param>
+        /// <param name="transactionName"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        bool DetailWithViewTransaction(string viewName, ref View3D view, Document doc, string transactionName, System.Action action)
+        {
+            bool isSuccess;
+            using (var transaction = new Transaction(doc, transactionName))
+            {
+                transaction.Start();
+                try
+                {
+                    action();
+                    transaction.Commit();
+                    isSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollBack();
+                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    isSuccess = false;
+                }
+            }
+            return isSuccess;
+        }
+        /// <summary>
+        /// 隐藏所有元素
+        /// </summary>
+        /// <param name="view"></param>
+        /// <param name="doc"></param>
+        static void HideAllElements(View3D view, Document doc)
+        {
+            //按Category处理
+            ////取消可见
+            //try
+            //{
+            //    foreach (Category category in doc.Settings.Categories)
+            //    {
+            //        category.set_Visible(view, false);
+            //    }
+            //}
+            //catch { };//由于存在某些User Hidden的Category暂不明如何针对性的设置
+
+            //按Element处理
+            IList<Element> allElements = GetAllElements(doc);
+            List<ElementId> elementIdsToHid = new List<ElementId>();
+            foreach (var element in allElements)
+            {
+                if (element.CanBeHidden(view) && element.Id != view.Id)
+                {
+                    elementIdsToHid.Add(element.Id);
+                }
+            }
+            view.HideElements(elementIdsToHid);
+        }
+        /// <summary>
+        /// 获取所有元素
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
+        static IList<Element> GetAllElements(Document doc)
+        {
+            //按元素隐藏
+            return new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElements();
+        }
+        #endregion
+
+        /// <summary>
+        /// 测点查看-查看选中
+        /// 选中-红色
+        /// 测点-淡显
+        /// 非测点-隐藏
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewSelection_Click(object sender, EventArgs e)
+        {
+            if (SelectedNodes.Count == 0)
+            {
+                ShowMessage("提醒", "需选中节点");
+                return;
+            }
+            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsBySelectedNodes,true,
+                (doc)=> {return Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc);
+            });
+            if (!isSuccess)
+                return;
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+
+        /// <summary>
+        /// 测点查看-整体查看
+        /// 选中-红色
+        /// 其他-淡显
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewAll_Click(object sender, EventArgs e)
+        {
+            if (SelectedNodes.Count == 0)
+            {
+                ShowMessage("提醒", "需选中节点");
+                return;
+            }
+            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false,
+                (doc) => {
+                    return Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc);
+                });
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        #endregion
+        /// <summary>
+        /// 本次最大变量点位查看
+        /// 最大-红色
+        /// 测点-淡显
+        /// 非测点-隐藏
+        /// </summary>
+        private void btn_ViewCurrentMax_Red_Click(object sender, EventArgs e)
+        {
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true,
+                (doc) => {
+                    return Model.GetCurrentMaxNodesElements(doc);
+                });
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        /// <summary>
+        /// 单次最大变量-整体查看
+        /// 最大-红色
+        /// 测点-淡显
+        /// 非测点-淡显
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewCurrentMax_All_Click(object sender, EventArgs e)
+        {
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false,
+                (doc) => {
+                    return Model.GetCurrentMaxNodesElements(doc);
+                });
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        /// <summary>
+        /// 累计最大变量-红色显示
+        /// 最大-红色
+        /// 测点-淡显
+        /// 非测点-隐藏
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewSumMax_Red_Click(object sender, EventArgs e)
+        {
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true,
+                (doc) => {
+                    return Model.GetTotalMaxNodesElements(doc);
+                });
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+        /// <summary>
+        /// 累计最大变量-整体查看
+        /// 最大-红色
+        /// 测点-淡显
+        /// 非测点-淡显
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ViewSumMax_All_Click(object sender, EventArgs e)
+        {
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false,
+                (doc) => {
+                    return Model.GetTotalMaxNodesElements(doc);
+                });
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
         /// <summary>
         /// 接近警戒值
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_CloseWarn_Click(object sender, EventArgs e)
+        private void btn_CloseWarnCPSettings_Click(object sender, EventArgs e)
         {
-            //TODO Revit
             var form = new CPSettingsForm(null, Model.MemorableData.Data.CloseCTSettings);
             var result = form.ShowDialog();
             if (result == DialogResult.OK)
@@ -580,7 +878,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_OverWarn_Click(object sender, EventArgs e)
+        private void btn_OverWarnCPSettings_Click(object sender, EventArgs e)
         {
             var form = new CPSettingsForm(null, Model.MemorableData.Data.OverCTSettings);
             var result = form.ShowDialog();
@@ -590,171 +888,98 @@ namespace MyRevit.SubsidenceMonitor.UI
                 Model.Edited();
             }
         }
-
         /// <summary>
-        /// 测点查看-查看选中
-        /// 选中-红色
-        /// 已附加-淡显
-        /// 未附加-隐藏
+        /// 接近预警预览
+        /// 接近:报警值*80%,天数-1
+        /// 显示测点,
+        /// 接近:颜色1
+        /// 非接近:颜色2
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void btn_ViewSelection_Click(object sender, EventArgs e)
+        private void btn_ViewCloseWarn_Click(object sender, EventArgs e)
         {
-            if (SelectedNodes.Count == 0)
+            string s = IssueTypeEntity.CheckWarnSettings(ListForm.WarnSettings, this);
+            if (!string.IsNullOrEmpty(s))
             {
-                MessageBox.Show("需选中节点");
-                return;
+                ShowMessage("警告", s);
             }
-            ListForm.ShowDialogType = ShowDialogType.ViewElementsBySelectedNodes;
+            ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
             string viewName = ListForm.ShowDialogType.GetViewName();
             var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
             var doc = UI_Doc.Document;
-            //新建
-            using (var transaction = new Transaction(doc, nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click)))
+            var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
             {
-                transaction.Start();
-                try
-                {
-                    //已有视图,则重置元素着色配置
-                    if (view != null)
-                    {
-                        ////取消可见
-                        //try
-                        //{
-                        //    foreach (Category category in doc.Settings.Categories)
-                        //    {
-                        //        category.set_Visible(view, false);
-                        //    }
-                        //}
-                        //catch { };//由于存在某些User Hidden的Category暂不明如何针对性的设置
-
-                        //按元素隐藏
-                        var allElements = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElements();
-                        List<ElementId> elementIdsToHid = new List<ElementId>();
-                        foreach (var element in allElements)
-                        {
-                            if (element.CanBeHidden(view) && element.Id != view.Id)
-                            {
-                                elementIdsToHid.Add(element.Id);
-                            }
-                        }
-                        view.HideElements(elementIdsToHid);
-                    }
-                    else
-                    {
-                        //新建视图
-                        view = Revit_Document_Helper.CreateTinged3DView(transaction, doc, viewName);
-                    }
-                    //渲染_所有节点相关的
-                    var nodesElementIds = Model.GetAllElementIds(doc);
-                    view.UnhideElements(nodesElementIds);
-                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                    foreach (var elementId in nodesElementIds)
-                    {
-                        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
-                    }
-                    //渲染_选中
-                    var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(System.Drawing.Color.Red.R, System.Drawing.Color.Red.G, System.Drawing.Color.Red.B),
-                        CPSettings.GetDefaultFillPatternId(doc), 0);
-                    var selectedElementIds = Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
-                    foreach (var elementId in selectedElementIds)
-                    {
-                        view.SetElementOverrides(elementId, overrideGraphicSettings);
-                    }
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.RollBack();
-                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
-                    return;
-                }
-            }
+                if (view == null)
+                    view = Revit_Document_Helper.Create3DView(doc, viewName);
+                //渲染_所有 隐藏
+                IList<Element> allElements = GetAllElements(doc);
+                List<ElementId> elementIdsToHid = new List<ElementId>();
+                foreach (var element in allElements)
+                    if (element.CanBeHidden(view) && element.Id != view.Id)
+                        elementIdsToHid.Add(element.Id);
+                view.HideElements(elementIdsToHid);
+                //渲染_测点 淡显,显示
+                var allNodesElementIds = Model.GetAllNodesElementIds(doc);
+                var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                view.UnhideElements(allNodesElementIds);
+                foreach (var elementId in allNodesElementIds)
+                    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                //渲染_选中 红显
+                var cpSettings = new CPSettings(Model.MemorableData.Data.CloseCTSettings);
+                var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(cpSettings.Color.R, cpSettings.Color.G, cpSettings.Color.B), new ElementId(cpSettings.FillerId), cpSettings.SurfaceTransparency);
+                var selectedElementIds = Model.GetCloseWarnNodesElements(doc, ListForm.WarnSettings);
+                foreach (var elementId in selectedElementIds)
+                    view.SetElementOverrides(elementId, overrideGraphicSettings);
+            });
             UI_Doc.ActiveView = view;
-            this.DialogResult = DialogResult.Retry;
-            this.Close();
-            ListForm.DialogResult = DialogResult.Retry;
-            ListForm.Close();
         }
-        #region 按元素隐藏和重置
-        //var allElements = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElements();
-        //List<ElementId> elementIdsToHid = new List<ElementId>();
-        //foreach (var element in allElements)
-        //{
-        //    if (element.CanBeHidden(view))
-        //    {
-        //        elementIdsToHid.Add(element.Id);
-        //    }
-        //}
-        //view.HideElements(elementIdsToHid);
-        ////重置所有OverrideGraphicSettings
-        //var defaultOverrideGraphicSettings = new OverrideGraphicSettings();
-        //foreach (var elementId in elementIdsToHid)
-        //{
-        //    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
-        //} 
-        #endregion
         /// <summary>
-        /// 测点查看-整体查看
-        /// 选中-红色
-        /// 其他-淡显
+        /// 超出预警预览
+        /// 超出:报警值*80%,天数-1
+        /// 超出:颜色1
+        /// 非超出:颜色2
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btn_ViewAll_Click(object sender, EventArgs e)
+        private void btn_ViewOverWarn_Click(object sender, EventArgs e)
         {
-            if (SelectedNodes.Count == 0)
+            string s = IssueTypeEntity.CheckWarnSettings(ListForm.WarnSettings, this);
+            if (!string.IsNullOrEmpty(s))
             {
-                MessageBox.Show("需选中节点");
-                return;
+                ShowMessage("警告", s);
             }
-            ListForm.ShowDialogType = ShowDialogType.ViewElementsBySelectedNodes;
+            ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
             string viewName = ListForm.ShowDialogType.GetViewName();
             var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
             var doc = UI_Doc.Document;
-            //新建
-            using (var transaction = new Transaction(doc, nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click)))
+            var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
             {
-                transaction.Start();
-                try
-                {
-                    //已有视图,则重置元素着色配置
-                    if (view == null)
-                    {
-                        //新建视图
-                        view = Revit_Document_Helper.CreateTinged3DView(transaction, doc, viewName);
-                    }
-                    //渲染_所有节点相关的
-                    var allElementIds = new FilteredElementCollector(doc).WherePasses(new LogicalOrFilter(new ElementIsElementTypeFilter(false), new ElementIsElementTypeFilter(true))).ToElementIds();
-                    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                    foreach (var elementId in allElementIds)
-                    {
-                        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
-                    }
-                    //渲染_选中
-                    var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(System.Drawing.Color.Red.R, System.Drawing.Color.Red.G, System.Drawing.Color.Red.B),
-                        CPSettings.GetDefaultFillPatternId(doc), 0);
-                    var selectedElementIds = Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
-                    foreach (var elementId in selectedElementIds)
-                    {
-                        view.SetElementOverrides(elementId, overrideGraphicSettings);
-                    }
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.RollBack();
-                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
-                    return;
-                }
-            }
+                if (view == null)
+                    view = Revit_Document_Helper.Create3DView(doc, viewName);
+                //渲染_所有 隐藏
+                IList<Element> allElements = GetAllElements(doc);
+                List<ElementId> elementIdsToHid = new List<ElementId>();
+                foreach (var element in allElements)
+                    if (element.CanBeHidden(view) && element.Id != view.Id)
+                        elementIdsToHid.Add(element.Id);
+                view.HideElements(elementIdsToHid);
+                //渲染_测点 淡显,显示
+                var allNodesElementIds = Model.GetAllNodesElementIds(doc);
+                var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                view.UnhideElements(allNodesElementIds);
+                foreach (var elementId in allNodesElementIds)
+                    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                //渲染_选中 红显
+                var cpSettings = new CPSettings(Model.MemorableData.Data.OverCTSettings);
+                var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(cpSettings.Color.R, cpSettings.Color.G, cpSettings.Color.B), new ElementId(cpSettings.FillerId), cpSettings.SurfaceTransparency);
+                var selectedElementIds = Model.GetOverWarnNodesElements(doc, ListForm.WarnSettings);
+                foreach (var elementId in selectedElementIds)
+                    view.SetElementOverrides(elementId, overrideGraphicSettings);
+            });
             UI_Doc.ActiveView = view;
-            this.DialogResult = DialogResult.Retry;
-            this.Close();
-            ListForm.DialogResult = DialogResult.Retry;
-            ListForm.Close();
         }
-        #endregion
     }
 }

@@ -60,7 +60,7 @@ namespace MyRevit.Utilities
         /// <param name="doc"></param>
         /// <param name="viewName"></param>
         /// <returns></returns>
-        public static View3D Create3DView(Transaction transaction, Document doc, string viewName)
+        public static View3D Create3DView(Document doc, string viewName)
         {
             var sampleViewId = Get3DProjectViewId(doc);
             if (sampleViewId == null)
@@ -70,9 +70,9 @@ namespace MyRevit.Utilities
             var viewTypeId = doc.GetElement(sampleViewId).get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsElementId();
             View3D view = View3D.CreateIsometric(doc, viewTypeId);
             view.Name = viewName;
+            view.DetailLevel = ViewDetailLevel.Fine;
+            view.DisplayStyle = DisplayStyle.Shading;
             return view;
-            //view.DetailLevel = ViewDetailLevel.Fine;
-            //view.DisplayStyle = DisplayStyle.Shading;
             //view.get_Parameter(BuiltInParameter.VIEW_NAME).Set(viewName);
         }
         /// <summary>
@@ -82,9 +82,9 @@ namespace MyRevit.Utilities
         /// <param name="doc"></param>
         /// <param name="viewName"></param>
         /// <returns></returns>
-        public static View3D CreateTinged3DView(Transaction transaction, Document doc, string viewName)
+        public static View3D CreateTinged3DView(Document doc, string viewName)
         {
-            var view = Create3DView(transaction, doc, viewName);
+            var view = Create3DView(doc, viewName);
             //淡显处理
             SetOverrideGraphicSettingsOfCategories(view, CPSettings.GetTingledOverrideGraphicSettings(doc));
             //隐藏CAD处理

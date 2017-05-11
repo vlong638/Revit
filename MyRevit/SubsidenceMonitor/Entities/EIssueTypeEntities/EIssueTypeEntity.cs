@@ -1,8 +1,10 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using MyRevit.SubsidenceMonitor.Interfaces;
+using MyRevit.SubsidenceMonitor.UI;
 using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MyRevit.SubsidenceMonitor.Entities
 {
@@ -11,6 +13,74 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public abstract EIssueType IssueType { get; }
         public abstract string SheetName { get; }
 
+        string MessageSuffix = "尚未进行有效配置,请联系管理人员";
+        public string CheckWarnSettings(WarnSettings warnSettings, SubsidenceMonitorForm form)
+        {
+            StringBuilder sb = new StringBuilder();
+            switch (IssueType)
+            {
+                case EIssueType.建筑物沉降:
+                    //建筑物沉降
+                    if (warnSettings.BuildingSubsidence_Day == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_BuildingSubsidence_Day + MessageSuffix);
+                    if (warnSettings.BuildingSubsidence_DailyMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_BuildingSubsidence_DailyMillimeter + MessageSuffix);
+                    if (warnSettings.BuildingSubsidence_SumMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_BuildingSubsidence_SumMillimeter + MessageSuffix);
+                    return sb.ToString();
+                case EIssueType.地表沉降:
+                    //地表沉降
+                    if (warnSettings.SurfaceSubsidence_Day == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SurfaceSubsidence_Day + MessageSuffix);
+                    if (warnSettings.SurfaceSubsidence_DailyMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SurfaceSubsidence_DailyMillimeter + MessageSuffix);
+                    if (warnSettings.SurfaceSubsidence_SumMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SurfaceSubsidence_SumMillimeter + MessageSuffix);
+                    return sb.ToString();
+                case EIssueType.管线沉降_有压:
+                    //管线沉降(有压)
+                    if (warnSettings.StressedPipeLineSubsidence_Day == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_Day + MessageSuffix);
+                    if (warnSettings.StressedPipeLineSubsidence_PipelineMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                    if (warnSettings.StressedPipeLineSubsidence_WellMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                    if (warnSettings.StressedPipeLineSubsidence_SumMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                    return sb.ToString();
+                case EIssueType.管线沉降_无压:
+                    //管线沉降(无压)
+                    if (warnSettings.UnstressedPipeLineSubsidence_Day == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_Day + MessageSuffix);
+                    if (warnSettings.UnstressedPipeLineSubsidence_PipelineMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                    if (warnSettings.UnstressedPipeLineSubsidence_WellMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                    if (warnSettings.UnstressedPipeLineSubsidence_SumMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                    return sb.ToString();
+                case EIssueType.侧线监测:
+                    //墙体水平位移(侧斜)
+                    if (warnSettings.SkewBack_WellMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SkewBack_WellMillimeter + MessageSuffix);
+                    if (warnSettings.SkewBack_StandardMillimeter == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SkewBack_StandardMillimeter + MessageSuffix);
+                    if (warnSettings.SkewBack_Speed == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SkewBack_Speed + MessageSuffix);
+                    if (warnSettings.SkewBack_Day == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_SkewBack_Day + MessageSuffix);
+                    return sb.ToString();
+                case EIssueType.钢支撑轴力监测:
+                    //钢支撑轴力
+                    if (warnSettings.STBAP_MaxAxle == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_STBAP_MaxAxle + MessageSuffix);
+                    if (warnSettings.STBAP_MinAxle == int.MinValue)
+                        sb.AppendLine(WarnSettings.Tag_STBAP_MinAxle + MessageSuffix);
+                    return sb.ToString();
+                default:
+                    throw new NotImplementedException("尚未支持的类型");
+            }
+        }
         public ParseResult ParseInto(Workbook workbook, TDetail detail)
         {
             var sheetName = SheetName;
@@ -127,6 +197,44 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 }
             }
             return nodes;
+        }
+        /// <summary>
+        /// 获取节点数据对象
+        /// </summary>
+        /// <param name="nodeCode"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public ITNodeData GetNodeDataEntity(string nodeCode, string data)
+        {
+            switch (IssueType)
+            {
+                case EIssueType.建筑物沉降:
+                    return new BuildingSubsidenceDataV1(nodeCode, data);
+                //TODO
+                case EIssueType.地表沉降:
+                case EIssueType.管线沉降_无压:
+                case EIssueType.管线沉降_有压:
+                case EIssueType.侧线监测:
+                case EIssueType.钢支撑轴力监测:
+                default:
+                    throw new NotImplementedException("未支持该类型的ITNodeData:" + IssueType.ToString());
+            }
+        }
+        public ITNodeDataCollection<ITNodeData> GetNodeDataCollection()
+        {
+            switch (IssueType)
+            {
+                case EIssueType.建筑物沉降:
+                    return new BuildingSubsidenceCollection<BuildingSubsidenceDataV1>();
+                //TODO
+                case EIssueType.地表沉降:
+                case EIssueType.管线沉降_无压:
+                case EIssueType.管线沉降_有压:
+                case EIssueType.侧线监测:
+                case EIssueType.钢支撑轴力监测:
+                default:
+                    throw new NotImplementedException("未支持该类型的ITNodeDataCollection:" + IssueType.ToString());
+            }
         }
     }
 }

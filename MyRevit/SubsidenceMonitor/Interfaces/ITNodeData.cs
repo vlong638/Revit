@@ -2,7 +2,8 @@
 {
     public interface ITNodeData
     {
-        void DeserializeFromString(string str);
+        string NodeCode { set; get; }
+        void DeserializeFromString(string nodeCode, string str);
         string SerializeToString();
     }
 }

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <AddInId>7D80649B-163F-4919-83C6-86E9912108F3</AddInId>
+    <Name>VLApplication</Name>
+    <FullClassName>MyRevit.SubsidenceMonitor.Command.WarnSettingsCommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+</RevitAddIns>

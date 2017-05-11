@@ -57,16 +57,18 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 targetNode.ElementIds_Int.Remove(elementId_Int);
             }
         }
-        public List<ElementId> GetElementIds(string nodeCode,Document doc)
+        public List<ElementId> GetElementIds(string nodeCode, Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();
             var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
-            var storedElements = targetNode.ElementIds_Int.Select(c => doc.GetElement(new ElementId(c)));
-            foreach (var element in storedElements)
-                if (element != null)
-                    availableElementIds.Add(element.Id);
+            for (int i = targetNode.ElementIds_Int.Count - 1; i >= 0; i--)
+            {
+                var element = doc.GetElement(new ElementId(targetNode.ElementIds_Int[i]));
+                if (element == null)
+                    targetNode.ElementIds_Int.Remove(targetNode.ElementIds_Int[i]);//获取ElementId的时候,需在文档中监测
                 else
-                    targetNode.ElementIds_Int.Remove(element.Id.IntegerValue);//获取ElementId的时候,需在文档中监测Element是否存在,移除无效的Element(可能被用户在文档中删除)
+                    availableElementIds.Add(element.Id);
+            }
             return availableElementIds;
         }
         public List<ElementId> GetElementIds(List<string> nodeCodes, Document doc)
@@ -78,7 +80,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return availableElementIds;
         }
-        public List<ElementId> GetAllElementIds(Document doc)
+        public List<ElementId> GetAllNodesElementIds(Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();
             foreach (var node in MemorableData.Data.Nodes)
@@ -86,6 +88,42 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 availableElementIds.AddRange(GetElementIds(node.NodeCode, doc));
             }
             return availableElementIds;
+        }
+        public List<ElementId> GetCurrentMaxNodesElements(Document doc)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.NodeDatas.GetCurrentMaxNodes())
+            {
+                results.AddRange(GetElementIds(node.NodeCode, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetTotalMaxNodesElements(Document doc)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.NodeDatas.GetTotalMaxNodes())
+            {
+                results.AddRange(GetElementIds(node.NodeCode, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetCloseWarnNodesElements(Document doc,WarnSettings warnSettings)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.NodeDatas.GetCloseWarn(warnSettings))
+            {
+                results.AddRange(GetElementIds(node.NodeCode, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetOverWarnNodesElements(Document doc, WarnSettings warnSettings)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.NodeDatas.GetOverWarn(warnSettings))
+            {
+                results.AddRange(GetElementIds(node.NodeCode, doc));
+            }
+            return results;
         }
     }
 }

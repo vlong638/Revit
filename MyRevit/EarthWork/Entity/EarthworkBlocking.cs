@@ -147,12 +147,12 @@ namespace MyRevit.EarthWork.Entity
             foreach (var orderedBlockIdIndex in orderedBlockIdIndexs)
             {
                 string blockStr = "";
-                recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlock, orderedBlockIdIndex.Key), ref blockStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlock_Size, orderedBlockIdIndex.Key), 1000) + 2);
+                recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock, orderedBlockIdIndex.Key), ref blockStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock_Size, orderedBlockIdIndex.Key), 1000) + 2);
                 var block = JsonConvert.DeserializeObject<EarthworkBlock>(blockStr);
                 if (block == null)
                     return;
                 string cpSettingsStr = "";
-                recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings, orderedBlockIdIndex.Key), ref cpSettingsStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings_Size, orderedBlockIdIndex.Key), 1000) + 2);
+                recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings, orderedBlockIdIndex.Key), ref cpSettingsStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings_Size, orderedBlockIdIndex.Key), 1000) + 2);
                 var cpSettings = JsonConvert.DeserializeObject<EarthworkBlockCPSettings>(cpSettingsStr);
                 if (cpSettings != null)
                     block.CPSettings = cpSettings;
@@ -330,15 +330,15 @@ namespace MyRevit.EarthWork.Entity
             }
             FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
             var jsonObj = JsonConvert.SerializeObject(this);
-            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlocking_Size, 1), jsonObj.Length.ToString());
-            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlocking, 1), jsonObj);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking_Size, 1), jsonObj.Length.ToString());
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking, 1), jsonObj);
             foreach (var block in Deletes)
             {
                 //TODO ???Block的删除或需优化
-                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlock_Size, block.Id), "");
-                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlock, block.Id), "");
-                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings_Size, block.Id), "");
-                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyType.EarthworkBlockCPSettings, block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock_Size, block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock, block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings_Size, block.Id), "");
+                recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings, block.Id), "");
             }
             Adds.Clear();
             Deletes.Clear();

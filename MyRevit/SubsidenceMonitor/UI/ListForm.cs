@@ -5,8 +5,10 @@ using System.Linq;
 using System.Windows.Forms;
 using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Operators;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using PmSoft.Common.CommonClass;
+using MyRevit.Utilities;
+using Newtonsoft.Json;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
@@ -23,7 +25,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <summary>
         /// 删除构件
         /// </summary>
-        DeleleElements_ForDetail, 
+        DeleleElements_ForDetail,
         /// <summary>
         /// 测点查看_查看选中
         /// </summary>
@@ -64,6 +66,10 @@ namespace MyRevit.SubsidenceMonitor.UI
             string result = "默认视图";
             switch (showDialogType)
             {
+                case ShowDialogType.AddElements_ForDetail:
+                case ShowDialogType.DeleleElements_ForDetail:
+                    result = "测点编辑";
+                    break;
                 case ShowDialogType.ViewElementsBySelectedNodes:
                     result = "测点查看_查看选中";
                     break;
@@ -101,7 +107,13 @@ namespace MyRevit.SubsidenceMonitor.UI
 
             InitControls();
             UI_Doc = ui_doc;
+            FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(WarnSettings), ui_doc.Document);
+            var str = recorder.GetValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForSubsidenceMonitor.WarnSettings, 1), "", 1000);
+            if (!string.IsNullOrEmpty(str))
+                WarnSettings = JsonConvert.DeserializeObject<WarnSettings>(str);
         }
+
+        public WarnSettings WarnSettings { set; get; } = new WarnSettings();
         public ShowDialogType ShowDialogType { set; get; }
         public SubsidenceMonitorForm SubForm { set; get; }
         protected UIDocument UI_Doc { set; get; }
@@ -134,7 +146,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void ListForm_Shown(object sender, EventArgs e)
         {
-            if (SubForm!=null)
+            if (SubForm != null)
             {
                 SubForm.ShowDialog();
             }
@@ -211,21 +223,21 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void Btn_IssueMonth_TextChanged(object sender, EventArgs e)
         {
-            if ((int)cb_IssueType.SelectedValue != 0&&btn_IssueMonth.Text != TextEmpty)
+            if ((int)cb_IssueType.SelectedValue != 0 && btn_IssueMonth.Text != TextEmpty)
             {
                 var issueType = (EIssueType)Enum.Parse(typeof(EIssueType), cb_IssueType.SelectedValue.ToString());
                 var yearMonth = DateTime.Parse(btn_IssueMonth.Text);
                 var year = yearMonth.Year;
                 var month = yearMonth.Month;
                 var dayLists = new List<DateTime>();
-                var tempDate = new DateTime(year, month, 1, 0, 0, 0,DateTimeKind.Local);
-                while (tempDate.Month== month)
+                var tempDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Local);
+                while (tempDate.Month == month)
                 {
                     dayLists.Add(tempDate);
                     tempDate = tempDate.AddDays(1);
                 }
                 //根据类型和月份加载列表数据
-                var loadedLists =ReadFacade.GetLists(issueType, new DateTime(year, month, 1));
+                var loadedLists = ReadFacade.GetLists(issueType, new DateTime(year, month, 1));
                 //构建完整列表
                 CurrentLists = dayLists.Select(c => new TList(issueType, c)).ToList();
                 foreach (var loadedList in loadedLists)
@@ -271,7 +283,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                         break;
                     case EIssueType.地表沉降:
                         break;
-                    case EIssueType.管线沉降:
+                    case EIssueType.管线沉降_无压:
+                    case EIssueType.管线沉降_有压:
                         break;
                     case EIssueType.侧线监测:
                         break;

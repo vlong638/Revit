@@ -121,9 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
-    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorExe.cs" />
-    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorSet.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlockImplementationInfo.cs" />
@@ -157,16 +156,19 @@
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidenceData.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ITNodeDataCollection.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ParseResult.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TList.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TNode.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\WarnSettings.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\ICloneableData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\IContainer.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\ILazyLoadData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\IMemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\IPDMTBase.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\IStringBasedData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\ITNodeData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
@@ -192,10 +194,18 @@
     <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.Designer.cs">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SubsidenceMonitor\UI\WarnSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\WarnSettingsForm.Designer.cs">
+      <DependentUpon>WarnSettingsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\ExcelHelper.cs" />
+    <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
     <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
     <Compile Include="Utilities\Revit_View_Helper.cs" />
+    <Compile Include="Utilities\SaveKeyHelper.cs" />
     <Compile Include="Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
@@ -223,6 +233,9 @@
     <EmbeddedResource Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.resx">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\WarnSettingsForm.resx">
+      <DependentUpon>WarnSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -236,6 +249,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AddIns\WarnSettings.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin">
       <SubType>Designer</SubType>
     </Content>
@@ -262,9 +278,7 @@
     <Content Include="Images\logoko.png" />
     <Content Include="Images\UpNode.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SubsidenceMonitor\Utilities\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.0\build\net45\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

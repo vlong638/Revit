@@ -16,20 +16,25 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// </summary>
         地表沉降 = 2,
         /// <summary>
-        /// 管线沉降
-        /// PipeLineSubsidence
+        /// 管线沉降_有压
+        /// PressedPipeLineSubsidence
         /// </summary>
-        管线沉降 = 3,
+        管线沉降_有压 = 3,
+        /// <summary>
+        /// 管线沉降_无压
+        /// UnpressedPipeLineSubsidence
+        /// </summary>
+        管线沉降_无压 = 4,
         /// <summary>
         /// 侧线监测
         /// SkewBack
         /// </summary>
-        侧线监测 = 4,
+        侧线监测 = 5,
         /// <summary>
         /// 钢支撑轴力监测
-        /// SteelTubeBracingAxialPressure
+        /// STBAP,SteelTubeBracingAxialPressure
         /// </summary>
-        钢支撑轴力监测 = 5,
+        钢支撑轴力监测 = 6,
 
         ///// <summary>
         ///// 建筑物沉降
@@ -61,7 +66,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 case EIssueType.建筑物沉降:
                     return new BuildingSubsidence();
                 case EIssueType.地表沉降:
-                case EIssueType.管线沉降:
+                case EIssueType.管线沉降_无压:
+                case EIssueType.管线沉降_有压:
                 case EIssueType.侧线监测:
                 case EIssueType.钢支撑轴力监测:
                 default:

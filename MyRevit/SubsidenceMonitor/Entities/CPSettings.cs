@@ -11,7 +11,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
     /// <summary>
     /// 颜色/透明度配置
     /// </summary>
-    public class CPSettings : ITNodeData
+    public class CPSettings : IStringBasedData
     {
         #region Properties
         /// <summary>
