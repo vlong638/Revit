@@ -158,7 +158,38 @@ namespace MyRevit.Utilities
                     return it.Current as T;
             }
             return null;
-        } 
+        }
+        #endregion
+
+        #region Parameter
+        public static bool AddSharedParameter(Document doc, string groupName, string parameterName, Category newCategory, bool isInstance)
+        {
+            DefinitionFile definitionFile = doc.Application.OpenSharedParameterFile();
+            DefinitionGroups groups = definitionFile.Groups;
+            DefinitionGroup group = groups.get_Item(groupName);
+            if (group == null)
+                throw new Exception("没有找到对应的参数组");
+            Definition definition = group.Definitions.get_Item(parameterName);
+            if (definition == null)
+                throw new Exception("没有找到对应的参数");
+            ElementBinding binding = null;
+            ElementBinding orientBinding = doc.ParameterBindings.get_Item(definition) as ElementBinding;
+            CategorySet categories = new CategorySet(); ;
+            if (orientBinding != null)
+            {
+                foreach (Category c in orientBinding.Categories)
+                {
+                    categories.Insert(c);
+                }
+            }
+            categories.Insert(newCategory);
+            if (isInstance)
+                binding = doc.Application.Create.NewInstanceBinding(categories);
+            else
+                binding = doc.Application.Create.NewTypeBinding(categories);
+            doc.ParameterBindings.Remove(definition);
+            return doc.ParameterBindings.Insert(definition, binding, BuiltInParameterGroup.PG_TEXT);
+        }
         #endregion
     }
 }

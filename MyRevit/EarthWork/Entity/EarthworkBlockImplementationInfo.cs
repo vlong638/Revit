@@ -75,10 +75,5 @@ namespace MyRevit.EarthWork.Entity
         public bool IsConflicted { set; get; }
         public System.Drawing.Color ColorForUnsettled { set; get; }
         public System.Drawing.Color ColorForSettled { set; get; }
-        public void Preview()
-        {
-            //TODO 预览
-            throw new NotImplementedException();
-        }
     }
 }

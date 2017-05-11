@@ -521,7 +521,7 @@ namespace MyRevit.EarthWork.UI
             }
         }
         //TODO 存在更改时,关闭时提示保存
-        bool IsChanged = false;
+        bool IsChanged { set; get; } = false;
         private void ValueChanged(object sender, EventArgs e)
         {
             IsChanged = true;
@@ -798,7 +798,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void dgv_ImplementationInfo_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            //TODO发生变更检测
+            //TODO发生变更检测 可能没有更改内容,优化一下更好~
             ValueChanged(sender, e);
         }
         /// <summary>

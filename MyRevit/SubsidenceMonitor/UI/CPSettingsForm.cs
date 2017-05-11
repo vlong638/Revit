@@ -1,26 +1,28 @@
-﻿using MyRevit.SubsidenceMonitor.Entities;
+﻿using Autodesk.Revit.DB;
+using MyRevit.SubsidenceMonitor.Entities;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
-    public partial class CPSettingsForm : Form
+    public partial class CPSettingsForm : System.Windows.Forms.Form
     {
-        //TODO 接入Revit
-        //static List<Element> _fillPatterns;
-        //static List<Element> GetFillPatterns(Document doc)
-        //{
-        //    if (_fillPatterns == null)
-        //    {
-        //        _fillPatterns = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).Where(p => (p as FillPatternElement).GetFillPattern().Target == FillPatternTarget.Drafting).ToList();
-        //    }
-        //    return _fillPatterns;
-        //}
+        static List<Element> _fillPatterns;
+        static List<Element> GetFillPatterns(Document doc)
+        {
+            if (_fillPatterns == null)
+            {
+                _fillPatterns = new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).Where(p => (p as FillPatternElement).GetFillPattern().Target == FillPatternTarget.Drafting).ToList();
+            }
+            return _fillPatterns;
+        }
         public object doc { set; get; }
         public CPSettings CPSettings { set; get; }
 
-        public CPSettingsForm(object doc, string cpSettingStr)
+        public CPSettingsForm(Document Document, string cpSettingStr)
         {
             InitializeComponent();
 
@@ -31,8 +33,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             CPSettings = new CPSettings(cpSettingStr);
             cb_FillPattern.DisplayMember = "Name";
             cb_FillPattern.ValueMember = "Id";
-            //TODO 接入Revit
-            //cb_FillPattern.DataSource = GetFillPatterns(form.m_Doc);
+            cb_FillPattern.DataSource = GetFillPatterns(Document);
             cb_IsVisible.Checked = CPSettings.IsVisible;
             cb_IsSurfaceVisible.Checked = CPSettings.IsSurfaceVisible;
             cb_IsHalftone.Checked = CPSettings.IsHalftone;
@@ -70,8 +71,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             CPSettings.IsSurfaceVisible = cb_IsSurfaceVisible.Checked;
             CPSettings.IsHalftone = cb_IsHalftone.Checked;
             CPSettings.SurfaceTransparency = traceBar_Transparency.Value;
-            //TODO 接入Revit
-            //CPSettings.FillerId = ((ElementId)cb_FillPattern.SelectedValue).IntegerValue;
+            CPSettings.FillerId = ((ElementId)cb_FillPattern.SelectedValue).IntegerValue;
         }
         /// <summary>
         /// 重置透明值

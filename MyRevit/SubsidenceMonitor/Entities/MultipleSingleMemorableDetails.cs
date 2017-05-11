@@ -1,6 +1,8 @@
 ﻿using Autodesk.Revit.DB;
 using Microsoft.Office.Interop.Excel;
 using MyRevit.SubsidenceMonitor.Interfaces;
+using MyRevit.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,7 +36,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             MemorableData = new MemorableDetail(Storage, Datas[DataIndex]);
             MemorableData.Start();
         }
-        public void AddElementIds(string nodeCode,List<ElementId> elementIds)
+        public void AddElementIds(string nodeCode, List<ElementId> elementIds)
         {
             var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
             foreach (var elementId in elementIds)
@@ -55,6 +57,73 @@ namespace MyRevit.SubsidenceMonitor.Entities
             {
                 var elementId_Int = elementId.IntegerValue;
                 targetNode.ElementIds_Int.Remove(elementId_Int);
+            }
+        }
+        string GroupName = "监测系统";
+        enum CustomParameters
+        {
+            监测类型,
+            /// <summary>
+            /// for All Except 钢支撑轴力监测
+            /// </summary>
+            测点编号,
+            /// <summary>
+            /// for 钢支撑轴力监测
+            /// </summary>
+            监测点,
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nodeCodes"></param>
+        /// <param name="doc"></param>
+        public void RenderNodeInfoToElements(List<string> nodeCodes, Document doc)
+        {
+            var nodes = MemorableData.Data.Nodes.Where(c => nodeCodes.Contains(c.NodeCode));
+            foreach (var node in nodes)
+            {
+                for (int i = node.ElementIds_Int.Count - 1; i >= 0; i--)
+                {
+                    var element = doc.GetElement(new ElementId(node.ElementIds_Int[i]));
+                    if (element == null)
+                        node.ElementIds_Int.Remove(node.ElementIds_Int[i]);//获取ElementId的时候,需在文档中监测
+
+                    //共享参数检测 添加共享参数
+                    var parameter = element.GetParameters(CustomParameters.监测类型.ToString()).FirstOrDefault();
+                    if (parameter == null)
+                    {
+                        if (node.IssueType == EIssueType.钢支撑轴力监测)
+                        {
+                            Revit_Document_Helper.AddSharedParameter(doc, GroupName, CustomParameters.监测类型.ToString(), element.Category, true);
+                            Revit_Document_Helper.AddSharedParameter(doc, GroupName, CustomParameters.监测点.ToString(), element.Category, true);
+                            parameter = element.GetParameters(CustomParameters.监测点.ToString()).First();
+                            parameter.Set(node.NodeCode);
+                        }
+                        else
+                        {
+                            Revit_Document_Helper.AddSharedParameter(doc, GroupName, CustomParameters.监测类型.ToString(), element.Category, true);
+                            Revit_Document_Helper.AddSharedParameter(doc, GroupName, CustomParameters.测点编号.ToString(), element.Category, true);
+                            parameter = element.GetParameters(CustomParameters.测点编号.ToString()).First();
+                            parameter.Set(node.NodeCode);
+                        }
+                        parameter = element.GetParameters(CustomParameters.监测类型.ToString()).FirstOrDefault();
+                        parameter.Set(node.IssueType.ToString());
+                    }
+                    else
+                    {
+                        //赋值及冲突监测
+                        var value = parameter.AsString();
+                        if (value != null && value != node.IssueType.ToString())
+                            throw new NotImplementedException($"构件({element.Name})存在重复,原先的类型:{value},现在的类型:{node.IssueType.ToString()}");
+                        if (string.IsNullOrEmpty(value))
+                            parameter.Set(node.IssueType.ToString());
+                        if (node.IssueType == EIssueType.钢支撑轴力监测)
+                            parameter = element.GetParameters(CustomParameters.监测点.ToString()).First();
+                        else
+                            parameter = element.GetParameters(CustomParameters.测点编号.ToString()).First();
+                        parameter.Set(node.NodeCode);
+                    }
+                }
             }
         }
         public List<ElementId> GetElementIds(string nodeCode, Document doc)
@@ -107,7 +176,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return results;
         }
-        public List<ElementId> GetCloseWarnNodesElements(Document doc,WarnSettings warnSettings)
+        public List<ElementId> GetCloseWarnNodesElements(Document doc, WarnSettings warnSettings)
         {
             List<ElementId> results = new List<ElementId>();
             foreach (var node in MemorableData.Data.NodeDatas.GetCloseWarn(warnSettings))

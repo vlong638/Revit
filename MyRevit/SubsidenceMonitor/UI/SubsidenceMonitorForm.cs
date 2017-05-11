@@ -112,13 +112,13 @@ namespace MyRevit.SubsidenceMonitor.UI
         private bool Model_OnChangeCurrentWhileHasCreateNew()
         {
             //TODO 确认处理
-            MessageBox.Show("用户确定了");
+            ShowMessage("提醒", "用户确定了");
             return true;
         }
         private bool Model_OnChangeCurrentWhileIsEdited()
         {
             //TODO 确认处理
-            MessageBox.Show("用户确定了");
+            ShowMessage("提醒", "用户确定了");
             return true;
         }
         private void Model_OnStateChanged(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave)
@@ -247,7 +247,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 var result = Model.Commit();
                 if (!result.IsSuccess && !string.IsNullOrEmpty(result.Message))
-                    MessageBox.Show(result.Message);
+                    ShowMessage("警告", result.Message);
             }
         }
         /// <summary>
@@ -279,7 +279,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 var result = Model.Delete();
                 if (!result.IsSuccess && !string.IsNullOrEmpty(result.Message))
-                    MessageBox.Show(result.Message);
+                    ShowMessage("警告", result.Message);
             }
         }
         /// <summary>
@@ -372,11 +372,11 @@ namespace MyRevit.SubsidenceMonitor.UI
         {
             if (SelectedNodes.Count == 0)
             {
-                MessageBox.Show("需选中节点");
+                ShowMessage("警告", "需选中节点");
             }
             else if (SelectedNodes.Count > 1)
             {
-                MessageBox.Show("需选中单一节点");
+                ShowMessage("警告", "需选中单一节点");
             }
             else
             {
@@ -387,7 +387,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 var transactionName = nameof(SubsidenceMonitor) + nameof(btn_AddComponent_Click);
                 if (view == null)
                 {
-                    bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+                    bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
                     {
                         view = Revit_Document_Helper.Create3DView(doc, viewName);
                     });
@@ -410,11 +410,11 @@ namespace MyRevit.SubsidenceMonitor.UI
         {
             if (SelectedNodes.Count == 0)
             {
-                MessageBox.Show("需选中节点");
+                ShowMessage("警告", "需选中节点");
             }
             else if (SelectedNodes.Count > 1)
             {
-                MessageBox.Show("需选中单一节点");
+                ShowMessage("警告", "需选中单一节点");
             }
             else
             {
@@ -425,10 +425,10 @@ namespace MyRevit.SubsidenceMonitor.UI
                 var transactionName = nameof(SubsidenceMonitor) + nameof(btn_AddComponent_Click);
                 if (view == null)
                 {
-                    bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
-                    {
-                        view = Revit_Document_Helper.Create3DView(doc, viewName);
-                    });
+                    bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
+                   {
+                       view = Revit_Document_Helper.Create3DView(doc, viewName);
+                   });
                     if (!isSuccess)
                         return;
                 }
@@ -554,7 +554,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 SelectedNodes.Clear();
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
-                    var data = dgv.Rows[0].DataBoundItem as BuildingSubsidenceDataV1;
+                    var data = dgv.Rows[0].DataBoundItem as ITNodeData;// as BuildingSubsidenceDataV1;
                     SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
                 }
                 return;
@@ -571,7 +571,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 }
                 foreach (var rowIndex in rowIndexes)
                 {
-                    var data = dgv.Rows[rowIndex].DataBoundItem as BuildingSubsidenceDataV1;
+                    var data = dgv.Rows[rowIndex].DataBoundItem as ITNodeData;// as BuildingSubsidenceDataV1;
                     SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
                 }
             }
@@ -584,8 +584,17 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         void btn_RenderComponent_Click(object sender, EventArgs e)
         {
-            //TODO 测点赋值
+            if (SelectedNodes.Count == 0)
+            {
+                ShowMessage("警告", "需选中节点");
+                return;
+            }
 
+            var transactionName = nameof(SubsidenceMonitor) + nameof(btn_RenderComponent_Click);
+            bool isSuccess = DealWithTransaction(UI_Doc.Document, transactionName, () =>
+                {
+                    Model.RenderNodeInfoToElements(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
+                });
         }
         #endregion
 
@@ -615,11 +624,12 @@ namespace MyRevit.SubsidenceMonitor.UI
         {
             ListForm.ShowDialogType = showDialogType;
             string viewName = ListForm.ShowDialogType.GetViewName();
-            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
             var doc = UI_Doc.Document;
+            View3D view = null;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
-            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+            bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
             {
+                view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
                 if (view == null)
                     view = Revit_Document_Helper.Create3DView(doc, viewName);
                 if (needHide)
@@ -630,10 +640,12 @@ namespace MyRevit.SubsidenceMonitor.UI
                     foreach (var element in allElements)
                         if (element.CanBeHidden(view) && element.Id != view.Id)
                             elementIdsToHid.Add(element.Id);
-                    view.HideElements(elementIdsToHid);
+                    if (elementIdsToHid.Count > 0)
+                        view.HideElements(elementIdsToHid);
                     //渲染_测点 淡显
                     var nodesElementIds = Model.GetAllNodesElementIds(doc);
-                    view.UnhideElements(nodesElementIds);
+                    if (nodesElementIds.Count > 0)
+                        view.UnhideElements(nodesElementIds);
                     var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
                     foreach (var elementId in nodesElementIds)
                         view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
@@ -659,7 +671,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 foreach (var elementId in selectedElementIds)
                     view.SetElementOverrides(elementId, overrideGraphicSettings);
             });
-            UI_Doc.ActiveView = view;
+            if (view != null)
+                UI_Doc.ActiveView = view;
             return isSuccess;
         }
         /// <summary>
@@ -671,7 +684,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="transactionName"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        bool DetailWithViewTransaction(string viewName, ref View3D view, Document doc, string transactionName, System.Action action)
+        bool DealWithTransaction(string viewName, Document doc, string transactionName, System.Action action)
         {
             bool isSuccess;
             using (var transaction = new Transaction(doc, transactionName))
@@ -686,7 +699,28 @@ namespace MyRevit.SubsidenceMonitor.UI
                 catch (Exception ex)
                 {
                     transaction.RollBack();
-                    MessageBox.Show("消息", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    ShowMessage("警告", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    isSuccess = false;
+                }
+            }
+            return isSuccess;
+        }
+        bool DealWithTransaction(Document doc, string transactionName, System.Action action)
+        {
+            bool isSuccess;
+            using (var transaction = new Transaction(doc, transactionName))
+            {
+                transaction.Start();
+                try
+                {
+                    action();
+                    transaction.Commit();
+                    isSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollBack();
+                    ShowMessage("警告", $"处理存在错误,错误详情:" + ex.Message);
                     isSuccess = false;
                 }
             }
@@ -720,7 +754,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                     elementIdsToHid.Add(element.Id);
                 }
             }
-            view.HideElements(elementIdsToHid);
+            if (elementIdsToHid.Count > 0)
+                view.HideElements(elementIdsToHid);
         }
         /// <summary>
         /// 获取所有元素
@@ -749,9 +784,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 ShowMessage("提醒", "需选中节点");
                 return;
             }
-            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsBySelectedNodes,true,
-                (doc)=> {return Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc);
-            });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsBySelectedNodes, true,
+                (doc) => Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -759,7 +793,6 @@ namespace MyRevit.SubsidenceMonitor.UI
             ListForm.DialogResult = DialogResult.Retry;
             ListForm.Close();
         }
-
         /// <summary>
         /// 测点查看-整体查看
         /// 选中-红色
@@ -775,7 +808,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 return;
             }
             bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false,
-                (doc) => {
+                (doc) =>
+                {
                     return Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc);
                 });
             this.DialogResult = DialogResult.Retry;
@@ -783,7 +817,6 @@ namespace MyRevit.SubsidenceMonitor.UI
             ListForm.DialogResult = DialogResult.Retry;
             ListForm.Close();
         }
-        #endregion
         /// <summary>
         /// 本次最大变量点位查看
         /// 最大-红色
@@ -793,7 +826,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void btn_ViewCurrentMax_Red_Click(object sender, EventArgs e)
         {
             bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true,
-                (doc) => {
+                (doc) =>
+                {
                     return Model.GetCurrentMaxNodesElements(doc);
                 });
             this.DialogResult = DialogResult.Retry;
@@ -812,7 +846,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void btn_ViewCurrentMax_All_Click(object sender, EventArgs e)
         {
             bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false,
-                (doc) => {
+                (doc) =>
+                {
                     return Model.GetCurrentMaxNodesElements(doc);
                 });
             this.DialogResult = DialogResult.Retry;
@@ -831,7 +866,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void btn_ViewSumMax_Red_Click(object sender, EventArgs e)
         {
             bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true,
-                (doc) => {
+                (doc) =>
+                {
                     return Model.GetTotalMaxNodesElements(doc);
                 });
             this.DialogResult = DialogResult.Retry;
@@ -850,7 +886,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void btn_ViewSumMax_All_Click(object sender, EventArgs e)
         {
             bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false,
-                (doc) => {
+                (doc) =>
+                {
                     return Model.GetTotalMaxNodesElements(doc);
                 });
             this.DialogResult = DialogResult.Retry;
@@ -906,11 +943,12 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
             string viewName = ListForm.ShowDialogType.GetViewName();
-            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
-            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+            View3D view = null;
+            bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
             {
+                view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
                 if (view == null)
                     view = Revit_Document_Helper.Create3DView(doc, viewName);
                 //渲染_所有 隐藏
@@ -919,11 +957,13 @@ namespace MyRevit.SubsidenceMonitor.UI
                 foreach (var element in allElements)
                     if (element.CanBeHidden(view) && element.Id != view.Id)
                         elementIdsToHid.Add(element.Id);
-                view.HideElements(elementIdsToHid);
+                if (elementIdsToHid.Count > 0)
+                    view.HideElements(elementIdsToHid);
                 //渲染_测点 淡显,显示
                 var allNodesElementIds = Model.GetAllNodesElementIds(doc);
                 var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                view.UnhideElements(allNodesElementIds);
+                if (allNodesElementIds.Count > 0)
+                    view.UnhideElements(allNodesElementIds);
                 foreach (var elementId in allNodesElementIds)
                     view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
                 //渲染_选中 红显
@@ -933,7 +973,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 foreach (var elementId in selectedElementIds)
                     view.SetElementOverrides(elementId, overrideGraphicSettings);
             });
-            UI_Doc.ActiveView = view;
+            if (view != null)
+                UI_Doc.ActiveView = view;
         }
         /// <summary>
         /// 超出预警预览
@@ -952,11 +993,12 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
             string viewName = ListForm.ShowDialogType.GetViewName();
-            var view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
-            bool isSuccess = DetailWithViewTransaction(viewName, ref view, doc, transactionName, () =>
+            View3D view = null;
+            bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
             {
+                view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
                 if (view == null)
                     view = Revit_Document_Helper.Create3DView(doc, viewName);
                 //渲染_所有 隐藏
@@ -965,11 +1007,13 @@ namespace MyRevit.SubsidenceMonitor.UI
                 foreach (var element in allElements)
                     if (element.CanBeHidden(view) && element.Id != view.Id)
                         elementIdsToHid.Add(element.Id);
-                view.HideElements(elementIdsToHid);
+                if (elementIdsToHid.Count > 0)
+                    view.HideElements(elementIdsToHid);
                 //渲染_测点 淡显,显示
                 var allNodesElementIds = Model.GetAllNodesElementIds(doc);
                 var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                view.UnhideElements(allNodesElementIds);
+                if (allNodesElementIds.Count > 0)
+                    view.UnhideElements(allNodesElementIds);
                 foreach (var elementId in allNodesElementIds)
                     view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
                 //渲染_选中 红显
@@ -979,7 +1023,9 @@ namespace MyRevit.SubsidenceMonitor.UI
                 foreach (var elementId in selectedElementIds)
                     view.SetElementOverrides(elementId, overrideGraphicSettings);
             });
-            UI_Doc.ActiveView = view;
+            if (view != null)
+                UI_Doc.ActiveView = view;
         }
+        #endregion
     }
 }
