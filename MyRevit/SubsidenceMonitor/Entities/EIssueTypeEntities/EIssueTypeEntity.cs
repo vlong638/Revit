@@ -84,11 +84,17 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public ParseResult ParseInto(Workbook workbook, TDetail detail)
         {
             var sheetName = SheetName;
-            if (workbook.Worksheets[sheetName] == null)
+            Worksheet sheet = null;
+            foreach (Worksheet s in workbook.Worksheets)
+            {
+                if (s.Name == sheetName)
+                {
+                    sheet = s;
+                    break;
+                }
+            }
+            if (sheet == null)
                 return ParseResult.ReportName_ParseFailure;
-            //throw new NotImplementedException("Worksheet名称无效");
-            var sheet = workbook.Worksheets[sheetName] as Worksheet;
-
             return ParseInto(sheet, detail);
         }
         public abstract ParseResult ParseInto(Worksheet sheet, TDetail detail);
