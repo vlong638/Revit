@@ -237,7 +237,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     tempDate = tempDate.AddDays(1);
                 }
                 //根据类型和月份加载列表数据
-                var loadedLists = ReadFacade.GetLists(issueType, new DateTime(year, month, 1));
+                var loadedLists = Facade.GetLists(issueType, new DateTime(year, month, 1));
                 //构建完整列表
                 CurrentLists = dayLists.Select(c => new TList(issueType, c)).ToList();
                 foreach (var loadedList in loadedLists)
@@ -274,7 +274,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 {
                     case EIssueType.建筑物沉降:
                         if (list.Datas.Count() == 0 && list.DataCount > 0)
-                            ReadFacade.FetchDetails(list);
+                            Facade.FetchDetails(list);
                         SubForm = new SubsidenceMonitorForm(this, UI_Doc, list);
                         SubForm.ShowDialog();
                         CurrentLists.FirstOrDefault(c => c.IssueDate == list.IssueDate).Datas = list.Datas;

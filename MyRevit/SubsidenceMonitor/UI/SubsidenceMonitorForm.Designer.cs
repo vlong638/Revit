@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.tb_ReportName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -172,14 +172,14 @@
             this.dgv_left.AllowUserToDeleteRows = false;
             this.dgv_left.AllowUserToResizeColumns = false;
             this.dgv_left.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgv_left.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_left.HeaderNodes = null;
             this.dgv_left.Location = new System.Drawing.Point(2, 122);
@@ -195,14 +195,14 @@
             this.dgv_right.AllowUserToDeleteRows = false;
             this.dgv_right.AllowUserToResizeColumns = false;
             this.dgv_right.AllowUserToResizeRows = false;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dgv_right.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_right.HeaderNodes = null;
             this.dgv_right.Location = new System.Drawing.Point(572, 122);
@@ -546,7 +546,7 @@
             this.groupBox7.Controls.Add(this.label11);
             this.groupBox7.Location = new System.Drawing.Point(568, 590);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(272, 79);
+            this.groupBox7.Size = new System.Drawing.Size(278, 79);
             this.groupBox7.TabIndex = 24;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "预警编辑/查看";
@@ -555,7 +555,7 @@
             // 
             this.btn_ViewOverWarn.Location = new System.Drawing.Point(172, 46);
             this.btn_ViewOverWarn.Name = "btn_ViewOverWarn";
-            this.btn_ViewOverWarn.Size = new System.Drawing.Size(85, 23);
+            this.btn_ViewOverWarn.Size = new System.Drawing.Size(94, 23);
             this.btn_ViewOverWarn.TabIndex = 38;
             this.btn_ViewOverWarn.Text = "接近预警预览";
             this.btn_ViewOverWarn.UseVisualStyleBackColor = true;
@@ -584,7 +584,7 @@
             // 
             this.btn_ViewCloseWarn.Location = new System.Drawing.Point(172, 20);
             this.btn_ViewCloseWarn.Name = "btn_ViewCloseWarn";
-            this.btn_ViewCloseWarn.Size = new System.Drawing.Size(85, 23);
+            this.btn_ViewCloseWarn.Size = new System.Drawing.Size(94, 23);
             this.btn_ViewCloseWarn.TabIndex = 35;
             this.btn_ViewCloseWarn.Text = "接近预警预览";
             this.btn_ViewCloseWarn.UseVisualStyleBackColor = true;

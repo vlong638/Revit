@@ -107,7 +107,9 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private bool Model_OnConfirmDelete()
         {
-            throw new NotImplementedException();
+            //TODO 确认处理
+            ShowMessage("提醒", "用户确定了");
+            return true;
         }
         private bool Model_OnChangeCurrentWhileHasCreateNew()
         {
@@ -171,15 +173,16 @@ namespace MyRevit.SubsidenceMonitor.UI
             tb_Monitor.Text = detail.Monitor;//监测单位
             tb_Date.Text = detail.IssueDateTime.ToString("yyyy.MM.dd");//监测日期
             var endTime = detail.IssueDateTime.AddMinutes(detail.IssueTimeRange);
-            var timeFormat = "hh:mm";
+            var timeFormat = "HH:mm";
             tb_Time.Text = $"{detail.IssueDateTime.ToString(timeFormat)}-{endTime.ToString(timeFormat)}";//监测时间
             tb_InstrumentName.Text = detail.InstrumentName;//仪器名称
             tb_InstrumentCode.Text = detail.InstrumentCode;//仪器编号
             //DGV
             var normalHeight = 20;
-            detail.NodeDatas = IssueTypeEntity.GetNodeDataCollection();
+            //detail.NodeDatas = IssueTypeEntity.GetNodeDataCollection();
             ITNodeDataCollection<ITNodeData> leftNodes = IssueTypeEntity.GetNodeDataCollection();
             ITNodeDataCollection<ITNodeData> rightNodes = IssueTypeEntity.GetNodeDataCollection();
+            //TODO 后续的处理本来优化为以NodeDatas为准的,然而抽象的处理 协变逆变并未精通
             if (detail.Nodes.Count <= normalHeight)
             {
                 foreach (var node in detail.Nodes)
@@ -199,12 +202,12 @@ namespace MyRevit.SubsidenceMonitor.UI
                     if (i < height)
                     {
                         leftNodes.Add(node.NodeCode, node.Data);
-                        detail.NodeDatas.Add(node.NodeCode, node.Data);
+                        //detail.NodeDatas.Add(node.NodeCode, node.Data);
                     }
                     else
                     {
                         rightNodes.Add(node.NodeCode, node.Data);
-                        detail.NodeDatas.Add(node.NodeCode, node.Data);
+                        //detail.NodeDatas.Add(node.NodeCode, node.Data);
                     }
                 }
             }
@@ -697,7 +700,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 catch (Exception ex)
                 {
                     transaction.RollBack();
-                    ShowMessage("警告", $"视图({viewName})处理失败,错误详情:" + ex.ToString());
+                    ShowMessage("警告", $"视图({viewName})加载失败,错误详情:" + ex.Message);
                     isSuccess = false;
                 }
             }
@@ -805,11 +808,9 @@ namespace MyRevit.SubsidenceMonitor.UI
                 ShowMessage("提醒", "需选中节点");
                 return;
             }
-            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false,
-                (doc) =>
-                {
-                    return Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc);
-                });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false, (doc) => Model.GetElementIds(SelectedNodes.Select(c => c.NodeCode).ToList(), doc));
+            if (!isSuccess)
+                return;
             this.DialogResult = DialogResult.Retry;
             this.Close();
             ListForm.DialogResult = DialogResult.Retry;
@@ -823,11 +824,9 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         private void btn_ViewCurrentMax_Red_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true,
-                (doc) =>
-                {
-                    return Model.GetCurrentMaxNodesElements(doc);
-                });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true, (doc) => Model.GetCurrentMaxNodesElements(doc));
+            if (!isSuccess)
+                return;
             this.DialogResult = DialogResult.Retry;
             this.Close();
             ListForm.DialogResult = DialogResult.Retry;
@@ -843,11 +842,9 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewCurrentMax_All_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false,
-                (doc) =>
-                {
-                    return Model.GetCurrentMaxNodesElements(doc);
-                });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false, (doc) => Model.GetCurrentMaxNodesElements(doc));
+            if (!isSuccess)
+                return;
             this.DialogResult = DialogResult.Retry;
             this.Close();
             ListForm.DialogResult = DialogResult.Retry;
@@ -863,11 +860,9 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewSumMax_Red_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true,
-                (doc) =>
-                {
-                    return Model.GetTotalMaxNodesElements(doc);
-                });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true, (doc) => Model.GetTotalMaxNodesElements(doc));
+            if (!isSuccess)
+                return;
             this.DialogResult = DialogResult.Retry;
             this.Close();
             ListForm.DialogResult = DialogResult.Retry;
@@ -883,11 +878,9 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewSumMax_All_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false,
-                (doc) =>
-                {
-                    return Model.GetTotalMaxNodesElements(doc);
-                });
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false,(doc) =>Model.GetTotalMaxNodesElements(doc));
+            if (!isSuccess)
+                return;
             this.DialogResult = DialogResult.Retry;
             this.Close();
             ListForm.DialogResult = DialogResult.Retry;
@@ -900,7 +893,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_CloseWarnCPSettings_Click(object sender, EventArgs e)
         {
-            var form = new CPSettingsForm(null, Model.MemorableData.Data.CloseCTSettings);
+            var form = new CPSettingsForm(UI_Doc.Document, Model.MemorableData.Data.CloseCTSettings);
             var result = form.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -915,7 +908,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_OverWarnCPSettings_Click(object sender, EventArgs e)
         {
-            var form = new CPSettingsForm(null, Model.MemorableData.Data.OverCTSettings);
+            var form = new CPSettingsForm(UI_Doc.Document, Model.MemorableData.Data.OverCTSettings);
             var result = form.ShowDialog();
             if (result == DialogResult.OK)
             {
@@ -939,41 +932,57 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 ShowMessage("警告", s);
             }
-            ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
-            string viewName = ListForm.ShowDialogType.GetViewName();
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            var cpSettingsString = Model.MemorableData.Data.CloseCTSettings;
             View3D view = null;
-            bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
+            var dialogType = ShowDialogType.ViewCloseWarn;
+            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetCloseWarnNodesElements(doc, ListForm.WarnSettings));
+            if (!isSuccess)
+                return;
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+        }
+
+        private bool DetailWithView(Document doc, string transactionName, string cpSettingsString, View3D view, ShowDialogType dialogType,Func<List<ElementId>> GetElementIds)
+        {
+            bool isSuccess;
+            ListForm.ShowDialogType = dialogType;
+            string viewName = dialogType.GetViewName();
+            isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
             {
                 view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
                 if (view == null)
                     view = Revit_Document_Helper.Create3DView(doc, viewName);
-                //渲染_所有 隐藏
-                IList<Element> allElements = GetAllElements(doc);
-                List<ElementId> elementIdsToHid = new List<ElementId>();
-                foreach (var element in allElements)
-                    if (element.CanBeHidden(view) && element.Id != view.Id)
-                        elementIdsToHid.Add(element.Id);
-                if (elementIdsToHid.Count > 0)
-                    view.HideElements(elementIdsToHid);
-                //渲染_测点 淡显,显示
-                var allNodesElementIds = Model.GetAllNodesElementIds(doc);
-                var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                if (allNodesElementIds.Count > 0)
-                    view.UnhideElements(allNodesElementIds);
-                foreach (var elementId in allNodesElementIds)
-                    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
-                //渲染_选中 红显
-                var cpSettings = new CPSettings(Model.MemorableData.Data.CloseCTSettings);
+                ////渲染_所有 隐藏
+                //IList<Element> allElements = GetAllElements(doc);
+                //List<ElementId> elementIdsToHid = new List<ElementId>();
+                //foreach (var element in allElements)
+                //    if (element.CanBeHidden(view) && element.Id != view.Id)
+                //        elementIdsToHid.Add(element.Id);
+                //if (elementIdsToHid.Count > 0)
+                //    view.HideElements(elementIdsToHid);
+                ////渲染_测点 淡显,显示
+                //var allNodesElementIds = Model.GetAllNodesElementIds(doc);
+                //var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+                //if (allNodesElementIds.Count > 0)
+                //    view.UnhideElements(allNodesElementIds);
+                //foreach (var elementId in allNodesElementIds)
+                //    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+                //渲染_选中 选中颜色显示
+                var cpSettings = new CPSettings(cpSettingsString);
                 var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(cpSettings.Color.R, cpSettings.Color.G, cpSettings.Color.B), new ElementId(cpSettings.FillerId), cpSettings.SurfaceTransparency);
-                var selectedElementIds = Model.GetCloseWarnNodesElements(doc, ListForm.WarnSettings);
+                var selectedElementIds = GetElementIds();
                 foreach (var elementId in selectedElementIds)
                     view.SetElementOverrides(elementId, overrideGraphicSettings);
             });
             if (view != null)
                 UI_Doc.ActiveView = view;
+            return isSuccess;
         }
+
         /// <summary>
         /// 超出预警预览
         /// 超出:报警值*80%,天数-1
@@ -989,40 +998,63 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 ShowMessage("警告", s);
             }
-            ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
-            string viewName = ListForm.ShowDialogType.GetViewName();
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            var cpSettingsString = Model.MemorableData.Data.OverCTSettings;
             View3D view = null;
-            bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
-            {
-                view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
-                if (view == null)
-                    view = Revit_Document_Helper.Create3DView(doc, viewName);
-                //渲染_所有 隐藏
-                IList<Element> allElements = GetAllElements(doc);
-                List<ElementId> elementIdsToHid = new List<ElementId>();
-                foreach (var element in allElements)
-                    if (element.CanBeHidden(view) && element.Id != view.Id)
-                        elementIdsToHid.Add(element.Id);
-                if (elementIdsToHid.Count > 0)
-                    view.HideElements(elementIdsToHid);
-                //渲染_测点 淡显,显示
-                var allNodesElementIds = Model.GetAllNodesElementIds(doc);
-                var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
-                if (allNodesElementIds.Count > 0)
-                    view.UnhideElements(allNodesElementIds);
-                foreach (var elementId in allNodesElementIds)
-                    view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
-                //渲染_选中 红显
-                var cpSettings = new CPSettings(Model.MemorableData.Data.OverCTSettings);
-                var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(cpSettings.Color.R, cpSettings.Color.G, cpSettings.Color.B), new ElementId(cpSettings.FillerId), cpSettings.SurfaceTransparency);
-                var selectedElementIds = Model.GetOverWarnNodesElements(doc, ListForm.WarnSettings);
-                foreach (var elementId in selectedElementIds)
-                    view.SetElementOverrides(elementId, overrideGraphicSettings);
-            });
-            if (view != null)
-                UI_Doc.ActiveView = view;
+            var dialogType = ShowDialogType.ViewOverWarn;
+            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetOverWarnNodesElements(doc, ListForm.WarnSettings));
+            if (!isSuccess)
+                return;
+            this.DialogResult = DialogResult.Retry;
+            this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
+
+
+            //string s = IssueTypeEntity.CheckWarnSettings(ListForm.WarnSettings, this);
+            //if (!string.IsNullOrEmpty(s))
+            //{
+            //    ShowMessage("警告", s);
+            //}
+            //ListForm.ShowDialogType = ShowDialogType.ViewCloseWarn;
+            //string viewName = ListForm.ShowDialogType.GetViewName();
+            //var doc = UI_Doc.Document;
+            //var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
+            //View3D view = null;
+            //bool isSuccess = DealWithTransaction(viewName, doc, transactionName, () =>
+            //{
+            //    view = Revit_Document_Helper.GetElementByNameAs<View3D>(UI_Doc.Document, viewName);
+            //    if (view == null)
+            //        view = Revit_Document_Helper.Create3DView(doc, viewName);
+            //    //渲染_所有 隐藏
+            //    IList<Element> allElements = GetAllElements(doc);
+            //    List<ElementId> elementIdsToHid = new List<ElementId>();
+            //    foreach (var element in allElements)
+            //        if (element.CanBeHidden(view) && element.Id != view.Id)
+            //            elementIdsToHid.Add(element.Id);
+            //    if (elementIdsToHid.Count > 0)
+            //        view.HideElements(elementIdsToHid);
+            //    //渲染_测点 淡显,显示
+            //    var allNodesElementIds = Model.GetAllNodesElementIds(doc);
+            //    var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
+            //    if (allNodesElementIds.Count > 0)
+            //        view.UnhideElements(allNodesElementIds);
+            //    foreach (var elementId in allNodesElementIds)
+            //        view.SetElementOverrides(elementId, defaultOverrideGraphicSettings);
+            //    //渲染_选中 红显
+            //    var cpSettings = new CPSettings(Model.MemorableData.Data.OverCTSettings);
+            //    var overrideGraphicSettings = Revit_Helper.GetOverrideGraphicSettings(new Color(cpSettings.Color.R, cpSettings.Color.G, cpSettings.Color.B), new ElementId(cpSettings.FillerId), cpSettings.SurfaceTransparency);
+            //    var selectedElementIds = Model.GetOverWarnNodesElements(doc, ListForm.WarnSettings);
+            //    foreach (var elementId in selectedElementIds)
+            //        view.SetElementOverrides(elementId, overrideGraphicSettings);
+            //});
+            //if (view != null)
+            //    UI_Doc.ActiveView = view;
+            //this.DialogResult = DialogResult.Retry;
+            //this.Close();
+            //ListForm.DialogResult = DialogResult.Retry;
+            //ListForm.Close();
         }
         #endregion
     }

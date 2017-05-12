@@ -34,15 +34,15 @@ namespace MyRevit.SubsidenceMonitor.Operators
         public static bool DbUpdate(this TNode entity, SQLiteConnection connection)
         {
             var command = connection.CreateCommand();
-            Dictionary<string, string> Sets = new Dictionary<string, string>();
-            Sets.Add(nameof(entity.Data), SQLiteHelper.ToSQLiteString(entity.Data));
-            Sets.Add(nameof(entity.ElementIds), SQLiteHelper.ToSQLiteString(entity.GetElementIds()));
-            Sets.Add(SQLiteHelper.ToSQLiteReservedField(nameof(entity.Index)), SQLiteHelper.ToSQLiteString(entity.Index));
-            Dictionary<string, string> Wheres = new Dictionary<string, string>();
-            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
-            Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
-            Wheres.Add(nameof(entity.NodeCode), SQLiteHelper.ToSQLiteString(entity.NodeCode));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Update(entity.TableName, Sets, Wheres);
+            Dictionary<string, string> sets = new Dictionary<string, string>();
+            sets.Add(nameof(entity.Data), SQLiteHelper.ToSQLiteString(entity.Data));
+            sets.Add(nameof(entity.ElementIds), SQLiteHelper.ToSQLiteString(entity.GetElementIds()));
+            sets.Add(SQLiteHelper.ToSQLiteReservedField(nameof(entity.Index)), SQLiteHelper.ToSQLiteString(entity.Index));
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDateTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.NodeCode), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.NodeCode)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Update(entity.TableName, sets, wheres);
             return command.ExecuteNonQuery() == 1;
         }
         public static bool DbUpdate(this List<TNode> entities, SQLiteConnection connection)
@@ -57,10 +57,10 @@ namespace MyRevit.SubsidenceMonitor.Operators
         static int dbDeleteByDetailKey(this TNode entity, SQLiteConnection connection)
         {
             var command = connection.CreateCommand();
-            Dictionary<string, string> Wheres = new Dictionary<string, string>();
-            Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
-            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(entity.TableName, Wheres);
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDateTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(entity.TableName, wheres);
             return command.ExecuteNonQuery();
         }
         public static int DbDeleteByDetailKey(this TNode entity, SQLiteConnection connection)
@@ -74,11 +74,11 @@ namespace MyRevit.SubsidenceMonitor.Operators
         static int dbDelete(this TNode entity, SQLiteConnection connection)
         {
             var command = connection.CreateCommand();
-            Dictionary<string, string> Wheres = new Dictionary<string, string>();
-            Wheres.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
-            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
-            Wheres.Add(nameof(entity.NodeCode), SQLiteHelper.ToSQLiteString(entity.NodeCode));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(entity.TableName, Wheres);
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDateTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.NodeCode), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.NodeCode)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(entity.TableName, wheres);
             return command.ExecuteNonQuery();
         }
         public static bool DbDelete(this TNode entity, SQLiteConnection connection)

@@ -124,31 +124,81 @@ create table TNode
         {
             return ((int)Enum.Parse(typeof(T), input.ToString())).ToString();
         }
-        public static string ToSQLiteSets(Dictionary<string, string> dic)
+
+
+        public static string ToSQLiteSets(Dictionary<string, string> updateSets)
         {
-            return string.Join(",", dic.Select(c => c.Key + "=" + c.Value));
+            return string.Join(",", updateSets.Select(c => c.Key + "=" + c.Value));
         }
-        public static string ToSQLiteWheres(Dictionary<string, string> dic)
+        public static string ToSQLiteWheres(List<KeyOperatorValue> wheres)
         {
-            return string.Join(" and ", dic.Select(c => c.Key + "=" + c.Value));
+            return string.Join(" and ", wheres.Select(c => c.Key + c.Operator + c.Value));
         }
-        public static string GetSQLiteQuery_Select(List<string> selects, string tableName, Dictionary<string, string> wheres)
+        public static string GetSQLiteQuery_Select(List<string> selects, string tableName, List<KeyOperatorValue> wheres)
         {
             var selectsStr = (selects == null || selects.Count == 0 ? "*" : string.Join(",", selects));
             return $"select {selectsStr} from {tableName} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
         }
-        public static string GetSQLiteQuery_Insert(string tableName, Dictionary<string, string> nameValues)
+        public static string GetSQLiteQuery_Insert(string tableName, Dictionary<string, string> insertSets)
         {
-            return $"insert into {tableName}({string.Join(",", nameValues.Keys)}) values({string.Join(",", nameValues.Values)})";
+            return $"insert into {tableName}({string.Join(",", insertSets.Keys)}) values({string.Join(",", insertSets.Values)})";
         }
-        public static string GetSQLiteQuery_Update(string tableName, Dictionary<string, string> sets, Dictionary<string, string> wheres)
+        public static string GetSQLiteQuery_InsertOrReplace(string tableName, Dictionary<string, string> insertSets)
         {
-            return $"update {tableName} set {SQLiteHelper.ToSQLiteSets(sets)} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
+            return $"insert or replace into {tableName}({string.Join(",", insertSets.Keys)}) values({string.Join(",", insertSets.Values)})";
         }
-        public static string GetSQLiteQuery_Delete(string tableName, Dictionary<string, string> wheres)
+        public static string GetSQLiteQuery_Update(string tableName, Dictionary<string, string> updateSets, List<KeyOperatorValue> wheres)
+        {
+            return $"update {tableName} set {SQLiteHelper.ToSQLiteSets(updateSets)} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
+        }
+        public static string GetSQLiteQuery_Delete(string tableName, List<KeyOperatorValue> wheres)
         {
             return  $"delete from {tableName}  where {SQLiteHelper.ToSQLiteWheres(wheres)}";
         }
         #endregion
+    }
+    public enum SQLiteOperater
+    {
+        Set,
+        Eq,
+        GT,
+        LT,
+        GTorEq,
+        LTorEq
+    }
+    public static class SQLiteOperaterEx
+    {
+        public static string GetSQLiteOperatorString(this SQLiteOperater op)
+        {
+            switch (op)
+            {
+                case SQLiteOperater.Set:
+                case SQLiteOperater.Eq:
+                    return "=";
+                case SQLiteOperater.GT:
+                    return ">";
+                case SQLiteOperater.LT:
+                    return "<";
+                case SQLiteOperater.GTorEq:
+                    return ">=";
+                case SQLiteOperater.LTorEq:
+                    return "<=";
+                default:
+                    return null;
+            }
+        }
+    }
+    public class KeyOperatorValue
+    {
+        public string Key;
+        public string Operator;
+        public string Value;
+
+        public KeyOperatorValue(string key, SQLiteOperater @operator, string value)
+        {
+            Key = key;
+            Operator = @operator.GetSQLiteOperatorString();
+            Value = value;
+        }
     }
 }

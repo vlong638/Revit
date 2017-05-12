@@ -5,8 +5,9 @@ using System.Collections.Generic;
 
 namespace MyRevit.SubsidenceMonitor.Operators
 {
-    public class WriteFacade
+    public class Facade
     {
+        #region Write
         public static BLLResult CreateDetail(TList list, TDetail detail, List<TNode> nodes)
         {
             var result = new BLLResult();
@@ -85,10 +86,10 @@ namespace MyRevit.SubsidenceMonitor.Operators
                 connection.Close();
             }
             return result;
-        }
-    }
-    public class ReadFacade
-    {
+        } 
+        #endregion
+
+        #region Read
         public static void FetchDetails(TList list)
         {
             using (var connection = SQLiteHelper.Connect())
@@ -118,5 +119,17 @@ namespace MyRevit.SubsidenceMonitor.Operators
             }
             return result;
         }
+        public static List<TDetail> GetDetailsByTimeRange(EIssueType issueType,DateTime start, DateTime end)
+        {
+            List<TDetail> result = new List<TDetail>();
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                result.GetDetailsByTimeRange(connection, issueType, start, end);
+                connection.Close();
+            }
+            return result;
+        } 
+        #endregion
     }
 }

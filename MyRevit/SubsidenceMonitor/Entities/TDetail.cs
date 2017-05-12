@@ -153,7 +153,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// </summary>
         public void LoadData()
         {
-            ReadFacade.FetchNodes(this);
+            Facade.FetchNodes(this);
             IsLoad = true;
         }
         /// <summary>
@@ -164,7 +164,20 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// 相关联的Nodes
         /// </summary>
         public List<TNode> Nodes { get; set; } = new List<TNode>();
-        public ITNodeDataCollection<ITNodeData> NodeDatas { set; get; }
+        ITNodeDataCollection<ITNodeData> _NodeDatas;
+        public ITNodeDataCollection<ITNodeData> NodeDatas
+        {
+            get
+            {
+                if (_NodeDatas == null)
+                {
+                    _NodeDatas = IssueType.GetEntity().GetNodeDataCollection();
+                    foreach (var node in Nodes)
+                        _NodeDatas.Add(node.NodeCode, node.Data);
+                }
+                return _NodeDatas;
+            }
+        }
         #endregion
     }
 }

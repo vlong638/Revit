@@ -44,7 +44,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             if (endTime < startTime)//如23:00-1:00认为跨天 但是跨天不支持10:00-11:00(第二天的11:00),这种情况跨天比较特殊,甚至跨多天,这个需要另提需求处理
                 endTime.AddDays(1);
             //检测:监测时间的日期需与列表一致
-            if (startTime.Date != detail.IssueDateTime)
+            if (startTime.Date != detail.IssueDateTime.Date)
                 return ParseResult.DateTime_Invalid;
             detail.IssueDateTime = startTime;
             detail.IssueTimeRange = (short)(endTime - startTime).TotalMinutes;
@@ -75,6 +75,5 @@ namespace MyRevit.SubsidenceMonitor.Entities
             detail.Nodes.AddRange(nodes);
             return ParseResult.Success;
         }
-
     }
 }

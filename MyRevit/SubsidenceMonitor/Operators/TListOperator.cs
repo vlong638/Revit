@@ -17,17 +17,17 @@ namespace MyRevit.SubsidenceMonitor.Operators
             NameValues.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
             NameValues.Add(nameof(entity.IssueDate), SQLiteHelper.ToSQLiteString(entity.IssueDate));
             NameValues.Add(nameof(entity.DataCount), SQLiteHelper.ToSQLiteString(entity.Datas.Count()));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Insert(entity.TableName, NameValues);
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_InsertOrReplace(entity.TableName, NameValues);
             return command.ExecuteNonQuery() == 1;
         }
         public static void GetListsByKeys(this List<TList> lists, SQLiteConnection connection, EIssueType issueType, DateTime issueDateTime)
         {
             var command = connection.CreateCommand();
             var entity = new TList();
-            Dictionary<string, string> Wheres = new Dictionary<string, string>();
-            Wheres.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(issueType));
-            Wheres.Add($"datetime({nameof(entity.IssueDate)},'start of month')", SQLiteHelper.ToSQLiteString(issueDateTime));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, entity.TableName, Wheres);
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue($"datetime({nameof(entity.IssueDate)},'start of month')", SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(issueDateTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(issueType)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, entity.TableName, wheres);
             var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -38,10 +38,10 @@ namespace MyRevit.SubsidenceMonitor.Operators
         {
             var command = connection.CreateCommand();
             var detail = new TDetail();
-            Dictionary<string, string> Wheres = new Dictionary<string, string>();
-            Wheres.Add(nameof(detail.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(list.IssueType));
-            Wheres.Add($"datetime({nameof(detail.IssueDateTime)},'start of day')", SQLiteHelper.ToSQLiteString(list.IssueDate));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, detail.TableName, Wheres);
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue($"datetime({nameof(detail.IssueDateTime)},'start of day')", SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(list.IssueDate)));
+            wheres.Add(new KeyOperatorValue(nameof(detail.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(list.IssueType)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, detail.TableName, wheres);
             var reader = command.ExecuteReader();
             while (reader.Read())
             {

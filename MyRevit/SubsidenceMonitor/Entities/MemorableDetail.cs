@@ -22,16 +22,16 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             if (isCreateNew)
             {
-                return WriteFacade.CreateDetail(Data.List, Data, Data.Nodes);
+                return Facade.CreateDetail(Data.List, Data, Data.Nodes);
             }
             else
             {
-                return WriteFacade.UpdateDetail(Data, Data.Nodes);
+                return Facade.UpdateDetail(Data, Data.Nodes);
             }
         }
         public override BLLResult Delete()
         {
-            return WriteFacade.DeleteDetail(Data);
+            return Facade.DeleteDetail(Data);
         }
         public override void Rollback()
         {

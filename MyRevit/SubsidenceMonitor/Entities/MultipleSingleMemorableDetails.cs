@@ -198,7 +198,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public List<ElementId> GetCloseWarnNodesElements(Document doc, WarnSettings warnSettings)
         {
             List<ElementId> results = new List<ElementId>();
-            foreach (var node in MemorableData.Data.NodeDatas.GetCloseWarn(warnSettings))
+            foreach (var node in MemorableData.Data.NodeDatas.GetCloseWarn(warnSettings, MemorableData.Data))
             {
                 results.AddRange(GetElementIds(node.NodeCode, doc));
             }
@@ -207,7 +207,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public List<ElementId> GetOverWarnNodesElements(Document doc, WarnSettings warnSettings)
         {
             List<ElementId> results = new List<ElementId>();
-            foreach (var node in MemorableData.Data.NodeDatas.GetOverWarn(warnSettings))
+            foreach (var node in MemorableData.Data.NodeDatas.GetOverWarn(warnSettings, MemorableData.Data))
             {
                 results.AddRange(GetElementIds(node.NodeCode, doc));
             }
