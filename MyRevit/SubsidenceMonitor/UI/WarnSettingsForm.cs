@@ -28,14 +28,14 @@ namespace MyRevit.SubsidenceMonitor.UI
                 tb_SurfaceSubsidence_SumMillimeter.Text = WarnSettings.SurfaceSubsidence_SumMillimeter.ToString();
                 tb_STBAP_MaxAxle.Text = WarnSettings.STBAP_MaxAxle.ToString();
                 tb_STBAP_MinAxle.Text = WarnSettings.STBAP_MinAxle.ToString();
-                tb_StressedPipeLineSubsidence_Day.Text = WarnSettings.StressedPipeLineSubsidence_Day.ToString();
-                tb_StressedPipeLineSubsidence_PipelineMillimeter.Text = WarnSettings.StressedPipeLineSubsidence_PipelineMillimeter.ToString();
-                tb_StressedPipeLineSubsidence_WellMillimeter.Text = WarnSettings.StressedPipeLineSubsidence_WellMillimeter.ToString();
-                tb_StressedPipeLineSubsidence_SumMillimeter.Text = WarnSettings.StressedPipeLineSubsidence_SumMillimeter.ToString();
-                tb_UnstressedPipeLineSubsidence_Day.Text = WarnSettings.UnstressedPipeLineSubsidence_Day.ToString();
-                tb_UnstressedPipeLineSubsidence_PipelineMillimeter.Text = WarnSettings.UnstressedPipeLineSubsidence_PipelineMillimeter.ToString();
-                tb_UnstressedPipeLineSubsidence_WellMillimeter.Text = WarnSettings.UnstressedPipeLineSubsidence_WellMillimeter.ToString();
-                tb_UnstressedPipeLineSubsidence_SumMillimeter.Text = WarnSettings.UnstressedPipeLineSubsidence_SumMillimeter.ToString();
+                tb_StressedPipeLineSubsidence_Day.Text = WarnSettings.PressedPipeLineSubsidence_Day.ToString();
+                tb_StressedPipeLineSubsidence_PipelineMillimeter.Text = WarnSettings.PressedPipeLineSubsidence_PipelineMillimeter.ToString();
+                tb_StressedPipeLineSubsidence_WellMillimeter.Text = WarnSettings.PressedPipeLineSubsidence_WellMillimeter.ToString();
+                tb_StressedPipeLineSubsidence_SumMillimeter.Text = WarnSettings.PressedPipeLineSubsidence_SumMillimeter.ToString();
+                tb_UnstressedPipeLineSubsidence_Day.Text = WarnSettings.UnpressedPipeLineSubsidence_Day.ToString();
+                tb_UnstressedPipeLineSubsidence_PipelineMillimeter.Text = WarnSettings.UnpressedPipeLineSubsidence_PipelineMillimeter.ToString();
+                tb_UnstressedPipeLineSubsidence_WellMillimeter.Text = WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter.ToString();
+                tb_UnstressedPipeLineSubsidence_SumMillimeter.Text = WarnSettings.UnpressedPipeLineSubsidence_SumMillimeter.ToString();
                 tb_SkewBack_WellMillimeter.Text = WarnSettings.SkewBack_WellMillimeter.ToString();
                 tb_SkewBack_StandardMillimeter.Text = WarnSettings.SkewBack_StandardMillimeter.ToString();
                 tb_SkewBack_Speed.Text = WarnSettings.SkewBack_Speed.ToString();
@@ -124,7 +124,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             //管线沉降(有压)
             int StressedPipeLineSubsidence_Day;
             if (int.TryParse(tb_StressedPipeLineSubsidence_Day.Text, out StressedPipeLineSubsidence_Day))
-                WarnSettings.StressedPipeLineSubsidence_Day = StressedPipeLineSubsidence_Day;
+                WarnSettings.PressedPipeLineSubsidence_Day = StressedPipeLineSubsidence_Day;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_Day + MessageSuffix);
@@ -132,7 +132,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int StressedPipeLineSubsidence_PipelineMillimeter;
             if (int.TryParse(tb_StressedPipeLineSubsidence_PipelineMillimeter.Text, out StressedPipeLineSubsidence_PipelineMillimeter))
-                WarnSettings.StressedPipeLineSubsidence_PipelineMillimeter = StressedPipeLineSubsidence_PipelineMillimeter;
+                WarnSettings.PressedPipeLineSubsidence_PipelineMillimeter = StressedPipeLineSubsidence_PipelineMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
@@ -140,7 +140,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int StressedPipeLineSubsidence_WellMillimeter;
             if (int.TryParse(tb_StressedPipeLineSubsidence_WellMillimeter.Text, out StressedPipeLineSubsidence_WellMillimeter))
-                WarnSettings.StressedPipeLineSubsidence_WellMillimeter = StressedPipeLineSubsidence_WellMillimeter;
+                WarnSettings.PressedPipeLineSubsidence_WellMillimeter = StressedPipeLineSubsidence_WellMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
@@ -148,7 +148,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int StressedPipeLineSubsidence_SumMillimeter;
             if (int.TryParse(tb_StressedPipeLineSubsidence_SumMillimeter.Text, out StressedPipeLineSubsidence_SumMillimeter))
-                WarnSettings.StressedPipeLineSubsidence_SumMillimeter = StressedPipeLineSubsidence_SumMillimeter;
+                WarnSettings.PressedPipeLineSubsidence_SumMillimeter = StressedPipeLineSubsidence_SumMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
@@ -157,7 +157,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             //管线沉降(无压)
             int UnstressedPipeLineSubsidence_Day;
             if (int.TryParse(tb_UnstressedPipeLineSubsidence_Day.Text, out UnstressedPipeLineSubsidence_Day))
-                WarnSettings.UnstressedPipeLineSubsidence_Day = UnstressedPipeLineSubsidence_Day;
+                WarnSettings.UnpressedPipeLineSubsidence_Day = UnstressedPipeLineSubsidence_Day;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_Day + MessageSuffix);
@@ -165,7 +165,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int UnstressedPipeLineSubsidence_PipelineMillimeter;
             if (int.TryParse(tb_UnstressedPipeLineSubsidence_PipelineMillimeter.Text, out UnstressedPipeLineSubsidence_PipelineMillimeter))
-                WarnSettings.UnstressedPipeLineSubsidence_PipelineMillimeter = UnstressedPipeLineSubsidence_PipelineMillimeter;
+                WarnSettings.UnpressedPipeLineSubsidence_PipelineMillimeter = UnstressedPipeLineSubsidence_PipelineMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
@@ -173,7 +173,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int UnstressedPipeLineSubsidence_WellMillimeter;
             if (int.TryParse(tb_UnstressedPipeLineSubsidence_WellMillimeter.Text, out UnstressedPipeLineSubsidence_WellMillimeter))
-                WarnSettings.UnstressedPipeLineSubsidence_WellMillimeter = UnstressedPipeLineSubsidence_WellMillimeter;
+                WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter = UnstressedPipeLineSubsidence_WellMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
@@ -181,7 +181,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             int UnstressedPipeLineSubsidence_SumMillimeter;
             if (int.TryParse(tb_UnstressedPipeLineSubsidence_SumMillimeter.Text, out UnstressedPipeLineSubsidence_SumMillimeter))
-                WarnSettings.UnstressedPipeLineSubsidence_SumMillimeter = UnstressedPipeLineSubsidence_SumMillimeter;
+                WarnSettings.UnpressedPipeLineSubsidence_SumMillimeter = UnstressedPipeLineSubsidence_SumMillimeter;
             else
             {
                 ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_SumMillimeter + MessageSuffix);

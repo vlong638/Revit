@@ -14,15 +14,15 @@
         public int STBAP_MaxAxle { set; get; } = int.MinValue;
         public int STBAP_MinAxle { set; get; } = int.MinValue;
         //管线沉降(有压)
-        public int StressedPipeLineSubsidence_Day { set; get; } = int.MinValue;
-        public int StressedPipeLineSubsidence_PipelineMillimeter { set; get; } = int.MinValue;
-        public int StressedPipeLineSubsidence_WellMillimeter { set; get; } = int.MinValue;
-        public int StressedPipeLineSubsidence_SumMillimeter { set; get; } = int.MinValue;
+        public int PressedPipeLineSubsidence_Day { set; get; } = int.MinValue;
+        public int PressedPipeLineSubsidence_PipelineMillimeter { set; get; } = int.MinValue;
+        public int PressedPipeLineSubsidence_WellMillimeter { set; get; } = int.MinValue;
+        public int PressedPipeLineSubsidence_SumMillimeter { set; get; } = int.MinValue;
         //管线沉降(无压)
-        public int UnstressedPipeLineSubsidence_Day { set; get; } = int.MinValue;
-        public int UnstressedPipeLineSubsidence_PipelineMillimeter { set; get; } = int.MinValue;
-        public int UnstressedPipeLineSubsidence_WellMillimeter { set; get; } = int.MinValue;
-        public int UnstressedPipeLineSubsidence_SumMillimeter { set; get; } = int.MinValue;
+        public int UnpressedPipeLineSubsidence_Day { set; get; } = int.MinValue;
+        public int UnpressedPipeLineSubsidence_PipelineMillimeter { set; get; } = int.MinValue;
+        public int UnpressedPipeLineSubsidence_WellMillimeter { set; get; } = int.MinValue;
+        public int UnpressedPipeLineSubsidence_SumMillimeter { set; get; } = int.MinValue;
         //墙体水平位移(侧斜)
         public int SkewBack_WellMillimeter { set; get; } = int.MinValue;
         public int SkewBack_StandardMillimeter { set; get; } = int.MinValue;

@@ -198,8 +198,8 @@ namespace MyRevit
             AllowUserToAddRows = false;//动态增加行
             AllowUserToDeleteRows = false;//动态删除行
             AllowUserToResizeRows = false;//编辑行高
-            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
+            RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.EnableResizing;
             ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.BottomCenter;
 
             //Paint += MyDGV0427_Paint;

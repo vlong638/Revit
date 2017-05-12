@@ -245,8 +245,6 @@ namespace MyRevit.SubsidenceMonitor.UI
                     var list = CurrentLists.First(c => c.IssueDate == loadedList.IssueDate);
                     list.DataCount = loadedList.DataCount;
                 }
-
-                //CurrentLists = dayLists.Select(dayList => new TList(issueType, dayList) { DataCount = (short)(loadedLists.FirstOrDefault(l => l.IssueDate == dayList.Date) == null ? 0 : loadedLists.FirstOrDefault(l => l.IssueDate == dayList.Date).DataCount) }).ToList();
                 dgv.DataSource = null;
                 dgv.DataSource = CurrentLists;
             }
@@ -273,6 +271,11 @@ namespace MyRevit.SubsidenceMonitor.UI
                 switch (list.IssueType)
                 {
                     case EIssueType.建筑物沉降:
+                    case EIssueType.地表沉降:
+                    case EIssueType.管线沉降_无压:
+                    case EIssueType.管线沉降_有压:
+                    case EIssueType.侧斜监测:
+                    case EIssueType.钢支撑轴力监测:
                         if (list.Datas.Count() == 0 && list.DataCount > 0)
                             Facade.FetchDetails(list);
                         SubForm = new SubsidenceMonitorForm(this, UI_Doc, list);
@@ -280,15 +283,6 @@ namespace MyRevit.SubsidenceMonitor.UI
                         CurrentLists.FirstOrDefault(c => c.IssueDate == list.IssueDate).Datas = list.Datas;
                         dgv.DataSource = null;
                         dgv.DataSource = CurrentLists;
-                        break;
-                    case EIssueType.地表沉降:
-                        break;
-                    case EIssueType.管线沉降_无压:
-                    case EIssueType.管线沉降_有压:
-                        break;
-                    case EIssueType.侧线监测:
-                        break;
-                    case EIssueType.钢支撑轴力监测:
                         break;
                     default:
                         break;

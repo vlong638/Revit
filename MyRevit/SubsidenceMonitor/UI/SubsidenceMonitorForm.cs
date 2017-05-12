@@ -67,18 +67,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             btn_LoadExcel.Text = $"录入{Environment.NewLine}Excel";
             //dgv 总宽479-42=437/5=87.4 420 17的Scroll空间
             //560-42-18-500/6 84 504 56 42+16 差不多? 保存还有多2左右 实际是 42的序列号+14的Scroll
-            var headerNodes = new List<HeaderNode>()
-            {
-                new HeaderNode(0,52,84,"测点编号",nameof(BuildingSubsidenceDataV1.NodeCode)),
-                new HeaderNode(1,26,168,"沉降变化量(mm)",null,
-                new List<HeaderNode>() {
-                     new HeaderNode(-1,26,84,"本次变量",nameof(BuildingSubsidenceDataV1.CurrentChanges)),
-                     new HeaderNode(-1,26,84,"累计变量",nameof(BuildingSubsidenceDataV1.SumChanges)),
-                }),
-                new HeaderNode(3,52,84,$"围护结构施工{System.Environment.NewLine}期间累计值（mm）",nameof(BuildingSubsidenceDataV1.SumPeriodBuildingEnvelope)),
-                new HeaderNode(4,52,84,"总累计值（mm）",nameof(BuildingSubsidenceDataV1.SumBuildingEnvelope)),
-                new HeaderNode(5,52,84,"备注",nameof(BuildingSubsidenceDataV1.Conment)),
-            };
+            var headerNodes = IssueTypeEntity.GetHeaderNodes();
             dgv_left.HeaderNodes = headerNodes;
             dgv_left.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             dgv_right.HeaderNodes = headerNodes;
@@ -342,7 +331,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case ParseResult.Success:
                     break;
                 case ParseResult.ReportName_ParseFailure:
-                    message = @"内容格式不符合预期(承包单位：@承包单位\s+监理单位：@监理单位\s+监测单位：@监测单位)";
+                    message = @"预期的表不存在";
                     break;
                 case ParseResult.Participants_ParseFailure:
                     message = @"内容格式不符合预期(承包单位：@承包单位\s+监理单位：@监理单位\s+监测单位：@监测单位)";

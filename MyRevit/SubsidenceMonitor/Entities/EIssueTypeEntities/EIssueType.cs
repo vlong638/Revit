@@ -29,7 +29,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// 侧线监测
         /// SkewBack
         /// </summary>
-        侧线监测 = 5,
+        侧斜监测 = 5,
         /// <summary>
         /// 钢支撑轴力监测
         /// STBAP,SteelTubeBracingAxialPressure
@@ -66,10 +66,15 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 case EIssueType.建筑物沉降:
                     return new BuildingSubsidence();
                 case EIssueType.地表沉降:
-                case EIssueType.管线沉降_无压:
-                case EIssueType.管线沉降_有压:
-                case EIssueType.侧线监测:
+                    return new SurfaceSubsidence();
                 case EIssueType.钢支撑轴力监测:
+                    return new STBAP();
+                case EIssueType.管线沉降_无压:
+                    return new UnpressedPipeLineSubsidence();
+                case EIssueType.管线沉降_有压:
+                    return new PressedPipeLineSubsidence();
+                case EIssueType.侧斜监测:
+                    return new SkewBack();
                 default:
                     throw new NotImplementedException($"暂未实现类型{issueType.ToString()}的EIssueTypeEntity");
             }

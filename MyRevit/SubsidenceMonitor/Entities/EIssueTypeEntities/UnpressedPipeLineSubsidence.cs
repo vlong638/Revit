@@ -12,10 +12,10 @@ namespace MyRevit.SubsidenceMonitor.Entities
     /// <summary>
     /// 建筑物沉降.EIssueTypeEntity
     /// </summary>
-    public class BuildingSubsidence : EIssueTypeEntity
+    public class UnpressedPipeLineSubsidence : EIssueTypeEntity
     {
-        public override EIssueType IssueType { get { return EIssueType.建筑物沉降; } }
-        public override string SheetName { get { return "建筑物沉降"; } }
+        public override EIssueType IssueType { get { return EIssueType.管线沉降_无压; } }
+        public override string SheetName { get { return "管线沉降"; } }
         public override ParseResult ParseInto(Worksheet sheet, TDetail detail)
         {
             //ReportName
@@ -64,7 +64,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             int emptyCountToStop = 2;//2即空两行则跳过
             nodes = GetNodes(detail, sheet, dataRanges, emptyCountToStop, (s, r, range) =>
             {
-                return new BuildingSubsidenceDataV1(
+                return new UnpressedPipeLineSubsidenceDataV1(
                      s.GetCellValueAsString(r, range.StartColumn).Trim(),
                      s.GetCellValueAsString(r, range.StartColumn + 1).Trim(),
                      s.GetCellValueAsString(r, range.StartColumn + 2).Trim(),
@@ -75,20 +75,20 @@ namespace MyRevit.SubsidenceMonitor.Entities
             return ParseResult.Success;
         }
     }
-    public class BuildingSubsidenceDataV1 : ITNodeData
+    public class UnpressedPipeLineSubsidenceDataV1 : ITNodeData
     {
         /// <summary>
         /// str需为this.ToString()的数据
         /// </summary>
         /// <param name="str"></param>
-        public BuildingSubsidenceDataV1()
+        public UnpressedPipeLineSubsidenceDataV1()
         {
         }
-        public BuildingSubsidenceDataV1(string nodeCode, string str)
+        public UnpressedPipeLineSubsidenceDataV1(string nodeCode, string str)
         {
             DeserializeFromString(nodeCode, str);
         }
-        public BuildingSubsidenceDataV1(string nodeCode, string currentChanges, string sumChanges, string sumPeriodBuildingEnvelope, string sumBuildingEnvelope)
+        public UnpressedPipeLineSubsidenceDataV1(string nodeCode, string currentChanges, string sumChanges, string sumPeriodBuildingEnvelope, string sumBuildingEnvelope)
         {
             NodeCode = nodeCode;
             CurrentChanges = currentChanges;
@@ -128,7 +128,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 return float.TryParse(CurrentChanges, out f)
                     && float.TryParse(SumChanges, out f)
                     && float.TryParse(SumPeriodBuildingEnvelope, out f)
-                    && float.TryParse(SumBuildingEnvelope, out f) ? "" : "点位破坏";
+                    && float.TryParse(SumBuildingEnvelope, out f) 
+                    ? "" : "点位破坏";
             }
         }
         public string SerializeToString()
@@ -186,9 +187,9 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
         }
     }
-    public class BuildingSubsidenceCollection<T>
+    public class UnpressedPipeLineSubsidenceCollection<T>
         : ITNodeDataCollection<T>
-        where T : BuildingSubsidenceDataV1, new()
+        where T : UnpressedPipeLineSubsidenceDataV1, new()
     {
         List<T> _Datas = new List<T>();
         public IEnumerable<T> Datas
@@ -233,14 +234,14 @@ namespace MyRevit.SubsidenceMonitor.Entities
             if (d == null)
                 return result;
 
-            var totalHourRange = warnSettings.BuildingSubsidence_Day * 24;
+            var totalHourRange = warnSettings.PressedPipeLineSubsidence_Day * 24;//检测项
             var endTime = detail.IssueDateTime;
             var details = Facade.GetDetailsByTimeRange(detail.IssueType, endTime.AddHours(-totalHourRange), endTime);
             var orderedDetails = details.OrderByDescending(c => c.IssueDateTime).ToList();
             var currentDetail = detail;
             //需预警的节点
-            //监测 warnSettings.BuildingSubsidence_SumMillimeter;
-            var sumMillimeter = warnSettings.SurfaceSubsidence_SumMillimeter;
+            //监测 warnSettings.UnpressedPipeLineSubsidence_SumMillimeter;
+            var sumMillimeter = warnSettings.PressedPipeLineSubsidence_SumMillimeter;//检测项
             foreach (var data in Datas)
             {
                 if (double.IsNaN(warnCoefficientMax))
@@ -255,11 +256,11 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         result.Add(data);
                 }
             }
-            //监测 warnSettings.BuildingSubsidence_DailyMillimeter;
+            //监测 warnSettings.UnpressedPipeLineSubsidence_DailyMillimeter;
             //数据天数达标监测
             if (totalHourRange != 0)
             {
-                var dailyMillimeter = warnSettings.SurfaceSubsidence_DailyMillimeter;
+                var dailyMillimeter = warnSettings.PressedPipeLineSubsidence_PipelineMillimeter;//检测项
                 double warnDailyMillimeterMin = dailyMillimeter * warnCoefficientMin;
                 double warnDailyMillimeterMax = 0;
                 if (!double.IsNaN(warnCoefficientMax))
@@ -292,7 +293,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
 
                     detailIndex = 0;
                     currentDetail = detail;
-                    int days = warnSettings.BuildingSubsidence_Day;
+                    int days = warnSettings.PressedPipeLineSubsidence_PipelineMillimeter;
                     double overHours = 0;
                     double overValues = 0;
                     while (days > 0)
@@ -355,6 +356,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         result.Add(data);
                 }
             }
+            throw new NotImplementedException();//自流井
             return result;
         }
     }

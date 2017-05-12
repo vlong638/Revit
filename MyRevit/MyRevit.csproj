@@ -152,12 +152,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\MyDGV0427.cs" />
     <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueType.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\SkewBack.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\UnpressedPipeLineSubsidence.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\PressedPipeLineSubsidence.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueType.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\STBAP.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\SurfaceSubsidence.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidenceData.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ITNodeDataCollection.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ParseResult.cs" />
     <Compile Include="SubsidenceMonitor\Entities\ElementParameterValueSet.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="SubsidenceMonitor\Interfaces\IPDMTBase.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\IStringBasedData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\ITNodeData.cs" />
+    <Compile Include="SubsidenceMonitor\Interfaces\ITNodeDataCollection.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using MyRevit.SubsidenceMonitor.Entities;
+using System.Collections.Generic;
 
-namespace MyRevit.SubsidenceMonitor.Entities
+namespace MyRevit.SubsidenceMonitor.Interfaces
 {
     public interface ITNodeDataCollection<out T>
     {
