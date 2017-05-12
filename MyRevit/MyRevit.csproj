@@ -158,6 +158,7 @@
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ITNodeDataCollection.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\ParseResult.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\ElementParameterValueSet.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TList.cs" />

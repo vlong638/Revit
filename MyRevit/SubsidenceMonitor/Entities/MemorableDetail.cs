@@ -1,4 +1,5 @@
-﻿using MyRevit.SubsidenceMonitor.Interfaces;
+﻿using Autodesk.Revit.DB;
+using MyRevit.SubsidenceMonitor.Interfaces;
 using MyRevit.SubsidenceMonitor.Operators;
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,9 @@ namespace MyRevit.SubsidenceMonitor.Entities
     /// <summary>
     /// 职责:作为业务逻辑的Facade
     /// </summary>
-    public class MemorableDetail : MemorableData<object, TDetail>
+    public class MemorableDetail : MemorableData<Document, TDetail,List<ElementParameterValueSet>>
     {
-        public MemorableDetail(object storage, TDetail data) : base(storage, data)
+        public MemorableDetail(Document storage, TDetail data) : base(storage, data)
         {
         }
 
@@ -36,7 +37,28 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             Data = Memo;
             Memo = Clone();
-            //TODO 回退需要取消掉被刷新过的内容
+
+            //回退需要取消掉被刷新过的内容
+            using (var transaction = new Transaction(Storage, nameof(MemorableDetail) + nameof(Rollback)))
+            {
+                transaction.Start();
+                try
+                {
+                    for (int i = TemporaryData.Count()-1; i >=0; i--)
+                    {
+                        var data = TemporaryData[i];
+                        var element = Storage.GetElement(new ElementId(data.ElementId));
+                        var parameter = element.GetParameters(data.ParameterName).First();
+                        parameter.Set(data.ParameterValue);
+                    }
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollBack();
+                    throw new NotImplementedException(ex.Message);
+                }
+            }
         }
         protected override TDetail Clone()
         {

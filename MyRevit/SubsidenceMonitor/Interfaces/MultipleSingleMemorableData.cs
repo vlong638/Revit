@@ -77,8 +77,8 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
         public IListData List { set; get; }
         public List<IDetailData> Datas { get { return List.Datas; } }
         public int DataIndex { set; get; }
-        MemorableData<IStorage, IDetailData> _memorableData;
-        public MemorableData<IStorage, IDetailData> MemorableData
+        MemorableData<IStorage, IDetailData,List<ElementParameterValueSet>> _memorableData;
+        public MemorableData<IStorage, IDetailData, List<ElementParameterValueSet>> MemorableData
         {
             set
             {

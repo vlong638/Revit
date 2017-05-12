@@ -591,10 +591,8 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
 
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_RenderComponent_Click);
-            bool isSuccess = DealWithTransaction(UI_Doc.Document, transactionName, () =>
-                {
-                    Model.RenderNodeInfoToElements(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document);
-                });
+            bool isSuccess = DealWithTransaction(UI_Doc.Document, transactionName
+                , () => { Model.RenderNodeInfoToElements(SelectedNodes.Select(c => c.NodeCode).ToList(), UI_Doc.Document); });
         }
         #endregion
 
