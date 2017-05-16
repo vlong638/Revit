@@ -56,23 +56,10 @@ namespace MyRevit.SubsidenceMonitor.Operators
             command.CommandText = SQLiteHelper.GetSQLiteQuery_Delete(new TDetail().TableName, wheres);
             return command.ExecuteNonQuery() == 1;
         }
-        public static void FetchNodes(this TDetail entity, SQLiteConnection connection)
-        {
-            var command = connection.CreateCommand();
-            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
-            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDateTime)));
-            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
-            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(null, new TNode().TableName, wheres);
-            var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                entity.Nodes.Add(new TNode(reader));
-            }
-        }
         /// <summary>
         /// 首日用与时间区间的判断,并不进行节点数据的获取
         /// </summary>
-        public static void GetDetailsByTimeRange(this List<TDetail> entities, SQLiteConnection connection, EIssueType issueType, DateTime start, DateTime end)
+        public static void GetNodeDetailsByTimeRange(this List<TDetail> entities, SQLiteConnection connection, EIssueType issueType, DateTime start, DateTime end)
         {
             var command = connection.CreateCommand();
             List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
@@ -89,8 +76,6 @@ namespace MyRevit.SubsidenceMonitor.Operators
             {
                 if (entity.IssueDateTime.Date == weightedStart)
                     continue;
-                entity.FetchNodes(connection);
-                //这里可以做一次优化,所有一次取出,本地匹配处理
             }
         }
         #endregion

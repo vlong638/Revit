@@ -12,92 +12,6 @@ using Newtonsoft.Json;
 
 namespace MyRevit.SubsidenceMonitor.UI
 {
-    public enum ShowDialogType
-    {
-        /// <summary>
-        /// 闲置
-        /// </summary>
-        Idle,
-        /// <summary>
-        /// 增加构件
-        /// </summary>
-        AddElements_ForDetail,
-        /// <summary>
-        /// 删除构件
-        /// </summary>
-        DeleleElements_ForDetail,
-        /// <summary>
-        /// 测点查看_查看选中
-        /// </summary>
-        ViewElementsBySelectedNodes,
-        /// <summary>
-        /// 测点查看_查看全部
-        /// </summary>
-        ViewElementsByAllNodes,
-        /// <summary>
-        /// 本次最大变量查看_红色显示
-        /// </summary>
-        ViewCurrentMaxByRed,
-        /// <summary>
-        /// 本次最大变量查看_整体查看
-        /// </summary>
-        ViewCurrentMaxByAll,
-        /// <summary>
-        /// 累计最大变量查看_红色显示
-        /// </summary>
-        ViewTotalMaxByRed,
-        /// <summary>
-        /// 累计最大变量查看_整体查看
-        /// </summary>
-        ViewTotalMaxByAll,
-        /// <summary>
-        /// 接近预警预览
-        /// </summary>
-        ViewCloseWarn,
-        /// <summary>
-        /// 超出预警预览
-        /// </summary>
-        ViewOverWarn,
-    }
-    public static class ShowDialogTypeEx
-    {
-        public static string GetViewName(this ShowDialogType showDialogType)
-        {
-            string result = "默认视图";
-            switch (showDialogType)
-            {
-                case ShowDialogType.AddElements_ForDetail:
-                case ShowDialogType.DeleleElements_ForDetail:
-                    result = "测点编辑";
-                    break;
-                case ShowDialogType.ViewElementsBySelectedNodes:
-                    result = "测点查看_查看选中";
-                    break;
-                case ShowDialogType.ViewElementsByAllNodes:
-                    result = "测点查看_查看全部";
-                    break;
-                case ShowDialogType.ViewCurrentMaxByRed:
-                    result = "本次最大变量查看_红色显示";
-                    break;
-                case ShowDialogType.ViewCurrentMaxByAll:
-                    result = "本次最大变量查看_整体查看";
-                    break;
-                case ShowDialogType.ViewTotalMaxByRed:
-                    result = "累计最大变量查看_红色显示";
-                    break;
-                case ShowDialogType.ViewTotalMaxByAll:
-                    result = "累计最大变量查看_整体查看";
-                    break;
-                case ShowDialogType.ViewCloseWarn:
-                    result = "接近预警预览";
-                    break;
-                case ShowDialogType.ViewOverWarn:
-                    result = "超出预警预览";
-                    break;
-            }
-            return result;
-        }
-    }
     public partial class ListForm : System.Windows.Forms.Form
     {
         #region Init
@@ -115,7 +29,9 @@ namespace MyRevit.SubsidenceMonitor.UI
 
         public WarnSettings WarnSettings { set; get; } = new WarnSettings();
         public ShowDialogType ShowDialogType { set; get; }
-        public SubsidenceMonitorForm SubForm { set; get; }
+        public SubFormType SubFormType { set; get; }
+        public SubsidenceMonitorForm SubFormForSubsidence { set; get; }
+        public SkewBackMonitorForm SubFormForSkewBack { set; get; }
         protected UIDocument UI_Doc { set; get; }
         private void InitControls()
         {
@@ -146,10 +62,41 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void ListForm_Shown(object sender, EventArgs e)
         {
-            if (SubForm != null)
+            switch (ShowDialogType)
             {
-                SubForm.ShowDialog();
+                case ShowDialogType.Idle:
+                    SubFormType = SubFormType.None;
+                    break;
+                case ShowDialogType.AddElements_ForDetail:
+                case ShowDialogType.DeleleElements_ForDetail:
+                case ShowDialogType.ViewElementsBySelectedNodes:
+                case ShowDialogType.ViewElementsByAllNodes:
+                case ShowDialogType.ViewCurrentMaxByRed:
+                case ShowDialogType.ViewCurrentMaxByAll:
+                case ShowDialogType.ViewTotalMaxByRed:
+                case ShowDialogType.ViewTotalMaxByAll:
+                case ShowDialogType.ViewCloseWarn:
+                case ShowDialogType.ViewOverWarn:
+                    switch (SubFormType)
+                    {
+                        case SubFormType.Subsidence:
+                            SubFormForSubsidence.ShowDialog();
+                            CurrentLists.FirstOrDefault(c => c.IssueDate == SubFormForSubsidence.Model.MemorableData.Data.List.IssueDate).Datas = SubFormForSubsidence.Model.MemorableData.Data.List.Datas;
+                            dgv.DataSource = null;
+                            dgv.DataSource = CurrentLists;
+                            break;
+                        case SubFormType.SkewBack:
+                            SubFormForSkewBack.ShowDialog();
+                            CurrentLists.FirstOrDefault(c => c.IssueDate == SubFormForSkewBack.Model.MemorableData.Data.List.IssueDate).Datas = SubFormForSkewBack.Model.MemorableData.Data.List.Datas;
+                            dgv.DataSource = null;
+                            dgv.DataSource = CurrentLists;
+                            break;
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException("暂未支持该类型");
             }
+            //ShowDialogType = ShowDialogType.Idle;
         }
         #endregion
 
@@ -274,18 +221,31 @@ namespace MyRevit.SubsidenceMonitor.UI
                     case EIssueType.地表沉降:
                     case EIssueType.管线沉降_无压:
                     case EIssueType.管线沉降_有压:
-                    case EIssueType.侧斜监测:
                     case EIssueType.钢支撑轴力监测:
                         if (list.Datas.Count() == 0 && list.DataCount > 0)
                             Facade.FetchDetails(list);
-                        SubForm = new SubsidenceMonitorForm(this, UI_Doc, list);
-                        SubForm.ShowDialog();
+                        SubFormForSubsidence = new SubsidenceMonitorForm(this, UI_Doc, list);
+                        SubFormForSubsidence.ShowDialog();
+                        CurrentLists.FirstOrDefault(c => c.IssueDate == list.IssueDate).Datas = list.Datas;
+                        dgv.DataSource = null;
+                        dgv.DataSource = CurrentLists;
+                        break;
+                    case EIssueType.侧斜监测:
+                        if (list.Datas.Count() == 0 && list.DataCount > 0)
+                            Facade.FetchDetails(list);
+                        SubFormForSkewBack = new SkewBackMonitorForm(this, UI_Doc, list);
+                        SubFormForSkewBack.ShowDialog();
                         CurrentLists.FirstOrDefault(c => c.IssueDate == list.IssueDate).Datas = list.Datas;
                         dgv.DataSource = null;
                         dgv.DataSource = CurrentLists;
                         break;
                     default:
-                        break;
+                        throw new NotImplementedException("未支持该类型的ITNodeDataCollection:" + list.IssueType.ToString());
+                }
+                if (ShowDialogType != ShowDialogType.Idle)
+                {
+                    DialogResult = DialogResult.Retry;
+                    Close();
                 }
                 return;
             }

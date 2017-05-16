@@ -153,7 +153,10 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// </summary>
         public void LoadData()
         {
-            Facade.FetchNodes(this);
+            if (IssueType == EIssueType.侧斜监测)
+                Facade.FetchDepthNodes(this);
+            else
+                Facade.FetchNodes(this);
             IsLoad = true;
         }
         /// <summary>
@@ -176,6 +179,21 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         _NodeDatas.Add(node.NodeCode, node.Data);
                 }
                 return _NodeDatas;
+            }
+        }
+        public List<TDepthNode> DepthNodes { get; set; } = new List<TDepthNode>();
+        ITDepthNodeDataCollection<ITDepthNodeData> _DepthNodeDatas;
+        public ITDepthNodeDataCollection<ITDepthNodeData> DepthNodeDatas
+        {
+            get
+            {
+                if (_DepthNodeDatas == null)
+                {
+                    _DepthNodeDatas = new SkewBackCollection<SkewBackDataV1>();
+                    foreach (var depthNode in DepthNodes)
+                        _DepthNodeDatas.Add(depthNode.NodeCode, depthNode.Depth, depthNode.Data);
+                }
+                return _DepthNodeDatas;
             }
         }
         #endregion

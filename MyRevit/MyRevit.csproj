@@ -162,6 +162,7 @@
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
     <Compile Include="SubsidenceMonitor\Entities\ElementParameterValueSet.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\TDepthNode.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TList.cs" />
     <Compile Include="SubsidenceMonitor\Entities\TNode.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TDetailOperator.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\TDepthNodeOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TNodeOperator.cs" />
     <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.cs">
       <SubType>Form</SubType>
@@ -188,9 +190,18 @@
     <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.Designer.cs">
       <DependentUpon>CPSettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\ListForm.cs" />
+    <Compile Include="SubsidenceMonitor\UI\ListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SubsidenceMonitor\UI\ListForm.Designer.cs">
       <DependentUpon>ListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\UIEnums.cs" />
+    <Compile Include="SubsidenceMonitor\UI\SkewBackMonitorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\SkewBackMonitorForm.Designer.cs">
+      <DependentUpon>SkewBackMonitorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.cs">
       <SubType>Form</SubType>
@@ -233,6 +244,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SubsidenceMonitor\UI\ListForm.resx">
       <DependentUpon>ListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\SkewBackMonitorForm.resx">
+      <DependentUpon>SkewBackMonitorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.resx">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>

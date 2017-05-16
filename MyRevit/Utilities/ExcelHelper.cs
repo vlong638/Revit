@@ -36,7 +36,9 @@ namespace MyRevit.Utilities
                 case EIssueType.管线沉降_有压:
                     return "管线沉降";
                 case EIssueType.侧斜监测:
+                    return "";
                 case EIssueType.钢支撑轴力监测:
+                    return "钢支撑轴力";
                 default:
                     throw new NotImplementedException();
             }

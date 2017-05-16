@@ -63,18 +63,37 @@ namespace MyRevit.SubsidenceMonitor.Command
                 {
                     case ShowDialogType.AddElements_ForDetail:
                     case ShowDialogType.DeleleElements_ForDetail:
-                        try
+                        switch (Form.SubFormType)
                         {
-                            mouseHook.InstallHook();
-                            Form.SubForm.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
-                                .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
-                            mouseHook.UninstallHook();
+                            case SubFormType.Subsidence:
+                                try
+                                {
+                                    mouseHook.InstallHook();
+                                    Form.SubFormForSubsidence.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                                        .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                                    mouseHook.UninstallHook();
+                                }
+                                catch
+                                {
+                                    mouseHook.UninstallHook();
+                                }
+                                Form.SubFormForSubsidence.FinishElementSelection();
+                                break;
+                            case SubFormType.SkewBack:
+                                try
+                                {
+                                    mouseHook.InstallHook();
+                                    Form.SubFormForSkewBack.SelectedElementIds = m_uiDoc.Selection.PickObjects(ObjectType.Element, "选择要添加的构件")
+                                        .Select(p => m_doc.GetElement(p.ElementId).Id).ToList();
+                                    mouseHook.UninstallHook();
+                                }
+                                catch
+                                {
+                                    mouseHook.UninstallHook();
+                                }
+                                Form.SubFormForSkewBack.FinishElementSelection();
+                                break;
                         }
-                        catch
-                        {
-                            mouseHook.UninstallHook();
-                        }
-                        Form.SubForm.FinishElementSelection();
                         break;
                     case ShowDialogType.ViewElementsBySelectedNodes:
                     case ShowDialogType.ViewElementsByAllNodes:

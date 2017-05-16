@@ -16,7 +16,12 @@ namespace MyRevit.SubsidenceMonitor.Entities
     {
         public override EIssueType IssueType { get { return EIssueType.钢支撑轴力监测; } }
         public override string SheetName { get { return "钢支撑轴力"; } }
-        public override ParseResult ParseInto(Worksheet sheet, TDetail detail)
+
+        public override ParseResult ParseBookInto(Workbook workbook, TDetail detail)
+        {
+            throw new NotImplementedException();
+        }
+        public override ParseResult ParseSheetInto(Worksheet sheet, TDetail detail)
         {
             //ReportName
             detail.ReportName = sheet.GetCellValueAsString(1, 1).Trim() + sheet.GetCellValueAsString(2, 1).Trim();
@@ -213,7 +218,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin, double warnCoefficientMax = double.NaN)
         {
-            throw new NotImplementedException();//全部检测
+            throw new NotImplementedException("还有未确定的需求");
 
             //List<T> result = new List<T>();
             //var d = Datas.FirstOrDefault();

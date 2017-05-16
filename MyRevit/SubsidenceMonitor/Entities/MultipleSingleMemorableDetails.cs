@@ -59,6 +59,29 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 targetNode.ElementIds_Int.Remove(elementId_Int);
             }
         }
+        public void AddElementIds(string nodeCode, string depth, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                var elementNode = MemorableData.Data.DepthNodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
+                if (elementNode == targetNode)
+                    continue;
+                if (elementNode != null && elementNode != targetNode)
+                    elementNode.ElementIds_Int.Remove(elementId_Int);
+                targetNode.ElementIds_Int.Add(elementId_Int);
+            }
+        }
+        public void DeleteElementIds(string nodeCode, string depth, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                targetNode.ElementIds_Int.Remove(elementId_Int);
+            }
+        }
         string GroupName = "监测系统";
         enum CustomParameters
         {
@@ -138,14 +161,15 @@ namespace MyRevit.SubsidenceMonitor.Entities
             Edited();
         }
 
-        private void SetParameterValue(Element element, string parameterName,string parameterValue)
+        private void SetParameterValue(Element element, string parameterName, string parameterValue)
         {
             var parameter = element.GetParameters(parameterName).FirstOrDefault();
             MemorableData.TemporaryData.Add(new ElementParameterValueSet(element.Id.IntegerValue, parameterName, parameter.AsString()));
             parameter.Set(parameterValue);
         }
 
-        public List<ElementId> GetElementIds(string nodeCode, Document doc)
+        #region ByTNode
+        List<ElementId> GetElementIds(string nodeCode, Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();
             var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
@@ -159,8 +183,13 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return availableElementIds;
         }
-        public List<ElementId> GetElementIds(List<string> nodeCodes, Document doc)
+        public List<ElementId> GetElementIdsByTNode(TNode node, Document doc)
         {
+            return GetElementIds(node.NodeCode, doc);
+        }
+        public List<ElementId> GetElementIdsByTNode(List<TNode> nodes, Document doc)
+        {
+            var nodeCodes = nodes.Select(c => c.NodeCode).ToList();
             List<ElementId> availableElementIds = new List<ElementId>();
             foreach (var nodeCode in nodeCodes)
             {
@@ -168,7 +197,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return availableElementIds;
         }
-        public List<ElementId> GetAllNodesElementIds(Document doc)
+        public List<ElementId> GetAllNodesElementIdsByTNode(Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();
             foreach (var node in MemorableData.Data.Nodes)
@@ -177,7 +206,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return availableElementIds;
         }
-        public List<ElementId> GetCurrentMaxNodesElements(Document doc)
+        public List<ElementId> GetCurrentMaxNodesElementsByTNode(Document doc)
         {
             List<ElementId> results = new List<ElementId>();
             foreach (var node in MemorableData.Data.NodeDatas.GetCurrentMaxNodes())
@@ -186,7 +215,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return results;
         }
-        public List<ElementId> GetTotalMaxNodesElements(Document doc)
+        public List<ElementId> GetTotalMaxNodesElementsByTNode(Document doc)
         {
             List<ElementId> results = new List<ElementId>();
             foreach (var node in MemorableData.Data.NodeDatas.GetTotalMaxNodes())
@@ -195,7 +224,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return results;
         }
-        public List<ElementId> GetCloseWarnNodesElements(Document doc, WarnSettings warnSettings)
+        public List<ElementId> GetCloseWarnNodesElementsByTNode(Document doc, WarnSettings warnSettings)
         {
             List<ElementId> results = new List<ElementId>();
             foreach (var node in MemorableData.Data.NodeDatas.GetCloseWarn(warnSettings, MemorableData.Data))
@@ -204,7 +233,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return results;
         }
-        public List<ElementId> GetOverWarnNodesElements(Document doc, WarnSettings warnSettings)
+        public List<ElementId> GetOverWarnNodesElementsByTNode(Document doc, WarnSettings warnSettings)
         {
             List<ElementId> results = new List<ElementId>();
             foreach (var node in MemorableData.Data.NodeDatas.GetOverWarn(warnSettings, MemorableData.Data))
@@ -213,5 +242,80 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return results;
         }
+        #endregion
+        #region ByTNode
+        List<ElementId> GetElementIds(string nodeCode, string depth, Document doc)
+        {
+            List<ElementId> availableElementIds = new List<ElementId>();
+            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
+            for (int i = targetNode.ElementIds_Int.Count - 1; i >= 0; i--)
+            {
+                var element = doc.GetElement(new ElementId(targetNode.ElementIds_Int[i]));
+                if (element == null)
+                    targetNode.ElementIds_Int.Remove(targetNode.ElementIds_Int[i]);//获取ElementId的时候,需在文档中监测
+                else
+                    availableElementIds.Add(element.Id);
+            }
+            return availableElementIds;
+        }
+        public List<ElementId> GetElementIdsByTDepthNode(TDepthNode node, Document doc)
+        {
+            return GetElementIds(node.NodeCode, node.Depth, doc);
+        }
+        public List<ElementId> GetElementIdsByTDepthNode(List<TDepthNode> nodes, Document doc)
+        {
+            List<ElementId> availableElementIds = new List<ElementId>();
+            foreach (var node in nodes)
+            {
+                availableElementIds.AddRange(GetElementIds(node.NodeCode, node.Depth, doc));
+            }
+            return availableElementIds;
+        }
+        public List<ElementId> GetAllNodesElementIdsByTDepthNode(Document doc)
+        {
+            List<ElementId> availableElementIds = new List<ElementId>();
+            foreach (var node in MemorableData.Data.DepthNodes)
+            {
+                availableElementIds.AddRange(GetElementIds(node.NodeCode, node.Depth, doc));
+            }
+            return availableElementIds;
+        }
+        public List<ElementId> GetCurrentMaxNodesElementsByTDepthNode(Document doc)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.DepthNodeDatas.GetCurrentMaxNodes())
+            {
+                results.AddRange(GetElementIds(node.NodeCode, node.Depth, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetTotalMaxNodesElementsByTDepthNode(Document doc)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.DepthNodeDatas.GetTotalMaxNodes())
+            {
+                results.AddRange(GetElementIds(node.NodeCode, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetCloseWarnNodesElementsByTDepthNode(Document doc, WarnSettings warnSettings)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.DepthNodeDatas.GetCloseWarn(warnSettings, MemorableData.Data))
+            {
+                results.AddRange(GetElementIds(node.NodeCode, node.Depth, doc));
+            }
+            return results;
+        }
+        public List<ElementId> GetOverWarnNodesElementsByTDepthNode(Document doc, WarnSettings warnSettings)
+        {
+            List<ElementId> results = new List<ElementId>();
+            foreach (var node in MemorableData.Data.DepthNodeDatas.GetOverWarn(warnSettings, MemorableData.Data))
+            {
+                results.AddRange(GetElementIds(node.NodeCode, node.Depth, doc));
+            }
+            return results;
+        }
+        #endregion
     }
 }

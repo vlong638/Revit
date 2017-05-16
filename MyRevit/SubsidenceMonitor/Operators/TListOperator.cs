@@ -20,6 +20,17 @@ namespace MyRevit.SubsidenceMonitor.Operators
             command.CommandText = SQLiteHelper.GetSQLiteQuery_InsertOrReplace(entity.TableName, NameValues);
             return command.ExecuteNonQuery() == 1;
         }
+        public static bool DbUpdate(this TList entity, SQLiteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            Dictionary<string, string> sets = new Dictionary<string, string>();
+            sets.Add(nameof(entity.DataCount), SQLiteHelper.ToSQLiteString(entity.DataCount));
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDate), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDate)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Update(new TList().TableName, sets, wheres);
+            return command.ExecuteNonQuery() == 1;
+        }
         public static void GetListsByKeys(this List<TList> lists, SQLiteConnection connection, EIssueType issueType, DateTime issueDateTime)
         {
             var command = connection.CreateCommand();

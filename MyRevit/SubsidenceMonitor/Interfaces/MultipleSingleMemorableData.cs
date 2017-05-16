@@ -101,8 +101,14 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
             }
         }
         public delegate void RenderDelegate2(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave);
+        /// <summary>
+        /// 文档编辑时候有新增,删除,等状态,这里统一负责这些状态对应的渲染的处理
+        /// </summary>
         public event RenderDelegate2 OnStateChanged;
         public delegate void RenderDelegate1(IDetailData data);
+        /// <summary>
+        /// 一天可能录入多份文档,这是文档级的变更
+        /// </summary>
         public event RenderDelegate1 OnDataChanged;
         public delegate bool ConfirmDelegate();
         /// <summary>

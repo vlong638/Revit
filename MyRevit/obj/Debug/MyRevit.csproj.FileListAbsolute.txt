@@ -56,5 +56,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\System.Data.SQLite.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ShowDialogTypeEx.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.WarnSettingsForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ListForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SkewBackMonitorForm.resources

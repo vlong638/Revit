@@ -20,10 +20,10 @@ namespace MyRevit.SubsidenceMonitor.UI
     /// CurrentDetailIndex可能为0,0表示TList下无TDetail
     /// MemorialDetail用于有数据时的提交和取消处理
     /// </summary>
-    public partial class SubsidenceMonitorForm : System.Windows.Forms.Form
+    public partial class SkewBackMonitorForm : System.Windows.Forms.Form
     {
         #region 初始化和主要参数
-        public SubsidenceMonitorForm(ListForm listForm, UIDocument ui_doc, TList list) : base()
+        public SkewBackMonitorForm(ListForm listForm, UIDocument ui_doc, TList list) : base()
         {
             InitializeComponent();
 
@@ -42,10 +42,10 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.OnConfirmDelete += Model_OnConfirmDelete;
             //事件附加后再作数据的初始化,否则关联的信息无法在初始化的时候渲染出来
             Model.Init(ui_doc.Document, list);
-            Shown += SubsidenceMonitorForm_Shown1;
+            Shown += SkewBackMonitorForm_Shown;
         }
 
-        private void SubsidenceMonitorForm_Shown1(object sender, EventArgs e)
+        private void SkewBackMonitorForm_Shown(object sender, EventArgs e)
         {
             ListForm.ShowDialogType = ShowDialogType.Idle;
         }
@@ -83,13 +83,57 @@ namespace MyRevit.SubsidenceMonitor.UI
             dgv_left.Click += dgv_left_Click;
             dgv_right.Click += dgv_right_Click;
             Shown += SubsidenceMonitorForm_Shown;
+            cb_NodeCode.SelectedIndexChanged += Cb_NodeCode_SelectedIndexChanged;
             dgv_left.BindingContextChanged += Dgv_left_BindingContextChanged;
             dgv_right.BindingContextChanged += Dgv_right_BindingContextChanged;
+        }
+
+        private void Cb_NodeCode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cb_NodeCode.SelectedItem != null)
+            {
+                var detail = Model.MemorableData.Data;
+                var nodes = Model.MemorableData.Data.DepthNodes.Where(c => c.NodeCode == cb_NodeCode.Text).ToList();
+                //DGV
+                var normalHeight = 20;
+                ITDepthNodeDataCollection<ITDepthNodeData> leftNodes = new SkewBackCollection<SkewBackDataV1>();
+                ITDepthNodeDataCollection<ITDepthNodeData> rightNodes = new SkewBackCollection<SkewBackDataV1>();
+                if (nodes.Count <= normalHeight)
+                {
+                    foreach (var node in nodes)
+                    {
+                        leftNodes.Add(node.NodeCode, node.Depth, node.Data);
+                    }
+                }
+                else
+                {
+                    var height = normalHeight;
+                    if (nodes.Count > normalHeight * 2)
+                        height = nodes.Count / 2;
+                    for (int i = 0; i < nodes.Count; i++)
+                    {
+                        var node = nodes[i];
+                        if (i < height)
+                            leftNodes.Add(node.NodeCode, node.Depth, node.Data);
+                        else
+                            rightNodes.Add(node.NodeCode, node.Depth, node.Data);
+                    }
+                }
+                dgv_left.DataSource = null;
+                dgv_left.DataSource = leftNodes.Datas;
+                dgv_right.DataSource = null;
+                dgv_right.DataSource = rightNodes.Datas;
+            }
+            else
+            {
+                dgv_left.DataSource = null;
+                dgv_right.DataSource = null;
+            }
         }
         private void SubsidenceMonitorForm_Shown(object sender, EventArgs e)
         {
             LoadDataGridViewSelection();
-            ListForm.SubFormType = SubFormType.Subsidence;
+            ListForm.SubFormType = SubFormType.SkewBack;
         }
         private void SubsidenceMonitorForm_FormClosing(object senedr, FormClosingEventArgs e)
         {
@@ -101,9 +145,9 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             else
             {
+                ClearDataGridViewSelection();
                 Model.Rollback(true);
                 ListForm.Activate();
-                ClearDataGridViewSelection();
             }
         }
         private bool Model_OnConfirmDelete()
@@ -177,35 +221,19 @@ namespace MyRevit.SubsidenceMonitor.UI
             tb_Time.Text = $"{detail.IssueDateTime.ToString(timeFormat)}-{endTime.ToString(timeFormat)}";//监测时间
             tb_InstrumentName.Text = detail.InstrumentName;//仪器名称
             tb_InstrumentCode.Text = detail.InstrumentCode;//仪器编号
-            //DGV
-            var normalHeight = 20;
-            ITNodeDataCollection<ITNodeData> leftNodes = IssueTypeEntity.GetNodeDataCollection();
-            ITNodeDataCollection<ITNodeData> rightNodes = IssueTypeEntity.GetNodeDataCollection();
-            if (detail.Nodes.Count <= normalHeight)
+            //cb_NodeCode
+            if (Model.MemorableData.Data.DepthNodes.Count > 0)
             {
-                foreach (var node in detail.Nodes)
-                {
-                    leftNodes.Add(node.NodeCode, node.Data);
-                }
+                cb_NodeCode.DataSource = Model.MemorableData.Data.DepthNodes.Select(c => c.NodeCode).Distinct().ToList();
+                cb_NodeCode.SelectedIndex = 0;
+
+                foreach (var node in Model.MemorableData.Data.DepthNodes)
+                    detail.DepthNodeDatas.Add(node.NodeCode, node.Depth, node.Data);
             }
             else
             {
-                var height = normalHeight;
-                if (detail.Nodes.Count > normalHeight * 2)
-                    height = detail.Nodes.Count / 2;
-                for (int i = 0; i < detail.Nodes.Count; i++)
-                {
-                    var node = detail.Nodes[i];
-                    if (i < height)
-                        leftNodes.Add(node.NodeCode, node.Data);
-                    else
-                        rightNodes.Add(node.NodeCode, node.Data);
-                }
+                cb_NodeCode.DataSource = null;
             }
-            dgv_left.DataSource = null;
-            dgv_left.DataSource = leftNodes.Datas;
-            dgv_right.DataSource = null;
-            dgv_right.DataSource = rightNodes.Datas;
         }
         /// <summary>
         /// 清空绑定时的默认选项
@@ -305,14 +333,9 @@ namespace MyRevit.SubsidenceMonitor.UI
             string path;
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Excel 文件(*.xls)|*.xls";
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                path = dialog.FileName;
-            }
-            else
-            {
+            if (dialog.ShowDialog() != DialogResult.OK)
                 return;
-            }
+            path = dialog.FileName;
             if (!File.Exists(path))
                 throw new NotImplementedException("无效的文件路径");
             ApplicationClass excelApp = new ApplicationClass();
@@ -426,7 +449,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                         return;
                 }
                 UI_Doc.ActiveView = view;
-                var elementIds = Model.GetElementIdsByTNode(SelectedNodes[0], UI_Doc.Document);
+                var elementIds = Model.GetElementIdsByTDepthNode(SelectedNodes[0], UI_Doc.Document);
                 Revit_View_Helper.IsolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(btn_DeleteComponent_Click), UI_Doc.Document.ActiveView, elementIds);
                 this.DialogResult = DialogResult.Retry;
                 this.Close();
@@ -444,7 +467,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case ShowDialogType.AddElements_ForDetail:
                     if (SelectedElementIds != null && SelectedElementIds.Count > 0)
                     {
-                        Model.AddElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
+                        Model.AddElementIds(SelectedNodes[0].NodeCode, SelectedNodes[0].Depth, SelectedElementIds);
                         Model.Edited();
                     }
                     //ListForm.ShowDialogType = ShowDialogType.Idle;
@@ -452,7 +475,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case ShowDialogType.DeleleElements_ForDetail:
                     if (SelectedElementIds != null && SelectedElementIds.Count > 0)
                     {
-                        Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedElementIds);
+                        Model.DeleteElementIds(SelectedNodes[0].NodeCode, SelectedNodes[0].Depth, SelectedElementIds);
                         Model.Edited();
                     }
                     Revit_View_Helper.DeisolateElements(UI_Doc.Document, nameof(SubsidenceMonitor) + nameof(FinishElementSelection), UI_Doc.ActiveView);
@@ -536,7 +559,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
         }
         #region 节点选中处理
-        List<TNode> SelectedNodes = new List<TNode>();
+        List<TDepthNode> SelectedNodes = new List<TDepthNode>();
         private void dgv_left_Click(object sender, EventArgs e)
         {
             var dgv = dgv_left;
@@ -551,14 +574,14 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void ChangeCurrentNode(MyDGV0427 dgv)
         {
-            SelectedNodes = new List<TNode>();
+            SelectedNodes = new List<TDepthNode>();
             if (dgv.SelectedRows.Count > 0)
             {
                 SelectedNodes.Clear();
                 foreach (DataGridViewRow row in dgv.SelectedRows)
                 {
-                    var data = dgv.Rows[0].DataBoundItem as ITNodeData;// as BuildingSubsidenceDataV1;
-                    SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
+                    var data = dgv.Rows[0].DataBoundItem as ITDepthNodeData;// as BuildingSubsidenceDataV1;
+                    SelectedNodes.Add(Model.MemorableData.Data.DepthNodes.First(c => c.NodeCode == data.NodeCode && c.Depth == data.Depth));
                 }
                 return;
             }
@@ -574,8 +597,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 }
                 foreach (var rowIndex in rowIndexes)
                 {
-                    var data = dgv.Rows[rowIndex].DataBoundItem as ITNodeData;// as BuildingSubsidenceDataV1;
-                    SelectedNodes.Add(Model.MemorableData.Data.Nodes.First(c => c.NodeCode == data.NodeCode));
+                    var data = dgv.Rows[rowIndex].DataBoundItem as ITDepthNodeData;// as BuildingSubsidenceDataV1;
+                    SelectedNodes.Add(Model.MemorableData.Data.DepthNodes.First(c => c.NodeCode == data.NodeCode && c.Depth == data.Depth));
                 }
             }
         }
@@ -644,7 +667,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     if (elementIdsToHid.Count > 0)
                         view.HideElements(elementIdsToHid);
                     //渲染_测点 淡显
-                    var nodesElementIds = Model.GetAllNodesElementIdsByTNode(doc);
+                    var nodesElementIds = Model.GetAllNodesElementIdsByTDepthNode(doc);
                     if (nodesElementIds.Count > 0)
                         view.UnhideElements(nodesElementIds);
                     var defaultOverrideGraphicSettings = CPSettings.GetTingledOverrideGraphicSettings(doc);
@@ -786,13 +809,13 @@ namespace MyRevit.SubsidenceMonitor.UI
                 return;
             }
             bool isSuccess = DetailWithView(ShowDialogType.ViewElementsBySelectedNodes, true,
-                (doc) => Model.GetElementIdsByTNode(SelectedNodes, doc));
+                (doc) => Model.GetElementIdsByTDepthNode(SelectedNodes, doc));
             if (!isSuccess)
                 return;
-            ListForm.DialogResult = DialogResult.Retry;
-            ListForm.Close();
             this.DialogResult = DialogResult.Retry;
             this.Close();
+            ListForm.DialogResult = DialogResult.Retry;
+            ListForm.Close();
         }
         /// <summary>
         /// 测点查看-整体查看
@@ -808,7 +831,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 ShowMessage("提醒", "需选中节点");
                 return;
             }
-            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false, (doc) => Model.GetElementIdsByTNode(SelectedNodes, doc));
+            bool isSuccess = DetailWithView(ShowDialogType.ViewElementsByAllNodes, false, (doc) => Model.GetElementIdsByTDepthNode(SelectedNodes, doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;

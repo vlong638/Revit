@@ -14,7 +14,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public abstract string SheetName { get; }
 
         string MessageSuffix = "尚未进行有效配置,请联系管理人员";
-        public string CheckWarnSettings(WarnSettings warnSettings, SubsidenceMonitorForm form)
+        public string CheckWarnSettings(WarnSettings warnSettings)
         {
             StringBuilder sb = new StringBuilder();
             switch (IssueType)
@@ -83,21 +83,29 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         public ParseResult ParseInto(Workbook workbook, TDetail detail)
         {
-            var sheetName = SheetName;
-            Worksheet sheet = null;
-            foreach (Worksheet s in workbook.Worksheets)
+            if (!string.IsNullOrEmpty(SheetName))
             {
-                if (s.Name == sheetName)
+                var sheetName = SheetName;
+                Worksheet sheet = null;
+                foreach (Worksheet s in workbook.Worksheets)
                 {
-                    sheet = s;
-                    break;
+                    if (s.Name == sheetName)
+                    {
+                        sheet = s;
+                        break;
+                    }
                 }
+                if (sheet == null)
+                    return ParseResult.ReportName_ParseFailure;
+                return ParseSheetInto(sheet, detail);
             }
-            if (sheet == null)
-                return ParseResult.ReportName_ParseFailure;
-            return ParseInto(sheet, detail);
+            else
+            {
+                return ParseBookInto(workbook, detail);
+            }
         }
-        public abstract ParseResult ParseInto(Worksheet sheet, TDetail detail);
+        public abstract ParseResult ParseSheetInto(Worksheet sheet, TDetail detail);
+        public abstract ParseResult ParseBookInto(Workbook workbook, TDetail detail);
         /// <summary>
         /// 从横向两组多段式取出有序的数据区间
         /// 1 2
@@ -115,6 +123,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
             int previousRow = startRow;//StartRow
             int currentRow = previousRow + 1;
             int currentSpan = 0;
+            if (IssueType == EIssueType.侧斜监测)
+                return dataRanges;
             while (true)
             {
                 if (IssueType==EIssueType.钢支撑轴力监测)
@@ -195,7 +205,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
                     break;
 
                 int emptyCount = 0;
-                for (int i = dataRange.StartRow; i <= dataRange.EndRow - 2; i++)
+                for (int i = dataRange.StartRow; i <= dataRange.EndRow - 1; i++)
                 {
                     //空行检测
                     var nodeCode = sheet.GetCellValueAsString(i, dataRange.StartColumn);
@@ -265,8 +275,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
                     return new UnpressedPipeLineSubsidenceCollection<UnpressedPipeLineSubsidenceDataV1>();
                 case EIssueType.管线沉降_有压:
                     return new PressedPipeLineSubsidenceCollection<PressedPipeLineSubsidenceDataV1>();
-                case EIssueType.侧斜监测:
-                    return new SkewBackCollection<SkewBackDataV1>();
+                //case EIssueType.侧斜监测:
+                //    return new SkewBackCollection<SkewBackDataV1>();
                 default:
                     throw new NotImplementedException("未支持该类型的ITNodeDataCollection:" + IssueType.ToString());
             }
@@ -332,18 +342,19 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         new HeaderNode(5,ordinaryHeight*2,averageWidth,"备注",nameof(PressedPipeLineSubsidenceDataV1.Conment)),
                     };
                 case EIssueType.侧斜监测:
-                    averageWidth = totalWidths / 4;
+                    averageWidth = totalWidths / 7;
                     return new List<HeaderNode>()
                     {
                         new HeaderNode(0,ordinaryHeight*2,averageWidth,"监测点",nameof(SkewBackDataV1.NodeCode)),
-                        new HeaderNode(1,ordinaryHeight,averageWidth*2,"位移量(mm)",null,
+                        new HeaderNode(1,ordinaryHeight*2,averageWidth,"深度(m)",nameof(SkewBackDataV1.Depth)),
+                        new HeaderNode(2,ordinaryHeight,averageWidth*2,"位移量(mm)",null,
                         new List<HeaderNode>() {
                              new HeaderNode(-1,ordinaryHeight,averageWidth,"上次",nameof(SkewBackDataV1.PreviousChange)),
                              new HeaderNode(-1,ordinaryHeight,averageWidth,"本次",nameof(SkewBackDataV1.CurrentChange)),
                         }),
-                        new HeaderNode(3,ordinaryHeight,averageWidth,"上次累计(mm)",nameof(SkewBackDataV1.PreviousSum)),
-                        new HeaderNode(4,ordinaryHeight,averageWidth,"本次累计(mm)",nameof(SkewBackDataV1.CurrentSum)),
-                        new HeaderNode(5,ordinaryHeight*2,averageWidth,"备注",nameof(SkewBackDataV1.Conment)),
+                        new HeaderNode(4,ordinaryHeight*2,averageWidth,"上次累计(mm)",nameof(SkewBackDataV1.PreviousSum)),
+                        new HeaderNode(5,ordinaryHeight*2,averageWidth,"本次累计(mm)",nameof(SkewBackDataV1.CurrentSum)),
+                        new HeaderNode(6,ordinaryHeight*2,averageWidth,"备注",nameof(SkewBackDataV1.Conment)),
                     };
                 default:
                     throw new NotImplementedException("该类型未设置表头配置");

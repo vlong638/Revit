@@ -22,16 +22,26 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             if (isCreateNew)
             {
-                return Facade.CreateDetail(Data.List, Data, Data.Nodes);
+                if (Data.IssueType == EIssueType.侧斜监测)
+                    return Facade.CreateDetail(Data.List, Data, Data.DepthNodes);
+                else
+                    return Facade.CreateDetail(Data.List, Data, Data.Nodes);
             }
             else
             {
-                return Facade.UpdateDetail(Data, Data.Nodes);
+                if (Data.IssueType == EIssueType.侧斜监测)
+                    return Facade.UpdateDetail(Data, Data.DepthNodes);
+                else
+                    return Facade.UpdateDetail(Data, Data.Nodes);
             }
         }
         public override BLLResult Delete()
         {
-            return Facade.DeleteDetail(Data);
+            if (Data.IssueType == EIssueType.侧斜监测)
+                return Facade.DeleteDetail(Data.List, Data, Data.DepthNodes);
+            else
+                return Facade.DeleteDetail(Data.List, Data, Data.Nodes);
+
         }
         public override void Rollback()
         {

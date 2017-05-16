@@ -59,8 +59,21 @@ create table TNode
    NodeCode             varchar(20)                    not null,
    Data                 varchar(1000)                  not null,
    ElementIds           varchar(2000)                  not null,
-   ""Index""              numeric(16)                    not null,
+   [Index]              numeric(16)                    not null,
    constraint PK_TNODE primary key (IssueType,IssueDateTime, NodeCode)
+);
+            "},
+            {"TDepthNode",  $@"
+create table TDepthNode 
+(
+   IssueType            numeric(8)                     not null,
+   IssueDateTime        datetime                       not null,
+   NodeCode             varchar(20)                    not null,
+   Depth             varchar(10)                    not null,
+   Data                 varchar(1000)                  not null,
+   ElementIds           varchar(2000)                  not null,
+   [Index]              numeric(16)                    not null,
+   constraint PK_TNODE primary key (IssueType,IssueDateTime, NodeCode,Depth)
 );
             "},
         };

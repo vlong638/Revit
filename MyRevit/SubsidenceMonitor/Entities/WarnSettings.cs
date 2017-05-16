@@ -1,4 +1,6 @@
-﻿namespace MyRevit.SubsidenceMonitor.Entities
+﻿using System;
+
+namespace MyRevit.SubsidenceMonitor.Entities
 {
     public class WarnSettings
     {
@@ -55,5 +57,26 @@
         public static string Tag_SkewBack_StandardMillimeter{set;get;}= "墙体水平位移_标准段累计值";
         public static string Tag_SkewBack_Speed{set;get;}= "墙体水平位移_变形速率";
         public static string Tag_SkewBack_Day{set;get;}= "墙体水平位移_连续天数";
+
+        public static string GetText(EIssueType issueType)
+        {
+            switch (issueType)
+            {
+                case EIssueType.建筑物沉降:
+                    return $"日报警值连续{Tag_BuildingSubsidence_Day}天±{Tag_BuildingSubsidence_DailyMillimeter}mm;累计{Tag_BuildingSubsidence_SumMillimeter}mm";
+                case EIssueType.地表沉降:
+                    return $"日报警值连续{Tag_SurfaceSubsidence_Day}天±{Tag_SurfaceSubsidence_DailyMillimeter}mm;累计{Tag_SurfaceSubsidence_SumMillimeter}mm";
+                case EIssueType.管线沉降_有压:
+                    return $"日报警值连续{Tag_StressedPipeLineSubsidence_Day}天±{Tag_StressedPipeLineSubsidence_PipelineMillimeter}mm、±{Tag_StressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{Tag_StressedPipeLineSubsidence_SumMillimeter}mm";
+                case EIssueType.管线沉降_无压:
+                    return $"日报警值连续{Tag_UnstressedPipeLineSubsidence_Day}天±{Tag_UnstressedPipeLineSubsidence_PipelineMillimeter}mm、±{Tag_UnstressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{Tag_UnstressedPipeLineSubsidence_SumMillimeter}mm";
+                case EIssueType.侧斜监测:
+                    return $"端头井累计值{Tag_SkewBack_WellMillimeter}mm,标准段累计值{Tag_SkewBack_StandardMillimeter}mm,变形速率{Tag_SkewBack_Speed}mm/d(连续{Tag_SkewBack_Day}天)";
+                case EIssueType.钢支撑轴力监测:
+                    return $"大于设计周力{Tag_STBAP_MaxAxle}%,小于设计轴力{Tag_STBAP_MinAxle}%";
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
     }
 }

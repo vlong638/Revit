@@ -16,7 +16,12 @@ namespace MyRevit.SubsidenceMonitor.Entities
     {
         public override EIssueType IssueType { get { return EIssueType.建筑物沉降; } }
         public override string SheetName { get { return "建筑物沉降"; } }
-        public override ParseResult ParseInto(Worksheet sheet, TDetail detail)
+
+        public override ParseResult ParseBookInto(Workbook workbook, TDetail detail)
+        {
+            throw new NotImplementedException();
+        }
+        public override ParseResult ParseSheetInto(Worksheet sheet, TDetail detail)
         {
             //ReportName
             detail.ReportName = sheet.GetCellValueAsString(1, 1).Trim() + sheet.GetCellValueAsString(2, 1).Trim();
