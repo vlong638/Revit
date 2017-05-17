@@ -235,6 +235,69 @@ namespace MyRevit.SubsidenceMonitor.Operators
             }
             return result;
         }
+        public static List<string> GetNodeCodesByType(EIssueType issueType)
+        {
+            List<string> result;
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                result = new TNode().GetNodeCodesByIssueType(issueType, connection);
+                connection.Close();
+            }
+            return result;
+        }
+        public static List<string> GetDepthsByNodeCode(string nodeCode)
+        {
+            List<string> result;
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                result = new TDepthNode().GetDepthsByNodeCode(nodeCode, connection);
+                connection.Close();
+            }
+            return result;
+        }
+        public static List<DateTimeValue> GetDateTimeValues(EIssueType issueType, string nodeCode,string fieldName,DateTime startTime, int daySpan)
+        {
+            List<DateTimeValue> result;
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                switch (issueType)
+                {
+                    case EIssueType.建筑物沉降:
+                    case EIssueType.地表沉降:
+                    case EIssueType.管线沉降_有压:
+                    case EIssueType.管线沉降_无压:
+                    case EIssueType.钢支撑轴力监测:
+                        result = new TNode().GetDateTimeValues(issueType, nodeCode, fieldName, startTime, daySpan, connection);
+                        break;
+                    case EIssueType.侧斜监测:
+                    default:
+                        throw new NotImplementedException("该方法暂不支持该类型");
+                }
+                connection.Close();
+            }
+            return result;
+        }
+        public static List<DateTimeValue> GetDateTimeValues(EIssueType issueType, string nodeCode, string depth, string fieldName, DateTime startTime, int daySpan)
+        {
+            List<DateTimeValue> result;
+            using (var connection = SQLiteHelper.Connect())
+            {
+                connection.Open();
+                switch (issueType)
+                {
+                    case EIssueType.侧斜监测:
+                        result = new TDepthNode().GetDateTimeValues(issueType,depth, nodeCode, fieldName, startTime, daySpan, connection);
+                        break;
+                    default:
+                        throw new NotImplementedException("该方法暂不支持该类型");
+                }
+                connection.Close();
+            }
+            return result;
+        }
         #endregion
     }
 }

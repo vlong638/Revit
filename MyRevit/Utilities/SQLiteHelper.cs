@@ -147,10 +147,14 @@ create table TDepthNode
         {
             return string.Join(" and ", wheres.Select(c => c.Key + c.Operator + c.Value));
         }
-        public static string GetSQLiteQuery_Select(List<string> selects, string tableName, List<KeyOperatorValue> wheres)
+        /// <param name="selects">null for *</param>
+        /// <param name="tableName"></param>
+        /// <param name="wheres"></param>
+        /// <returns></returns>
+        public static string GetSQLiteQuery_Select(List<string> selects, string tableName, List<KeyOperatorValue> wheres,string prefix="",string suffix="")
         {
             var selectsStr = (selects == null || selects.Count == 0 ? "*" : string.Join(",", selects));
-            return $"select {selectsStr} from {tableName} where {SQLiteHelper.ToSQLiteWheres(wheres)}";
+            return $"select {prefix} {selectsStr} from {tableName} where {SQLiteHelper.ToSQLiteWheres(wheres)} {suffix}";
         }
         public static string GetSQLiteQuery_Insert(string tableName, Dictionary<string, string> insertSets)
         {

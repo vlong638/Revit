@@ -250,5 +250,10 @@ namespace MyRevit.SubsidenceMonitor.UI
                 return;
             }
         }
+
+        private void btn_Chart_Click(object sender, EventArgs e)
+        {
+            new ChartForm().ShowDialog();
+        }
     }
 }

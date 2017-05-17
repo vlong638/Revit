@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -109,6 +109,7 @@
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.105.0\lib\net45\System.Data.SQLite.Linq.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -152,6 +153,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\MyDGV0427.cs" />
     <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
+    <Compile Include="SubsidenceMonitor\Entities\DateTimeValue.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\SkewBack.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\UnpressedPipeLineSubsidence.cs" />
     <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\PressedPipeLineSubsidence.cs" />
@@ -179,11 +181,18 @@
     <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />
     <Compile Include="SubsidenceMonitor\Operators\BLLResult.cs" />
+    <Compile Include="SubsidenceMonitor\Operators\CommonOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TDetailOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TDepthNodeOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TNodeOperator.cs" />
+    <Compile Include="SubsidenceMonitor\UI\ChartForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubsidenceMonitor\UI\ChartForm.Designer.cs">
+      <DependentUpon>ChartForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -239,6 +248,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SubsidenceMonitor\UI\ChartForm.resx">
+      <DependentUpon>ChartForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SubsidenceMonitor\UI\CPSettingsForm.resx">
       <DependentUpon>CPSettingsForm.cs</DependentUpon>
     </EmbeddedResource>

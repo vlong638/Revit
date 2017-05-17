@@ -1,5 +1,6 @@
 ﻿using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -112,6 +113,82 @@ namespace MyRevit.SubsidenceMonitor.Operators
                     return false;
             }
             return true;
+        }
+        public static List<string> GetDepthsByNodeCode(this TDepthNode node, string nodeCode, SQLiteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            List<string> selects = new List<string>();
+            selects.Add(nameof(TDepthNode.Depth));
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(TDepthNode.NodeCode), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(nodeCode)));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(selects, new TDepthNode().TableName, wheres, "distinct");
+            var reader = command.ExecuteReader();
+            List<string> results = new List<string>();
+            while (reader.Read())
+                results.Add(reader[nameof(TDepthNode.Depth)].ToString());
+            return results;
+        }
+        public static List<DateTimeValue> GetDateTimeValues(this TDepthNode entity, EIssueType issueType, string nodeCode, string depth, string fieldName, DateTime startTime, int daySpan, SQLiteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            List<string> selects = new List<string>();
+            selects.Add(nameof(entity.Data));
+            selects.Add(nameof(entity.IssueDateTime));
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(issueType)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.NodeCode), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(nodeCode)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.Depth), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(depth)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.GTorEq, SQLiteHelper.ToSQLiteString(startTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.LTorEq, SQLiteHelper.ToSQLiteString(startTime.AddDays(daySpan))));
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(selects, entity.TableName, wheres);
+            var reader = command.ExecuteReader();
+            List<DateTimeValue> results = new List<DateTimeValue>();
+            switch (fieldName)
+            {
+                case nameof(SkewBackDataV1.CurrentChange):
+                    while (reader.Read())
+                    {
+                        var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                        var data = new SkewBackDataV1(nodeCode,depth, reader[nameof(entity.Data)].ToString());
+                        double value;
+                        if (double.TryParse(data.CurrentChange, out value))
+                            results.Add(new DateTimeValue(time, value));
+                    }
+                    break;
+                case nameof(SkewBackDataV1.CurrentSum):
+                    while (reader.Read())
+                    {
+                        var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                        var data = new SkewBackDataV1(nodeCode, depth, reader[nameof(entity.Data)].ToString());
+                        double value;
+                        if (double.TryParse(data.CurrentSum, out value))
+                            results.Add(new DateTimeValue(time, value));
+                    }
+                    break;
+                case nameof(SkewBackDataV1.PreviousChange):
+                    while (reader.Read())
+                    {
+                        var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                        var data = new SkewBackDataV1(nodeCode, depth, reader[nameof(entity.Data)].ToString());
+                        double value;
+                        if (double.TryParse(data.PreviousChange, out value))
+                            results.Add(new DateTimeValue(time, value));
+                    }
+                    break;
+                case nameof(SkewBackDataV1.PreviousSum):
+                    while (reader.Read())
+                    {
+                        var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                        var data = new SkewBackDataV1(nodeCode, depth, reader[nameof(entity.Data)].ToString());
+                        double value;
+                        if (double.TryParse(data.PreviousSum, out value))
+                            results.Add(new DateTimeValue(time, value));
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return results;
         }
         #endregion
     }

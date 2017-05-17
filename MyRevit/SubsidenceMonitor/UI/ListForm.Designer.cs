@@ -36,6 +36,7 @@
             this.dgv_Date = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgv_Imported = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgv_Operation = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.btn_Chart = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
             // 
@@ -82,10 +83,10 @@
             this.dgv_Date,
             this.dgv_Imported,
             this.dgv_Operation});
-            this.dgv.Location = new System.Drawing.Point(19, 44);
+            this.dgv.Location = new System.Drawing.Point(19, 72);
             this.dgv.Name = "dgv";
             this.dgv.RowTemplate.Height = 23;
-            this.dgv.Size = new System.Drawing.Size(335, 738);
+            this.dgv.Size = new System.Drawing.Size(335, 710);
             this.dgv.TabIndex = 4;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             // 
@@ -109,11 +110,22 @@
             this.dgv_Operation.Name = "dgv_Operation";
             this.dgv_Operation.Width = 80;
             // 
+            // btn_Chart
+            // 
+            this.btn_Chart.Location = new System.Drawing.Point(254, 43);
+            this.btn_Chart.Name = "btn_Chart";
+            this.btn_Chart.Size = new System.Drawing.Size(100, 23);
+            this.btn_Chart.TabIndex = 5;
+            this.btn_Chart.Text = "查看图表";
+            this.btn_Chart.UseVisualStyleBackColor = true;
+            this.btn_Chart.Click += new System.EventHandler(this.btn_Chart_Click);
+            // 
             // ListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(371, 794);
+            this.Controls.Add(this.btn_Chart);
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.btn_IssueMonth);
             this.Controls.Add(this.label2);
@@ -138,5 +150,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dgv_Date;
         private System.Windows.Forms.DataGridViewTextBoxColumn dgv_Imported;
         private System.Windows.Forms.DataGridViewButtonColumn dgv_Operation;
+        private System.Windows.Forms.Button btn_Chart;
     }
 }
