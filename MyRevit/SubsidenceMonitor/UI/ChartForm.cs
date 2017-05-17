@@ -1,10 +1,12 @@
-﻿using MyRevit.SubsidenceMonitor.Entities;
+﻿using Microsoft.Office.Interop.Excel;
+using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Operators;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace MyRevit.SubsidenceMonitor.UI
@@ -17,13 +19,13 @@ namespace MyRevit.SubsidenceMonitor.UI
 
             //DatePicker 日期选择辅助
             DatePicker = new DateTimePicker()
-             {
-                 Format = DateTimePickerFormat.Custom,
-                 CustomFormat = "yyyy/MM/dd",
-                 //ShowCheckBox = true,
-                 Width = 100,
-                 Visible = false,
-             };
+            {
+                Format = DateTimePickerFormat.Custom,
+                CustomFormat = "yyyy/MM/dd",
+                //ShowCheckBox = true,
+                Width = 100,
+                Visible = false,
+            };
             DatePicker.Parent = this;
             DatePicker.LostFocus += DatePicker_LostFocus;
             //监测类型
@@ -90,7 +92,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 //Y轴选项 级联处理
                 cb_Y.DisplayMember = nameof(TypeKeyDdscription.Description);
                 cb_Y.ValueMember = nameof(TypeKeyDdscription.Key);
-                DataTable table = new DataTable();
+                System.Data.DataTable table = new System.Data.DataTable();
                 var datas = TypeKeyDiscriptions.Where(c => c.Type == issueType).ToList();
                 table.Columns.Add(new DataColumn(nameof(TypeKeyDdscription.Description), typeof(string)));
                 table.Columns.Add(new DataColumn(nameof(TypeKeyDdscription.Key), typeof(string)));
@@ -248,6 +250,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             else
                 btn_StartDate.Enabled = true;
         }
+        List<DateTimeValue> Datas = new List<DateTimeValue>();
         /// <summary>
         /// 日期区间变更
         /// 级联影响(图表数据)
@@ -272,17 +275,17 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case EIssueType.管线沉降_有压:
                 case EIssueType.管线沉降_无压:
                 case EIssueType.钢支撑轴力监测:
-                    var datas = Facade.GetDateTimeValues(type, nodeCode, yField, date, range);
+                    Datas = Facade.GetDateTimeValues(type, nodeCode, yField, date, range);
                     chart1.Series[0].Points.Clear();
-                    foreach (var data in datas)
+                    foreach (var data in Datas)
                     {
                         chart1.Series[0].Points.AddXY(data.DateTime, data.Value);
                     }
                     break;
                 case EIssueType.侧斜监测:
-                    datas = Facade.GetDateTimeValues(type, nodeCode, cb_Depth.Text, yField, date, range);
+                    Datas = Facade.GetDateTimeValues(type, nodeCode, cb_Depth.Text, yField, date, range);
                     chart1.Series[0].Points.Clear();
-                    foreach (var data in datas)
+                    foreach (var data in Datas)
                     {
                         chart1.Series[0].Points.AddXY(data.DateTime, data.Value);
                     }
@@ -311,7 +314,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 var btnLocation = btn_StartDate.Location;
                 DatePicker.Show();
-                DatePicker.Location = new Point(btnLocation.X - (DatePicker.Width - btn_StartDate.Width) / 2, btnLocation.Y + 24);
+                DatePicker.Location = new System.Drawing.Point(btnLocation.X - (DatePicker.Width - btn_StartDate.Width) / 2, btnLocation.Y + 24);
                 DatePicker.BringToFront();
                 DatePicker.Focus();
                 IsDatePickerFocused = true;
@@ -326,5 +329,137 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
         }
         #endregion
+
+        private void btn_Export_Click(object sender, EventArgs e)
+        {
+            //信息准备
+            var reportName = tb_ReportName.Text;
+            var issueType = cb_IssueType.Text;
+            var nodeCode = cb_NodeCode.Text;
+            var depth = cb_Depth.Text;
+            var yField = cb_Y.Text;
+            var startTime = btn_StartDate.Text;
+            var datas = Datas;
+            #region 导出处理
+            //Excel导出
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "EXCEL文件(*.xls)|*.xls";
+            if (save.ShowDialog() != DialogResult.OK)
+                return;
+            var path = save.FileName;
+            // 创建Excel对象
+            ApplicationClass xlApp = new ApplicationClass();
+            // 创建Excel工作薄
+            Workbook xlBook = xlApp.Workbooks.Add(true);
+            Worksheet xlSheet = (Worksheet)xlBook.Worksheets[1];
+            //第一列双倍宽度
+            Range range = xlSheet.Cells[1, 1] as Range;
+            range.ColumnWidth = double.Parse(range.ColumnWidth.ToString()) * 2;
+            //开始输出数据
+            int x = 1, y = 1;
+            int width = 0;
+            //报告名称
+            y = SetRangeValue("图表名称:", xlSheet, x, y, 1);
+            y = SetRangeValue(reportName, xlSheet, x, y, 4);
+            //测点名称
+            y = SetRangeValue("测点名称:", xlSheet, x, y, 2);
+            y = SetRangeValue(nodeCode, xlSheet, x, y, 3);
+            int totalWidth = y - 1;
+            x += 1; y = 1;//换行
+            //报告类型
+            y = SetRangeValue("报告类型:", xlSheet, x, y, 1);
+            y = SetRangeValue(issueType, xlSheet, x, y, 4);
+            //监测日期起点
+            y = SetRangeValue("监测日期起点:", xlSheet, x, y, 2);
+            y = SetRangeValue(startTime, xlSheet, x, y, 3);
+            x += 1; y = 1;//换行
+            //监测日期
+            y = SetRangeValue("监测日期", xlSheet, x, y, 1);
+            //测点数据
+            y = SetRangeValue("测点数据", xlSheet, x, y, 1);
+            int dataStartX = x + 1, dataStartY = 1;
+            foreach (var data in datas)
+            {
+                x += 1; y = 1;//换行
+                y = SetRangeValue(data.DateTime.ToString("yyyy/MM/dd HH") + "时", xlSheet, x, y, 1);
+                y = SetRangeValue(data.Value.ToString(), xlSheet, x, y, 1);
+            }
+            int dataEndX = x, dataEndY = y - 1;
+            //图表
+            xlBook.Charts.Add(Missing.Value, Missing.Value, 1, Missing.Value);
+            xlBook.ActiveChart.ChartType = XlChartType.xlLineMarkers;//设置图表类型
+            xlBook.ActiveChart.Location(XlChartLocation.xlLocationAsObject, xlSheet.Name);//放置到Sheet中
+            xlBook.ActiveChart.SetSourceData(xlSheet.get_Range(xlSheet.Cells[dataStartX, dataStartY], xlSheet.Cells[dataEndX, dataEndY])
+                , XlRowCol.xlColumns);//设置数据区间
+            var chart = xlSheet.Shapes.Item("Chart 1");
+            range = xlSheet.get_Range(xlSheet.Cells[1, 1], xlSheet.Cells[dataStartX - 2, 2]);
+            chart.Top = float.Parse(range.Height.ToString());
+            chart.Left = float.Parse(range.Width.ToString());
+            range = xlSheet.get_Range(xlSheet.Cells[dataStartX - 1, 3], xlSheet.Cells[dataEndX, totalWidth]);
+            chart.Height = float.Parse(range.Height.ToString());
+            chart.Width = float.Parse(range.Width.ToString());
+            int formatNum = GetFormatNum(xlApp);
+            xlBook.SaveAs(path, formatNum);
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(xlSheet);
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(xlBook);
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(xlApp); 
+            #endregion
+            KillProcess("Excel");
+        }
+        private static int SetRangeValue(string reportName, Worksheet xlSheet, int x, int y, int width)
+        {
+            Range range;
+            if (width > 1)
+            {
+                var start = xlSheet.Cells[x, y];
+                y += width - 1;
+                var end = xlSheet.Cells[x, y];
+                range = xlSheet.get_Range(start, end);
+                range.MergeCells = true;
+            }
+            else
+            {
+                range = xlSheet.Cells[x, y] as Range;
+            }
+            range.Value = reportName;
+            return y += 1;//下一格
+        }
+        private static void KillProcess(string name)
+        {
+            System.Diagnostics.Process myproc = new System.Diagnostics.Process();//得到所有打开的进程
+            try
+            {
+                foreach (System.Diagnostics.Process thisproc in System.Diagnostics.Process.GetProcessesByName(name))
+                {
+                    if (!thisproc.CloseMainWindow())
+                    {
+                        thisproc.Kill();
+                    }
+                }
+            }
+            catch { }
+        }
+        private static int GetFormatNum(ApplicationClass xlApp)
+        {
+            int formatNum;
+            string Version = xlApp.Version;//excel 的版本号
+            if (Convert.ToDouble(Version) < 12)//You use Excel 97-2003
+            {
+                formatNum = -4143;
+            }
+            else//you use excel 2007 or later
+            {
+                formatNum = 56;
+            }
+            return formatNum;
+        }
+        private void btn_Submit_Click(object sender, EventArgs e)
+        {
+            //TODO 当前页面选项的备份,下次加载上次打开的
+        }
+        private void btn_Cancel_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

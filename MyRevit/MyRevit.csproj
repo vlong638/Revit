@@ -181,7 +181,6 @@
     <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
     <Compile Include="SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />
     <Compile Include="SubsidenceMonitor\Operators\BLLResult.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\CommonOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />
     <Compile Include="SubsidenceMonitor\Operators\TDetailOperator.cs" />

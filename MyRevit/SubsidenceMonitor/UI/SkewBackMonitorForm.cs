@@ -344,9 +344,10 @@ namespace MyRevit.SubsidenceMonitor.UI
                 throw new NotImplementedException("Workbook文档对象无效");
             //TODO 加载动画效果
             var result = Model.ImportExcel(workbook);
-            workbook.Close();
-            workbook = null;
-            excelApp.Quit();
+            //workbook.Close();
+            //workbook = null;
+            //excelApp.Quit();
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
             System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
             excelApp = null;
             string message = "";
