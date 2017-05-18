@@ -89,7 +89,8 @@ namespace MyRevit.EarthWork.Entity
 
         public static FaceRecorderForRevit GetRecorder(string segName, Document doc)
         {
-            return new FaceRecorderForRevit(segName, ApplicationPath.GetCurrentPath(doc));
+            return PMSoftHelper.GetRecorder(segName, doc);
+            //return new FaceRecorderForRevit(segName, ApplicationPath.GetCurrentPath(doc));
         }
     }
     /// <summary>
@@ -142,7 +143,7 @@ namespace MyRevit.EarthWork.Entity
                 }
             }
             //加载 EarthworkBlock
-            FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), doc);
+            FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(EarthworkBlockingForm), doc);
             var orderedBlockIdIndexs = BlockIdIndexMapper.OrderBy(c => c.Value);
             foreach (var orderedBlockIdIndex in orderedBlockIdIndexs)
             {
@@ -328,7 +329,7 @@ namespace MyRevit.EarthWork.Entity
                 if (block.IsChanged)
                     block.Commit(storage);
             }
-            FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
+            FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(EarthworkBlockingForm), storage.m_Doc);
             var jsonObj = JsonConvert.SerializeObject(this);
             recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking_Size, 1), jsonObj.Length.ToString());
             recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking, 1), jsonObj);

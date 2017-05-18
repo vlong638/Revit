@@ -58,7 +58,7 @@ namespace MyRevit.EarthWork.UI
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
             Node_Name.Tag = nameof(EarthworkBlock.Name);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
-            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = EarthworkBlockingConstraints.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
+            PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
             var blockingStr = "";
             recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking, 1), ref blockingStr, recorder.GetValueAsInt(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking_Size, 1), 1000) + 2);
             if (blockingStr != "")
