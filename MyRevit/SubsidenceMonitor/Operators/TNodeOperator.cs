@@ -314,6 +314,16 @@ namespace MyRevit.SubsidenceMonitor.Operators
                 case EIssueType.钢支撑轴力监测:
                     switch (fieldName)
                     {
+                        case nameof(STBAPDataV1.AxialForce):
+                            while (reader.Read())
+                            {
+                                var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                                var data = new STBAPDataV1(nodeCode, reader[nameof(entity.Data)].ToString());
+                                double value;
+                                if (double.TryParse(data.AxialForce, out value))
+                                    results.Add(new DateTimeValue(time, value));
+                            }
+                            break;
                         case nameof(STBAPDataV1.SumChanges):
                             while (reader.Read())
                             {

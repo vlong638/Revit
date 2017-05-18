@@ -6,7 +6,7 @@ using PmSoft.Common.CommonClass;
 using PmSoft.MainModel.EntData;
 using System;
 
-namespace MyRevit.SubsidenceMonitor.Command
+namespace MyRevit.Commands
 {
     [Transaction(TransactionMode.Manual)]
     public class WarnSettingsCommand : IExternalCommand

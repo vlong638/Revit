@@ -48,7 +48,8 @@ namespace MyRevit.Utilities
 
         public enum SaveKeyTypeForSubsidenceMonitor
         {
-            WarnSettings
+            WarnSettings,
+            ChartForm,
         }
         public static string GetSaveKey(SaveKeyTypeForSubsidenceMonitor saveKeyType, int id)
         {

@@ -4,6 +4,9 @@ namespace MyRevit.SubsidenceMonitor.Entities
 {
     public class WarnSettings
     {
+        public static double CloseCoefficient = 0.8f;
+        public static double OverCoefficient = 1;
+
         //建筑物沉降
         public int BuildingSubsidence_Day { set; get; } = int.MinValue;
         public int BuildingSubsidence_DailyMillimeter { set; get; } = int.MinValue;

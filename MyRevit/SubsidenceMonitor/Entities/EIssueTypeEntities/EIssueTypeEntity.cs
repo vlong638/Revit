@@ -239,28 +239,6 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             return nodes;
         }
-        ///// <summary>
-        ///// 获取节点数据对象
-        ///// </summary>
-        ///// <param name="nodeCode"></param>
-        ///// <param name="data"></param>
-        ///// <returns></returns>
-        //public ITNodeData GetNodeDataEntity(string nodeCode, string data)
-        //{
-        //    switch (IssueType)
-        //    {
-        //        case EIssueType.建筑物沉降:
-        //            return new BuildingSubsidenceDataV1(nodeCode, data);
-        //        //TODO
-        //        case EIssueType.地表沉降:
-        //        case EIssueType.管线沉降_无压:
-        //        case EIssueType.管线沉降_有压:
-        //        case EIssueType.侧线监测:
-        //        case EIssueType.钢支撑轴力监测:
-        //        default:
-        //            throw new NotImplementedException("未支持该类型的ITNodeData:" + IssueType.ToString());
-        //    }
-        //}
         public ITNodeDataCollection<ITNodeData> GetNodeDataCollection()
         {
             switch (IssueType)
@@ -315,10 +293,11 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         new HeaderNode(3,ordinaryHeight*2,averageWidth,"备注",nameof(SurfaceSubsidenceDataV1.Conment)),
                     };
                 case EIssueType.钢支撑轴力监测:
-                    averageWidth = totalWidths / 4;
+                    averageWidth = totalWidths / 5;
                     return new List<HeaderNode>()
                     {
                         new HeaderNode(0,ordinaryHeight*2,averageWidth,"监测点",nameof(STBAPDataV1.NodeCode)),
+                        new HeaderNode(0,ordinaryHeight*2,averageWidth,"轴力值",nameof(STBAPDataV1.AxialForce)),
                         new HeaderNode(1,ordinaryHeight,averageWidth*2,"变化值(KN)",null,
                         new List<HeaderNode>() {
                              new HeaderNode(-1,ordinaryHeight,averageWidth,"本次变量",nameof(STBAPDataV1.CurrentChanges)),

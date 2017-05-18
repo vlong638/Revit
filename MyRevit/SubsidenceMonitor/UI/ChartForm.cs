@@ -173,6 +173,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             new TypeKeyDdscription(EIssueType.管线沉降_有压,nameof(PressedPipeLineSubsidenceDataV1.SumPeriodBuildingEnvelope),"围护结构施工期间累计值(mm)"),
             new TypeKeyDdscription(EIssueType.管线沉降_有压,nameof(PressedPipeLineSubsidenceDataV1.SumBuildingEnvelope),"总累计值(mm)"),
 
+            new TypeKeyDdscription(EIssueType.钢支撑轴力监测,nameof(STBAPDataV1.AxialForce),"本次变量(mm)"),
             new TypeKeyDdscription(EIssueType.钢支撑轴力监测,nameof(STBAPDataV1.CurrentChanges),"本次变量(mm)"),
             new TypeKeyDdscription(EIssueType.钢支撑轴力监测,nameof(STBAPDataV1.SumChanges),"累计变量(mm)"),
 
@@ -456,6 +457,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         private void btn_Submit_Click(object sender, EventArgs e)
         {
             //TODO 当前页面选项的备份,下次加载上次打开的
+            this.Close();
         }
         private void btn_Cancel_Click(object sender, EventArgs e)
         {

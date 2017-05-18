@@ -3,16 +3,14 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
 using PmSoft.MainModel.EntData;
 using MyRevit.EarthWork.UI;
-using PmSoft.Common.CommonClass;
 using PmSoft.Common.RevitClass;
 using System.Windows.Forms;
 using PmSoft.Common.Controls.RevitMethod;
 using System.Diagnostics;
 using System.Linq;
-using System;
 using Autodesk.Revit.UI.Selection;
 
-namespace MyRevit.EarthWork.Command
+namespace MyRevit.Commands
 {
     [Transaction(TransactionMode.Manual)]
     public class EarthworkBlockingCommand : IExternalCommand

@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace MyRevit.SubsidenceMonitor.Command
+namespace MyRevit.Commands
 {
     [Transaction(TransactionMode.Manual)]
     public class SubsidenceMonitorCommand : IExternalCommand

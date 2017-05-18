@@ -153,19 +153,19 @@ namespace MyRevit.SubsidenceMonitor.UI
         private bool Model_OnConfirmDelete()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private bool Model_OnChangeCurrentWhileHasCreateNew()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private bool Model_OnChangeCurrentWhileIsEdited()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private void Model_OnStateChanged(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave)

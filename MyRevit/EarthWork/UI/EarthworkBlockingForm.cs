@@ -245,7 +245,7 @@ namespace MyRevit.EarthWork.UI
         {
             if (rows == null || rows.Count == 0 || rows[0].DataBoundItem == null)
             {
-                if (dgv_Blocks.CurrentCell != null)
+                if (dgv_Blocks.DataSource != null&&dgv_Blocks.CurrentCell != null)
                 {
                     Row = rows[dgv_Blocks.CurrentCell.RowIndex];
                     Block = Row.DataBoundItem as EarthworkBlock;
@@ -651,7 +651,7 @@ namespace MyRevit.EarthWork.UI
         private void dgv_ImplementationInfo_SelectionChanged(object sender, EventArgs e)
         {
             var cell = dgv_ImplementationInfo.CurrentCell;
-            if (ImplementationInfo != Blocking.Blocks[cell.RowIndex].ImplementationInfo)
+            if (Blocking.Blocks.Count > 0 && ImplementationInfo != Blocking.Blocks[cell.RowIndex].ImplementationInfo)
             {
                 ImplementationInfo = Blocking.Blocks[cell.RowIndex].ImplementationInfo;
                 RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
@@ -774,14 +774,15 @@ namespace MyRevit.EarthWork.UI
                     MessageBox.Show("限制输入晚于系统的时间");
                     return;
                 }
+                var data = (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo);
                 if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName == nameof(EarthworkBlockImplementationInfo.StartTimeStr)
-                    && DateTimePicker.Value > (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).EndTime)
+                    && (data.EndTime != DateTime.MinValue && DateTimePicker.Value > data.EndTime))
                 {
                     MessageBox.Show("开始时间不可晚于结束时间");
                     return;
                 }
                 if (dgv_ImplementationInfo.Columns[DataGridViewCellCancelEventArgs.ColumnIndex].DataPropertyName == nameof(EarthworkBlockImplementationInfo.EndTimeStr)
-                    && DateTimePicker.Value < (dgv_ImplementationInfo.Rows[DataGridViewCellCancelEventArgs.RowIndex].DataBoundItem as EarthworkBlockImplementationInfo).StartTime)
+                    && DateTimePicker.Value < data.StartTime)
                 {
                     MessageBox.Show("结束时间不可早于开始时间");
                     return;
@@ -857,7 +858,7 @@ namespace MyRevit.EarthWork.UI
         /// <param name="e"></param>
         private void btn_SortByDate_TextChanged(object sender, EventArgs e)
         {
-            List<EarthworkBlockImplementationInfo> infos = null;
+            List<EarthworkBlockImplementationInfo> infos = new List<EarthworkBlockImplementationInfo>();
             if (btn_SortByDate.Text == SortAll)
             {
                 dgv_ImplementationInfo.DataSource = null;
@@ -871,7 +872,7 @@ namespace MyRevit.EarthWork.UI
                 if (Blocking.Blocks.Count > 0)
                     infos = Blocking.GetBlockingImplementationInfos().Where(c => c.StartTime.Date == date.Date || c.EndTime.Date == date.Date).ToList();
             }
-            dgv_ImplementationInfo.DataSource = null;
+            dgv_ImplementationInfo.DataSource = infos;
             if (infos.Count() > 0)
             {
                 dgv_ImplementationInfo.DataSource = infos;

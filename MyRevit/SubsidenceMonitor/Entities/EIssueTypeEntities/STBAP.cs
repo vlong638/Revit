@@ -71,6 +71,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             {
                 return new STBAPDataV1(
                      s.GetCellValueAsString(r, range.StartColumn).Trim(),
+                     s.GetCellValueAsString(r, range.StartColumn + 2).Trim(),
                      s.GetCellValueAsString(r, range.StartColumn + 3).Trim(),
                      s.GetCellValueAsString(r, range.StartColumn + 4).Trim());
             });
@@ -91,9 +92,10 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             DeserializeFromString(nodeCode, str);
         }
-        public STBAPDataV1(string nodeCode, string currentChanges, string sumChanges)
+        public STBAPDataV1(string nodeCode,string axialForce, string currentChanges, string sumChanges)
         {
             NodeCode = nodeCode;
+            AxialForce = axialForce;
             CurrentChanges = currentChanges;
             SumChanges = sumChanges;
         }
@@ -102,6 +104,10 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// 测点编号
         /// </summary>
         public string NodeCode { set; get; }
+        /// <summary>
+        /// 轴力值(KN)
+        /// </summary>
+        public string AxialForce { set; get; }
         /// <summary>
         /// 本次变量(mm)
         /// </summary>
@@ -120,21 +126,43 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 float f;
                 return float.TryParse(CurrentChanges, out f)
                     && float.TryParse(SumChanges, out f)
+                     && float.TryParse(AxialForce, out f)
                     ? "" : "点位破坏";
             }
         }
         public string SerializeToString()
         {
-            return $"{CurrentChanges},{SumChanges}";
+            return $"{AxialForce},{CurrentChanges},{SumChanges}";
         }
         public void DeserializeFromString(string nodeCode, string str)
         {
             NodeCode = nodeCode;
             var args = str.Split(',');
-            CurrentChanges = args[0];
-            SumChanges = args[1];
+            AxialForce = args[0];
+            CurrentChanges = args[1];
+            SumChanges = args[2];
         }
 
+        float _AxialForce_Float = float.MinValue;
+        public float AxialForce_Float
+        {
+            get
+            {
+                if (_AxialForce_Float == float.MinValue)
+                {
+                    float result = float.MinValue;
+                    if (!float.TryParse(AxialForce, out result))
+                    {
+                        _AxialForce_Float = float.NaN;
+                    }
+                    else
+                    {
+                        _AxialForce_Float = Math.Abs(result);//计算以绝对值为准
+                    }
+                }
+                return _AxialForce_Float;
+            }
+        }
         float _CurrentChanges_Float = float.MinValue;
         public float CurrentChanges_Float
         {
@@ -210,7 +238,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         public IEnumerable<T> GetCloseWarn(WarnSettings warnSettings, TDetail detail)
         {
-            return getWarnResult(warnSettings, detail, 0.8f, 1);
+            return getWarnResult(warnSettings, detail, WarnSettings.CloseCoefficient, WarnSettings.OverCoefficient);
         }
         public IEnumerable<T> GetOverWarn(WarnSettings warnSettings, TDetail detail)
         {
@@ -218,18 +246,18 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin, double warnCoefficientMax = double.NaN)
         {
-            throw new NotImplementedException("还有未确定的需求");
+            //TODO 算法
+            throw new NotImplementedException();
+            List<T> result = new List<T>();
+            var d = Datas.FirstOrDefault();
+            if (d == null)
+                return result;
 
-            //List<T> result = new List<T>();
-            //var d = Datas.FirstOrDefault();
-            //if (d == null)
-            //    return result;
-
-            //var totalHourRange = warnSettings.STBAP_Day * 24;
-            //var endTime = detail.IssueDateTime;
-            //var details = Facade.GetDetailsByTimeRange(detail.IssueType, endTime.AddHours(-totalHourRange), endTime);
-            //var orderedDetails = details.OrderByDescending(c => c.IssueDateTime).ToList();
-            //var currentDetail = detail;
+            var totalHourRange = 24;
+            var endTime = detail.IssueDateTime;
+            var details = Facade.GetDetailsByTimeRange(detail.IssueType, endTime.AddHours(-totalHourRange), endTime);
+            var orderedDetails = details.OrderByDescending(c => c.IssueDateTime).ToList();
+            var currentDetail = detail;
             ////需预警的节点
             ////监测 warnSettings.STBAP_SumMillimeter;
             //var sumMillimeter = warnSettings.STBAP_SumMillimeter;

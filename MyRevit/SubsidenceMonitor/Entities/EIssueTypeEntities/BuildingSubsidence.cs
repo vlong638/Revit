@@ -225,7 +225,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
         public IEnumerable<T> GetCloseWarn(WarnSettings warnSettings, TDetail detail)
         {
-            return getWarnResult(warnSettings, detail, 0.8f, 1);
+            return getWarnResult(warnSettings, detail, WarnSettings.CloseCoefficient, WarnSettings.OverCoefficient);
         }
         public IEnumerable<T> GetOverWarn(WarnSettings warnSettings, TDetail detail)
         {

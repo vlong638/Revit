@@ -1,0 +1,24 @@
+      <PushButton name="Earthwork" text="   土方   \n   分块   ">
+        <ToolTip></ToolTip>
+        <LongDescription></LongDescription>
+        <Assembly>E:\Work\last\2016\MyRevit.dll</Assembly>
+        <ClassName>MyRevit.Commands.EarthworkBlockingCommand</ClassName>
+        <LargeImage>建筑结构\工程设置.png</LargeImage>
+        <Image>建筑结构\小图标\工程设置.png</Image>
+      </PushButton>
+      <PushButton name="WarnMonitor" text="   预警   \n   系统   ">
+        <ToolTip></ToolTip>
+        <LongDescription></LongDescription>
+        <Assembly>E:\Work\last\2016\MyRevit.dll</Assembly>
+        <ClassName>MyRevit.Commands.SubsidenceMonitorCommand</ClassName>
+        <LargeImage>建筑结构\工程设置.png</LargeImage>
+        <Image>建筑结构\小图标\工程设置.png</Image>
+      </PushButton>
+      <PushButton name="WarnSettings" text="   预警值   \n   配置   ">
+        <ToolTip></ToolTip>
+        <LongDescription></LongDescription>
+        <Assembly>E:\Work\last\2016\MyRevit.dll</Assembly>
+        <ClassName>MyRevit.Commands.WarnSettingsCommand</ClassName>
+        <LargeImage>建筑结构\工程设置.png</LargeImage>
+        <Image>建筑结构\小图标\工程设置.png</Image>
+      </PushButton>

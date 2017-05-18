@@ -69,6 +69,16 @@ namespace MyRevit.SubsidenceMonitor.UI
             tb_Time.ReadOnly = true;//监测时间
             tb_InstrumentName.ReadOnly = true;//仪器名称
             tb_InstrumentCode.ReadOnly = true;//仪器编号
+            if (IssueTypeEntity.IssueType==EIssueType.管线沉降_无压|| IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            {
+                lbl_Well.Show();
+                tb_Well.Show();
+            }
+            else
+            {
+                lbl_Well.Hide();
+                tb_Well.Hide();
+            }
             //录入Excel_按钮_文本
             btn_LoadExcel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             btn_LoadExcel.Text = $"录入{Environment.NewLine}Excel";
@@ -109,19 +119,19 @@ namespace MyRevit.SubsidenceMonitor.UI
         private bool Model_OnConfirmDelete()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private bool Model_OnChangeCurrentWhileHasCreateNew()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private bool Model_OnChangeCurrentWhileIsEdited()
         {
             //TODO 确认处理
-            ShowMessage("提醒", "用户确定了");
+            //ShowMessage("提醒", "用户确定了");
             return true;
         }
         private void Model_OnStateChanged(bool hasPrevious, bool hasNext, bool canCreateNew, bool canDelete, bool canSave)
@@ -936,6 +946,36 @@ namespace MyRevit.SubsidenceMonitor.UI
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
             var cpSettingsString = Model.MemorableData.Data.CloseCTSettings;
+            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_无压)
+            {
+                var wellValue = 0;
+                if (!int.TryParse(tb_Well.Text,out wellValue))
+                {
+                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter;
+                if (wellValue>= warnValue * WarnSettings .CloseCoefficient&& wellValue< warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", "输入的自流井沉降值在接近设定的预警值");
+                    return;
+                }
+            }
+            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            {
+                var wellValue = 0;
+                if (!int.TryParse(tb_Well.Text, out wellValue))
+                {
+                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.PressedPipeLineSubsidence_WellMillimeter;
+                if (wellValue >= warnValue * WarnSettings.CloseCoefficient && wellValue < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", "输入的自流井沉降值在接近设定的预警值");
+                    return;
+                }
+            }
             View3D view = null;
             var dialogType = ShowDialogType.ViewCloseWarn;
             bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetCloseWarnNodesElementsByTNode(doc, ListForm.WarnSettings));
@@ -1002,6 +1042,36 @@ namespace MyRevit.SubsidenceMonitor.UI
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
             var cpSettingsString = Model.MemorableData.Data.OverCTSettings;
+            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_无压)
+            {
+                var wellValue = 0;
+                if (!int.TryParse(tb_Well.Text, out wellValue))
+                {
+                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter;
+                if (wellValue >= warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", "输入的自流井沉降值超出了设定的预警值");
+                    return;
+                }
+            }
+            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            {
+                var wellValue = 0;
+                if (!int.TryParse(tb_Well.Text, out wellValue))
+                {
+                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.PressedPipeLineSubsidence_WellMillimeter;
+                if (wellValue >= warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", "输入的自流井沉降值超出了设定的预警值");
+                    return;
+                }
+            }
             View3D view = null;
             var dialogType = ShowDialogType.ViewOverWarn;
             bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetOverWarnNodesElementsByTNode(doc, ListForm.WarnSettings));

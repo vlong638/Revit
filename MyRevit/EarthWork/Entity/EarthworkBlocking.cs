@@ -334,7 +334,7 @@ namespace MyRevit.EarthWork.Entity
             recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlocking, 1), jsonObj);
             foreach (var block in Deletes)
             {
-                //TODO ???Block的删除或需优化
+                //TODO ???Block的删除或需优化 Block总是新增节点,会造成数据量一致增加
                 recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock_Size, block.Id), "");
                 recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlock, block.Id), "");
                 recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForEarthWork.EarthworkBlockCPSettings_Size, block.Id), "");
