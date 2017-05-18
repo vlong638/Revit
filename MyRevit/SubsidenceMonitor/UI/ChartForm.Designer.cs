@@ -91,6 +91,7 @@
             this.btn_StartDate.Size = new System.Drawing.Size(133, 23);
             this.btn_StartDate.TabIndex = 6;
             this.btn_StartDate.UseVisualStyleBackColor = true;
+            this.btn_StartDate.TextChanged += new System.EventHandler(this.btn_StartDate_TextChanged);
             this.btn_StartDate.Click += new System.EventHandler(this.btn_StartDate_Click);
             // 
             // cb_IssueType
@@ -100,6 +101,7 @@
             this.cb_IssueType.Name = "cb_IssueType";
             this.cb_IssueType.Size = new System.Drawing.Size(133, 20);
             this.cb_IssueType.TabIndex = 7;
+            this.cb_IssueType.TextChanged += new System.EventHandler(this.cb_IssueType_TextChanged);
             // 
             // cb_Y
             // 
@@ -108,6 +110,7 @@
             this.cb_Y.Name = "cb_Y";
             this.cb_Y.Size = new System.Drawing.Size(133, 20);
             this.cb_Y.TabIndex = 10;
+            this.cb_Y.TextChanged += new System.EventHandler(this.cb_Y_TextChanged);
             // 
             // label5
             // 
@@ -164,6 +167,7 @@
             this.cb_NodeCode.Name = "cb_NodeCode";
             this.cb_NodeCode.Size = new System.Drawing.Size(127, 20);
             this.cb_NodeCode.TabIndex = 14;
+            this.cb_NodeCode.TextChanged += new System.EventHandler(this.cb_NodeCode_TextChanged);
             // 
             // lbl_Depth
             // 
@@ -181,6 +185,7 @@
             this.cb_Depth.Name = "cb_Depth";
             this.cb_Depth.Size = new System.Drawing.Size(127, 20);
             this.cb_Depth.TabIndex = 16;
+            this.cb_Depth.TextChanged += new System.EventHandler(this.cb_Depth_TextChanged);
             // 
             // chart1
             // 

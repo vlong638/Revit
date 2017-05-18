@@ -12,7 +12,7 @@ namespace MyRevit.Utilities
     {
         public static FaceRecorderForRevit GetRecorder(string segName, Document doc)
         {
-            return new FaceRecorderForRevit(segName, doc.PathName);
+            return new FaceRecorderForRevit(doc.PathName + segName, ApplicationPath.GetCurrentPath(doc));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MyRevit.EarthWork.Entity;
 using MyRevit.SubsidenceMonitor.Entities;
+using MyRevit.SubsidenceMonitor.UI;
 using System;
 
 namespace MyRevit.Utilities
@@ -56,7 +57,9 @@ namespace MyRevit.Utilities
             switch (saveKeyType)
             {
                 case SaveKeyTypeForSubsidenceMonitor.WarnSettings:
-                    return nameof(WarnSettings);
+                    return nameof(WarnSettingsForm);
+                case SaveKeyTypeForSubsidenceMonitor.ChartForm:
+                    return nameof(ChartForm);
                 default:
                     throw new NotImplementedException("暂不支持该类型");
             }

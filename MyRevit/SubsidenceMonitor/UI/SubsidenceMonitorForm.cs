@@ -86,15 +86,15 @@ namespace MyRevit.SubsidenceMonitor.UI
             //dgv 总宽479-42=437/5=87.4 420 17的Scroll空间
             //560-42-18-500/6 84 504 56 42+16 差不多? 保存还有多2左右 实际是 42的序列号+14的Scroll
             var headerNodes = IssueTypeEntity.GetHeaderNodes();
-            dgv_left.HeaderNodes = headerNodes;
-            dgv_left.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             dgv_right.HeaderNodes = headerNodes;
             dgv_right.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            dgv_left.Click += dgv_left_Click;
-            dgv_right.Click += dgv_right_Click;
+            dgv_left.HeaderNodes = headerNodes;
+            dgv_left.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            dgv_right.Click += dgv_left_Click;
+            dgv_left.Click += dgv_right_Click;
             Shown += SubsidenceMonitorForm_Shown;
-            dgv_left.BindingContextChanged += Dgv_left_BindingContextChanged;
-            dgv_right.BindingContextChanged += Dgv_right_BindingContextChanged;
+            dgv_right.BindingContextChanged += Dgv_left_BindingContextChanged;
+            dgv_left.BindingContextChanged += Dgv_right_BindingContextChanged;
         }
         private void SubsidenceMonitorForm_Shown(object sender, EventArgs e)
         {
@@ -212,10 +212,10 @@ namespace MyRevit.SubsidenceMonitor.UI
                         rightNodes.Add(node.NodeCode, node.Data);
                 }
             }
-            dgv_left.DataSource = null;
-            dgv_left.DataSource = leftNodes.Datas;
             dgv_right.DataSource = null;
-            dgv_right.DataSource = rightNodes.Datas;
+            dgv_right.DataSource = leftNodes.Datas;
+            dgv_left.DataSource = null;
+            dgv_left.DataSource = rightNodes.Datas;
         }
         /// <summary>
         /// 清空绑定时的默认选项
@@ -224,7 +224,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void Dgv_right_BindingContextChanged(object sender, EventArgs e)
         {
-            dgv_right.ClearSelection();
+            dgv_left.ClearSelection();
         }
         /// <summary>
         /// 清空绑定时的默认选项
@@ -233,7 +233,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void Dgv_left_BindingContextChanged(object sender, EventArgs e)
         {
-            dgv_left.ClearSelection();
+            dgv_right.ClearSelection();
         }
         #endregion
 
@@ -506,8 +506,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         void SaveDataGridViewSelection()
         {
-            SaveDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
-            SaveDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
+            SaveDataGridViewSelection(dgv_right, SelectedRows_left, SelectedCells_left);
+            SaveDataGridViewSelection(dgv_left, SelectedRows_right, SelectedCells_right);
         }
         void ClearDataGridViewSelection(MyDGV0427 dgv, List<int> rows, List<CellLocation> cells)
         {
@@ -516,8 +516,8 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         void ClearDataGridViewSelection()
         {
-            ClearDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
-            ClearDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
+            ClearDataGridViewSelection(dgv_right, SelectedRows_left, SelectedCells_left);
+            ClearDataGridViewSelection(dgv_left, SelectedRows_right, SelectedCells_right);
         }
         /// <summary>
         /// 加载列表选中项
@@ -543,21 +543,21 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         void LoadDataGridViewSelection()
         {
-            LoadDataGridViewSelection(dgv_left, SelectedRows_left, SelectedCells_left);
-            LoadDataGridViewSelection(dgv_right, SelectedRows_right, SelectedCells_right);
+            LoadDataGridViewSelection(dgv_right, SelectedRows_left, SelectedCells_left);
+            LoadDataGridViewSelection(dgv_left, SelectedRows_right, SelectedCells_right);
         }
         #region 节点选中处理
         List<TNode> SelectedNodes = new List<TNode>();
         private void dgv_left_Click(object sender, EventArgs e)
         {
-            var dgv = dgv_left;
-            dgv_right.ClearSelection();
+            var dgv = dgv_right;
+            dgv_left.ClearSelection();
             ChangeCurrentNode(dgv);
         }
         private void dgv_right_Click(object sender, EventArgs e)
         {
-            var dgv = dgv_right;
-            dgv_left.ClearSelection();
+            var dgv = dgv_left;
+            dgv_right.ClearSelection();
             ChangeCurrentNode(dgv);
         }
         private void ChangeCurrentNode(MyDGV0427 dgv)

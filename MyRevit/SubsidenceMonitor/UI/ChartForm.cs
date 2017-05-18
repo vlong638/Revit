@@ -1,6 +1,9 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using MyRevit.SubsidenceMonitor.Entities;
 using MyRevit.SubsidenceMonitor.Operators;
+using MyRevit.Utilities;
+using Newtonsoft.Json;
+using PmSoft.Common.CommonClass;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,10 +16,51 @@ namespace MyRevit.SubsidenceMonitor.UI
 {
     public partial class ChartForm : Form
     {
-        public ChartForm()
+        Autodesk.Revit.DB.Document Doc;
+        public ChartForm(Autodesk.Revit.DB.Document doc)
         {
             InitializeComponent();
 
+            InitControls();
+
+            Doc = doc;
+            string dataStr = "";
+            FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(WarnSettings), Doc);
+            recorder.ReadValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForSubsidenceMonitor.ChartForm, 1), ref dataStr, 1000);
+            ChartFormData data = JsonConvert.DeserializeObject<ChartFormData>(dataStr);
+            if (data != null)
+            {
+                tb_ReportName.Text = data.ReportName;
+                var typeNames = Enum.GetNames(typeof(EIssueType));
+                if (typeNames.Contains(data.IssueType))
+                {
+                    cb_IssueType.Text = data.IssueType;
+                }
+                if ((cb_NodeCode.DataSource as List<string>) != null && (cb_NodeCode.DataSource as List<string>).Contains(data.NodeCode))
+                {
+                    cb_NodeCode.Text = data.NodeCode;
+                }
+                if ((cb_Depth.DataSource as List<string>) != null && (cb_Depth.DataSource as List<string>).Contains(data.Depth))
+                {
+                    cb_Depth.Text = data.Depth;
+                }
+                if ((cb_Y.DataSource as System.Data.DataTable) != null)
+                {
+                    foreach (DataRow row in (cb_Y.DataSource as System.Data.DataTable).Rows)
+                    {
+                        if (row[nameof(TypeKeyDdscription.Description)].ToString() == data.YField)
+                        {
+                            cb_Y.Text = data.YField;
+                            break;
+                        }
+                    }
+                }
+                btn_StartDate.Text = data.StartTime;
+            }
+        }
+
+        private void InitControls()
+        {
             //DatePicker 日期选择辅助
             DatePicker = new DateTimePicker()
             {
@@ -33,17 +77,18 @@ namespace MyRevit.SubsidenceMonitor.UI
             cb_IssueType.DisplayMember = "Name";
             cb_IssueType.ValueMember = "Value";
             cb_IssueType.DataSource = types;
-            cb_IssueType.TextChanged += Cb_IssueType_TextChanged;
+            Clear(cb_IssueType);
+            //cb_IssueType.TextChanged += Cb_IssueType_TextChanged;
             //测点编码
-            cb_NodeCode.TextChanged += Cb_NodeCode_TextChanged;
+            //cb_NodeCode.TextChanged += Cb_NodeCode_TextChanged;
             //深度
-            cb_Depth.TextChanged += Cb_Depth_TextChanged;
+            //cb_Depth.TextChanged += Cb_Depth_TextChanged;
             //Y轴
             cb_Y.DisplayMember = nameof(TypeKeyDdscription.Description);
             cb_Y.ValueMember = nameof(TypeKeyDdscription.Key);
-            cb_Y.TextChanged += Cb_Y_TextChanged;
+            //cb_Y.TextChanged += Cb_Y_TextChanged;
             //日期区间
-            btn_StartDate.TextChanged += Btn_StartDate_TextChanged;
+            //btn_StartDate.TextChanged += Btn_StartDate_TextChanged;
             btn_StartDate.Enabled = false;
             //Chart
             //Series.Value 节点值显示
@@ -83,8 +128,10 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// 级联影响(监测点,深度)
         /// </summary>
 
-        private void Cb_IssueType_TextChanged(object sender, EventArgs e)
+        private void cb_IssueType_TextChanged(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(cb_IssueType.Text))
+                return;
             var issueType = (EIssueType)Enum.Parse(typeof(EIssueType), cb_IssueType.Text);
             CurrentType = issueType;
             if (CurrentType != EIssueType.未指定)
@@ -93,7 +140,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 cb_Y.DisplayMember = nameof(TypeKeyDdscription.Description);
                 cb_Y.ValueMember = nameof(TypeKeyDdscription.Key);
                 System.Data.DataTable table = new System.Data.DataTable();
-                var datas = TypeKeyDiscriptions.Where(c => c.Type == issueType).ToList();
+                var datas = TypeKeyDescriptions.Where(c => c.Type == issueType).ToList();
                 table.Columns.Add(new DataColumn(nameof(TypeKeyDdscription.Description), typeof(string)));
                 table.Columns.Add(new DataColumn(nameof(TypeKeyDdscription.Key), typeof(string)));
                 table.Columns.Add(new DataColumn(nameof(TypeKeyDdscription.Type), typeof(string)));
@@ -105,6 +152,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     table.Rows.Add(row);
                 }
                 cb_Y.DataSource = table;
+                Clear(cb_Y);
             }
             switch (issueType)
             {
@@ -123,6 +171,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                     cb_NodeCode.DataSource = nodeCodes;
                     //重置当前值
                     Clear(cb_Depth);
+                    Clear(cb_NodeCode);
+                    //深度 控件隐藏
                     cb_Depth.Hide();
                     lbl_Depth.Hide();
                     break;
@@ -131,7 +181,10 @@ namespace MyRevit.SubsidenceMonitor.UI
                     nodeCodes = Facade.GetNodeCodesByType(issueType);
                     cb_NodeCode.DataSource = null;
                     cb_NodeCode.DataSource = nodeCodes;
-                    //深度 控件隐藏
+                    //重置当前值
+                    Clear(cb_Depth);
+                    Clear(cb_NodeCode);
+                    //深度 控件显示
                     cb_Depth.Show();
                     lbl_Depth.Show();
                     break;
@@ -153,7 +206,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 Description = description;
             }
         }
-        List<TypeKeyDdscription> TypeKeyDiscriptions = new List<TypeKeyDdscription>()
+        List<TypeKeyDdscription> TypeKeyDescriptions = new List<TypeKeyDdscription>()
         {
             new TypeKeyDdscription(EIssueType.建筑物沉降,nameof(BuildingSubsidenceDataV1.CurrentChanges),"本次变量(mm)"),
             new TypeKeyDdscription(EIssueType.建筑物沉降,nameof(BuildingSubsidenceDataV1.SumChanges),"累计变量(mm)"),
@@ -189,7 +242,10 @@ namespace MyRevit.SubsidenceMonitor.UI
         //}
         void Clear(Control control)
         {
-            control.Text = "";
+            if (control is ComboBox)
+                (control as ComboBox).SelectedItem = null;
+            if (control is System.Windows.Forms.Button)
+                (control as System.Windows.Forms.Button).Text = "";
         }
         /// <summary>
         /// 测点编号变更
@@ -197,7 +253,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Cb_NodeCode_TextChanged(object sender, EventArgs e)
+        private void cb_NodeCode_TextChanged(object sender, EventArgs e)
         {
             switch (CurrentType)
             {
@@ -222,6 +278,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                     var depths = Facade.GetDepthsByNodeCode(cb_NodeCode.Text);
                     cb_NodeCode.DataSource = null;
                     cb_NodeCode.DataSource = depths;
+                    Clear(cb_NodeCode);
                     break;
                 default:
                     break;
@@ -233,7 +290,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Cb_Depth_TextChanged(object sender, EventArgs e)
+        private void cb_Depth_TextChanged(object sender, EventArgs e)
         {
             //重置当前值
             Clear(cb_Y);
@@ -242,7 +299,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// Y轴选项变更
         /// 级联影响(日期区间)
         /// </summary>
-        private void Cb_Y_TextChanged(object sender, EventArgs e)
+        private void cb_Y_TextChanged(object sender, EventArgs e)
         {
             //重置当前值
             Clear(btn_StartDate);
@@ -258,7 +315,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Btn_StartDate_TextChanged(object sender, EventArgs e)
+        private void btn_StartDate_TextChanged(object sender, EventArgs e)
         {
             DateTime date = DateTime.MinValue;
             if (!DateTime.TryParse(btn_StartDate.Text, out date))
@@ -456,12 +513,33 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void btn_Submit_Click(object sender, EventArgs e)
         {
-            //TODO 当前页面选项的备份,下次加载上次打开的
+            //当前页面选项的备份,下次加载上次打开的
+            ChartFormData data = new ChartFormData()
+            {
+                ReportName = tb_ReportName.Text,
+                IssueType = cb_IssueType.Text,
+                NodeCode = cb_NodeCode.Text,
+                Depth = cb_Depth.Text,
+                YField = cb_Y.Text,
+                StartTime = btn_StartDate.Text,
+            };
+            FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(WarnSettings), Doc);
+            var jsonObj = JsonConvert.SerializeObject(data);
+            recorder.WriteValue(SaveKeyHelper.GetSaveKey(SaveKeyHelper.SaveKeyTypeForSubsidenceMonitor.ChartForm, 1), jsonObj);
             this.Close();
         }
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }
+    }
+    class ChartFormData
+    {
+        public string ReportName { set; get; }
+        public string IssueType { set; get; }
+        public string NodeCode { set; get; }
+        public string Depth { set; get; }
+        public string YField { set; get; }
+        public string StartTime { set; get; }
     }
 }
