@@ -57,6 +57,7 @@ namespace MyRevit.EarthWork.UI
             dgv_Blocks.AutoGenerateColumns = false;
             Node_Name.DataPropertyName = nameof(EarthworkBlock.Name);
             Node_Name.Tag = nameof(EarthworkBlock.Name);
+            Node_Description.Tag = nameof(EarthworkBlock.Description);
             Node_Description.DataPropertyName = nameof(EarthworkBlock.Description);
             PmSoft.Common.CommonClass.FaceRecorderForRevit recorder = PMSoftHelper.GetRecorder(nameof(EarthworkBlockingForm), m_Doc);
             var blockingStr = "";
@@ -69,6 +70,8 @@ namespace MyRevit.EarthWork.UI
             Blocking.Start();
             if (Blocking.Count() > 0)
                 dgv_Blocks.DataSource = Blocking.Blocks;
+            else
+                dgv_Blocks.DataSource = null;
             //dgv_ConstructionInfo
             dgv_ImplementationInfo.AutoGenerateColumns = false;
             ConstructionNode_Name.DataPropertyName = nameof(EarthworkBlockImplementationInfo.Name);
@@ -513,9 +516,15 @@ namespace MyRevit.EarthWork.UI
         private void dgv_Blocks_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             DataGridViewTextBoxColumn textbox = dgv_Blocks.Columns[e.ColumnIndex] as DataGridViewTextBoxColumn;
+            var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
+            if (data == null)
+            {
+                ShowMessage("警告", "请添加节点后编辑");
+                e.Cancel = true;//解除编辑状态
+                return;
+            }
             if (textbox != null && textbox.Tag.ToString() == nameof(EarthworkBlock.Name))
             {
-                var data = dgv_Blocks.Rows[e.RowIndex].DataBoundItem as EarthworkBlock;
                 if (data.ImplementationInfo.IsSettled)
                     PreName = data.Name;
             }
