@@ -43,6 +43,11 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.OnConfirmDelete += Model_OnConfirmDelete;
             //事件附加后再作数据的初始化,否则关联的信息无法在初始化的时候渲染出来
             Model.Init(ui_doc.Document, list);
+            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_无压|| IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            {
+                if (Model.MemorableData.Data.ExtraValue1.HasValue)
+                    tb_Well.Text = Model.MemorableData.Data.ExtraValue1.Value.ToString();
+            }
             Shown += SubsidenceMonitorForm_Shown1;
         }
 

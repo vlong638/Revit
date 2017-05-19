@@ -43,6 +43,13 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.OnConfirmDelete += Model_OnConfirmDelete;
             //事件附加后再作数据的初始化,否则关联的信息无法在初始化的时候渲染出来
             Model.Init(ui_doc.Document, list);
+            if (Model.MemorableData.Data.ExtraValue1.HasValue)
+                tb_SkewBack_Well.Text = Model.MemorableData.Data.ExtraValue1.Value.ToString();
+            if (Model.MemorableData.Data.ExtraValue2.HasValue)
+                tb_SkewBack_Standard.Text = Model.MemorableData.Data.ExtraValue2.Value.ToString();
+            if (Model.MemorableData.Data.ExtraValue3.HasValue)
+                tb_SkewBack_Speed.Text = Model.MemorableData.Data.ExtraValue3.Value.ToString();
+
             Shown += SkewBackMonitorForm_Shown;
         }
 
@@ -967,7 +974,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             var warnValue = ListForm.WarnSettings.SkewBack_WellMillimeter;
             if (warnValue == int.MinValue)
             {
-                ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}值的预警值");
+                ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}的预警值");
                 return;
             }
             if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
@@ -984,7 +991,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             warnValue = ListForm.WarnSettings.SkewBack_StandardMillimeter;
             if (warnValue == int.MinValue)
             {
-                ShowMessage("警告", $"请联系管理员设置{"标准段累计值"}值的预警值");
+                ShowMessage("警告", $"请联系管理员设置{"标准段累计值"}的预警值");
                 return;
             }
             if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
@@ -1001,24 +1008,18 @@ namespace MyRevit.SubsidenceMonitor.UI
             warnValue = ListForm.WarnSettings.SkewBack_Speed;
             if (warnValue == int.MinValue)
             {
-                ShowMessage("警告", $"请联系管理员设置{"变形速率"}值的预警值");
+                ShowMessage("警告", $"请联系管理员设置{"变形速率"}的预警值");
                 return;
             }
-            if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
-            {
-                ShowMessage("警告", $"输入的{"变形速率"}接近设定的预警值");
-                return;
-            }
-
-
             warnValue = ListForm.WarnSettings.SkewBack_Day;
             if (warnValue == int.MinValue)
             {
-                ShowMessage("警告", $"请联系管理员设置{"变形速率"}值的预警值");
+                ShowMessage("警告", $"请联系管理员设置{"变形速率连续天数"}的预警值");
                 return;
             }
             var currentDate = Model.MemorableData.Data.IssueDateTime.Date;
-            var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue), warnValue).OrderByDescending(c => c.DateTime);
+            var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue + 1), warnValue).OrderByDescending(c => c.DateTime).ToList();
+            dateValues.Add(new DateTimeValue(Model.MemorableData.Data.IssueDateTime, short.Parse(tb_SkewBack_Speed.Text)));//添加当前值,数据基于数据库,避免导入未保存缺失数据
             int index = 1;
             int maxSpan = warnValue + 10;
             int warnCount = 0;
@@ -1051,19 +1052,6 @@ namespace MyRevit.SubsidenceMonitor.UI
             }
             ShowMessage("提醒", "校验通过");
             return;//侧斜不作预览处理
-
-            //var doc = UI_Doc.Document;
-            //var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
-            //var cpSettingsString = Model.MemorableData.Data.CloseCTSettings;
-            //View3D view = null;
-            //var dialogType = ShowDialogType.ViewCloseWarn;
-            //bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetCloseWarnNodesElementsByTDepthNode(doc, ListForm.WarnSettings));
-            //if (!isSuccess)
-            //    return;
-            //this.DialogResult = DialogResult.Retry;
-            //this.Close();
-            //ListForm.DialogResult = DialogResult.Retry;
-            //ListForm.Close();
         }
 
         private bool DetailWithView(Document doc, string transactionName, string cpSettingsString, View3D view, ShowDialogType dialogType, Func<List<ElementId>> GetElementIds)
@@ -1178,7 +1166,8 @@ namespace MyRevit.SubsidenceMonitor.UI
                 return;
             }
             var currentDate = Model.MemorableData.Data.IssueDateTime.Date;
-            var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue), warnValue).OrderByDescending(c => c.DateTime);
+            var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue + 1), warnValue).OrderByDescending(c => c.DateTime).ToList();
+            dateValues.Add(new DateTimeValue(Model.MemorableData.Data.IssueDateTime, short.Parse(tb_SkewBack_Speed.Text)));//添加当前值,数据基于数据库,避免导入未保存缺失数据
             int index = 1;
             int maxSpan = warnValue + 10;
             int warnCount = 0;
