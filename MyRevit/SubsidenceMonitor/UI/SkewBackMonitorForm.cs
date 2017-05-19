@@ -848,7 +848,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// </summary>
         private void btn_ViewCurrentMax_Red_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true, (doc) => Model.GetCurrentMaxNodesElementsByTNode(doc));
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByRed, true, (doc) => Model.GetCurrentMaxNodesElementsByTDepthNode(doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -866,7 +866,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewCurrentMax_All_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false, (doc) => Model.GetCurrentMaxNodesElementsByTNode(doc));
+            bool isSuccess = DetailWithView(ShowDialogType.ViewCurrentMaxByAll, false, (doc) => Model.GetCurrentMaxNodesElementsByTDepthNode(doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -884,7 +884,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewSumMax_Red_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true, (doc) => Model.GetTotalMaxNodesElementsByTNode(doc));
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByRed, true, (doc) => Model.GetTotalMaxNodesElementsByTDepthNode(doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -902,7 +902,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_ViewSumMax_All_Click(object sender, EventArgs e)
         {
-            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false, (doc) => Model.GetTotalMaxNodesElementsByTNode(doc));
+            bool isSuccess = DetailWithView(ShowDialogType.ViewTotalMaxByAll, false, (doc) => Model.GetTotalMaxNodesElementsByTDepthNode(doc));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -961,7 +961,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             var cpSettingsString = Model.MemorableData.Data.CloseCTSettings;
             View3D view = null;
             var dialogType = ShowDialogType.ViewCloseWarn;
-            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetCloseWarnNodesElementsByTNode(doc, ListForm.WarnSettings));
+            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetCloseWarnNodesElementsByTDepthNode(doc, ListForm.WarnSettings));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;
@@ -1027,7 +1027,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             var cpSettingsString = Model.MemorableData.Data.OverCTSettings;
             View3D view = null;
             var dialogType = ShowDialogType.ViewOverWarn;
-            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetOverWarnNodesElementsByTNode(doc, ListForm.WarnSettings));
+            bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetOverWarnNodesElementsByTDepthNode(doc, ListForm.WarnSettings));
             if (!isSuccess)
                 return;
             this.DialogResult = DialogResult.Retry;

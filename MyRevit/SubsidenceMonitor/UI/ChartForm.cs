@@ -317,6 +317,7 @@ namespace MyRevit.SubsidenceMonitor.UI
         /// <param name="e"></param>
         private void btn_StartDate_TextChanged(object sender, EventArgs e)
         {
+            chart1.Series[0].Points.Clear();
             DateTime date = DateTime.MinValue;
             if (!DateTime.TryParse(btn_StartDate.Text, out date))
                 return;
