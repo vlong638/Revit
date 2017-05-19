@@ -127,7 +127,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.PressedPipeLineSubsidence_Day = StressedPipeLineSubsidence_Day;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_Day + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_PressedPipeLineSubsidence_Day + MessageSuffix);
                 return;
             }
             int StressedPipeLineSubsidence_PipelineMillimeter;
@@ -135,7 +135,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.PressedPipeLineSubsidence_PipelineMillimeter = StressedPipeLineSubsidence_PipelineMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_PressedPipeLineSubsidence_PipelineMillimeter  + MessageSuffix);
                 return;
             }
             int StressedPipeLineSubsidence_WellMillimeter;
@@ -143,7 +143,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.PressedPipeLineSubsidence_WellMillimeter = StressedPipeLineSubsidence_WellMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_PressedPipeLineSubsidence_WellMillimeter  + MessageSuffix);
                 return;
             }
             int StressedPipeLineSubsidence_SumMillimeter;
@@ -151,7 +151,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.PressedPipeLineSubsidence_SumMillimeter = StressedPipeLineSubsidence_SumMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_StressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_PressedPPipeLineSubsidence_SumMillimeter  + MessageSuffix);
                 return;
             }
             //管线沉降(无压)
@@ -160,7 +160,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.UnpressedPipeLineSubsidence_Day = UnstressedPipeLineSubsidence_Day;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_Day + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_UnpressedPipeLineSubsidence_Day + MessageSuffix);
                 return;
             }
             int UnstressedPipeLineSubsidence_PipelineMillimeter;
@@ -168,7 +168,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.UnpressedPipeLineSubsidence_PipelineMillimeter = UnstressedPipeLineSubsidence_PipelineMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_UnpressedPipeLineSubsidence_PipelineMillimeter  + MessageSuffix);
                 return;
             }
             int UnstressedPipeLineSubsidence_WellMillimeter;
@@ -176,7 +176,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter = UnstressedPipeLineSubsidence_WellMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_UnpressedPipeLineSubsidence_WellMillimeter  + MessageSuffix);
                 return;
             }
             int UnstressedPipeLineSubsidence_SumMillimeter;
@@ -184,7 +184,7 @@ namespace MyRevit.SubsidenceMonitor.UI
                 WarnSettings.UnpressedPipeLineSubsidence_SumMillimeter = UnstressedPipeLineSubsidence_SumMillimeter;
             else
             {
-                ShowMessage(ShowTitle, WarnSettings.Tag_UnstressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                ShowMessage(ShowTitle, WarnSettings.Tag_UnpressedPipeLineSubsidence_SumMillimeter  + MessageSuffix);
                 return;
             }
             //墙体水平位移(侧斜)

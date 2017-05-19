@@ -40,24 +40,24 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 case EIssueType.管线沉降_有压:
                     //管线沉降(有压)
                     if (warnSettings.PressedPipeLineSubsidence_Day == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_Day + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_PressedPipeLineSubsidence_Day + MessageSuffix);
                     if (warnSettings.PressedPipeLineSubsidence_PipelineMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_PressedPipeLineSubsidence_PipelineMillimeter  + MessageSuffix);
                     if (warnSettings.PressedPipeLineSubsidence_WellMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_PressedPipeLineSubsidence_WellMillimeter  + MessageSuffix);
                     if (warnSettings.PressedPipeLineSubsidence_SumMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_StressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_PressedPPipeLineSubsidence_SumMillimeter  + MessageSuffix);
                     return sb.ToString();
                 case EIssueType.管线沉降_无压:
                     //管线沉降(无压)
                     if (warnSettings.UnpressedPipeLineSubsidence_Day == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_Day + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_UnpressedPipeLineSubsidence_Day + MessageSuffix);
                     if (warnSettings.UnpressedPipeLineSubsidence_PipelineMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_PipelineMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_UnpressedPipeLineSubsidence_PipelineMillimeter  + MessageSuffix);
                     if (warnSettings.UnpressedPipeLineSubsidence_WellMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_WellMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_UnpressedPipeLineSubsidence_WellMillimeter  + MessageSuffix);
                     if (warnSettings.UnpressedPipeLineSubsidence_SumMillimeter == int.MinValue)
-                        sb.AppendLine(WarnSettings.Tag_UnstressedPipeLineSubsidence_SumMillimeter + MessageSuffix);
+                        sb.AppendLine(WarnSettings.Tag_UnpressedPipeLineSubsidence_SumMillimeter  + MessageSuffix);
                     return sb.ToString();
                 case EIssueType.侧斜监测:
                     //墙体水平位移(侧斜)

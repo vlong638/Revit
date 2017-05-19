@@ -83,7 +83,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             //录入Excel_按钮_文本
             btn_LoadExcel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             btn_LoadExcel.Text = $"录入{Environment.NewLine}Excel";
-            tb_WarnArgs.Text = WarnSettings.GetText(IssueTypeEntity.IssueType);
+            tb_WarnArgs.Text = ListForm.WarnSettings.GetText(IssueTypeEntity.IssueType);
             //dgv 总宽479-42=437/5=87.4 420 17的Scroll空间
             //560-42-18-500/6 84 504 56 42+16 差不多? 保存还有多2左右 实际是 42的序列号+14的Scroll
             var headerNodes = IssueTypeEntity.GetHeaderNodes();
@@ -943,6 +943,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             if (!string.IsNullOrEmpty(s))
             {
                 ShowMessage("警告", s);
+                return;
             }
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);
@@ -1049,6 +1050,7 @@ namespace MyRevit.SubsidenceMonitor.UI
             if (!string.IsNullOrEmpty(s))
             {
                 ShowMessage("警告", s);
+                return;
             }
             var doc = UI_Doc.Document;
             var transactionName = nameof(SubsidenceMonitor) + nameof(btn_ViewSelection_Click);

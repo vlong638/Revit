@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.tb_ReportName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -113,7 +113,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(671, 14);
+            this.label2.Location = new System.Drawing.Point(663, 13);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 3;
@@ -132,7 +132,7 @@
             // 
             this.tb_WarnArgs.Location = new System.Drawing.Point(921, 10);
             this.tb_WarnArgs.Name = "tb_WarnArgs";
-            this.tb_WarnArgs.Size = new System.Drawing.Size(135, 21);
+            this.tb_WarnArgs.Size = new System.Drawing.Size(231, 21);
             this.tb_WarnArgs.TabIndex = 6;
             // 
             // groupBox1
@@ -146,8 +146,10 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.tb_Well);
             this.groupBox2.Controls.Add(this.dgv_right);
             this.groupBox2.Controls.Add(this.dgv_left);
+            this.groupBox2.Controls.Add(this.lbl_Well);
             this.groupBox2.Controls.Add(this.tb_InstrumentCode);
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.tb_InstrumentName);
@@ -174,14 +176,14 @@
             this.dgv_right.AllowUserToDeleteRows = false;
             this.dgv_right.AllowUserToResizeColumns = false;
             this.dgv_right.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.dgv_right.ColumnHeadersHeight = 60;
             this.dgv_right.HeaderNodes = null;
             this.dgv_right.Location = new System.Drawing.Point(570, 113);
@@ -197,14 +199,14 @@
             this.dgv_left.AllowUserToDeleteRows = false;
             this.dgv_left.AllowUserToResizeColumns = false;
             this.dgv_left.AllowUserToResizeRows = false;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dgv_left.ColumnHeadersHeight = 60;
             this.dgv_left.HeaderNodes = null;
             this.dgv_left.Location = new System.Drawing.Point(0, 113);
@@ -630,7 +632,7 @@
             // 
             // tb_Well
             // 
-            this.tb_Well.Location = new System.Drawing.Point(1112, 11);
+            this.tb_Well.Location = new System.Drawing.Point(1032, 66);
             this.tb_Well.Name = "tb_Well";
             this.tb_Well.Size = new System.Drawing.Size(40, 21);
             this.tb_Well.TabIndex = 42;
@@ -639,7 +641,7 @@
             // lbl_Well
             // 
             this.lbl_Well.AutoSize = true;
-            this.lbl_Well.Location = new System.Drawing.Point(1062, 13);
+            this.lbl_Well.Location = new System.Drawing.Point(979, 69);
             this.lbl_Well.Name = "lbl_Well";
             this.lbl_Well.Size = new System.Drawing.Size(47, 12);
             this.lbl_Well.TabIndex = 41;
@@ -650,9 +652,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1164, 681);
-            this.Controls.Add(this.tb_Well);
             this.Controls.Add(this.btn_CreateNew);
-            this.Controls.Add(this.lbl_Well);
             this.Controls.Add(this.tb_IssueType);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.btn_Previous);

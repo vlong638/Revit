@@ -46,37 +46,37 @@ namespace MyRevit.SubsidenceMonitor.Entities
         public static string Tag_STBAP_MaxAxle{set;get;}= "钢支撑轴力_轴力上限";
         public static string Tag_STBAP_MinAxle{set;get;}= "钢支撑轴力_轴力下限";
         //管线沉降(有压)
-        public static string Tag_StressedPipeLineSubsidence_Day{set;get;}= "管线沉降_有压_日报警值_连续天数";
-        public static string Tag_StressedPipeLineSubsidence_PipelineMillimeter{set;get;}= "管线沉降_有压_日报警值_线变量";
-        public static string Tag_StressedPipeLineSubsidence_WellMillimeter{set;get;}= "管线沉降_有压_日报警值_井变量";
-        public static string Tag_StressedPipeLineSubsidence_SumMillimeter{set;get;}= "管线沉降_有压_累计变量";
+        public static string Tag_PressedPipeLineSubsidence_Day{set;get;}= "管线沉降_有压_日报警值_连续天数";
+        public static string Tag_PressedPipeLineSubsidence_PipelineMillimeter {set;get;}= "管线沉降_有压_日报警值_线变量";
+        public static string Tag_PressedPipeLineSubsidence_WellMillimeter {set;get;}= "管线沉降_有压_日报警值_井变量";
+        public static string Tag_PressedPPipeLineSubsidence_SumMillimeter {set;get;}= "管线沉降_有压_累计变量";
         //管线沉降(无压)
-        public static string Tag_UnstressedPipeLineSubsidence_Day{set;get;}= "管线沉降_无压_日报警值_连续天数";
-        public static string Tag_UnstressedPipeLineSubsidence_PipelineMillimeter{set;get;}= "管线沉降_无压_日报警值_线变量";
-        public static string Tag_UnstressedPipeLineSubsidence_WellMillimeter{set;get;}= "管线沉降_无压_日报警值_井变量";
-        public static string Tag_UnstressedPipeLineSubsidence_SumMillimeter{set;get;}= "管线沉降_无压_累计变量";
+        public static string Tag_UnpressedPipeLineSubsidence_Day{set;get;}= "管线沉降_无压_日报警值_连续天数";
+        public static string Tag_UnpressedPipeLineSubsidence_PipelineMillimeter {set;get;}= "管线沉降_无压_日报警值_线变量";
+        public static string Tag_UnpressedPipeLineSubsidence_WellMillimeter {set;get;}= "管线沉降_无压_日报警值_井变量";
+        public static string Tag_UnpressedPipeLineSubsidence_SumMillimeter {set;get;}= "管线沉降_无压_累计变量";
         //墙体水平位移(侧斜)
         public static string Tag_SkewBack_WellMillimeter{set;get;}= "墙体水平位移_端头井累计值";
         public static string Tag_SkewBack_StandardMillimeter{set;get;}= "墙体水平位移_标准段累计值";
         public static string Tag_SkewBack_Speed{set;get;}= "墙体水平位移_变形速率";
         public static string Tag_SkewBack_Day{set;get;}= "墙体水平位移_连续天数";
 
-        public static string GetText(EIssueType issueType)
+        public string GetText(EIssueType issueType)
         {
             switch (issueType)
             {
                 case EIssueType.建筑物沉降:
-                    return $"日报警值连续{Tag_BuildingSubsidence_Day}天±{Tag_BuildingSubsidence_DailyMillimeter}mm;累计{Tag_BuildingSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{BuildingSubsidence_Day}天±{BuildingSubsidence_DailyMillimeter}mm;累计{BuildingSubsidence_SumMillimeter}mm";
                 case EIssueType.地表沉降:
-                    return $"日报警值连续{Tag_SurfaceSubsidence_Day}天±{Tag_SurfaceSubsidence_DailyMillimeter}mm;累计{Tag_SurfaceSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{SurfaceSubsidence_Day}天±{SurfaceSubsidence_DailyMillimeter}mm;累计{SurfaceSubsidence_SumMillimeter}mm";
                 case EIssueType.管线沉降_有压:
-                    return $"日报警值连续{Tag_StressedPipeLineSubsidence_Day}天±{Tag_StressedPipeLineSubsidence_PipelineMillimeter}mm、±{Tag_StressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{Tag_StressedPipeLineSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{PressedPipeLineSubsidence_Day}天±{PressedPipeLineSubsidence_PipelineMillimeter}mm、±{PressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{PressedPipeLineSubsidence_SumMillimeter}mm";
                 case EIssueType.管线沉降_无压:
-                    return $"日报警值连续{Tag_UnstressedPipeLineSubsidence_Day}天±{Tag_UnstressedPipeLineSubsidence_PipelineMillimeter}mm、±{Tag_UnstressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{Tag_UnstressedPipeLineSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{UnpressedPipeLineSubsidence_Day}天±{UnpressedPipeLineSubsidence_PipelineMillimeter}mm、±{UnpressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{UnpressedPipeLineSubsidence_SumMillimeter}mm";
                 case EIssueType.侧斜监测:
-                    return $"端头井累计值{Tag_SkewBack_WellMillimeter}mm,标准段累计值{Tag_SkewBack_StandardMillimeter}mm,变形速率{Tag_SkewBack_Speed}mm/d(连续{Tag_SkewBack_Day}天)";
+                    return $"端头井累计值{SkewBack_WellMillimeter}mm,标准段累计值{SkewBack_StandardMillimeter}mm,变形速率{SkewBack_Speed}mm/d(连续{SkewBack_Day}天)";
                 case EIssueType.钢支撑轴力监测:
-                    return $"大于设计周力{Tag_STBAP_MaxAxle}%,小于设计轴力{Tag_STBAP_MinAxle}%";
+                    return $"大于设计周力{STBAP_MaxAxle}%,小于设计轴力{STBAP_MinAxle}%";
                 default:
                     throw new NotImplementedException("暂不支持该类型");
             }
