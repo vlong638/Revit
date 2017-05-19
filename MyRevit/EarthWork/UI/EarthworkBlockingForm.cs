@@ -109,6 +109,9 @@ namespace MyRevit.EarthWork.UI
             DateTimePicker.LostFocus += DateTimePicker_LostFocus;
             dgv_ImplementationInfo.Controls.Add(DateTimePicker);
             this.FormClosing += EarthworkBlockingForm_FormClosing;
+            //Color Buttons
+            RenderColorButton(btn_Completed, Blocking.ColorForSettled);
+            RenderColorButton(btn_Uncompleted, Blocking.ColorForUnsettled);
         }
 
         private void EarthworkBlockingForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -646,22 +649,22 @@ namespace MyRevit.EarthWork.UI
             e.Graphics.DrawString((e.RowIndex + 1).ToString(System.Globalization.CultureInfo.CurrentUICulture)
                 , this.dgv_Blocks.DefaultCellStyle.Font, b, e.RowBounds.Location.X + 20, e.RowBounds.Location.Y + 4);
         }
-        public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
-        /// <summary>
-        /// 选中项变更
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgv_ImplementationInfo_SelectionChanged(object sender, EventArgs e)
-        {
-            var cell = dgv_ImplementationInfo.CurrentCell;
-            if (Blocking.Blocks.Count > 0 && ImplementationInfo != Blocking.Blocks[cell.RowIndex].ImplementationInfo)
-            {
-                ImplementationInfo = Blocking.Blocks[cell.RowIndex].ImplementationInfo;
-                RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
-                RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
-            }
-        }
+        //public EarthworkBlockImplementationInfo ImplementationInfo { set; get; }
+        ///// <summary>
+        ///// 选中项变更
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //private void dgv_ImplementationInfo_SelectionChanged(object sender, EventArgs e)
+        //{
+        //    var cell = dgv_ImplementationInfo.CurrentCell;
+        //    if (Blocking.Blocks.Count > 0 && ImplementationInfo != Blocking.Blocks[cell.RowIndex].ImplementationInfo)
+        //    {
+        //        ImplementationInfo = Blocking.Blocks[cell.RowIndex].ImplementationInfo;
+        //        RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
+        //        RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
+        //    }
+        //}
         /// <summary>
         /// 渲染选中颜色到按钮
         /// </summary>
@@ -693,12 +696,9 @@ namespace MyRevit.EarthWork.UI
             colorDialog1.ShowHelp = true;
             if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
-                if (colorDialog1.Color != ImplementationInfo.ColorForSettled)
-                {
-                    ImplementationInfo.ColorForSettled = colorDialog1.Color;
-                    RenderColorButton(btn_Completed, ImplementationInfo.ColorForSettled);
-                    ValueChanged(sender, e);
-                }
+                Blocking.ColorForSettled = colorDialog1.Color;
+                RenderColorButton(btn_Completed, Blocking.ColorForSettled);
+                ValueChanged(sender, e);
             }
         }
         /// <summary>
@@ -718,12 +718,9 @@ namespace MyRevit.EarthWork.UI
             colorDialog1.ShowHelp = true;
             if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
-                if (colorDialog1.Color != ImplementationInfo.ColorForUnsettled)
-                {
-                    ImplementationInfo.ColorForUnsettled = colorDialog1.Color;
-                    RenderColorButton(btn_Uncompleted, ImplementationInfo.ColorForUnsettled);
-                    ValueChanged(sender, e);
-                }
+                Blocking.ColorForUnsettled = colorDialog1.Color;
+                RenderColorButton(btn_Uncompleted, Blocking.ColorForUnsettled);
+                ValueChanged(sender, e);
             }
         }
         public List<int> CellLocation;
@@ -1020,12 +1017,12 @@ namespace MyRevit.EarthWork.UI
                     if (block.ImplementationInfo.IsSettled)
                     {
                         setting.SetSurfaceTransparency(0);
-                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForSettled.R, block.ImplementationInfo.ColorForSettled.G, block.ImplementationInfo.ColorForSettled.B));
+                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(Blocking.ColorForSettled.R, Blocking.ColorForSettled.G, Blocking.ColorForSettled.B));
                     }
                     else
                     {
                         setting.SetSurfaceTransparency(0);
-                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(block.ImplementationInfo.ColorForUnsettled.R, block.ImplementationInfo.ColorForUnsettled.G, block.ImplementationInfo.ColorForUnsettled.B));
+                        setting.SetProjectionFillColor(new Autodesk.Revit.DB.Color(Blocking.ColorForUnsettled.R, Blocking.ColorForUnsettled.G, Blocking.ColorForUnsettled.B));
                     }
                     foreach (var elementId in block.ElementIds)
                     {

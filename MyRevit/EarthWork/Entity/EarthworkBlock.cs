@@ -53,8 +53,6 @@ namespace MyRevit.EarthWork.Entity
             sb.Append(Name);
             sb.Append("Adds:" + string.Join(",", Adds.Select(c => c.IntegerValue)));
             sb.Append("Deletes:" + string.Join(",", Deletes.Select(c => c.IntegerValue)));
-            sb.Append(ImplementationInfo.ColorForSettled);
-            sb.Append(ImplementationInfo.ColorForUnsettled);
             sb.Append(ImplementationInfo.StartTime);
             sb.Append(ImplementationInfo.ExposureTime);
             sb.Append(ImplementationInfo.EndTime);

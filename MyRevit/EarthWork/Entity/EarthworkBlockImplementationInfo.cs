@@ -68,12 +68,10 @@ namespace MyRevit.EarthWork.Entity
             get
             {
                 return StartTime != DateTime.MinValue
-              && EndTime != DateTime.MinValue
-              && ExposureTime != 0;
+              && EndTime != DateTime.MinValue;
+              //&& ExposureTime != 0;
             }
         }
         public bool IsConflicted { set; get; }
-        public System.Drawing.Color ColorForUnsettled { set; get; }
-        public System.Drawing.Color ColorForSettled { set; get; }
     }
 }

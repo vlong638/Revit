@@ -320,7 +320,6 @@
             this.dgv_ImplementationInfo.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgv_ImplementationInfo_CellBeginEdit);
             this.dgv_ImplementationInfo.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_ImplementationInfo_CellEndEdit);
             this.dgv_ImplementationInfo.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dgv_ImplementationInfo_RowPostPaint);
-            this.dgv_ImplementationInfo.SelectionChanged += new System.EventHandler(this.dgv_ImplementationInfo_SelectionChanged);
             // 
             // ConstructionNode_Name
             // 

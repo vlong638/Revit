@@ -111,6 +111,10 @@ namespace MyRevit.EarthWork.Entity
         }
         [JsonProperty]
         public bool IsImplementationInfoConflicted { get; set; }
+        [JsonProperty]
+        public System.Drawing.Color ColorForUnsettled { set; get; }
+        [JsonProperty]
+        public System.Drawing.Color ColorForSettled { set; get; }
         #endregion
 
         #region DocRelatedInfo
