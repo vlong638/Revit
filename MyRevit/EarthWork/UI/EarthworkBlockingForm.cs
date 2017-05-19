@@ -51,7 +51,6 @@ namespace MyRevit.EarthWork.UI
         private void InitForm()
         {
             //初始化参数
-            TopMost = true;
             ShowDialogType = ShowDialogType.Idle;
             //dgv_Blocks
             dgv_Blocks.AutoGenerateColumns = false;
@@ -478,14 +477,10 @@ namespace MyRevit.EarthWork.UI
             if (IsSingleBlockSelected(rows))
             {
                 var row = rows[0];
-                //含义不明,可能误加
-                //if (row.Index == Blocking.Count() - 1)
-                //    return;
                 var block = row.DataBoundItem as EarthworkBlock;
-                this.Hide();
                 EarthworkBlockCPSettingsForm form = new EarthworkBlockCPSettingsForm(this, block.CPSettings);
                 form.ShowDialog();
-                this.Show();
+                //form.BringToFront();
             }
         }
         /// <summary>

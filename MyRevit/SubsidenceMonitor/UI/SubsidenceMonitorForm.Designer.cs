@@ -37,13 +37,7 @@
             this.tb_WarnArgs = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.tb_SkewBack_Speed = new System.Windows.Forms.TextBox();
-            this.lbl_SkewBack_Speed = new System.Windows.Forms.Label();
-            this.tb_SkewBack_Standard = new System.Windows.Forms.TextBox();
-            this.lbl_SkewBack_Standard = new System.Windows.Forms.Label();
-            this.tb_SkewBack_Well = new System.Windows.Forms.TextBox();
             this.dgv_right = new MyRevit.MyDGV0427();
-            this.lbl_SkewBack_Well = new System.Windows.Forms.Label();
             this.dgv_left = new MyRevit.MyDGV0427();
             this.tb_InstrumentCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -152,13 +146,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.tb_SkewBack_Speed);
-            this.groupBox2.Controls.Add(this.lbl_SkewBack_Speed);
-            this.groupBox2.Controls.Add(this.tb_SkewBack_Standard);
-            this.groupBox2.Controls.Add(this.lbl_SkewBack_Standard);
-            this.groupBox2.Controls.Add(this.tb_SkewBack_Well);
             this.groupBox2.Controls.Add(this.dgv_right);
-            this.groupBox2.Controls.Add(this.lbl_SkewBack_Well);
             this.groupBox2.Controls.Add(this.dgv_left);
             this.groupBox2.Controls.Add(this.tb_InstrumentCode);
             this.groupBox2.Controls.Add(this.label9);
@@ -179,48 +167,6 @@
             this.groupBox2.Size = new System.Drawing.Size(1140, 526);
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
-            // 
-            // tb_SkewBack_Speed
-            // 
-            this.tb_SkewBack_Speed.Location = new System.Drawing.Point(1088, 83);
-            this.tb_SkewBack_Speed.Name = "tb_SkewBack_Speed";
-            this.tb_SkewBack_Speed.Size = new System.Drawing.Size(40, 21);
-            this.tb_SkewBack_Speed.TabIndex = 48;
-            this.tb_SkewBack_Speed.TextChanged += new System.EventHandler(this.tb_SkewBack_Speed_TextChanged);
-            // 
-            // lbl_SkewBack_Speed
-            // 
-            this.lbl_SkewBack_Speed.AutoSize = true;
-            this.lbl_SkewBack_Speed.Location = new System.Drawing.Point(1023, 86);
-            this.lbl_SkewBack_Speed.Name = "lbl_SkewBack_Speed";
-            this.lbl_SkewBack_Speed.Size = new System.Drawing.Size(59, 12);
-            this.lbl_SkewBack_Speed.TabIndex = 47;
-            this.lbl_SkewBack_Speed.Text = "变形速率:";
-            // 
-            // tb_SkewBack_Standard
-            // 
-            this.tb_SkewBack_Standard.Location = new System.Drawing.Point(1088, 60);
-            this.tb_SkewBack_Standard.Name = "tb_SkewBack_Standard";
-            this.tb_SkewBack_Standard.Size = new System.Drawing.Size(40, 21);
-            this.tb_SkewBack_Standard.TabIndex = 46;
-            this.tb_SkewBack_Standard.TextChanged += new System.EventHandler(this.tb_SkewBack_Standard_TextChanged);
-            // 
-            // lbl_SkewBack_Standard
-            // 
-            this.lbl_SkewBack_Standard.AutoSize = true;
-            this.lbl_SkewBack_Standard.Location = new System.Drawing.Point(1038, 63);
-            this.lbl_SkewBack_Standard.Name = "lbl_SkewBack_Standard";
-            this.lbl_SkewBack_Standard.Size = new System.Drawing.Size(47, 12);
-            this.lbl_SkewBack_Standard.TabIndex = 45;
-            this.lbl_SkewBack_Standard.Text = "标准段:";
-            // 
-            // tb_SkewBack_Well
-            // 
-            this.tb_SkewBack_Well.Location = new System.Drawing.Point(1088, 38);
-            this.tb_SkewBack_Well.Name = "tb_SkewBack_Well";
-            this.tb_SkewBack_Well.Size = new System.Drawing.Size(40, 21);
-            this.tb_SkewBack_Well.TabIndex = 44;
-            this.tb_SkewBack_Well.TextChanged += new System.EventHandler(this.tb_SkewBack_Well_TextChanged);
             // 
             // dgv_right
             // 
@@ -244,15 +190,6 @@
             this.dgv_right.RowTemplate.Height = 23;
             this.dgv_right.Size = new System.Drawing.Size(570, 413);
             this.dgv_right.TabIndex = 36;
-            // 
-            // lbl_SkewBack_Well
-            // 
-            this.lbl_SkewBack_Well.AutoSize = true;
-            this.lbl_SkewBack_Well.Location = new System.Drawing.Point(1038, 41);
-            this.lbl_SkewBack_Well.Name = "lbl_SkewBack_Well";
-            this.lbl_SkewBack_Well.Size = new System.Drawing.Size(47, 12);
-            this.lbl_SkewBack_Well.TabIndex = 43;
-            this.lbl_SkewBack_Well.Text = "端头井:";
             // 
             // dgv_left
             // 
@@ -810,11 +747,5 @@
         private System.Windows.Forms.Label lbl_Well;
         private MyDGV0427 dgv_right;
         private MyDGV0427 dgv_left;
-        private System.Windows.Forms.TextBox tb_SkewBack_Standard;
-        private System.Windows.Forms.Label lbl_SkewBack_Standard;
-        private System.Windows.Forms.Label lbl_SkewBack_Well;
-        private System.Windows.Forms.TextBox tb_SkewBack_Speed;
-        private System.Windows.Forms.Label lbl_SkewBack_Speed;
-        private System.Windows.Forms.TextBox tb_SkewBack_Well;
     }
 }

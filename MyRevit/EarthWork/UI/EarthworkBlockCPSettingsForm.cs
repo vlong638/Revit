@@ -160,7 +160,7 @@ namespace MyRevit.EarthWork.UI
         private void btn_Color_Click(object sender, EventArgs e)
         {
             //禁止使用自定义颜色  
-            colorDialog1.AllowFullOpen = false;
+            colorDialog1.AllowFullOpen = true;
             //提供自己给定的颜色  
             colorDialog1.CustomColors = new int[] { 6916092, 15195440, 16107657, 1836924, 3758726, 12566463, 7526079, 7405793, 6945974, 241502, 2296476, 5130294, 3102017, 7324121, 14993507, 11730944 };
             colorDialog1.ShowHelp = true;
