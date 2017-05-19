@@ -135,12 +135,12 @@
     <Compile Include="EarthWork\UI\EarthworkBlockingForm.Designer.cs">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Entities\EventsCommand.cs" />
-    <Compile Include="Entities\ViewCommand.cs" />
-    <Compile Include="Entities\MyExternalApplication.cs" />
-    <Compile Include="Entities\FilterElementCommand.cs" />
-    <Compile Include="Entities\SelectElementCommand.cs" />
-    <Compile Include="Entities\MyExternalCommand.cs" />
+    <Compile Include="MyTests\EventsCommand.cs" />
+    <Compile Include="MyTests\ViewCommand.cs" />
+    <Compile Include="MyTests\MyExternalApplication.cs" />
+    <Compile Include="MyTests\FilterElementCommand.cs" />
+    <Compile Include="MyTests\SelectElementCommand.cs" />
+    <Compile Include="MyTests\MyExternalCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\MyDGV0427.cs" />
@@ -225,6 +225,7 @@
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockingForm.resx">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>

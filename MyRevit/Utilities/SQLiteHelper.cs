@@ -48,6 +48,9 @@ create table TDetail
    InstrumentCode       varchar(100)                   not null,
    CloseCTSettings      varchar(500)                   not null,
    OverCTSettings       varchar(500)                   not null,
+   ExtraValue1          numeric(16)                    null,
+   ExtraValue2          numeric(16)                    null,
+   ExtraValue3          numeric(16)                    null,
    constraint PK_TDETAIL primary key (IssueType, IssueDateTime)
 );
             "},

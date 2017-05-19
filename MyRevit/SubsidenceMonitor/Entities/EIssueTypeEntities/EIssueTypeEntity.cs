@@ -131,9 +131,9 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 {
                     if (sheet.GetCellValueAsString(currentRow, 1).Contains("监测点"))
                     {
-                        dataRanges.Add(new DataRange(previousRow, 1, currentRow - 5));//-2=>监测员该行不要,前一行也是一个备注不要
-                        dataRanges.Add(new DataRange(previousRow, dataColumns + 1, currentRow - 2));
-                        previousRow = currentRow + 2;//从数据行开始
+                        dataRanges.Add(new DataRange(previousRow, 1, currentRow - 5));//-5=>监测点上面 仪器,监测日期,监测员,注 四行多余+本身一行 共5
+                        dataRanges.Add(new DataRange(previousRow, dataColumns + 1, currentRow - 5));
+                        previousRow = currentRow + 2;//从数据行开始 监测点占两行,37行监测点 39数据起点
                         currentSpan = 0;
                         if (currentRow == sheet.Rows.Count || currentSpan == rowSpanLimit)
                         {
@@ -297,13 +297,13 @@ namespace MyRevit.SubsidenceMonitor.Entities
                     return new List<HeaderNode>()
                     {
                         new HeaderNode(0,ordinaryHeight*2,averageWidth,"监测点",nameof(STBAPDataV1.NodeCode)),
-                        new HeaderNode(0,ordinaryHeight*2,averageWidth,"轴力值",nameof(STBAPDataV1.AxialForce)),
-                        new HeaderNode(1,ordinaryHeight,averageWidth*2,"变化值(KN)",null,
+                        new HeaderNode(1,ordinaryHeight*2,averageWidth,"轴力值",nameof(STBAPDataV1.AxialForce)),
+                        new HeaderNode(2,ordinaryHeight,averageWidth*2,"变化值(KN)",null,
                         new List<HeaderNode>() {
                              new HeaderNode(-1,ordinaryHeight,averageWidth,"本次变量",nameof(STBAPDataV1.CurrentChanges)),
                              new HeaderNode(-1,ordinaryHeight,averageWidth,"累计变量",nameof(STBAPDataV1.SumChanges)),
                         }),
-                        new HeaderNode(3,ordinaryHeight*2,averageWidth,"备注",nameof(STBAPDataV1.Conment)),
+                        new HeaderNode(4,ordinaryHeight*2,averageWidth,"备注",nameof(STBAPDataV1.Conment)),
                     };
                 case EIssueType.管线沉降_有压:
                 case EIssueType.管线沉降_无压:

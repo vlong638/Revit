@@ -133,7 +133,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 return float.TryParse(CurrentChanges, out f)
                     && float.TryParse(SumChanges, out f)
                     && float.TryParse(SumPeriodBuildingEnvelope, out f)
-                    && float.TryParse(SumBuildingEnvelope, out f) 
+                    && float.TryParse(SumBuildingEnvelope, out f)
                     ? "" : "点位破坏";
             }
         }
@@ -232,7 +232,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             return getWarnResult(warnSettings, detail, 1);
         }
-        private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin, double warnCoefficientMax = double.NaN)
+        private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin)//, double overCoefficientMax = double.NaN)
         {
             List<T> result = new List<T>();
             var d = Datas.FirstOrDefault();
@@ -249,17 +249,19 @@ namespace MyRevit.SubsidenceMonitor.Entities
             var sumMillimeter = warnSettings.PressedPipeLineSubsidence_SumMillimeter;//检测项
             foreach (var data in Datas)
             {
-                if (double.IsNaN(warnCoefficientMax))
-                {
-                    if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin)
-                        result.Add(data);
-                }
-                else
-                {
-                    if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin
-                        && data.SumChanges_Float < sumMillimeter * warnCoefficientMax)
-                        result.Add(data);
-                }
+                if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin)
+                    result.Add(data);
+                //if (double.IsNaN(overCoefficientMax))
+                //{
+                //    if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin)
+                //        result.Add(data);
+                //}
+                //else
+                //{
+                //    if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin
+                //        && data.SumChanges_Float < sumMillimeter * overCoefficientMax)
+                //        result.Add(data);
+                //}
             }
             //监测 warnSettings.UnpressedPipeLineSubsidence_DailyMillimeter;
             //数据天数达标监测
@@ -267,11 +269,11 @@ namespace MyRevit.SubsidenceMonitor.Entities
             {
                 var dailyMillimeter = warnSettings.PressedPipeLineSubsidence_PipelineMillimeter;//检测项
                 double warnDailyMillimeterMin = dailyMillimeter * warnCoefficientMin;
-                double warnDailyMillimeterMax = 0;
-                if (!double.IsNaN(warnCoefficientMax))
-                {
-                    warnDailyMillimeterMax = dailyMillimeter * warnCoefficientMax;
-                }
+                //double warnDailyMillimeterMax = 0;
+                //if (!double.IsNaN(overCoefficientMax))
+                //{
+                //    warnDailyMillimeterMax = dailyMillimeter * overCoefficientMax;
+                //}
                 var tempTotalTimeRange = totalHourRange;
                 int detailIndex = 0;
                 while (tempTotalTimeRange > 0)
@@ -344,18 +346,25 @@ namespace MyRevit.SubsidenceMonitor.Entities
                         //时间已尽 检测是否到达预期值
                         if (days == -1)
                             break;
-                        if (!double.IsNaN(warnCoefficientMax) && dailyValue > warnDailyMillimeterMax)
-                        {
-                            days = -3;//-3表信息已过高限
-                            break;
-                        }
-                        else if (dailyValue >= warnDailyMillimeterMin)
+                        if (dailyValue >= warnDailyMillimeterMin)
                             days--;
                         else
                         {
                             days = -2;//-2表信息未到连续标准
                             break;
                         }
+                        //if (!double.IsNaN(overCoefficientMax) && dailyValue > warnDailyMillimeterMax)
+                        //{
+                        //    days = -3;//-3表信息已过高限
+                        //    break;
+                        //}
+                        //else if (dailyValue >= warnDailyMillimeterMin)
+                        //    days--;
+                        //else
+                        //{
+                        //    days = -2;//-2表信息未到连续标准
+                        //    break;
+                        //}
                     }
                     if (days == 0)//处理结束 认为按照标准的到达了日期0则各天检测通过
                         result.Add(data);

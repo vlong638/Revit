@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.tb_ReportName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -37,6 +37,12 @@
             this.tb_WarnArgs = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.tb_SkewBack_Speed = new System.Windows.Forms.TextBox();
+            this.lbl_SkewBack_Speed = new System.Windows.Forms.Label();
+            this.tb_SkewBack_Standard = new System.Windows.Forms.TextBox();
+            this.lbl_SkewBack_Standard = new System.Windows.Forms.Label();
+            this.tb_SkewBack_Well = new System.Windows.Forms.TextBox();
+            this.lbl_SkewBack_Well = new System.Windows.Forms.Label();
             this.tb_InstrumentCode = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.tb_InstrumentName = new System.Windows.Forms.TextBox();
@@ -82,16 +88,16 @@
             this.btn_CreateNew = new System.Windows.Forms.Button();
             this.tb_Well = new System.Windows.Forms.TextBox();
             this.lbl_Well = new System.Windows.Forms.Label();
-            this.dgv_left = new MyRevit.MyDGV0427();
             this.dgv_right = new MyRevit.MyDGV0427();
+            this.dgv_left = new MyRevit.MyDGV0427();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_left)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_right)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_left)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -146,7 +152,13 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.tb_SkewBack_Speed);
+            this.groupBox2.Controls.Add(this.lbl_SkewBack_Speed);
+            this.groupBox2.Controls.Add(this.tb_SkewBack_Standard);
+            this.groupBox2.Controls.Add(this.lbl_SkewBack_Standard);
+            this.groupBox2.Controls.Add(this.tb_SkewBack_Well);
             this.groupBox2.Controls.Add(this.dgv_right);
+            this.groupBox2.Controls.Add(this.lbl_SkewBack_Well);
             this.groupBox2.Controls.Add(this.dgv_left);
             this.groupBox2.Controls.Add(this.tb_InstrumentCode);
             this.groupBox2.Controls.Add(this.label9);
@@ -167,6 +179,57 @@
             this.groupBox2.Size = new System.Drawing.Size(1140, 526);
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
+            // 
+            // tb_SkewBack_Speed
+            // 
+            this.tb_SkewBack_Speed.Location = new System.Drawing.Point(1088, 83);
+            this.tb_SkewBack_Speed.Name = "tb_SkewBack_Speed";
+            this.tb_SkewBack_Speed.Size = new System.Drawing.Size(40, 21);
+            this.tb_SkewBack_Speed.TabIndex = 48;
+            this.tb_SkewBack_Speed.TextChanged += new System.EventHandler(this.tb_SkewBack_Speed_TextChanged);
+            // 
+            // lbl_SkewBack_Speed
+            // 
+            this.lbl_SkewBack_Speed.AutoSize = true;
+            this.lbl_SkewBack_Speed.Location = new System.Drawing.Point(1023, 86);
+            this.lbl_SkewBack_Speed.Name = "lbl_SkewBack_Speed";
+            this.lbl_SkewBack_Speed.Size = new System.Drawing.Size(59, 12);
+            this.lbl_SkewBack_Speed.TabIndex = 47;
+            this.lbl_SkewBack_Speed.Text = "变形速率:";
+            // 
+            // tb_SkewBack_Standard
+            // 
+            this.tb_SkewBack_Standard.Location = new System.Drawing.Point(1088, 60);
+            this.tb_SkewBack_Standard.Name = "tb_SkewBack_Standard";
+            this.tb_SkewBack_Standard.Size = new System.Drawing.Size(40, 21);
+            this.tb_SkewBack_Standard.TabIndex = 46;
+            this.tb_SkewBack_Standard.TextChanged += new System.EventHandler(this.tb_SkewBack_Standard_TextChanged);
+            // 
+            // lbl_SkewBack_Standard
+            // 
+            this.lbl_SkewBack_Standard.AutoSize = true;
+            this.lbl_SkewBack_Standard.Location = new System.Drawing.Point(1038, 63);
+            this.lbl_SkewBack_Standard.Name = "lbl_SkewBack_Standard";
+            this.lbl_SkewBack_Standard.Size = new System.Drawing.Size(47, 12);
+            this.lbl_SkewBack_Standard.TabIndex = 45;
+            this.lbl_SkewBack_Standard.Text = "标准段:";
+            // 
+            // tb_SkewBack_Well
+            // 
+            this.tb_SkewBack_Well.Location = new System.Drawing.Point(1088, 38);
+            this.tb_SkewBack_Well.Name = "tb_SkewBack_Well";
+            this.tb_SkewBack_Well.Size = new System.Drawing.Size(40, 21);
+            this.tb_SkewBack_Well.TabIndex = 44;
+            this.tb_SkewBack_Well.TextChanged += new System.EventHandler(this.tb_SkewBack_Well_TextChanged);
+            // 
+            // lbl_SkewBack_Well
+            // 
+            this.lbl_SkewBack_Well.AutoSize = true;
+            this.lbl_SkewBack_Well.Location = new System.Drawing.Point(1038, 41);
+            this.lbl_SkewBack_Well.Name = "lbl_SkewBack_Well";
+            this.lbl_SkewBack_Well.Size = new System.Drawing.Size(47, 12);
+            this.lbl_SkewBack_Well.TabIndex = 43;
+            this.lbl_SkewBack_Well.Text = "端头井:";
             // 
             // tb_InstrumentCode
             // 
@@ -588,6 +651,7 @@
             this.tb_Well.Name = "tb_Well";
             this.tb_Well.Size = new System.Drawing.Size(40, 21);
             this.tb_Well.TabIndex = 42;
+            this.tb_Well.TextChanged += new System.EventHandler(this.tb_Well_TextChanged);
             // 
             // lbl_Well
             // 
@@ -598,7 +662,30 @@
             this.lbl_Well.TabIndex = 41;
             this.lbl_Well.Text = "自流井:";
             // 
-            // myDGV04271
+            // dgv_right
+            // 
+            this.dgv_right.AllowUserToAddRows = false;
+            this.dgv_right.AllowUserToDeleteRows = false;
+            this.dgv_right.AllowUserToResizeColumns = false;
+            this.dgv_right.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv_right.ColumnHeadersHeight = 60;
+            this.dgv_right.HeaderNodes = null;
+            this.dgv_right.Location = new System.Drawing.Point(570, 113);
+            this.dgv_right.Name = "dgv_right";
+            this.dgv_right.RowHeadersWidth = 60;
+            this.dgv_right.RowTemplate.Height = 23;
+            this.dgv_right.Size = new System.Drawing.Size(570, 413);
+            this.dgv_right.TabIndex = 36;
+            // 
+            // dgv_left
             // 
             this.dgv_left.AllowUserToAddRows = false;
             this.dgv_left.AllowUserToDeleteRows = false;
@@ -615,32 +702,11 @@
             this.dgv_left.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_left.HeaderNodes = null;
             this.dgv_left.Location = new System.Drawing.Point(0, 113);
-            this.dgv_left.Name = "myDGV04271";
+            this.dgv_left.Name = "dgv_left";
+            this.dgv_left.RowHeadersWidth = 60;
             this.dgv_left.RowTemplate.Height = 23;
             this.dgv_left.Size = new System.Drawing.Size(568, 413);
             this.dgv_left.TabIndex = 35;
-            // 
-            // myDGV04272
-            // 
-            this.dgv_right.AllowUserToAddRows = false;
-            this.dgv_right.AllowUserToDeleteRows = false;
-            this.dgv_right.AllowUserToResizeColumns = false;
-            this.dgv_right.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dgv_right.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_right.HeaderNodes = null;
-            this.dgv_right.Location = new System.Drawing.Point(570, 113);
-            this.dgv_right.Name = "myDGV04272";
-            this.dgv_right.RowTemplate.Height = 23;
-            this.dgv_right.Size = new System.Drawing.Size(570, 413);
-            this.dgv_right.TabIndex = 36;
             // 
             // SubsidenceMonitorForm
             // 
@@ -680,8 +746,8 @@
             this.groupBox6.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_left)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_right)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_left)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -744,5 +810,11 @@
         private System.Windows.Forms.Label lbl_Well;
         private MyDGV0427 dgv_right;
         private MyDGV0427 dgv_left;
+        private System.Windows.Forms.TextBox tb_SkewBack_Standard;
+        private System.Windows.Forms.Label lbl_SkewBack_Standard;
+        private System.Windows.Forms.Label lbl_SkewBack_Well;
+        private System.Windows.Forms.TextBox tb_SkewBack_Speed;
+        private System.Windows.Forms.Label lbl_SkewBack_Speed;
+        private System.Windows.Forms.TextBox tb_SkewBack_Well;
     }
 }

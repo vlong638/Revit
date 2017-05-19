@@ -62,7 +62,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             //定位点集合 默认从9,1开始
             int dataColumns = 6;//数据列数
             int rowSpan = 30;//上下分段间隔不超过30行
-            int startRow = 9;
+            int startRow = 8;
             var dataRanges = GetDataRangesFromMultipleTwoParagraphsContent(sheet, startRow, dataColumns, rowSpan);
             //节点解析
             List<TNode> nodes;
@@ -92,7 +92,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             DeserializeFromString(nodeCode, str);
         }
-        public STBAPDataV1(string nodeCode,string axialForce, string currentChanges, string sumChanges)
+        public STBAPDataV1(string nodeCode, string axialForce, string currentChanges, string sumChanges)
         {
             NodeCode = nodeCode;
             AxialForce = axialForce;
@@ -244,10 +244,18 @@ namespace MyRevit.SubsidenceMonitor.Entities
         {
             return getWarnResult(warnSettings, detail, 1);
         }
-        private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin, double warnCoefficientMax = double.NaN)
+        /// <summary>
+        /// 只有warnCoefficientMin,表只有下界,过界则录入
+        /// 有min和max则有上下界,界内录入
+        /// </summary>
+        /// <param name="warnSettings"></param>
+        /// <param name="detail"></param>
+        /// <param name="warnCoefficientMin"></param>
+        /// <param name="warnCoefficientMax"></param>
+        /// <returns></returns>
+        private IEnumerable<T> getWarnResult(WarnSettings warnSettings, TDetail detail, double warnCoefficientMin)//, double warnCoefficientMax = double.NaN)
         {
-            //TODO 算法
-            throw new NotImplementedException();
+            //算法
             List<T> result = new List<T>();
             var d = Datas.FirstOrDefault();
             if (d == null)
@@ -258,124 +266,44 @@ namespace MyRevit.SubsidenceMonitor.Entities
             var details = Facade.GetDetailsByTimeRange(detail.IssueType, endTime.AddHours(-totalHourRange), endTime);
             var orderedDetails = details.OrderByDescending(c => c.IssueDateTime).ToList();
             var currentDetail = detail;
-            ////需预警的节点
-            ////监测 warnSettings.STBAP_SumMillimeter;
-            //var sumMillimeter = warnSettings.STBAP_SumMillimeter;
-            //foreach (var data in Datas)
-            //{
-            //    if (double.IsNaN(warnCoefficientMax))
-            //    {
-            //        if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin)
-            //            result.Add(data);
-            //    }
-            //    else
-            //    {
-            //        if (data.SumChanges_Float >= sumMillimeter * warnCoefficientMin
-            //            && data.SumChanges_Float < sumMillimeter * warnCoefficientMax)
-            //            result.Add(data);
-            //    }
-            //}
-            ////监测 warnSettings.STBAP_DailyMillimeter;
-            ////数据天数达标监测
-            //if (totalHourRange != 0)
-            //{
-            //    var dailyMillimeter = warnSettings.STBAP_DailyMillimeter;
-            //    double warnDailyMillimeterMin = dailyMillimeter * warnCoefficientMin;
-            //    double warnDailyMillimeterMax = 0;
-            //    if (!double.IsNaN(warnCoefficientMax))
-            //    {
-            //        warnDailyMillimeterMax = dailyMillimeter * warnCoefficientMax;
-            //    }
-            //    var tempTotalTimeRange = totalHourRange;
-            //    int detailIndex = 0;
-            //    while (tempTotalTimeRange > 0)
-            //    {
-            //        if (detailIndex == orderedDetails.Count())
-            //            throw new NotImplementedException("未满足监测报警要求的天数");
-            //        var nextDetail = orderedDetails[detailIndex];
-            //        var currentTimeRange = (int)(currentDetail.IssueDateTime.AddMinutes(currentDetail.IssueTimeRange) - nextDetail.IssueDateTime.AddMinutes(nextDetail.IssueTimeRange)).TotalHours;
-            //        if (currentTimeRange <= tempTotalTimeRange)
-            //        {
-            //            tempTotalTimeRange -= currentTimeRange;
-            //        }
-            //        else
-            //        {
-            //            tempTotalTimeRange -= currentTimeRange;
-            //        }
-            //        currentDetail = nextDetail;
-            //        detailIndex++;
-            //    }
-            //    foreach (var data in Datas)
-            //    {
-            //        if (result.Contains(data))
-            //            continue;
+            //需预警的节点
+            var maxAxle = warnSettings.STBAP_MaxAxle;
+            foreach (var data in Datas)
+            {
+                if (data.AxialForce_Float >= maxAxle * warnCoefficientMin)
+                    result.Add(data);
 
-            //        detailIndex = 0;
-            //        currentDetail = detail;
-            //        int days = warnSettings.STBAP_Day;
-            //        double overHours = 0;
-            //        double overValues = 0;
-            //        while (days > 0)
-            //        {
-            //            double dailyValue = 0;
-            //            double hoursToDeal = 0;
-            //            if (overHours >= 24)
-            //            {
-            //                dailyValue = overValues * 24 / overHours;
-            //                overValues -= dailyValue;
-            //                overHours -= 24;
-            //            }
-            //            else
-            //            {
-            //                dailyValue = overValues;
-            //                hoursToDeal = 24 - overHours;
-            //                while (hoursToDeal > 0)
-            //                {
-            //                    var currentNodeData = currentDetail.NodeDatas.Datas.FirstOrDefault(c => c.NodeCode == data.NodeCode);
-            //                    if (currentNodeData == null)//信息缺失,不作提醒处理  当前所需的节点数据不存在
-            //                    {
-            //                        days = -1;//-1表信息缺失
-            //                        hoursToDeal = 0;
-            //                        break;
-            //                    }
-            //                    var nextDetail = orderedDetails[detailIndex];
-            //                    double currentTimeRange = (currentDetail.IssueDateTime.AddMinutes(currentDetail.IssueTimeRange) - nextDetail.IssueDateTime.AddMinutes(nextDetail.IssueTimeRange)).TotalHours;
-            //                    if (currentTimeRange <= hoursToDeal)
-            //                    {
-            //                        dailyValue += (currentNodeData as T).CurrentChanges_Float;
-            //                    }
-            //                    else
-            //                    {
-            //                        dailyValue += (currentNodeData as T).CurrentChanges_Float * (hoursToDeal / currentTimeRange);
-            //                        overHours = currentTimeRange - hoursToDeal;
-            //                        overValues = (currentNodeData as T).CurrentChanges_Float * (overHours / currentTimeRange);
-            //                    }
-            //                    hoursToDeal -= currentTimeRange;
-            //                    detailIndex++;
-            //                    currentDetail = nextDetail;
-            //                }
-            //            }
-            //            //时间已尽 检测是否到达预期值
-            //            if (days == -1)
-            //                break;
-            //            if (!double.IsNaN(warnCoefficientMax) && dailyValue > warnDailyMillimeterMax)
-            //            {
-            //                days = -3;//-3表信息已过高限
-            //                break;
-            //            }
-            //            else if (dailyValue >= warnDailyMillimeterMin)
-            //                days--;
-            //            else
-            //            {
-            //                days = -2;//-2表信息未到连续标准
-            //                break;
-            //            }
-            //        }
-            //        if (days == 0)//处理结束 认为按照标准的到达了日期0则各天检测通过
-            //            result.Add(data);
-            //    }
-            //}
-            //return result;
+                //if (double.IsNaN(warnCoefficientMax))
+                //{
+                //    if (data.AxialForce_Float >= maxAxle * warnCoefficientMin)
+                //        result.Add(data);
+                //}
+                //else
+                //{
+                //    if (data.AxialForce_Float >= maxAxle * warnCoefficientMin
+                //        && data.AxialForce_Float < maxAxle * warnCoefficientMax)
+                //        result.Add(data);
+                //}
+            }
+            var minAxle = warnSettings.STBAP_MinAxle;
+            foreach (var data in Datas)
+            {
+                if (data.AxialForce_Float <= minAxle / warnCoefficientMin)
+                    result.Add(data);
+
+                //if (double.IsNaN(warnCoefficientMax))
+                //{
+                //    if (data.AxialForce_Float <= minAxle / warnCoefficientMin)
+                //        result.Add(data);
+                //}
+                //else
+                //{
+                //    if (data.AxialForce_Float <= minAxle / warnCoefficientMin
+                //        && data.AxialForce_Float > minAxle / warnCoefficientMax)
+                //        result.Add(data);
+                //}
+            }
+            return result;
         }
     }
 }

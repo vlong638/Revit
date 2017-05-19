@@ -25,6 +25,12 @@ namespace MyRevit.SubsidenceMonitor.Operators
             NameValues.Add(nameof(entity.InstrumentCode), SQLiteHelper.ToSQLiteString(entity.InstrumentCode));
             NameValues.Add(nameof(entity.CloseCTSettings), SQLiteHelper.ToSQLiteString(entity.CloseCTSettings));
             NameValues.Add(nameof(entity.OverCTSettings), SQLiteHelper.ToSQLiteString(entity.OverCTSettings));
+            if (entity.ExtraValue1.HasValue)
+                NameValues.Add(nameof(entity.ExtraValue1), SQLiteHelper.ToSQLiteString(entity.ExtraValue1.Value));
+            if (entity.ExtraValue2.HasValue)
+                NameValues.Add(nameof(entity.ExtraValue2), SQLiteHelper.ToSQLiteString(entity.ExtraValue2.Value));
+            if (entity.ExtraValue3.HasValue)
+                NameValues.Add(nameof(entity.ExtraValue3), SQLiteHelper.ToSQLiteString(entity.ExtraValue3.Value));
             command.CommandText = SQLiteHelper.GetSQLiteQuery_Insert(new TDetail().TableName, NameValues);
             return command.ExecuteNonQuery() == 1;
         }
@@ -41,6 +47,12 @@ namespace MyRevit.SubsidenceMonitor.Operators
             sets.Add(nameof(entity.InstrumentCode), SQLiteHelper.ToSQLiteString(entity.InstrumentCode));
             sets.Add(nameof(entity.CloseCTSettings), SQLiteHelper.ToSQLiteString(entity.CloseCTSettings));
             sets.Add(nameof(entity.OverCTSettings), SQLiteHelper.ToSQLiteString(entity.OverCTSettings));
+            if (entity.ExtraValue1.HasValue)
+                sets.Add(nameof(entity.ExtraValue1), SQLiteHelper.ToSQLiteString(entity.ExtraValue1.Value));
+            if (entity.ExtraValue2.HasValue)
+                sets.Add(nameof(entity.ExtraValue2), SQLiteHelper.ToSQLiteString(entity.ExtraValue2.Value));
+            if (entity.ExtraValue3.HasValue)
+                sets.Add(nameof(entity.ExtraValue3), SQLiteHelper.ToSQLiteString(entity.ExtraValue3.Value));
             List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
             wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString(entity.IssueDateTime)));
             wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)));
@@ -77,6 +89,38 @@ namespace MyRevit.SubsidenceMonitor.Operators
                 if (entity.IssueDateTime.Date == weightedStart)
                     continue;
             }
+        }
+        public static List<DateTimeValue> GetDateTimeValue(this TDetail entity, EIssueType issueType, DateTime startTime, int daySpan, SQLiteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            List<string> selects = new List<string>();
+            selects.Add(nameof(entity.IssueDateTime));
+            selects.Add(nameof(entity.ExtraValue3));
+            List<KeyOperatorValue> wheres = new List<KeyOperatorValue>();
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueType), SQLiteOperater.Eq, SQLiteHelper.ToSQLiteString<EIssueType>(issueType)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.GTorEq, SQLiteHelper.ToSQLiteString(startTime)));
+            wheres.Add(new KeyOperatorValue(nameof(entity.IssueDateTime), SQLiteOperater.LT, SQLiteHelper.ToSQLiteString(startTime.AddDays(daySpan + 10))));//+10作预留区间允许其中有个10天的空档
+            command.CommandText = SQLiteHelper.GetSQLiteQuery_Select(selects, entity.TableName, wheres);
+            var reader = command.ExecuteReader();
+            List<DateTimeValue> results = new List<DateTimeValue>();
+            switch (issueType)
+            {
+                case EIssueType.钢支撑轴力监测:
+                    while (reader.Read())
+                    {
+                        DateTimeValue data = new DateTimeValue();
+                        var time = DateTime.Parse(reader[nameof(entity.IssueDateTime)].ToString());
+                        data.DateTime = time;
+                        double value;
+                        if (double.TryParse(reader[nameof(entity.ExtraValue3)].ToString(), out value))
+                            data.Value = value;
+                        results.Add(data);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return results;
         }
         #endregion
     }

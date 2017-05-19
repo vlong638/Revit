@@ -56,6 +56,18 @@ namespace MyRevit.SubsidenceMonitor.Entities
         /// 超出预警值(颜色/透明度配置)
         /// </summary>
         public String OverCTSettings { get; set; }
+        /// <summary>
+        /// 附加值
+        /// </summary>
+        public Int16? ExtraValue1 { get; set; }
+        /// <summary>
+        /// 附加值
+        /// </summary>
+        public Int16? ExtraValue2 { get; set; }
+        /// <summary>
+        /// 附加值
+        /// </summary>
+        public Int16? ExtraValue3 { get; set; }
         #endregion
 
         #region Constructors
@@ -86,6 +98,18 @@ namespace MyRevit.SubsidenceMonitor.Entities
             this.InstrumentCode = Convert.ToString(reader[nameof(this.InstrumentCode)]);
             this.CloseCTSettings = Convert.ToString(reader[nameof(this.CloseCTSettings)]);
             this.OverCTSettings = Convert.ToString(reader[nameof(this.OverCTSettings)]);
+            if (reader[nameof(this.ExtraValue1)] != DBNull.Value)
+            {
+                this.ExtraValue1 = Convert.ToInt16(reader[nameof(this.ExtraValue1)]);
+            }
+            if (reader[nameof(this.ExtraValue2)] != DBNull.Value)
+            {
+                this.ExtraValue2 = Convert.ToInt16(reader[nameof(this.ExtraValue2)]);
+            }
+            if (reader[nameof(this.ExtraValue3)] != DBNull.Value)
+            {
+                this.ExtraValue3 = Convert.ToInt16(reader[nameof(this.ExtraValue3)]);
+            }
         }
         public override void Init(IDataReader reader, List<string> fields)
         {
@@ -132,6 +156,27 @@ namespace MyRevit.SubsidenceMonitor.Entities
             if (fields.Contains(nameof(OverCTSettings)))
             {
                 this.OverCTSettings = Convert.ToString(reader[nameof(this.OverCTSettings)]);
+            }
+            if (fields.Contains(nameof(ExtraValue1)))
+            {
+                if (reader[nameof(this.ExtraValue1)] != DBNull.Value)
+                {
+                    this.ExtraValue1 = Convert.ToInt16(reader[nameof(this.ExtraValue1)]);
+                }
+            }
+            if (fields.Contains(nameof(ExtraValue2)))
+            {
+                if (reader[nameof(this.ExtraValue2)] != DBNull.Value)
+                {
+                    this.ExtraValue2 = Convert.ToInt16(reader[nameof(this.ExtraValue2)]);
+                }
+            }
+            if (fields.Contains(nameof(ExtraValue3)))
+            {
+                if (reader[nameof(this.ExtraValue3)] != DBNull.Value)
+                {
+                    this.ExtraValue3 = Convert.ToInt16(reader[nameof(this.ExtraValue3)]);
+                }
             }
         }
         public override string TableName

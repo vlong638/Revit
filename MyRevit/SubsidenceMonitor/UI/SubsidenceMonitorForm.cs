@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Excel;
 using Autodesk.Revit.DB;
 using MyRevit.Utilities;
 using Autodesk.Revit.UI;
+using MyRevit.SubsidenceMonitor.Operators;
 //using Autodesk.Revit.DB;
 
 namespace MyRevit.SubsidenceMonitor.UI
@@ -78,6 +79,24 @@ namespace MyRevit.SubsidenceMonitor.UI
             {
                 lbl_Well.Hide();
                 tb_Well.Hide();
+            }
+            if (IssueTypeEntity.IssueType == EIssueType.钢支撑轴力监测)
+            {
+                lbl_SkewBack_Well.Show();
+                lbl_SkewBack_Standard.Show();
+                lbl_SkewBack_Speed.Show();
+                tb_SkewBack_Well.Show();
+                tb_SkewBack_Standard.Show();
+                tb_SkewBack_Speed.Show();
+            }
+            else
+            {
+                lbl_SkewBack_Well.Hide();
+                lbl_SkewBack_Standard.Hide();
+                lbl_SkewBack_Speed.Hide();
+                tb_SkewBack_Well.Hide();
+                tb_SkewBack_Standard.Hide();
+                tb_SkewBack_Speed.Hide();
             }
             //录入Excel_按钮_文本
             btn_LoadExcel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -949,32 +968,137 @@ namespace MyRevit.SubsidenceMonitor.UI
             if (IssueTypeEntity.IssueType == EIssueType.管线沉降_无压)
             {
                 var wellValue = 0;
-                if (!int.TryParse(tb_Well.Text,out wellValue))
+                if (!int.TryParse(tb_Well.Text, out wellValue))
                 {
-                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    ShowMessage("警告", $"请输入有效的{"自流井沉降值"}");
                     return;
                 }
                 var warnValue = ListForm.WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter;
-                if (wellValue>= warnValue * WarnSettings .CloseCoefficient&& wellValue< warnValue * WarnSettings.OverCoefficient)
+                if (warnValue == int.MinValue)
                 {
-                    ShowMessage("警告", "输入的自流井沉降值在接近设定的预警值");
+                    ShowMessage("警告", $"请联系管理员设置{"自流井沉降值"}值的预警值");
+                    return;
+                }
+                if (wellValue >= warnValue * WarnSettings.CloseCoefficient && wellValue < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"自流井沉降值"}在接近设定的预警值");
                     return;
                 }
             }
-            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            else if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
             {
                 var wellValue = 0;
                 if (!int.TryParse(tb_Well.Text, out wellValue))
                 {
-                    ShowMessage("警告", "请输入有效的自流井沉降值");
+                    ShowMessage("警告", $"请输入有效的{"自流井沉降值"}");
                     return;
                 }
                 var warnValue = ListForm.WarnSettings.PressedPipeLineSubsidence_WellMillimeter;
-                if (wellValue >= warnValue * WarnSettings.CloseCoefficient && wellValue < warnValue * WarnSettings.OverCoefficient)
+                if (warnValue == int.MinValue)
                 {
-                    ShowMessage("警告", "输入的自流井沉降值在接近设定的预警值");
+                    ShowMessage("警告", $"请联系管理员设置{"自流井沉降值"}值的预警值");
                     return;
                 }
+                if (wellValue >= warnValue * WarnSettings.CloseCoefficient && wellValue < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"自流井沉降值"}在接近设定的预警值");
+                    return;
+                }
+            }
+            else if (IssueTypeEntity.IssueType == EIssueType.侧斜监测)
+            {
+                short value = 0;
+                if (!short.TryParse(tb_SkewBack_Well.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"端头井累计值"}");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.SkewBack_WellMillimeter;
+                if (warnValue == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}值的预警值");
+                    return;
+                }
+                if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"端头井累计值"}接近设定的预警值");
+                    return;
+                }
+
+                if (!short.TryParse(tb_SkewBack_Standard.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"标准段累计值"}");
+                    return;
+                }
+                warnValue = ListForm.WarnSettings.SkewBack_StandardMillimeter;
+                if (warnValue == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"标准段累计值"}值的预警值");
+                    return;
+                }
+                if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"标准段累计值"}接近设定的预警值");
+                    return;
+                }
+
+                if (!short.TryParse(tb_SkewBack_Speed.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"变形速率"}");
+                    return;
+                }
+                warnValue = ListForm.WarnSettings.SkewBack_Speed;
+                if (warnValue == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"变形速率"}值的预警值");
+                    return;
+                }
+                if (value >= warnValue * WarnSettings.CloseCoefficient && value < warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"变形速率"}接近设定的预警值");
+                    return;
+                }
+
+
+                warnValue = ListForm.WarnSettings.SkewBack_Day;
+                if (warnValue == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"变形速率"}值的预警值");
+                    return;
+                }
+                var currentDate = Model.MemorableData.Data.IssueDateTime.Date;
+                var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue), warnValue).OrderByDescending(c => c.DateTime);
+                int index = 1;
+                int maxSpan = warnValue + 10;
+                int warnCount = 0;
+                while (warnValue > 0 && index <= maxSpan)
+                {
+                    var dailyDate = currentDate.Date.AddDays(-index);
+                    var dailyValue = dateValues.Where(c => c.DateTime.Date == dailyDate);
+                    if (dailyValue.Count() == 0)
+                    {
+                        index++;
+                        continue;
+                    }
+                    if (dailyValue.Where(c => c.Value != double.NaN && c.Value >= ListForm.WarnSettings.SkewBack_Speed * WarnSettings.CloseCoefficient).Count() == 0)
+                    {
+                        //未超过预警值
+                        ShowMessage("提醒", "变形速率未达到预警值");
+                        return;
+                    }
+                    else
+                    {
+                        warnCount++;
+                        if (warnCount >= ListForm.WarnSettings.SkewBack_Day)
+                        {
+                            ShowMessage("警告", $"变形速率已连续{warnCount}天的超过预警值");
+                            return;
+                        }
+                    }
+                    index++;
+                    warnValue--;
+                }
+                return;//侧斜不作预览处理
             }
             View3D view = null;
             var dialogType = ShowDialogType.ViewCloseWarn;
@@ -1044,6 +1168,11 @@ namespace MyRevit.SubsidenceMonitor.UI
             var cpSettingsString = Model.MemorableData.Data.OverCTSettings;
             if (IssueTypeEntity.IssueType == EIssueType.管线沉降_无压)
             {
+                if (ListForm.WarnSettings.UnpressedPipeLineSubsidence_WellMillimeter==int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"无压_自流井沉降"}值的预警值");
+                    return;
+                }
                 var wellValue = 0;
                 if (!int.TryParse(tb_Well.Text, out wellValue))
                 {
@@ -1057,8 +1186,13 @@ namespace MyRevit.SubsidenceMonitor.UI
                     return;
                 }
             }
-            if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
+            else if (IssueTypeEntity.IssueType == EIssueType.管线沉降_有压)
             {
+                if (ListForm.WarnSettings.PressedPipeLineSubsidence_WellMillimeter == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"有压_自流井沉降"}值的预警值");
+                    return;
+                }
                 var wellValue = 0;
                 if (!int.TryParse(tb_Well.Text, out wellValue))
                 {
@@ -1072,6 +1206,100 @@ namespace MyRevit.SubsidenceMonitor.UI
                     return;
                 }
             }
+            else if (IssueTypeEntity.IssueType == EIssueType.侧斜监测)
+            {
+                short value = 0;
+                if (!short.TryParse(tb_SkewBack_Well.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"端头井累计值"}");
+                    return;
+                }
+                if (ListForm.WarnSettings.SkewBack_WellMillimeter == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}值的预警值");
+                    return;
+                }
+                var warnValue = ListForm.WarnSettings.SkewBack_WellMillimeter;
+                if (value >= warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"端头井累计值"}超出设定的预警值");
+                    return;
+                }
+
+                if (ListForm.WarnSettings.SkewBack_StandardMillimeter == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}值的预警值");
+                    return;
+                }
+                if (!short.TryParse(tb_SkewBack_Standard.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"标准段累计值"}");
+                    return;
+                }
+                warnValue = ListForm.WarnSettings.SkewBack_StandardMillimeter;
+                if (value >= warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"标准段累计值"}超出设定的预警值");
+                    return;
+                }
+
+                if (ListForm.WarnSettings.SkewBack_Speed == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"端头井累计值"}值的预警值");
+                    return;
+                }
+                if (!short.TryParse(tb_SkewBack_Speed.Text, out value))
+                {
+                    ShowMessage("警告", $"请输入有效的{"变形速率"}");
+                    return;
+                }
+                warnValue = ListForm.WarnSettings.SkewBack_Speed;
+                if (value >= warnValue * WarnSettings.OverCoefficient)
+                {
+                    ShowMessage("警告", $"输入的{"变形速率"}超出设定的预警值");
+                    return;
+                }
+                //TODO 侧斜存在连续N天的速率监测算法
+                warnValue = ListForm.WarnSettings.SkewBack_Day;
+                if (warnValue == int.MinValue)
+                {
+                    ShowMessage("警告", $"请联系管理员设置{"变形速率"}值的预警值");
+                    return;
+                }
+                var currentDate = Model.MemorableData.Data.IssueDateTime.Date;
+                var dateValues = Facade.GetDateTimeValues(IssueTypeEntity.IssueType, currentDate.AddDays(-warnValue), warnValue).OrderByDescending(c => c.DateTime);
+                int index = 1;
+                int maxSpan = warnValue + 10;
+                int warnCount =0;
+                while (warnValue>0&& index<= maxSpan)
+                {
+                    var dailyDate = currentDate.Date.AddDays(-index);
+                    var dailyValue =dateValues.Where(c => c.DateTime.Date == dailyDate);
+                    if (dailyValue.Count()==0)
+                    {
+                        index++;
+                        continue;
+                    }
+                    if (dailyValue.Where(c => c.Value != double.NaN && c.Value >= ListForm.WarnSettings.SkewBack_Speed * WarnSettings.OverCoefficient).Count() == 0)
+                    {
+                        //未超过预警值
+                        ShowMessage("提醒", "变形速率未达到预警值");
+                        return;
+                    }
+                    else
+                    {
+                        warnCount++;
+                        if (warnCount >= ListForm.WarnSettings.SkewBack_Day)
+                        {
+                            ShowMessage("警告", $"变形速率已连续{warnCount}天的超过预警值");
+                            return;
+                        }
+                    }
+                    index++;
+                    warnValue--;
+                }
+                return;//侧斜不作预览处理
+            }
             View3D view = null;
             var dialogType = ShowDialogType.ViewOverWarn;
             bool isSuccess = DetailWithView(doc, transactionName, cpSettingsString, view, dialogType, () => Model.GetOverWarnNodesElementsByTNode(doc, ListForm.WarnSettings));
@@ -1083,5 +1311,46 @@ namespace MyRevit.SubsidenceMonitor.UI
             ListForm.Close();
         }
         #endregion
+
+        private void tb_Well_TextChanged(object sender, EventArgs e)
+        {
+            short value = 0;
+            if (!short.TryParse(tb_Well.Text,out value))
+            {
+                ShowMessage("警告", "请输入正确的数值");
+                return;
+            }
+            Model.MemorableData.Data.ExtraValue1 = value;
+        }
+        private void tb_SkewBack_Well_TextChanged(object sender, EventArgs e)
+        {
+            short value = 0;
+            if (!short.TryParse(tb_SkewBack_Well.Text, out value))
+            {
+                ShowMessage("警告", "请输入正确的数值");
+                return;
+            }
+            Model.MemorableData.Data.ExtraValue1 = value;
+        }
+        private void tb_SkewBack_Standard_TextChanged(object sender, EventArgs e)
+        {
+            short value = 0;
+            if (!short.TryParse(tb_SkewBack_Standard.Text, out value))
+            {
+                ShowMessage("警告", "请输入正确的数值");
+                return;
+            }
+            Model.MemorableData.Data.ExtraValue2 = value;
+        }
+        private void tb_SkewBack_Speed_TextChanged(object sender, EventArgs e)
+        {
+            short value = 0;
+            if (!short.TryParse(tb_SkewBack_Speed.Text, out value))
+            {
+                ShowMessage("警告", "请输入正确的数值");
+                return;
+            }
+            Model.MemorableData.Data.ExtraValue3 = value;
+        }
     }
 }
