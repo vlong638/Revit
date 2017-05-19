@@ -87,6 +87,9 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 OverCTSettings = Data.OverCTSettings,
                 IsLoad = Data.IsLoad,
                 List = Data.List,//List可以拷贝引用
+                ExtraValue1=Data.ExtraValue1,
+                ExtraValue2=Data.ExtraValue2,
+                ExtraValue3=Data.ExtraValue3,
                 //Nodes需重建Copy
             };
             memo.Nodes.AddRange(Data.Nodes.Select(c => new TNode()
@@ -94,6 +97,16 @@ namespace MyRevit.SubsidenceMonitor.Entities
                 IssueType = c.IssueType,
                 IssueDateTime = c.IssueDateTime,
                 NodeCode = c.NodeCode,
+                Data = c.Data,
+                ElementIds = c.GetElementIds(),//2017/05/09 09:59  ElementIds总是以ElementIds_Int为修改对象,ElementIds_Int是ElementIds的活动的修改对象,ElementIds是静态的存储对象
+                Index = c.Index,
+            }));
+            memo.DepthNodes.AddRange(Data.DepthNodes.Select(c => new TDepthNode()
+            {
+                IssueType = c.IssueType,
+                IssueDateTime = c.IssueDateTime,
+                NodeCode = c.NodeCode,
+                Depth=c.Depth,
                 Data = c.Data,
                 ElementIds = c.GetElementIds(),//2017/05/09 09:59  ElementIds总是以ElementIds_Int为修改对象,ElementIds_Int是ElementIds的活动的修改对象,ElementIds是静态的存储对象
                 Index = c.Index,

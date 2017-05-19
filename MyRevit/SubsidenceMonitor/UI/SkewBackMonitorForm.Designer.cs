@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.tb_ReportName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -188,7 +188,6 @@
             this.tb_SkewBack_Speed.Name = "tb_SkewBack_Speed";
             this.tb_SkewBack_Speed.Size = new System.Drawing.Size(40, 21);
             this.tb_SkewBack_Speed.TabIndex = 54;
-            this.tb_SkewBack_Speed.TextChanged += new System.EventHandler(this.tb_SkewBack_Speed_TextChanged);
             // 
             // lbl_SkewBack_Speed
             // 
@@ -205,7 +204,6 @@
             this.tb_SkewBack_Standard.Name = "tb_SkewBack_Standard";
             this.tb_SkewBack_Standard.Size = new System.Drawing.Size(40, 21);
             this.tb_SkewBack_Standard.TabIndex = 52;
-            this.tb_SkewBack_Standard.TextChanged += new System.EventHandler(this.tb_SkewBack_Standard_TextChanged);
             // 
             // lbl_SkewBack_Standard
             // 
@@ -222,7 +220,6 @@
             this.tb_SkewBack_Well.Name = "tb_SkewBack_Well";
             this.tb_SkewBack_Well.Size = new System.Drawing.Size(40, 21);
             this.tb_SkewBack_Well.TabIndex = 50;
-            this.tb_SkewBack_Well.TextChanged += new System.EventHandler(this.tb_SkewBack_Well_TextChanged);
             // 
             // lbl_SkewBack_Well
             // 
@@ -671,14 +668,14 @@
             this.dgv_left.AllowUserToDeleteRows = false;
             this.dgv_left.AllowUserToResizeColumns = false;
             this.dgv_left.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_left.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.dgv_left.ColumnHeadersHeight = 60;
             this.dgv_left.HeaderNodes = null;
             this.dgv_left.Location = new System.Drawing.Point(2, 122);
@@ -694,14 +691,14 @@
             this.dgv_right.AllowUserToDeleteRows = false;
             this.dgv_right.AllowUserToResizeColumns = false;
             this.dgv_right.AllowUserToResizeRows = false;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.BottomCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv_right.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dgv_right.HeaderNodes = null;
             this.dgv_right.Location = new System.Drawing.Point(572, 122);
             this.dgv_right.Name = "dgv_right";

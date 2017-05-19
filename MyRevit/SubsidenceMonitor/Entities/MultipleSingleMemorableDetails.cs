@@ -36,52 +36,6 @@ namespace MyRevit.SubsidenceMonitor.Entities
             MemorableData = new MemorableDetail(Storage, Datas[DataIndex]);
             MemorableData.Start();
         }
-        public void AddElementIds(string nodeCode, List<ElementId> elementIds)
-        {
-            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
-            foreach (var elementId in elementIds)
-            {
-                var elementId_Int = elementId.IntegerValue;
-                var elementNode = MemorableData.Data.Nodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
-                if (elementNode == targetNode)
-                    continue;
-                if (elementNode != null && elementNode != targetNode)
-                    elementNode.ElementIds_Int.Remove(elementId_Int);
-                targetNode.ElementIds_Int.Add(elementId_Int);
-            }
-        }
-        public void DeleteElementIds(string nodeCode, List<ElementId> elementIds)
-        {
-            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
-            foreach (var elementId in elementIds)
-            {
-                var elementId_Int = elementId.IntegerValue;
-                targetNode.ElementIds_Int.Remove(elementId_Int);
-            }
-        }
-        public void AddElementIds(string nodeCode, string depth, List<ElementId> elementIds)
-        {
-            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
-            foreach (var elementId in elementIds)
-            {
-                var elementId_Int = elementId.IntegerValue;
-                var elementNode = MemorableData.Data.DepthNodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
-                if (elementNode == targetNode)
-                    continue;
-                if (elementNode != null && elementNode != targetNode)
-                    elementNode.ElementIds_Int.Remove(elementId_Int);
-                targetNode.ElementIds_Int.Add(elementId_Int);
-            }
-        }
-        public void DeleteElementIds(string nodeCode, string depth, List<ElementId> elementIds)
-        {
-            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
-            foreach (var elementId in elementIds)
-            {
-                var elementId_Int = elementId.IntegerValue;
-                targetNode.ElementIds_Int.Remove(elementId_Int);
-            }
-        }
         string GroupName = "监测系统";
         enum CustomParameters
         {
@@ -95,11 +49,6 @@ namespace MyRevit.SubsidenceMonitor.Entities
             /// </summary>
             监测点,
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="nodeCodes"></param>
-        /// <param name="doc"></param>
         public void RenderNodeInfoToElements(List<string> nodeCodes, Document doc)
         {
             var nodes = MemorableData.Data.Nodes.Where(c => nodeCodes.Contains(c.NodeCode));
@@ -160,7 +109,6 @@ namespace MyRevit.SubsidenceMonitor.Entities
             }
             Edited();
         }
-
         private void SetParameterValue(Element element, string parameterName, string parameterValue)
         {
             var parameter = element.GetParameters(parameterName).FirstOrDefault();
@@ -169,6 +117,29 @@ namespace MyRevit.SubsidenceMonitor.Entities
         }
 
         #region ByTNode
+        public void AddElementIds(string nodeCode, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                var elementNode = MemorableData.Data.Nodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
+                if (elementNode == targetNode)
+                    continue;
+                if (elementNode != null && elementNode != targetNode)
+                    elementNode.ElementIds_Int.Remove(elementId_Int);
+                targetNode.ElementIds_Int.Add(elementId_Int);
+            }
+        }
+        public void DeleteElementIds(string nodeCode, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.Nodes.First(c => c.NodeCode == nodeCode);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                targetNode.ElementIds_Int.Remove(elementId_Int);
+            }
+        }
         List<ElementId> GetElementIds(string nodeCode, Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();
@@ -243,7 +214,30 @@ namespace MyRevit.SubsidenceMonitor.Entities
             return results;
         }
         #endregion
-        #region ByTNode
+        #region ByTDepthNode
+        public void AddElementIds(string nodeCode, string depth, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                var elementNode = MemorableData.Data.DepthNodes.FirstOrDefault(c => c.ElementIds_Int.Contains(elementId_Int));
+                if (elementNode == targetNode)
+                    continue;
+                if (elementNode != null && elementNode != targetNode)
+                    elementNode.ElementIds_Int.Remove(elementId_Int);
+                targetNode.ElementIds_Int.Add(elementId_Int);
+            }
+        }
+        public void DeleteElementIds(string nodeCode, string depth, List<ElementId> elementIds)
+        {
+            var targetNode = MemorableData.Data.DepthNodes.First(c => c.NodeCode == nodeCode && c.Depth == depth);
+            foreach (var elementId in elementIds)
+            {
+                var elementId_Int = elementId.IntegerValue;
+                targetNode.ElementIds_Int.Remove(elementId_Int);
+            }
+        }
         List<ElementId> GetElementIds(string nodeCode, string depth, Document doc)
         {
             List<ElementId> availableElementIds = new List<ElementId>();

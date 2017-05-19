@@ -46,6 +46,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
             //检测:监测时间的日期需与列表一致
             if (startTime.Date != detail.IssueDateTime.Date)
                 return ParseResult.DateTime_Invalid;
+            detail.IssueDateTime = startTime;
+            detail.IssueTimeRange = (short)(endTime - startTime).TotalMinutes;
             //InstrumentName,InstrumentCode
             regex = new Regex(@"\s?仪器名称：(.+)\s+仪器编号：(.+)\s?");
             match = regex.Match(sheet.GetCellValueAsString(6, 1));

@@ -160,11 +160,13 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
                 if (!OnConfirmDelete())
                     return new BLLResult() { IsSuccess = false, Message = "" };// "删除取消"
             }
+            bool needMove = !HasNext && HasPrevious;
             var result = MemorableData.Delete();
             if (result.IsSuccess)
             {
-                if (!HasNext && HasPrevious)
+                if (needMove)
                     DataIndex = DataIndex - 1;//前移一项
+                IsEdited = false;
                 Datas.Remove(MemorableData.Data);
                 ChangeCurrent(DataIndex);
             }
@@ -262,7 +264,8 @@ namespace MyRevit.SubsidenceMonitor.Interfaces
                 if (IsEdited)
                 {
                     MemorableData.Rollback();
-                    Datas[DataIndex] = MemorableData.Data;
+                    if (Datas.Count > 0)
+                        Datas[DataIndex] = MemorableData.Data;
                     OnDataChanged?.Invoke(Datas[DataIndex]);
                     OnStateChanged?.Invoke(HasPrevious, HasNext, CanCreateNew, CanDelete, CanSave);
                 }

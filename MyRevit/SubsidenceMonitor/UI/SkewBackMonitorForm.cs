@@ -45,10 +45,13 @@ namespace MyRevit.SubsidenceMonitor.UI
             Model.Init(ui_doc.Document, list);
             if (Model.MemorableData.Data.ExtraValue1.HasValue)
                 tb_SkewBack_Well.Text = Model.MemorableData.Data.ExtraValue1.Value.ToString();
+            tb_SkewBack_Well.TextChanged += tb_SkewBack_Well_TextChanged;
             if (Model.MemorableData.Data.ExtraValue2.HasValue)
                 tb_SkewBack_Standard.Text = Model.MemorableData.Data.ExtraValue2.Value.ToString();
+            tb_SkewBack_Standard.TextChanged += tb_SkewBack_Standard_TextChanged;
             if (Model.MemorableData.Data.ExtraValue3.HasValue)
                 tb_SkewBack_Speed.Text = Model.MemorableData.Data.ExtraValue3.Value.ToString();
+            tb_SkewBack_Speed.TextChanged += tb_SkewBack_Speed_TextChanged;
 
             Shown += SkewBackMonitorForm_Shown;
         }
@@ -230,18 +233,30 @@ namespace MyRevit.SubsidenceMonitor.UI
             tb_InstrumentName.Text = detail.InstrumentName;//仪器名称
             tb_InstrumentCode.Text = detail.InstrumentCode;//仪器编号
             //cb_NodeCode
-            if (Model.MemorableData.Data.DepthNodes.Count > 0)
+            if (detail.DepthNodes.Count > 0)
             {
-                cb_NodeCode.DataSource = Model.MemorableData.Data.DepthNodes.Select(c => c.NodeCode).Distinct().ToList();
+                cb_NodeCode.DataSource = detail.DepthNodes.Select(c => c.NodeCode).Distinct().ToList();
                 cb_NodeCode.SelectedIndex = 0;
 
-                foreach (var node in Model.MemorableData.Data.DepthNodes)
+                foreach (var node in detail.DepthNodes)
                     detail.DepthNodeDatas.Add(node.NodeCode, node.Depth, node.Data);
             }
             else
             {
                 cb_NodeCode.DataSource = null;
             }
+            if (detail.ExtraValue1.HasValue)
+                tb_SkewBack_Well.Text = detail.ExtraValue1.Value.ToString();
+            else
+                tb_SkewBack_Well.Text = "";
+            if (detail.ExtraValue2.HasValue)
+                tb_SkewBack_Standard.Text = detail.ExtraValue2.Value.ToString();
+            else
+                tb_SkewBack_Standard.Text = "";
+            if (detail.ExtraValue3.HasValue)
+                tb_SkewBack_Speed.Text = detail.ExtraValue3.Value.ToString();
+            else
+                tb_SkewBack_Speed.Text = "";
         }
         /// <summary>
         /// 清空绑定时的默认选项
@@ -1205,6 +1220,12 @@ namespace MyRevit.SubsidenceMonitor.UI
 
         private void tb_SkewBack_Well_TextChanged(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(tb_SkewBack_Well.Text))
+            {
+                Model.MemorableData.Data.ExtraValue1 = 0;
+                return;
+            }
+
             short value = 0;
             if (!short.TryParse(tb_SkewBack_Well.Text, out value))
             {
@@ -1216,6 +1237,12 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void tb_SkewBack_Standard_TextChanged(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(tb_SkewBack_Standard.Text))
+            {
+                Model.MemorableData.Data.ExtraValue2 = 0;
+                return;
+            }
+
             short value = 0;
             if (!short.TryParse(tb_SkewBack_Standard.Text, out value))
             {
@@ -1227,6 +1254,12 @@ namespace MyRevit.SubsidenceMonitor.UI
         }
         private void tb_SkewBack_Speed_TextChanged(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(tb_SkewBack_Speed.Text))
+            {
+                Model.MemorableData.Data.ExtraValue3 = 0;
+                return;
+            }
+
             short value = 0;
             if (!short.TryParse(tb_SkewBack_Speed.Text, out value))
             {
