@@ -346,7 +346,8 @@ namespace MyRevit.SubsidenceMonitor.Entities
         ReportName_ParseFailure,
         Participants_ParseFailure,
         DateTime_ParseFailure,
-        DateTime_Invalid,
+        Date_Invalid,
+        Time_Invalid,
         Instrument_ParseFailure,
     }
 }

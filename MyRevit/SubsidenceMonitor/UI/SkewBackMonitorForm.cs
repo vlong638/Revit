@@ -387,8 +387,11 @@ namespace MyRevit.SubsidenceMonitor.UI
                 case ParseResult.DateTime_ParseFailure:
                     message = @"内容格式不符合预期(监测日期：@yyyy.MM.dd\s+监测时间：@hh:mm-@hh:mm)";
                     break;
-                case ParseResult.DateTime_Invalid:
+                case ParseResult.Date_Invalid:
                     message = $"文档日期不一致,当前记录日期:{Model.List.IssueDate.ToShortDateString()},请检查导入文件的监测日期是否存在差异";
+                    break;
+                case ParseResult.Time_Invalid:
+                    message = $"已导入的文档暂不支持更改为其他时间的文档,请确保导入文档的起始时间一致,如需替换,请删除文档后新增";
                     break;
                 case ParseResult.Instrument_ParseFailure:
                     message = @"内容格式不符合预期(仪器名称：@仪器名称\s+仪器编号：@仪器编号)";

@@ -66,20 +66,27 @@ namespace MyRevit.SubsidenceMonitor.Entities
             switch (issueType)
             {
                 case EIssueType.建筑物沉降:
-                    return $"日报警值连续{BuildingSubsidence_Day}天±{BuildingSubsidence_DailyMillimeter}mm;累计{BuildingSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{GetText(BuildingSubsidence_Day)}天±{GetText(BuildingSubsidence_DailyMillimeter)}mm;累计{GetText(BuildingSubsidence_SumMillimeter)}mm";
                 case EIssueType.地表沉降:
-                    return $"日报警值连续{SurfaceSubsidence_Day}天±{SurfaceSubsidence_DailyMillimeter}mm;累计{SurfaceSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{GetText(SurfaceSubsidence_Day)}天±{GetText(SurfaceSubsidence_DailyMillimeter)}mm;累计{GetText(SurfaceSubsidence_SumMillimeter)}mm";
                 case EIssueType.管线沉降_有压:
-                    return $"日报警值连续{PressedPipeLineSubsidence_Day}天±{PressedPipeLineSubsidence_PipelineMillimeter}mm、±{PressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{PressedPipeLineSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{GetText(PressedPipeLineSubsidence_Day)}天±{GetText(PressedPipeLineSubsidence_PipelineMillimeter)}mm、±{GetText(PressedPipeLineSubsidence_WellMillimeter)}mm(自流井);累计{GetText(PressedPipeLineSubsidence_SumMillimeter)}mm";
                 case EIssueType.管线沉降_无压:
-                    return $"日报警值连续{UnpressedPipeLineSubsidence_Day}天±{UnpressedPipeLineSubsidence_PipelineMillimeter}mm、±{UnpressedPipeLineSubsidence_WellMillimeter}mm(自流井);累计{UnpressedPipeLineSubsidence_SumMillimeter}mm";
+                    return $"日报警值连续{GetText(UnpressedPipeLineSubsidence_Day)}天±{GetText(UnpressedPipeLineSubsidence_PipelineMillimeter)}mm、±{GetText(UnpressedPipeLineSubsidence_WellMillimeter)}mm(自流井);累计{GetText(UnpressedPipeLineSubsidence_SumMillimeter)}mm";
                 case EIssueType.侧斜监测:
-                    return $"端头井累计值{SkewBack_WellMillimeter}mm,标准段累计值{SkewBack_StandardMillimeter}mm,变形速率{SkewBack_Speed}mm/d(连续{SkewBack_Day}天)";
+                    return $"端头井累计值{GetText(SkewBack_WellMillimeter)}mm,标准段累计值{GetText(SkewBack_StandardMillimeter)}mm,变形速率{GetText(SkewBack_Speed)}mm/d(连续{GetText(SkewBack_Day)}天)";
                 case EIssueType.钢支撑轴力监测:
-                    return $"大于设计周力{STBAP_MaxAxle}%,小于设计轴力{STBAP_MinAxle}%";
+                    return $"大于设计周力{GetText(STBAP_MaxAxle)}%,小于设计轴力{GetText(STBAP_MinAxle)}%";
                 default:
                     throw new NotImplementedException("暂不支持该类型");
             }
+        }
+        public string GetText(int parameter)
+        {
+            if (parameter == int.MinValue)
+                return "";
+            else
+                return parameter.ToString();
         }
     }
 }
