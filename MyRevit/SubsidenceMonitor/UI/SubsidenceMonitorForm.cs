@@ -219,9 +219,9 @@ namespace MyRevit.SubsidenceMonitor.UI
                 }
             }
             dgv_right.DataSource = null;
-            dgv_right.DataSource = leftNodes.Datas;
+            dgv_right.DataSource = rightNodes.Datas;
             dgv_left.DataSource = null;
-            dgv_left.DataSource = rightNodes.Datas;
+            dgv_left.DataSource = leftNodes.Datas; 
         }
         /// <summary>
         /// 清空绑定时的默认选项

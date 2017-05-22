@@ -50,7 +50,7 @@ namespace MyRevit.SubsidenceMonitor.Entities
             //检测:监测时间的日期需与列表一致
             if (startTime.Date != detail.IssueDateTime.Date)
                 return ParseResult.Date_Invalid;
-            if (string.IsNullOrEmpty(detail.InstrumentCode) && startTime.Hour != detail.IssueDateTime.Hour)
+            if (!string.IsNullOrEmpty(detail.InstrumentCode) && startTime.Hour != detail.IssueDateTime.Hour)
                 return ParseResult.Time_Invalid;
             detail.IssueDateTime = startTime;
             detail.IssueTimeRange = (short)(endTime - startTime).TotalMinutes;
