@@ -135,13 +135,6 @@
     <Compile Include="EarthWork\UI\EarthworkBlockingForm.Designer.cs">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyTests\EventsCommand.cs" />
-    <Compile Include="MyTests\ViewCommand.cs" />
-    <Compile Include="MyTests\MyExternalApplication.cs" />
-    <Compile Include="MyTests\FilterElementCommand.cs" />
-    <Compile Include="MyTests\SelectElementCommand.cs" />
-    <Compile Include="MyTests\MyExternalCommand.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\MyDGV0427.cs" />
     <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
@@ -258,7 +251,6 @@
     <EmbeddedResource Include="SubsidenceMonitor\UI\WarnSettingsForm.resx">
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -270,21 +262,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AddIns\WarnSettings.addin">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="AddIns\SubsidenceMonitor.addin">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="AddIns\EarthWork.addin">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="AddIns\MyExternalApplications.addin">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="AddIns\MyExternalCommands.addin">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="EarthWork\Images\AddElement.png" />
     <Content Include="EarthWork\Images\AddNode.png" />
     <Content Include="EarthWork\Images\DeleteElement.png" />
