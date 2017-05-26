@@ -114,6 +114,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\EventsCommand.cs" />
+    <Compile Include="MyTests\FilterElementCommand.cs" />
+    <Compile Include="MyTests\MyExternalApplication.cs" />
+    <Compile Include="MyTests\MyExternalCommand.cs" />
+    <Compile Include="MyTests\SelectElementCommand.cs" />
+    <Compile Include="MyTests\ViewCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
@@ -262,6 +268,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AddIns\EarthWork.addin" />
+    <Content Include="AddIns\MyExternalApplications.addin" />
+    <Content Include="AddIns\MyExternalCommands.addin" />
+    <Content Include="AddIns\SubsidenceMonitor.addin" />
+    <Content Include="AddIns\WarnSettings.addin" />
     <Content Include="EarthWork\Images\AddElement.png" />
     <Content Include="EarthWork\Images\AddNode.png" />
     <Content Include="EarthWork\Images\DeleteElement.png" />

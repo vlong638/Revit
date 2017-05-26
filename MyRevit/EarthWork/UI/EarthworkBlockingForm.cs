@@ -913,7 +913,7 @@ namespace MyRevit.EarthWork.UI
             //    return;
 
             var doc = m_Doc;
-            string viewName = "ViewGt6";
+            string viewName = "查看无支撑时间大于6的构件";
             var view = Revit_Document_Helper.GetElementByNameAs<View3D>(doc, viewName);
             if (view == null)
             {
@@ -981,7 +981,7 @@ namespace MyRevit.EarthWork.UI
             //    return;
 
             var doc = m_Doc;
-            string viewName = "ViewCompletion";
+            string viewName = "查看完成和未完成的构件";
             var view = Revit_Document_Helper.GetElementByNameAs<View3D>(doc, viewName);
             if (view == null)
             {
