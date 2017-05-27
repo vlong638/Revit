@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9A</ClientId>
+    <FullClassName>MyRevit.Entities.MyTestCommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+</RevitAddIns>

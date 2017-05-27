@@ -22,7 +22,6 @@ namespace MyRevit.Entities
             var doc = commandData.Application.ActiveUIDocument.Document;
 
             #region 放置类型为"0762*2032 mm"的门
-            //放置类型为"0762*2032 mm"的门
             //首先通过类型过滤出 类型为门的族类型,找到名称相同的
             string doorTypeName = "0762*2032 mm";
             FamilySymbol doorType = null;
@@ -90,35 +89,21 @@ namespace MyRevit.Entities
             }
             #endregion
 
-            #region 创建拉伸实体族
-            var currentPath = System.Environment.CurrentDirectory;
-            var familyTemplateDoc = app.NewFamilyDocument(Path.Combine(currentPath, "MyFamilyTemplate.rft"));
-            using (Transaction transaction=new Transaction(familyTemplateDoc))
+            #region 复制墙类型
+            var wallElementId = 1111;
+            wall = doc.GetElement(new ElementId(wallElementId)) as Wall;
+            if (wall!=null)
             {
-                transaction.Start("Create Familiy");
-                try
-                {
-                    CurveArray curvyArray = new CurveArray();
-                    curvyArray.Append(Line.CreateBound(new XYZ(0, 0, 0), new XYZ(5, 0, 0)));
-                    curvyArray.Append(Line.CreateBound(new XYZ(5, 0, 0), new XYZ(5, 5, 0)));
-                    curvyArray.Append(Line.CreateBound(new XYZ(5, 5, 0), new XYZ(0, 5, 0)));
-                    curvyArray.Append(Line.CreateBound(new XYZ(0, 5, 0), new XYZ(0, 0, 0)));
-                    CurveArrArray curveArrArray = new CurveArrArray();
-                    curveArrArray.Append(curvyArray);
-                    var isSolid = true;
-                    var length = 10;
-                    var sketchPlane = SketchPlane.Create(familyTemplateDoc, app.Create.NewPlane(new XYZ(0, 0, 1), XYZ.Zero));
-                    familyTemplateDoc.FamilyCreate.NewExtrusion(isSolid, curveArrArray, sketchPlane, length);
-                    familyTemplateDoc.FamilyManager.NewType("MyFamilyType");
-                    transaction.Commit();
-                }
-                catch (System.Exception ex)
-                {
-                    //TODO Log it 
-                    transaction.RollBack();
-                }
+                var wallType = wall.WallType;
+                ElementType duplicatedType = wallType.Duplicate(wall.Name + "duplicated");
             }
-            familyTemplateDoc.Save();
+            #endregion
+
+            #region 元素移动
+            using (var transaction =new Transaction(doc))
+            {
+                //transaction.Start()
+            }
             #endregion
 
             return Result.Succeeded;
