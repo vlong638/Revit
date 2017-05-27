@@ -48,6 +48,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Work\export\Revit\2016\Aliyun.OSS.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Dlls\VL.Logger\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -110,6 +114,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="VL.Logger">
+      <HintPath>..\..\..\..\Dlls\VL.Logger\VL.Logger.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +223,7 @@
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\ExcelHelper.cs" />
+    <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
     <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
@@ -223,6 +231,7 @@
     <Compile Include="Utilities\SaveKeyHelper.cs" />
     <Compile Include="Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
+    <Compile Include="Utilities\TransactionHelper.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
       <SubType>Designer</SubType>

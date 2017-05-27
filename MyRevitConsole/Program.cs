@@ -13,8 +13,8 @@ namespace MyRevitConsole
         {
             //Autodesk.Revit.Creation.
             var logger = new Log4netLogger();
-            logger.SetupLog("Default");
-            var logData = new LogData() { ClassName = nameof(Program), FuctionName = nameof(Main), Message = "正在调试中" };
+            logger.SetupLog("Debug");
+            var logData = new LogData(nameof(Program), nameof(Main), "正在调试中");
             logger.Error(logData);
             logger.SetupLog("Info");
             logger.Info(logData);

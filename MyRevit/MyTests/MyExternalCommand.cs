@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MyRevit.Utilities;
 using System.IO;
 using System.Linq;
 
@@ -100,10 +101,12 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素移动
-            using (var transaction =new Transaction(doc))
+            TransactionHelper.DelegateTransaction(doc, () =>
             {
-                //transaction.Start()
-            }
+
+
+                return true;
+            });
             #endregion
 
             return Result.Succeeded;
