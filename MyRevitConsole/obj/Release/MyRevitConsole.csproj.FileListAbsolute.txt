@@ -1,0 +1,1 @@
+E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\bin\Release\MyRevitConsole.exe.config

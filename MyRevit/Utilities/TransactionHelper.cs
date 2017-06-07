@@ -9,7 +9,7 @@ namespace MyRevit.Utilities
     {
         public static bool DelegateTransaction(Document doc, Func<bool> function)
         {
-            using (var transaction = new Transaction(doc))
+            using (var transaction = new Transaction(doc,"DefaultTransactionName"))
             {
                 transaction.Start();
                 try
@@ -24,7 +24,6 @@ namespace MyRevit.Utilities
                         transaction.RollBack();
                         return false;
                     }
-
                 }
                 catch (Exception ex)
                 {

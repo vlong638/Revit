@@ -176,12 +176,8 @@ namespace MyRevit.Utilities
             ElementBinding orientBinding = doc.ParameterBindings.get_Item(definition) as ElementBinding;
             CategorySet categories = new CategorySet(); ;
             if (orientBinding != null)
-            {
                 foreach (Category c in orientBinding.Categories)
-                {
                     categories.Insert(c);
-                }
-            }
             categories.Insert(newCategory);
             if (isInstance)
                 binding = doc.Application.Create.NewInstanceBinding(categories);

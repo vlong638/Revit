@@ -9,6 +9,12 @@
   <AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9B</ClientId>
+    <FullClassName>MyRevit.Entities.SelectFilteredElementCommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9B</ClientId>
     <FullClassName>MyRevit.Entities.SelectElementCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
