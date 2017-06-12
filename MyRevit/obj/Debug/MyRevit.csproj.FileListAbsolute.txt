@@ -75,9 +75,9 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\BuildingSystemsUIAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\UIFrameworkServices.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\stdole.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.MyTests.UI.PipeAnnotationForm.resources

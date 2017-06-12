@@ -121,11 +121,19 @@
     <Compile Include="MyTests\EventsCommand.cs" />
     <Compile Include="MyTests\FilterElementCommand.cs" />
     <Compile Include="MyTests\MyExternalApplication.cs" />
-    <Compile Include="MyTests\MyTestCommand2.cs" />
-    <Compile Include="MyTests\MyTestCommand.cs" />
+    <Compile Include="MyTests\AdvancedRevitCommand.cs" />
+    <Compile Include="MyTests\PipeAnnotationCommand.cs" />
+    <Compile Include="MyTests\BeamUpdaterCommand.cs" />
+    <Compile Include="MyTests\BeamAnnotationCommand.cs" />
     <Compile Include="MyTests\MyExternalCommand.cs" />
     <Compile Include="MyTests\SelectFilteredElementCommand.cs" />
     <Compile Include="MyTests\SelectElementCommand.cs" />
+    <Compile Include="MyTests\UI\PipeAnnotationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyTests\UI\PipeAnnotationForm.Designer.cs">
+      <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MyTests\ViewCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
@@ -222,6 +230,8 @@
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\ExcelHelper.cs" />
+    <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
+    <Compile Include="Utilities\ExtensibleStorageHelper.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
@@ -237,6 +247,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockingForm.resx">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyTests\UI\PipeAnnotationForm.resx">
+      <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

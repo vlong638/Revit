@@ -12,6 +12,9 @@ using System.Linq;
 
 namespace MyRevit.Entities
 {
+    /// <summary>
+    /// 文本数据名称
+    /// </summary>
     enum BeamAnnotationParameters
     {
         //PG_TEXT
@@ -19,7 +22,7 @@ namespace MyRevit.Entities
             //梁截面,//无效
         箍筋直径,//已有入口
              //INVALID
-        //乘号,//无入口
+             //乘号,//无入口
         梁高,//已有入口
         梁宽,//已有入口
         梁加腋,//已有入口
@@ -33,6 +36,9 @@ namespace MyRevit.Entities
         梁顶绝对标高,//已有入口
         梁顶相对偏移,//已有入口
     }
+    /// <summary>
+    /// 文本数据记忆
+    /// </summary>
     public class BeamAnnotationData
     {
         /// <summary>
@@ -155,12 +161,14 @@ namespace MyRevit.Entities
     public class BeamAnnotationEntity
     {
         public bool IsEditing { set; get; }
+        public int ViewId { set; get; }
         public int BeamId { set; get; }
         public int LineId { set; get; }
         public int TagId { set; get; }
 
-        public BeamAnnotationEntity(int beamId, int lineId, int tagId)
+        public BeamAnnotationEntity(int viewId, int beamId, int lineId, int tagId)
         {
+            ViewId = viewId;
             BeamId = beamId;
             LineId = lineId;
             TagId = tagId;
@@ -173,6 +181,8 @@ namespace MyRevit.Entities
 
         public BeamAnnotationEntityCollection(string data)
         {
+            if (string.IsNullOrEmpty(data))
+                return;
             var entities = data.Split(EntitySplitter.ToCharArray()[0]);
             var propertySplitter = PropertySplitter.ToCharArray()[0];
             foreach (var entity in entities)
@@ -180,13 +190,13 @@ namespace MyRevit.Entities
                 if (string.IsNullOrEmpty(entity))
                     continue;
                 var properties = entity.Split(propertySplitter);
-                Add(new BeamAnnotationEntity(Convert.ToInt32(properties[0]), Convert.ToInt32(properties[1]), Convert.ToInt32(properties[2])));
+                Add(new BeamAnnotationEntity(Convert.ToInt32(properties[0]), Convert.ToInt32(properties[1]), Convert.ToInt32(properties[2]), Convert.ToInt32(properties[3])));
             }
         }
 
         public string ToData()
         {
-            return string.Join(EntitySplitter, this.Select(c => c.BeamId + PropertySplitter + c.LineId + PropertySplitter + c.TagId));
+            return string.Join(EntitySplitter, this.Select(c => c.ViewId + PropertySplitter + c.BeamId + PropertySplitter + c.LineId + PropertySplitter + c.TagId));
         }
     }
     public enum SaveKey
@@ -201,31 +211,31 @@ namespace MyRevit.Entities
         static BeamAnnotationEntityCollection Collection;
         public static BeamAnnotationEntityCollection GetCollection(Document doc)
         {
-            if (Collection == null)
-            {
-                var recorder = GetRecorder(doc);
-                var length = recorder.GetValueAsInt(nameof(SaveKey.CollectionLength), 0);
-                var data = recorder.GetValue(nameof(SaveKey.CollectionData), "", length + 2);
-                Collection = new BeamAnnotationEntityCollection(data);
-            }
+            var recorder = PMSoftHelper.GetRecorder(nameof(BeamAnnotationData), doc);
+            var length = int.Parse(recorder.GetValue(nameof(SaveKey.CollectionLength), "0", 10));
+            var data = recorder.GetValue(nameof(SaveKey.CollectionData), "", length + 2);
+            Collection = new BeamAnnotationEntityCollection(data);
+            //if (Collection == null)
+            //{
+            //    var recorder = PMSoftHelper.GetRecorder(nameof(BeamAnnotationData), doc);
+            //    var length = recorder.GetValueAsInt(nameof(SaveKey.CollectionLength), 0);
+            //    var data = recorder.GetValue(nameof(SaveKey.CollectionData), "", length + 2);
+            //    Collection = new BeamAnnotationEntityCollection(data);
+            //}
             return Collection;
         }
         public static void SaveCollection(Document doc)
         {
             var data = Collection.ToData();
-            var recorder = GetRecorder(doc);
+            var recorder = PMSoftHelper.GetRecorder(nameof(BeamAnnotationData), doc);
             recorder.WriteValue(nameof(SaveKey.CollectionData), data);
             recorder.WriteValue(nameof(SaveKey.CollectionLength), data.Length.ToString());
-        }
-        static FaceRecorderForRevit GetRecorder(Autodesk.Revit.DB.Document doc)
-        {
-            return new FaceRecorderForRevit(nameof(BeamAnnotationData), ApplicationPath.GetCurrentPath(doc));
         }
         #endregion
     }
 
     [Transaction(TransactionMode.Manual)]
-    public class MyTestCommand : IExternalCommand
+    public class BeamAnnotationCommand : IExternalCommand
     {
         string BeamAnnotationParameterGroupName = "梁集中标注";
         BeamAnnotationData BeamAnnotationData = new BeamAnnotationData();
@@ -243,7 +253,7 @@ namespace MyRevit.Entities
                 selectedId = uiDoc.Selection.PickObject(ObjectType.Element, new BeamFramingFilter()).ElementId;
             string tagName = "梁平法_集中标_左对齐";
             FamilySymbol tagSymbol = null;
-            TransactionHelper.DelegateTransaction(doc, () =>
+            TransactionHelper.DelegateTransaction(doc, "加载族", () =>
             {
                 //查找族类型
                 var symbols = new FilteredElementCollector(doc)
@@ -278,129 +288,117 @@ namespace MyRevit.Entities
                 }
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, () =>
+            if (tagSymbol == null)
+                return Result.Failed;
+            TransactionHelper.DelegateTransaction(doc, "参数赋值", () =>
             {
                 //如果上述两者获取到了对应的族
-                if (tagSymbol != null)
+                var view = doc.ActiveView;
+                var element = doc.GetElement(selectedId);
+                //参数赋值
+                BeamAnnotationData.LoadConfig(doc);
+                var beamParameterNames = Enum.GetNames(typeof(BeamAnnotationParameters));
+                var parameter = element.GetParameters(nameof(BeamAnnotationParameters.梁名称)).FirstOrDefault();
+                if (parameter == null)
                 {
-                    var view = doc.ActiveView;
-                    var element = doc.GetElement(selectedId);
-                    //参数赋值
-                    BeamAnnotationData.LoadConfig(doc);
-                    var beamParameterNames = Enum.GetNames(typeof(BeamAnnotationParameters));
-                    var parameter = element.GetParameters(nameof(BeamAnnotationParameters.梁名称)).FirstOrDefault();
-                    if (parameter == null)
+                    string shareFilePath = @"E:\WorkingSpace\Tasks\0526标注\标注_共享参数(全).txt";
+                    var parameterHelper = new ShareParameter(shareFilePath);
+                    foreach (var beamParameterName in beamParameterNames)
                     {
-                        string shareFilePath = @"E:\WorkingSpace\Tasks\0526标注\标注_共享参数(全).txt";
-                        var parameterHelper = new ShareParameter(shareFilePath);
-                        foreach (var beamParameterName in beamParameterNames)
-                        {
-                            if (new List<string>() {
+                        if (new List<string>() {
                             nameof(BeamAnnotationParameters.梁名称)
                             ,nameof(BeamAnnotationParameters.箍筋直径)}
-                                .Contains(beamParameterName))
-                                AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.PG_TEXT);
-                            //parameterHelper.AddShadeParameter(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.PG_TEXT);
-                            else if (new List<string>() {
+                            .Contains(beamParameterName))
+                            AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.PG_TEXT);
+                        //parameterHelper.AddShadeParameter(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.PG_TEXT);
+                        else if (new List<string>() {
                             nameof(BeamAnnotationParameters.梁宽)
                             ,nameof(BeamAnnotationParameters.梁高)}
-                                .Contains(beamParameterName))
-                                AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.PG_GEOMETRY);
-                            //parameterHelper.AddShadeParameter(doc, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.PG_GEOMETRY);
-                            else
-                                AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.INVALID);
-                            //parameterHelper.AddShadeParameter(doc, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.INVALID);
-                        }
+                            .Contains(beamParameterName))
+                            AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.PG_GEOMETRY);
+                        //parameterHelper.AddShadeParameter(doc, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.PG_GEOMETRY);
+                        else
+                            AddSharedParameterByDefaulGroupName(doc, shareFilePath, BeamAnnotationParameterGroupName, beamParameterName, element.Category, true, Autodesk.Revit.DB.BuiltInParameterGroup.INVALID);
+                        //parameterHelper.AddShadeParameter(doc, BeamAnnotationParameterGroupName, beamParameterName, element.Category, false, Autodesk.Revit.DB.BuiltInParameterGroup.INVALID);
                     }
-                    //参数赋值
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁名称)).FirstOrDefault().Set(BeamAnnotationData.BeamName);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁加腋)).FirstOrDefault().Set(BeamAnnotationData.BeamHaunching);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁加腋可见性)).FirstOrDefault().Set(Convert.ToInt32(BeamAnnotationData.BeamHaunchingVisibility));
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁箍筋)).FirstOrDefault().Set(BeamAnnotationData.Hooping);
-                    element.GetParameters(nameof(BeamAnnotationParameters.箍筋直径)).FirstOrDefault().Set(BeamAnnotationData.HoopingDiameter);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁纵筋)).FirstOrDefault().Set(BeamAnnotationData.LongitudinalBar);
-                    element.GetParameters(nameof(BeamAnnotationParameters.纵筋级别)).FirstOrDefault().Set(BeamAnnotationData.LongitudinalBarLevel);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁腰筋)).FirstOrDefault().Set(BeamAnnotationData.WaistBar);
-                    element.GetParameters(nameof(BeamAnnotationParameters.腰筋级别)).FirstOrDefault().Set(BeamAnnotationData.WaistBarLevel);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁顶绝对标高)).FirstOrDefault().Set(BeamAnnotationData.BeamAbsoluteTop);
-                    element.GetParameters(nameof(BeamAnnotationParameters.梁顶相对偏移)).FirstOrDefault().Set(BeamAnnotationData.BeamRelationalSkew);
-                    var symbol = (element as FamilyInstance).Symbol;
-                    symbol.GetParameters(nameof(BeamAnnotationParameters.梁宽)).FirstOrDefault().Set(BeamAnnotationData.BeamWidth);
-                    symbol.GetParameters(nameof(BeamAnnotationParameters.梁高)).FirstOrDefault().Set(BeamAnnotationData.BeamHeight);
                 }
+                //参数赋值
+                element.GetParameters(nameof(BeamAnnotationParameters.梁名称)).FirstOrDefault().Set(BeamAnnotationData.BeamName);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁加腋)).FirstOrDefault().Set(BeamAnnotationData.BeamHaunching);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁加腋可见性)).FirstOrDefault().Set(Convert.ToInt32(BeamAnnotationData.BeamHaunchingVisibility));
+                element.GetParameters(nameof(BeamAnnotationParameters.梁箍筋)).FirstOrDefault().Set(BeamAnnotationData.Hooping);
+                element.GetParameters(nameof(BeamAnnotationParameters.箍筋直径)).FirstOrDefault().Set(BeamAnnotationData.HoopingDiameter);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁纵筋)).FirstOrDefault().Set(BeamAnnotationData.LongitudinalBar);
+                element.GetParameters(nameof(BeamAnnotationParameters.纵筋级别)).FirstOrDefault().Set(BeamAnnotationData.LongitudinalBarLevel);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁腰筋)).FirstOrDefault().Set(BeamAnnotationData.WaistBar);
+                element.GetParameters(nameof(BeamAnnotationParameters.腰筋级别)).FirstOrDefault().Set(BeamAnnotationData.WaistBarLevel);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁顶绝对标高)).FirstOrDefault().Set(BeamAnnotationData.BeamAbsoluteTop);
+                element.GetParameters(nameof(BeamAnnotationParameters.梁顶相对偏移)).FirstOrDefault().Set(BeamAnnotationData.BeamRelationalSkew);
+                var symbol = (element as FamilyInstance).Symbol;
+                symbol.GetParameters(nameof(BeamAnnotationParameters.梁宽)).FirstOrDefault().Set(BeamAnnotationData.BeamWidth);
+                symbol.GetParameters(nameof(BeamAnnotationParameters.梁高)).FirstOrDefault().Set(BeamAnnotationData.BeamHeight);
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, () =>
+            TransactionHelper.DelegateTransaction(doc, "绘图处理", () =>
             {
-                //如果上述两者获取到了对应的族
-                if (tagSymbol != null)
-                {
-                    var view = doc.ActiveView;
-                    var element = doc.GetElement(selectedId);
-                    //中点出线
-                    var locationCurve = (element.Location as LocationCurve).Curve;
-                    var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
-                    var parallelVector = (locationCurve as Line).Direction;
-                    if (parallelVector.X<0||(parallelVector.X==0&&parallelVector.Y==-1))
-                        parallelVector = new XYZ(-parallelVector.X, -parallelVector.Y, parallelVector.Z);
-                    var vecticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                    var standardLength = 6;
-                    var line =doc.Create.NewDetailCurve(view, Line.CreateBound(midPoint, midPoint + standardLength * vecticalVector));
-                    //中点绘字
-                    var tag1 = doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint);
-                    //通过BoundingBox计算
-                    //var boundingBox = tag1.get_BoundingBox(view);
-                    //var diagonalLine = Line.CreateBound(boundingBox.Max ,boundingBox.Min);
-                    //var intersectionAngle = parallelVector.AngleTo(diagonalLine.Direction);
-                    //var targetPoint = midPoint + diagonalLine.Length * Math.Abs(Math.Sin(intersectionAngle))* vecticalVector + diagonalLine.Length * Math.Abs(Math.Cos(intersectionAngle)) * parallelVector;
-                    //确定长宽
-                    var parallelLength = 9.5;
-                    var vecticalLength = 1;
-                    var targetPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2 + parallelLength * parallelVector + vecticalLength * vecticalVector;
-                    ////删除中点绘字
-                    doc.Delete(tag1.Id);
-                    ////平行移动
-                    //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + parallelLength * parallelVector);
-                    ////垂直移动
-                    //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + vecticalLength * vecticalVector);
-                    //综合移动
-                    var tag2 = doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, targetPoint);
+                //绘图处理
+                double parallelLength = BeamAnnotationConstaints.parallelLength;
+                int vecticalLength = BeamAnnotationConstaints.vecticalLength;
+                int standardLength = BeamAnnotationConstaints.standardLength;
+                string relatedLineField = BeamAnnotationConstaints.relatedLineField;
+                string relatedTagField = BeamAnnotationConstaints.relatedTagField;
+                string relatedBeamField = BeamAnnotationConstaints.relatedBeamField;
+                string relatedViewField = BeamAnnotationConstaints.relatedViewField;
+                var view = doc.ActiveView;
+                var beam = doc.GetElement(selectedId);
+                //中点出线
+                var locationCurve = (beam.Location as LocationCurve).Curve;
+                var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+                var parallelVector = (locationCurve as Line).Direction;
+                if (parallelVector.X < 0 || (parallelVector.X == 0 && parallelVector.Y == -1))
+                    parallelVector = new XYZ(-parallelVector.X, -parallelVector.Y, parallelVector.Z);
+                var vecticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+                var line = doc.Create.NewDetailCurve(view, Line.CreateBound(midPoint, midPoint + standardLength * vecticalVector));
+                //中点绘字
+                var tag1 = doc.Create.NewTag(view, beam, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint);
+                //通过BoundingBox计算
+                //var boundingBox = tag1.get_BoundingBox(view);
+                //var diagonalLine = Line.CreateBound(boundingBox.Max ,boundingBox.Min);
+                //var intersectionAngle = parallelVector.AngleTo(diagonalLine.Direction);
+                //var targetPoint = midPoint + diagonalLine.Length * Math.Abs(Math.Sin(intersectionAngle))* vecticalVector + diagonalLine.Length * Math.Abs(Math.Cos(intersectionAngle)) * parallelVector;
+                //确定长宽
+                var targetPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2 + parallelLength * parallelVector + vecticalLength * vecticalVector;
+                ////删除中点绘字
+                doc.Delete(tag1.Id);
+                ////平行移动
+                //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + parallelLength * parallelVector);
+                ////垂直移动
+                //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + vecticalLength * vecticalVector);
+                //综合移动
+                var tag2 = doc.Create.NewTag(view, beam, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, targetPoint);
 
-                    //关系存储
-                    var collection = MyTestContext.GetCollection(doc);
-                    collection.Add(new BeamAnnotationEntity(element.Id.IntegerValue, line.Id.IntegerValue, tag2.Id.IntegerValue));
-                    MyTestContext.SaveCollection(doc);
+                ////更新扩展存储
+                //var opr = new SchemaEntityOpr(line);
+                //opr.SetParm(relatedViewField, view.Id.IntegerValue.ToString());
+                //opr.SetParm(relatedBeamField, beam.Id.IntegerValue.ToString());
+                //opr.SetParm(relatedTagField, tag2.Id.IntegerValue.ToString());
+                //opr.SaveTo(line);
+                //opr = new SchemaEntityOpr(tag2);
+                //opr.SetParm(relatedViewField, view.Id.IntegerValue.ToString());
+                //opr.SetParm(relatedBeamField, beam.Id.IntegerValue.ToString());
+                //opr.SetParm(relatedLineField, line.Id.IntegerValue.ToString());
+                //opr.SaveTo(tag2);
 
-                    //var recorder = GetRecorder(doc);
-                    //var length = recorder.GetValueAsInt(nameof(SaveKey.CollectionLength), 0);
-                    //var data = recorder.GetValue(nameof(SaveKey.CollectionData), "", length + 2);
-                    //BeamAnnotationEntityCollection collection = new BeamAnnotationEntityCollection(data);
-                    //collection.Add(new BeamAnnotationEntity(element.Id.IntegerValue, line.Id.IntegerValue, tag2.Id.IntegerValue));
-                    //data = collection.ToData();
-                    //recorder.WriteValue(nameof(SaveKey.CollectionData), data);
-                    //recorder.WriteValue(nameof(SaveKey.CollectionLength), data.Length.ToString());
-                }
+                //关系存储
+                var collection = MyTestContext.GetCollection(doc);
+                collection.Add(new BeamAnnotationEntity(view.Id.IntegerValue, beam.Id.IntegerValue, line.Id.IntegerValue, tag2.Id.IntegerValue));
+                MyTestContext.SaveCollection(doc);
                 return true;
             });
-
-
-            //var tag1 = doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, headerPoint);
-            //var boundingBox = tag1.get_BoundingBox(view);
-            //headerPoint += (boundingBox.Max - boundingBox.Min);
-            //var tag2 = doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, headerPoint);
-            //共享参数
-            //var doc = commandData.Application.ActiveUIDocument.Document;
-            //doc.Application.SharedParametersFilename = SharedParameterFile;
-            //if (!File.Exists(SharedParameterFile))
-            //{
-            //    var fs = File.Create(SharedParameterFile);
-            //    fs.Close();
-            //}
-            //DefinitionFile definitionFile = doc.Application.OpenSharedParameterFile();
             return Result.Succeeded;
         }
 
-        public static bool AddSharedParameterByDefaulGroupName(Document doc,string sharedParameterFile,string groupName, string parameterName, Category newCategory, bool isInstance, BuiltInParameterGroup parameterGroup)
+        public static bool AddSharedParameterByDefaulGroupName(Document doc, string sharedParameterFile, string groupName, string parameterName, Category newCategory, bool isInstance, BuiltInParameterGroup parameterGroup)
         {
             doc.Application.SharedParametersFilename = sharedParameterFile;
             DefinitionFile definitionFile = doc.Application.OpenSharedParameterFile();
@@ -423,7 +421,7 @@ namespace MyRevit.Entities
             else
                 binding = doc.Application.Create.NewTypeBinding(categories);
             doc.ParameterBindings.Remove(definition);
-            var result= doc.ParameterBindings.Insert(definition, binding, parameterGroup);
+            var result = doc.ParameterBindings.Insert(definition, binding, parameterGroup);
             return result;
         }
         private static void TaskDialogShow(string message)

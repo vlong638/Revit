@@ -7,9 +7,9 @@ namespace MyRevit.Utilities
 {
     public class TransactionHelper
     {
-        public static bool DelegateTransaction(Document doc, Func<bool> function)
+        public static bool DelegateTransaction(Document doc, string transactionName, Func<bool> function)
         {
-            using (var transaction = new Transaction(doc,"DefaultTransactionName"))
+            using (var transaction = new Transaction(doc, transactionName))
             {
                 transaction.Start();
                 try
