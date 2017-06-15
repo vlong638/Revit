@@ -1,54 +1,19 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MyRevit.MyTests.PipeAnnotation;
 using MyRevit.Utilities;
 using PmSoft.Common.CommonClass;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace MyRevit.Entities
 {
-    public enum SinglePipeTagLocation
-    {
-        OnPipe,
-        AbovePipe,
-    }
-    class SinglePipeAnnotationSettings
-    {
-        public bool NeedLeader { set; get; }
-        public double LengthFromLine { set; get; }
-        public SinglePipeTagLocation Location { set; get; }
-        //public bool Cover { set; get; }
-    }
 
-    public enum MultiPipeTagLocation
-    {
-        OnLineEdge,
-        OnLine,
-    }
-    class MultiPipeAnnotationSettings
-    {
-        public double LengthBetweenPipe { set; get; }
-        public MultiPipeTagLocation Location { set; get; }
-        //public bool Cover { set; get; }
-    }
-
-    public class PipeFilter : ISelectionFilter
-    {
-        RevitLinkInstance rvtIns = null;
-        public bool AllowElement(Element elem)
-        {
-            var doc = elem.Document;
-            var category = Category.GetCategory(doc, BuiltInCategory.OST_PipeCurves);
-            return elem.Category.Id == category.Id;
-        }
-        public bool AllowReference(Reference reference, XYZ position)
-        {
-            return false;
-        }
-    }
     [Transaction(TransactionMode.Manual)]
     public class PipeAnnotationCommand : IExternalCommand
     {
@@ -85,23 +50,23 @@ namespace MyRevit.Entities
                 FamilySymbol tagSymbol = null;
                 TransactionHelper.DelegateTransaction(doc, "加载族", () =>
                 {
-                //查找族类型
-                string tagName = "管道尺寸标记";
+                    //查找族类型
+                    string tagName = "管道尺寸标记";
                     var symbols = new FilteredElementCollector(doc)
                         .WherePasses(new ElementCategoryFilter(BuiltInCategory.OST_PipeTags))
                         .WherePasses(new ElementClassFilter(typeof(FamilySymbol)));
                     var targetSymbol = symbols.FirstOrDefault(c => (c as FamilySymbol).FamilyName == tagName);
                     if (targetSymbol != null)
                         tagSymbol = targetSymbol as FamilySymbol;
-                //空时加载族类型
-                if (tagSymbol == null)
+                    //空时加载族类型
+                    if (tagSymbol == null)
                     {
                         var symbolFile = @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa";
                         Family family;
                         if (doc.LoadFamily(symbolFile, out family))
                         {
-                        //获取族类型集合Id
-                        var familySymbolIds = family.GetFamilySymbolIds();
+                            //获取族类型集合Id
+                            var familySymbolIds = family.GetFamilySymbolIds();
                             foreach (var familySymbolId in familySymbolIds)
                             {
                                 var element = doc.GetElement(familySymbolId) as FamilySymbol;
@@ -121,13 +86,11 @@ namespace MyRevit.Entities
                 });
                 if (tagSymbol == null)
                     return Result.Failed;
-
                 TransactionHelper.DelegateTransaction(doc, "选择使用的标注", () =>
                 {
                     //TODO
                     return true;
                 });
-
                 TransactionHelper.DelegateTransaction(doc, "文字位于管道", () =>
                 {
                     var pipe = doc.GetElement(selectedId);
@@ -136,7 +99,6 @@ namespace MyRevit.Entities
                     var tag = doc.Create.NewTag(view, pipe, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint);
                     return true;
                 });
-
                 TransactionHelper.DelegateTransaction(doc, "文字位于管道上方", () =>
                 {
                     double length = 8;
@@ -146,11 +108,10 @@ namespace MyRevit.Entities
                     var parallelVector = (locationCurve as Line).Direction;
                     var verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
                     if (verticalVector.Y < 0 || (verticalVector.Y == 0 && verticalVector.X == -1))//控制到一二象限
-                    verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+                        verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
                     var tag = doc.Create.NewTag(view, pipe, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + length * verticalVector);
                     return true;
                 });
-
                 TransactionHelper.DelegateTransaction(doc, "引线", () =>
                 {
                     double length = 5;
@@ -165,7 +126,6 @@ namespace MyRevit.Entities
                     var tag = doc.Create.NewTag(view, pipe, needLeader, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + length * verticalVector);
                     return true;
                 });
-
                 TransactionHelper.DelegateTransaction(doc, "标记距离管道边缘5mm", () =>
                 {
                     double length = 5;
@@ -205,85 +165,189 @@ namespace MyRevit.Entities
                     }
                     return true;
                 });
-
             }
 
             if (true)
             {
-                FamilySymbol tagSymbol = null;
-                TransactionHelper.DelegateTransaction(doc, "加载族", () =>
-                {
-                    //查找族类型
-                    string tagName = "多管直径标注";
-                    var symbols = new FilteredElementCollector(doc)
-                        .WherePasses(new ElementCategoryFilter(BuiltInCategory.OST_PipeTags))
-                        .WherePasses(new ElementClassFilter(typeof(FamilySymbol)));
-                    var targetSymbol = symbols.FirstOrDefault(c => (c as FamilySymbol).FamilyName == tagName);
-                    if (targetSymbol != null)
-                        tagSymbol = targetSymbol as FamilySymbol;
-                    //空时加载族类型
-                    if (tagSymbol == null)
-                    {
-                        var symbolFile = @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa";
-                        Family family;
-                        if (doc.LoadFamily(symbolFile, out family))
-                        {
-                            //获取族类型集合Id
-                            var familySymbolIds = family.GetFamilySymbolIds();
-                            foreach (var familySymbolId in familySymbolIds)
-                            {
-                                var element = doc.GetElement(familySymbolId) as FamilySymbol;
-                                if (element != null && element.FamilyName == tagName)
-                                {
-                                    tagSymbol = element;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            TaskDialogShow("加载族文件失败");
-                        }
-                    }
-                    return true;
-                });
-                if (tagSymbol == null)
-                    return Result.Failed;
-
                 var selectedIds = uiDoc.Selection.PickObjects(ObjectType.Element, new PipeFilter());
-
-                if (TransactionHelper.DelegateTransaction(doc, "多管-平行检测", () =>
+                if (false)
                 {
-                    XYZ verticalVector = null;
-                    foreach (var selectedId in selectedIds)
+                    TransactionHelper.DelegateTransaction(doc, "多管-平行检测", () =>
                     {
-                        var pipe = doc.GetElement(selectedId) as Autodesk.Revit.DB.Plumbing.Pipe;
-                        var direction = ((pipe.Location as LocationCurve).Curve as Line).Direction;
-                        if (verticalVector == null)
-                            verticalVector = new XYZ(direction.Y, -direction.X, direction.Z);
-                        if (direction.X * verticalVector.X + direction.Y * verticalVector.Y != 0)
-                            return false;
-                    }
-                    return true;
-                }))
-                {
-                    TransactionHelper.DelegateTransaction(doc, "多管-文字位于线端", () =>
-                    {
-
-
+                        XYZ verticalVector = null;
+                        foreach (var selectedId in selectedIds)
+                        {
+                            var pipe = doc.GetElement(selectedId) as Autodesk.Revit.DB.Plumbing.Pipe;
+                            var direction = ((pipe.Location as LocationCurve).Curve as Line).Direction;
+                            if (verticalVector == null)
+                                verticalVector = new XYZ(direction.Y, -direction.X, direction.Z);
+                            if (direction.X * verticalVector.X + direction.Y * verticalVector.Y != 0)
+                                return false;
+                        }
                         return true;
                     });
                 }
+                FamilySymbol singleTagSymbol = null;
+                FamilySymbol multipleTagSymbol = null;
+                if (!TransactionHelper.DelegateTransaction(doc, "多管-平行检测", () =>
+                {
+                    singleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记", BuiltInCategory.OST_PipeTags);
+                    multipleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端", BuiltInCategory.OST_DetailComponents);
+                    return true;
+                }))
+                    return Result.Failed;
+                var familyDoc = doc.EditFamily(singleTagSymbol.Family);
+                var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                var textSizeStr = textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_SIZE).AsValueString();
+                double textSize = double.Parse(textSizeStr.Substring(0, textSizeStr.IndexOf(" mm")));
+                double widthScale = double.Parse(textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsValueString());
+                Font font = new Font("Angsana New", 20);
+                TransactionHelper.DelegateTransaction(doc, "多管-文字位于线端", () =>
+                {
+                    if (singleTagSymbol == null || multipleTagSymbol == null)
+                        return false;
+
+                    var collection = PipeAnnotationContext.GetCollection(doc);
+                    PipeAnnotationEntity entity = new PipeAnnotationEntity();
+                    entity.ViewId = view.Id.IntegerValue;
+                    XYZ parallelVector = null;
+                    XYZ verticalVector = null;
+                    List<Pipe> pipes = new List<Pipe>();
+                    foreach (var selectedId in selectedIds)
+                    {
+                        pipes.Add(doc.GetElement(selectedId) as Pipe);
+                        entity.PipeIds.Add(selectedId.ElementId.IntegerValue);
+                    }
+                    //平行检测
+                    foreach (var pipe in pipes)
+                    {
+                        var direction = ((pipe.Location as LocationCurve).Curve as Line).Direction;
+                        if (parallelVector == null)
+                        {
+                            parallelVector = direction;
+                            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+                            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+                            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+                        }
+                        var crossProduct = direction.CrossProduct(verticalVector);
+                        if (crossProduct.X != 0 || crossProduct.Y != 0)
+                            return false;
+                    }
+                    //标签构建
+                    List<XYZ> targetPoints = new List<XYZ>();
+                    foreach (var pipe in pipes)
+                    {
+                        var locationCurve = (pipe.Location as LocationCurve).Curve;
+                        if (targetPoints.Count > 0)
+                        {
+                            locationCurve.MakeUnbound();
+                            targetPoints.Add(locationCurve.Project(targetPoints.First()).XYZPoint);
+                        }
+                        else
+                        {
+                            var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+                            targetPoints.Add(midPoint);
+                        }
+                    }
+                    var unitType = MyTests.PipeAnnotation.UnitType.millimeter;
+                    var textHeight = 150;
+                    //线下探长度
+                    double deepLength = targetPoints.First().DistanceTo(targetPoints.Last());
+                    targetPoints = targetPoints.OrderByDescending(c => c.Y).ToList();
+                    //if (verticalVector.Y < 0 || (verticalVector.Y == 0 && verticalVector.X == -1))//控制到一二象限
+                    //    verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+                    //起始点
+                    var startPoint = targetPoints.First();// - verticalVector * deepLength;
+                    //实例创建及参数赋值
+                    if (!multipleTagSymbol.IsActive)
+                        multipleTagSymbol.Activate();
+                    var tagFrame = doc.Create.NewFamilyInstance(startPoint, multipleTagSymbol, view);
+                    entity.LineId = tagFrame.Id.IntegerValue;
+                    //标签结构旋转处理
+                    if (verticalVector.Y != 1)
+                    {
+                        LocationPoint locationPoint = tagFrame.Location as LocationPoint;
+                        if (locationPoint != null)
+                        {
+                            locationPoint.RotateByXY(startPoint, verticalVector);
+
+                            //var start = startPoint;
+                            //Line axis = Line.CreateBound(start, start.Add(new XYZ(0, 0, 10)));
+                            //locationPoint.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+                        }
+                    }
+                    //节点偏移设置
+                    tagFrame.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
+                    tagFrame.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToInch(textHeight, unitType));
+                    for (int i = 2; i <= 8; i++)
+                    {
+                        var first = targetPoints.First();
+                        if (targetPoints.Count() >= i)
+                        {
+                            var cur = targetPoints[i - 1];
+                            tagFrame.GetParameters(string.Format("节点{0}可见性", i)).First().Set(1);
+                            tagFrame.GetParameters(string.Format("节点{0}距离", i)).First().Set(cur.DistanceTo(first));
+                            //tag.GetParameters(string.Format("节点{0}距离", i)).First().Set(UnitHelper.ConvertFromInchTo(cur.DistanceTo(first), unitType));
+                        }
+                        else
+                        {
+                            tagFrame.GetParameters(string.Format("节点{0}可见性", i)).First().Set(0);
+                            tagFrame.GetParameters(string.Format("节点{0}距离", i)).First().Set(0);
+                        }
+                    }
+                    tagFrame.GetParameters(TagProperty.文字行数.ToString()).First().Set(targetPoints.Count());
+                    if (false)
+                    {
+                        entity.LocationType = MultiPipeTagLocation.OnLineEdge;
+                        #region 文字位于线端
+                        //添加对应的单管直径标注
+                        tagFrame.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, unitType));
+                        var height = Convert.ToDouble(tagFrame.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
+                         (targetPoints.Count() - 1) * textHeight;
+                        var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                        //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+                        for (int i = 0; i < pipes.Count(); i++)
+                        {
+                            var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
+                                , startPoint + UnitHelper.ConvertToInch(height - i * textHeight, unitType) * verticalVector + skewLength * parallelVector);
+                            var text = subTag.TagText;
+                            var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
+                            var actualLength = textLength / (textSize * widthScale);
+                            subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
+                        }
+                        #endregion
+                    }
+                    if (true)
+                    {
+                        entity.LocationType = MultiPipeTagLocation.OnLine;
+                        #region 文字位于线上
+                        //添加对应的单管直径标注
+                        tagFrame.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, unitType));
+                        var height = Convert.ToDouble(tagFrame.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
+                         (targetPoints.Count() - 1) * textHeight;
+                        var skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
+                        //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+                        for (int i = 0; i < pipes.Count(); i++)
+                        {
+                            var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
+                                , startPoint + UnitHelper.ConvertToInch(height - (i - 0.5) * textHeight, unitType) * verticalVector + skewLength * parallelVector);
+                            var text = subTag.TagText;
+                            var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
+                            var actualLength = textLength / (textSize * widthScale);
+                            subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
+                            entity.TagIds.Add(subTag.Id.IntegerValue);
+                        }
+                        #endregion
+                    }
+                    collection.Add(entity);
+                    collection.Save(doc);
+                    return true;
+                });
             }
-
-
-            TransactionHelper.DelegateTransaction(doc, "多管-文字位于线端", () =>
-            {
-                return true;
-            });
 
             TransactionHelper.DelegateTransaction(doc, "多管-文字位于线上", () =>
             {
+                FamilySymbol tagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在线上", BuiltInCategory.OST_DetailComponents);
                 return true;
             });
             TransactionHelper.DelegateTransaction(doc, "多管-一键标注", () =>
@@ -298,19 +362,66 @@ namespace MyRevit.Entities
             {
                 return true;
             });
-
-
-
-
-
-
-
             TransactionHelper.DelegateTransaction(doc, "修改标高的基面", () =>
-            {
-                return true;
-            });
+                {
+                    return true;
+                });
             return Result.Succeeded;
         }
+
+        //private void SetParameterValue(Element element, string parameterName, bool parameterValue)
+        //{
+        //    SetParameterValue(element, parameterName, Convert.ToInt32(parameterValue));
+        //}
+        //private void SetParameterValue(Element element, string parameterName, int parameterValue)
+        //{
+        //    element.GetParameters(parameterName).First().Set(parameterValue);
+        //}
+        //private void SetParameterValue(Element element, string parameterName, double parameterValue)
+        //{
+        //    element.GetParameters(parameterName).First().Set(parameterValue);
+        //}
+        //private void SetParameterValue(Element element, string parameterName, string parameterValue)
+        //{
+        //    element.GetParameters(parameterName).First().Set(parameterValue);
+        //}
+        private static FamilySymbol LoadFamilySymbol(Document doc, string familyFilePath, string familyName, string name, BuiltInCategory category)
+        {
+            FamilySymbol symbol = null;
+            var symbols = new FilteredElementCollector(doc)
+                .WherePasses(new ElementCategoryFilter(category))
+                .WherePasses(new ElementClassFilter(typeof(FamilySymbol)));
+            var targetSymbol = symbols.FirstOrDefault(c => (c as FamilySymbol).FamilyName == familyName && (c as FamilySymbol).Name == name);
+            if (targetSymbol != null)
+                symbol = targetSymbol as FamilySymbol;
+            //空时加载族类型
+            if (symbol == null)
+            {
+                var symbolFile = familyFilePath;
+                Family family;
+                if (doc.LoadFamily(symbolFile, out family))
+                {
+                    //获取族类型集合Id
+                    var familySymbolIds = family.GetFamilySymbolIds();
+                    foreach (var familySymbolId in familySymbolIds)
+                    {
+                        var element = doc.GetElement(familySymbolId) as FamilySymbol;
+                        if (element != null && element.FamilyName == name)
+                        {
+                            symbol = element;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    TaskDialogShow("加载族文件失败");
+                }
+            }
+
+            return symbol;
+        }
+
 
         private static void TaskDialogShow(string message)
         {

@@ -14,8 +14,9 @@ namespace MyRevit.Utilities
         {
             XYZ dataToStore = null;
             var storageName = "MyTest";
+            RemoveStorage(doc, storageName);
             var storage = CreateStorage(doc, storageName);
-            storage = GetStorage(doc, storageName);
+            storage = GetOrCreateStorage(doc, storageName);
 
             #region AddSimpleField
             if (true)
@@ -25,9 +26,12 @@ namespace MyRevit.Utilities
                 schemaBuilder.SetReadAccessLevel(AccessLevel.Public);
                 //写权限
                 schemaBuilder.SetWriteAccessLevel(AccessLevel.Public);
-                //AddSimpleField
+                //Field
                 var fieldName = "versionNum";
                 schemaBuilder.AddSimpleField(fieldName, typeof(short));
+                var fieldName2 = "businessName";
+                schemaBuilder.AddSimpleField(fieldName2, typeof(string));
+                //SchemaName
                 var schemaName = "AddSimpleField";
                 schemaBuilder.SetSchemaName(schemaName);
                 var schema = schemaBuilder.Finish();
@@ -35,10 +39,41 @@ namespace MyRevit.Utilities
                 Entity entityToWrite = new Entity(schema);
                 Field valueField = schema.GetField(fieldName);
                 entityToWrite.Set<short>(valueField, 11);
+                valueField = schema.GetField(fieldName2);
+                entityToWrite.Set<string>(valueField, "VL");
                 storage.SetEntity(entityToWrite);
                 //read
                 Entity entityFromRead = storage.GetEntity(schema);
                 short dataFromStore = entityFromRead.Get<short>(schema.GetField(fieldName));
+                string businusessName = entityFromRead.Get<string>(schema.GetField(fieldName2));
+            }
+            if (true)
+            {
+                SchemaBuilder schemaBuilder = new SchemaBuilder(new Guid("720080CB-DA99-40DC-9415-E53F280AA1F0"));
+                //读权限 
+                schemaBuilder.SetReadAccessLevel(AccessLevel.Public);
+                //写权限
+                schemaBuilder.SetWriteAccessLevel(AccessLevel.Public);
+                //Field
+                var fieldName = "versionNum";
+                schemaBuilder.AddSimpleField(fieldName, typeof(short));
+                var fieldName2 = "businessName2";
+                schemaBuilder.AddSimpleField(fieldName2, typeof(string));
+                //SchemaName
+                var schemaName = "AddSimpleField";
+                schemaBuilder.SetSchemaName(schemaName);
+                var schema = schemaBuilder.Finish();
+                //write
+                Entity entityToWrite = new Entity(schema);
+                Field valueField = schema.GetField(fieldName);
+                entityToWrite.Set<short>(valueField, 11);
+                valueField = schema.GetField(fieldName2);
+                entityToWrite.Set<string>(valueField, "VL");
+                storage.SetEntity(entityToWrite);
+                //read
+                Entity entityFromRead = storage.GetEntity(schema);
+                short dataFromStore = entityFromRead.Get<short>(schema.GetField(fieldName));
+                string businusessName = entityFromRead.Get<string>(schema.GetField(fieldName2));
             }
             if (true)
             {
@@ -50,11 +85,14 @@ namespace MyRevit.Utilities
                 //AddSimpleField
                 var fieldName = "versionNum";
                 schemaBuilder.AddSimpleField(fieldName, typeof(short));
+                var fieldName2 = "businessName";
+                schemaBuilder.AddSimpleField(fieldName2, typeof(string));
                 var schemaName = "AddSimpleField";
                 schemaBuilder.SetSchemaName(schemaName);
                 var schema = schemaBuilder.Finish();
                 var entity = storage.GetEntity(schema);
                 short dataFromStore = entity.Get<short>(schema.GetField(fieldName));
+                schema.Dispose();
             }
             #endregion
 
@@ -136,14 +174,14 @@ namespace MyRevit.Utilities
             #endregion
         }
 
+        #region DataStorage
         public static DataStorage CreateStorage(Document doc, string name)
         {
             DataStorage st = DataStorage.Create(doc);
             st.Name = name;
             return st;
         }
-
-        public static DataStorage GetStorage(Document doc, string name)
+        public static DataStorage GetOrCreateStorage(Document doc, string name)
         {
             FilteredElementCollector eleCollector = new FilteredElementCollector(doc).OfClass(typeof(DataStorage));
             foreach (DataStorage dt in eleCollector)
@@ -153,14 +191,17 @@ namespace MyRevit.Utilities
                     return dt;
                 }
             }
-            return null;
+            return CreateStorage(doc, name);
         }
-
         public static void RemoveStorage(Document doc, string name)
         {
-            var storage = GetStorage(doc, name);
+            var storage = GetOrCreateStorage(doc, name);
             if (storage != null)
                 doc.Delete(storage.Id);
-        }
+        } 
+        #endregion
+
+
+
     }
 }

@@ -122,6 +122,13 @@
     <Compile Include="MyTests\FilterElementCommand.cs" />
     <Compile Include="MyTests\MyExternalApplication.cs" />
     <Compile Include="MyTests\AdvancedRevitCommand.cs" />
+    <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotation\MultiPipeAnnotationSettings.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeFilter.cs" />
+    <Compile Include="MyTests\PipeAnnotation\SinglePipeAnnotationSettings.cs" />
+    <Compile Include="MyTests\PipeAnnotation\TagProperty.cs" />
+    <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
+    <Compile Include="MyTests\PipeUpdaterCommand.cs" />
     <Compile Include="MyTests\PipeAnnotationCommand.cs" />
     <Compile Include="MyTests\BeamUpdaterCommand.cs" />
     <Compile Include="MyTests\BeamAnnotationCommand.cs" />
@@ -241,6 +248,7 @@
     <Compile Include="Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
     <Compile Include="Utilities\TransactionHelper.cs" />
+    <Compile Include="Utilities\UnitTransUtils.cs" />
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
       <SubType>Designer</SubType>
