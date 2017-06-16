@@ -189,13 +189,14 @@ namespace MyRevit.Entities
                 }
                 FamilySymbol singleTagSymbol = null;
                 FamilySymbol multipleTagSymbol = null;
-                if (!TransactionHelper.DelegateTransaction(doc, "多管-平行检测", () =>
+                if (!TransactionHelper.DelegateTransaction(doc, "多管-族加载", () =>
                 {
                     singleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记", BuiltInCategory.OST_PipeTags);
                     multipleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端", BuiltInCategory.OST_DetailComponents);
                     return true;
                 }))
                     return Result.Failed;
+
                 var familyDoc = doc.EditFamily(singleTagSymbol.Family);
                 var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
                 var textSizeStr = textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_SIZE).AsValueString();
@@ -207,141 +208,153 @@ namespace MyRevit.Entities
                     if (singleTagSymbol == null || multipleTagSymbol == null)
                         return false;
 
-                    var collection = PipeAnnotationContext.GetCollection(doc);
-                    PipeAnnotationEntity entity = new PipeAnnotationEntity();
-                    entity.ViewId = view.Id.IntegerValue;
-                    XYZ parallelVector = null;
-                    XYZ verticalVector = null;
-                    List<Pipe> pipes = new List<Pipe>();
-                    foreach (var selectedId in selectedIds)
+                    AnnotationCreater builder = new AnnotationCreater(doc, singleTagSymbol, multipleTagSymbol, textSize, widthScale);
+                    builder.Calculator = new LocationCalculator(textSize);
+                    switch (builder.GenerateMultipleTagSymbol(selectedIds))
                     {
-                        pipes.Add(doc.GetElement(selectedId) as Pipe);
-                        entity.PipeIds.Add(selectedId.ElementId.IntegerValue);
-                    }
-                    //平行检测
-                    foreach (var pipe in pipes)
-                    {
-                        var direction = ((pipe.Location as LocationCurve).Curve as Line).Direction;
-                        if (parallelVector == null)
-                        {
-                            parallelVector = direction;
-                            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-                            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-                        }
-                        var crossProduct = direction.CrossProduct(verticalVector);
-                        if (crossProduct.X != 0 || crossProduct.Y != 0)
+                        case AnnotationBuildResult.Success:
+                            return true;
+                        case AnnotationBuildResult.NotParallel:
+                        case AnnotationBuildResult.NoLocationType:
+                        default:
                             return false;
                     }
-                    //标签构建
-                    List<XYZ> targetPoints = new List<XYZ>();
-                    foreach (var pipe in pipes)
-                    {
-                        var locationCurve = (pipe.Location as LocationCurve).Curve;
-                        if (targetPoints.Count > 0)
-                        {
-                            locationCurve.MakeUnbound();
-                            targetPoints.Add(locationCurve.Project(targetPoints.First()).XYZPoint);
-                        }
-                        else
-                        {
-                            var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
-                            targetPoints.Add(midPoint);
-                        }
-                    }
-                    var unitType = MyTests.PipeAnnotation.UnitType.millimeter;
-                    var textHeight = 150;
-                    //线下探长度
-                    double deepLength = targetPoints.First().DistanceTo(targetPoints.Last());
-                    targetPoints = targetPoints.OrderByDescending(c => c.Y).ToList();
-                    //if (verticalVector.Y < 0 || (verticalVector.Y == 0 && verticalVector.X == -1))//控制到一二象限
-                    //    verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-                    //起始点
-                    var startPoint = targetPoints.First();// - verticalVector * deepLength;
-                    //实例创建及参数赋值
-                    if (!multipleTagSymbol.IsActive)
-                        multipleTagSymbol.Activate();
-                    var tagFrame = doc.Create.NewFamilyInstance(startPoint, multipleTagSymbol, view);
-                    entity.LineId = tagFrame.Id.IntegerValue;
-                    //标签结构旋转处理
-                    if (verticalVector.Y != 1)
-                    {
-                        LocationPoint locationPoint = tagFrame.Location as LocationPoint;
-                        if (locationPoint != null)
-                        {
-                            locationPoint.RotateByXY(startPoint, verticalVector);
 
-                            //var start = startPoint;
-                            //Line axis = Line.CreateBound(start, start.Add(new XYZ(0, 0, 10)));
-                            //locationPoint.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
-                        }
-                    }
-                    //节点偏移设置
-                    tagFrame.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
-                    tagFrame.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToInch(textHeight, unitType));
-                    for (int i = 2; i <= 8; i++)
-                    {
-                        var first = targetPoints.First();
-                        if (targetPoints.Count() >= i)
-                        {
-                            var cur = targetPoints[i - 1];
-                            tagFrame.GetParameters(string.Format("节点{0}可见性", i)).First().Set(1);
-                            tagFrame.GetParameters(string.Format("节点{0}距离", i)).First().Set(cur.DistanceTo(first));
-                            //tag.GetParameters(string.Format("节点{0}距离", i)).First().Set(UnitHelper.ConvertFromInchTo(cur.DistanceTo(first), unitType));
-                        }
-                        else
-                        {
-                            tagFrame.GetParameters(string.Format("节点{0}可见性", i)).First().Set(0);
-                            tagFrame.GetParameters(string.Format("节点{0}距离", i)).First().Set(0);
-                        }
-                    }
-                    tagFrame.GetParameters(TagProperty.文字行数.ToString()).First().Set(targetPoints.Count());
-                    if (false)
-                    {
-                        entity.LocationType = MultiPipeTagLocation.OnLineEdge;
-                        #region 文字位于线端
-                        //添加对应的单管直径标注
-                        tagFrame.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, unitType));
-                        var height = Convert.ToDouble(tagFrame.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
-                         (targetPoints.Count() - 1) * textHeight;
-                        var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
-                        //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
-                        for (int i = 0; i < pipes.Count(); i++)
-                        {
-                            var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
-                                , startPoint + UnitHelper.ConvertToInch(height - i * textHeight, unitType) * verticalVector + skewLength * parallelVector);
-                            var text = subTag.TagText;
-                            var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
-                            var actualLength = textLength / (textSize * widthScale);
-                            subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
-                        }
-                        #endregion
-                    }
-                    if (true)
-                    {
-                        entity.LocationType = MultiPipeTagLocation.OnLine;
-                        #region 文字位于线上
-                        //添加对应的单管直径标注
-                        tagFrame.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, unitType));
-                        var height = Convert.ToDouble(tagFrame.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
-                         (targetPoints.Count() - 1) * textHeight;
-                        var skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
-                        //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
-                        for (int i = 0; i < pipes.Count(); i++)
-                        {
-                            var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
-                                , startPoint + UnitHelper.ConvertToInch(height - (i - 0.5) * textHeight, unitType) * verticalVector + skewLength * parallelVector);
-                            var text = subTag.TagText;
-                            var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
-                            var actualLength = textLength / (textSize * widthScale);
-                            subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
-                            entity.TagIds.Add(subTag.Id.IntegerValue);
-                        }
-                        #endregion
-                    }
-                    collection.Add(entity);
-                    collection.Save(doc);
-                    return true;
+                    //var collection = PipeAnnotationContext.GetCollection(doc);
+                    //PipeAnnotationEntity entity = new PipeAnnotationEntity();
+                    //entity.ViewId = view.Id.IntegerValue;
+                    //XYZ parallelVector = null;
+                    //XYZ verticalVector = null;
+                    //List<Pipe> pipes = new List<Pipe>();
+                    //foreach (var selectedId in selectedIds)
+                    //{
+                    //    pipes.Add(doc.GetElement(selectedId) as Pipe);
+                    //    entity.PipeIds.Add(selectedId.ElementId.IntegerValue);
+                    //}
+                    ////平行检测
+                    //foreach (var pipe in pipes)
+                    //{
+                    //    var direction = ((pipe.Location as LocationCurve).Curve as Line).Direction;
+                    //    if (parallelVector == null)
+                    //    {
+                    //        parallelVector = direction;
+                    //        verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+                    //        parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+                    //        verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+                    //    }
+                    //    var crossProduct = direction.CrossProduct(verticalVector);
+                    //    if (crossProduct.X != 0 || crossProduct.Y != 0)
+                    //        return false;
+                    //}
+                    ////节点计算
+                    //List<XYZ> nodePoints = new List<XYZ>();
+                    //foreach (var pipe in pipes)
+                    //{
+                    //    var locationCurve = (pipe.Location as LocationCurve).Curve;
+                    //    if (nodePoints.Count > 0)
+                    //    {
+                    //        locationCurve.MakeUnbound();
+                    //        nodePoints.Add(locationCurve.Project(nodePoints.First()).XYZPoint);
+                    //    }
+                    //    else
+                    //    {
+                    //        var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+                    //        nodePoints.Add(midPoint);
+                    //    }
+                    //}
+                    //var unitType = MyTests.PipeAnnotation.UnitType.millimeter;
+                    //var textHeight = 150;
+                    ////线下探长度
+                    //double deepLength = nodePoints.First().DistanceTo(nodePoints.Last());
+                    //nodePoints = nodePoints.OrderByDescending(c => c.Y).ToList();
+                    ////if (verticalVector.Y < 0 || (verticalVector.Y == 0 && verticalVector.X == -1))//控制到一二象限
+                    ////    verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+                    ////起始点
+                    //var startPoint = nodePoints.First();// - verticalVector * deepLength;
+                    ////线
+                    //if (!multipleTagSymbol.IsActive)
+                    //    multipleTagSymbol.Activate();
+                    //var line = doc.Create.NewFamilyInstance(startPoint, multipleTagSymbol, view);
+                    //entity.LineId = line.Id.IntegerValue;
+                    ////线 旋转处理
+                    //if (verticalVector.Y != 1)
+                    //{
+                    //    LocationPoint locationPoint = line.Location as LocationPoint;
+                    //    if (locationPoint != null)
+                    //    {
+                    //        locationPoint.RotateByXY(startPoint, verticalVector);
+
+                    //        //var start = startPoint;
+                    //        //Line axis = Line.CreateBound(start, start.Add(new XYZ(0, 0, 10)));
+                    //        //locationPoint.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+                    //    }
+                    //}
+                    ////节点偏移设置
+                    //line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
+                    //line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToInch(textHeight, unitType));
+                    //for (int i = 2; i <= 8; i++)
+                    //{
+                    //    var first = nodePoints.First();
+                    //    if (nodePoints.Count() >= i)
+                    //    {
+                    //        var cur = nodePoints[i - 1];
+                    //        line.GetParameters(string.Format("节点{0}可见性", i)).First().Set(1);
+                    //        line.GetParameters(string.Format("节点{0}距离", i)).First().Set(cur.DistanceTo(first));
+                    //        //tag.GetParameters(string.Format("节点{0}距离", i)).First().Set(UnitHelper.ConvertFromInchTo(cur.DistanceTo(first), unitType));
+                    //    }
+                    //    else
+                    //    {
+                    //        line.GetParameters(string.Format("节点{0}可见性", i)).First().Set(0);
+                    //        line.GetParameters(string.Format("节点{0}距离", i)).First().Set(0);
+                    //    }
+                    //}
+                    //line.GetParameters(TagProperty.文字行数.ToString()).First().Set(nodePoints.Count());
+                    //if (false)
+                    //{
+                    //    entity.LocationType = MultiPipeTagLocation.OnLineEdge;
+                    //    #region 文字位于线端
+                    //    //添加对应的单管直径标注
+                    //    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, unitType));
+                    //    var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
+                    //     (nodePoints.Count() - 1) * textHeight;
+                    //    var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                    //    //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+                    //    for (int i = 0; i < pipes.Count(); i++)
+                    //    {
+                    //        var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
+                    //            , startPoint + UnitHelper.ConvertToInch(height - i * textHeight, unitType) * verticalVector + skewLength * parallelVector);
+                    //        var text = subTag.TagText;
+                    //        var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
+                    //        var actualLength = textLength / (textSize * widthScale);
+                    //        subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
+                    //    }
+                    //    #endregion
+                    //}
+                    //if (true)
+                    //{
+                    //    entity.LocationType = MultiPipeTagLocation.OnLine;
+                    //    #region 文字位于线上
+                    //    //添加对应的单管直径标注
+                    //    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, unitType));
+                    //    var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
+                    //     (nodePoints.Count() - 1) * textHeight;
+                    //    var skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
+                    //    //var typeList= new FilteredElementCollector(doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+                    //    for (int i = 0; i < pipes.Count(); i++)
+                    //    {
+                    //        var subTag = doc.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal
+                    //            , startPoint + UnitHelper.ConvertToInch(height - (i - 0.5) * textHeight, unitType) * verticalVector + skewLength * parallelVector);
+                    //        var text = subTag.TagText;
+                    //        var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, font).Width;
+                    //        var actualLength = textLength / (textSize * widthScale);
+                    //        subTag.TagHeadPosition += actualLength / 25.4 * parallelVector;
+                    //        entity.TagIds.Add(subTag.Id.IntegerValue);
+                    //    }
+                    //    #endregion
+                    //}
+                    //collection.Add(entity);
+                    //collection.Save(doc);
+                    //return true;
                 });
             }
 

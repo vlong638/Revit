@@ -118,12 +118,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\BeamAnnotationEntity.cs" />
     <Compile Include="MyTests\EventsCommand.cs" />
     <Compile Include="MyTests\FilterElementCommand.cs" />
     <Compile Include="MyTests\MyExternalApplication.cs" />
     <Compile Include="MyTests\AdvancedRevitCommand.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AnnotationBuilder.cs" />
     <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\MultiPipeAnnotationSettings.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationEntity.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeFilter.cs" />
     <Compile Include="MyTests\PipeAnnotation\SinglePipeAnnotationSettings.cs" />
     <Compile Include="MyTests\PipeAnnotation\TagProperty.cs" />
