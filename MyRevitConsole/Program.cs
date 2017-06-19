@@ -11,6 +11,10 @@ namespace MyRevitConsole
     {
         static void Main(string[] args)
         {
+            var i = 1;
+            var j = ++i + i++;
+
+
             //Autodesk.Revit.Creation.
             var logger = new Log4netLogger();
             logger.SetupLog("Debug");

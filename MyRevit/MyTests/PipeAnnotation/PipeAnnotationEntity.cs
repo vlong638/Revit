@@ -19,6 +19,7 @@ namespace MyRevit.MyTests.PipeAnnotation
         public int LineId { set; get; }
         public List<int> PipeIds { set; get; }
         public List<int> TagIds { set; get; }
+        public XYZ StartPoint { set; get; }
 
         public PipeAnnotationEntity()
         {
@@ -26,13 +27,14 @@ namespace MyRevit.MyTests.PipeAnnotation
             TagIds = new List<int>();
         }
 
-        public PipeAnnotationEntity(MultiPipeTagLocation locationType, int viewId, int lineId, List<int> pipeIds, List<int> tagIds)
+        public PipeAnnotationEntity(MultiPipeTagLocation locationType, int viewId, int lineId, List<int> pipeIds, List<int> tagIds, XYZ startPoint)
         {
             LocationType = locationType;
             ViewId = viewId;
             LineId = lineId;
             PipeIds = pipeIds;
             TagIds = tagIds;
+            StartPoint = startPoint;
         }
     }
     /// <summary>
@@ -58,7 +60,7 @@ namespace MyRevit.MyTests.PipeAnnotation
                 if (string.IsNullOrEmpty(entity))
                     continue;
                 var properties = entity.Split(propertySplitter);
-                if (properties.Count() == 5)
+                if (properties.Count() == 6)
                 {
                     MultiPipeTagLocation locationType = (MultiPipeTagLocation)Enum.Parse(typeof(MultiPipeTagLocation), properties[0]);
                     int viewId = Convert.ToInt32(properties[1]);
@@ -75,7 +77,9 @@ namespace MyRevit.MyTests.PipeAnnotation
                         if (item != "")
                             annotationIds.Add(Convert.ToInt32(item));
                     }
-                    Add(new PipeAnnotationEntity(locationType, viewId, specialTagFrame, pipeIds, annotationIds));
+                    var pointStr = properties[5].Split(PropertyInnerSplitter_Char);
+                    XYZ startPoint = new XYZ(Convert.ToDouble(pointStr[0]), Convert.ToDouble(pointStr[1]), Convert.ToDouble(pointStr[2]));
+                    Add(new PipeAnnotationEntity(locationType, viewId, specialTagFrame, pipeIds, annotationIds, startPoint));
                 }
             }
         }
@@ -86,8 +90,15 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// <returns></returns>
         public string ToData()
         {
-            return string.Join(EntitySplitter, this.Select(c => (int)c.LocationType + PropertySplitter + c.ViewId + PropertySplitter + c.LineId + PropertySplitter + string.Join(PropertyInnerSplitter, c.PipeIds) + PropertySplitter + string.Join(PropertyInnerSplitter, c.TagIds)));
+            return string.Join(EntitySplitter, this.Select(c => (int)c.LocationType
+            + PropertySplitter + c.ViewId
+            + PropertySplitter + c.LineId
+            + PropertySplitter + string.Join(PropertyInnerSplitter, c.PipeIds)
+            + PropertySplitter + string.Join(PropertyInnerSplitter, c.TagIds)
+            + PropertySplitter + string.Join(PropertyInnerSplitter, new List<double>() { c.StartPoint.X, c.StartPoint.Y, c.StartPoint.Z })
+            ));
         }
+
         /// <summary>
         /// 保存
         /// </summary>
@@ -220,9 +231,6 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// <returns></returns>
         public static PipeAnnotationEntityCollection GetCollection(Document doc)
         {
-            ////TEST
-            //RemoveStorageByName(doc, StorageName);
-
             if (Collection != null)
                 return Collection;
 
@@ -256,6 +264,13 @@ namespace MyRevit.MyTests.PipeAnnotation
             storage.SetEntity(entity);
         }
         #endregion
+
+        public static AnnotationCreater Creater;
+        public static void UpdateCreater(Document doc)
+        {
+            Creater = new AnnotationCreater();
+            Creater.LoadFamilySymbols(doc);
+        }
     }
     #endregion
 }

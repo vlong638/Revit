@@ -305,23 +305,6 @@ namespace MyRevit.Entities
                     //重新计算标签的位置
                     XYZ currentPoint0, currentPoint1;
                     var tagPoint = CalculateTagPointAndLinePointFromTag(beamCurve,tag.TagHeadPosition, parallelVector, vecticalVector, out currentPoint0, out currentPoint1);
-                    //var currentPoint0 = tag.TagHeadPosition - (parallelLength * parallelVector + vecticalLength * vecticalVector);
-                    //var midPoint = (beamCurve.GetEndPoint(0) + beamCurve.GetEndPoint(1)) / 2;
-                    //var orientPoint0 = new XYZ(midPoint.X, midPoint.Y, currentPoint0.Z);//梁的Z轴为0与Curve绘制的轴不一致,调整为以Curve为准
-                    //var currentPoint1 = currentPoint0 + standardLength * vecticalVector;
-                    //beamCurve.MakeUnbound();
-                    //var project = beamCurve.Project(currentPoint0);
-                    //if (currentPoint1.DistanceTo(project.XYZPoint) < standardLength)
-                    //{
-                    //    currentPoint0 = project.XYZPoint;
-                    //    currentPoint1 = currentPoint0 + standardLength * vecticalVector;
-                    //    tag.TagHeadPosition = currentPoint1 - standardLength * vecticalVector + (parallelLength * parallelVector + vecticalLength * vecticalVector);
-                    //}
-                    //else
-                    //{
-                    //    var skewLine = Line.CreateBound(orientPoint0, currentPoint0);
-                    //    currentPoint0 = orientPoint0 + skewLine.Length * Math.Cos(skewLine.Direction.AngleTo(parallelVector)) * parallelVector;
-                    //}
                     if (line != null)
                         doc.Delete(line.Id);
                     var newLine = doc.Create.NewDetailCurve(view, Line.CreateBound(currentPoint0, currentPoint1));
