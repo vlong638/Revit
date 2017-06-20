@@ -104,8 +104,8 @@ namespace MyRevit.MyTests.PipeAnnotation
         Document Document { set; get; }
         FamilySymbol SingleTagSymbol { set; get; }
         FamilySymbol MultipleTagSymbol { set; get; }
-        double TextSize { set; get; }
-        double WidthScale { set; get; }
+        public double TextSize { set; get; }
+        public double WidthScale { set; get; }
         #endregion
 
         #region Doc关联参数
@@ -225,7 +225,7 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// <summary>
         /// 根据线的移动,重定位内容
         /// </summary>
-        public bool RegenerateMultipleTagSymbolByEntity(Document document, PipeAnnotationEntity entity)
+        public bool RegenerateMultipleTagSymbolByEntity(Document document, PipeAnnotationEntity entity,XYZ skewVector)
         {
             Document = document;
             XYZ startPoint = null;
@@ -235,8 +235,10 @@ namespace MyRevit.MyTests.PipeAnnotation
             foreach (var pipeId in entity.PipeIds)
                 pipes.Add(Document.GetElement(new ElementId(pipeId)) as Pipe);
             List<IndependentTag> tags = new List<IndependentTag>();
-            //偏移量
-            XYZ skew = (line.Location as LocationPoint).Point - entity.StartPoint;
+            foreach (var tagId in entity.TagIds)
+                tags.Add(Document.GetElement(new ElementId(tagId)) as IndependentTag);
+            ////偏移量
+            //XYZ skew = (line.Location as LocationPoint).Point - entity.StartPoint;
             //管道 获取
             //平行,垂直 向量
             XYZ parallelVector = null;
@@ -247,17 +249,18 @@ namespace MyRevit.MyTests.PipeAnnotation
             verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             //原始线高度
             var orientLineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble();
-            //原始对象清理
-            Document.Delete(line.Id);
-            foreach (var tagId in entity.TagIds)
-                Document.Delete(new ElementId(tagId));
+            ////原始对象清理
+            //Document.Delete(line.Id);
+            //foreach (var tagId in entity.TagIds)
+            //    Document.Delete(new ElementId(tagId));
             ////平行检测
             //if (!CheckParallel(pipes, verticalVector))
             //{
             //    return AnnotationBuildResult.NotParallel;
             //}
             //节点计算
-            List<XYZ> nodePoints = GetNodePoints(pipes, entity.StartPoint, skew).OrderByDescending(c => c.Y).ToList();
+            //TODO entity.StartPoint 不以记录为准 以其他点位的信息来计算
+            List<XYZ> nodePoints = GetNodePoints(pipes, entity.StartPoint + skewVector).OrderByDescending(c => c.Y).ToList();
             //if (nodePoints.Count() == 0)
             //{
             //    return AnnotationBuildResult.NoOverlap;
@@ -267,17 +270,18 @@ namespace MyRevit.MyTests.PipeAnnotation
             //线 创建
             if (!MultipleTagSymbol.IsActive)
                 MultipleTagSymbol.Activate();
-            line = Document.Create.NewFamilyInstance(startPoint, MultipleTagSymbol, view);
+            //line = Document.Create.NewFamilyInstance(startPoint, MultipleTagSymbol, view);
+            (line.Location as LocationPoint).Point = startPoint;
             //线 旋转处理
-            if (verticalVector.Y != 1)
+            if (verticalVector.Y != 1)//TODO 判断是否相同方向
             {
                 LocationPoint locationPoint = line.Location as LocationPoint;
                 if (locationPoint != null)
                     locationPoint.RotateByXY(startPoint, verticalVector);
             }
             //偏移计算
-            var verticalSkew = LocationHelper.GetLengthBySide(skew, verticalVector);
-            var parallelSkew = LocationHelper.GetLengthBySide(skew, parallelVector);
+            var verticalSkew = LocationHelper.GetLengthBySide(skewVector, verticalVector);
+            var parallelSkew = LocationHelper.GetLengthBySide(skewVector, parallelVector);
             //线参数
             UpdateLineParameters(nodePoints, line);
             //标注 创建
@@ -293,7 +297,8 @@ namespace MyRevit.MyTests.PipeAnnotation
                     var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
-                        var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
+                        //var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
+                        var subTag = tags[i];
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (TextSize * WidthScale);
@@ -308,7 +313,8 @@ namespace MyRevit.MyTests.PipeAnnotation
                     skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
-                        var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
+                        //var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
+                        var subTag = tags[i];
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (TextSize * WidthScale);
@@ -321,12 +327,12 @@ namespace MyRevit.MyTests.PipeAnnotation
                     return false;
             }
             entity.ViewId = view.Id.IntegerValue;
-            entity.LineId = line.Id.IntegerValue;
-            entity.PipeIds.Clear();
-            entity.PipeIds.AddRange(pipes.Select(c => c.Id.IntegerValue));
-            entity.TagIds.Clear();
-            entity.TagIds.AddRange(tags.Select(c => c.Id.IntegerValue));
             entity.StartPoint = startPoint;
+            //entity.LineId = line.Id.IntegerValue;
+            //entity.PipeIds.Clear();
+            //entity.PipeIds.AddRange(pipes.Select(c => c.Id.IntegerValue));
+            //entity.TagIds.Clear();
+            //entity.TagIds.AddRange(tags.Select(c => c.Id.IntegerValue));
             return true;
         }
 
@@ -635,16 +641,16 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// <summary>
         /// 节点计算 带初始点参数,即定位变更,非首次生成
         /// </summary>
-        private static List<XYZ> GetNodePoints(List<Pipe> pipes, XYZ startPoint, XYZ skew)
+        private static List<XYZ> GetNodePoints(List<Pipe> pipes, XYZ startPoint)
         {
-            var skewedPoint = startPoint + skew;
             List<XYZ> nodePoints = new List<XYZ>();
             //节点计算
             for (int i = 0; i < pipes.Count(); i++)
             {
                 var pipe = pipes[i];
                 var locationCurve = (pipe.Location as LocationCurve).Curve;
-                nodePoints.Add(locationCurve.Project(skewedPoint).XYZPoint);
+                locationCurve.MakeUnbound();
+                nodePoints.Add(locationCurve.Project(startPoint).XYZPoint);
             }
             return nodePoints;
         }
