@@ -319,9 +319,11 @@ namespace MyRevit.Entities
                 {
                     TaskDialog.Show("警告", "管道.删除了");
                     entity = pipeMoved;
-                    if (entity.PipeIds.Count() > 1)
+                    if (entity.PipeIds.Count() > 2)
                     {
+                        var index = entity.PipeIds.IndexOf(changeId.IntegerValue);
                         entity.PipeIds.Remove(changeId.IntegerValue);
+                        entity.TagIds.RemoveAt(index);
                         var creater = PipeAnnotationContext.Creater;
                         creater.RegenerateMultipleTagSymbolByEntity(document, entity, new XYZ(0, 0, 0));
                         PipeAnnotationContext.IsEditing = true;
@@ -329,7 +331,13 @@ namespace MyRevit.Entities
                     else
                     {
                         document.Delete(new ElementId(entity.LineId));
+                        var index = entity.PipeIds.IndexOf(changeId.IntegerValue);
+                        entity.TagIds.RemoveAt(index);
+                        document.Delete(new ElementId(entity.TagIds.First()));
+                        entity.PipeIds.Remove(changeId.IntegerValue);
+                        var pipeId = entity.PipeIds.First();
                         collection.Remove(entity);
+                        GenerateSingleTag(document, entity.ViewId, pipeId);
                     }
                 }
                 var tagMoved = collection.FirstOrDefault(c => c.TagIds.Contains(changeId.IntegerValue));
@@ -337,7 +345,7 @@ namespace MyRevit.Entities
                 {
                     TaskDialog.Show("警告", "标注.删除了");
                     entity = tagMoved;
-                    if (entity.TagIds.Count() > 1)
+                    if (entity.TagIds.Count() > 2)
                     {
                         var index = entity.TagIds.IndexOf(changeId.IntegerValue);
                         entity.TagIds.Remove(changeId.IntegerValue);
@@ -348,12 +356,31 @@ namespace MyRevit.Entities
                     }
                     else
                     {
+                        var index = entity.TagIds.IndexOf(changeId.IntegerValue);
+                        var pipeId = entity.PipeIds[index];
+                        entity.TagIds.Remove(changeId.IntegerValue);
                         document.Delete(new ElementId(entity.LineId));
+                        foreach (var id in entity.TagIds)
+                            document.Delete(new ElementId(id));
                         collection.Remove(entity);
+                        GenerateSingleTag(document, entity.ViewId, pipeId);
                     }
                 }
             }
             PipeAnnotationContext.SaveCollection(document);
+        }
+
+        private static void GenerateSingleTag(Document document, int viewId, int pipeId)
+        {
+            double length = 8;
+            var pipe = document.GetElement(new ElementId(pipeId));
+            var locationCurve = (pipe.Location as LocationCurve).Curve;
+            var midPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+            var parallelVector = (locationCurve as Line).Direction;
+            var verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+            if (verticalVector.Y < 0 || (verticalVector.Y == 0 && verticalVector.X == -1))//控制到一二象限
+                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+            var tag = document.Create.NewTag(document.GetElement(new ElementId(viewId)) as View, pipe, true, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + length * verticalVector);
         }
 
         private static XYZ CalculateTagPointAndLinePointFromLine(Curve beamCurve, XYZ vecticalVector, ref XYZ currentPoint0, ref XYZ currentPoint1)
