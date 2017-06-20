@@ -171,9 +171,10 @@ namespace MyRevit.Entities
             generateOnLineEdge = !generateOnLineEdge;
             var selectedIds = uiDoc.Selection.PickObjects(ObjectType.Element, new PipeFilter());
             AnnotationCreater builder = new AnnotationCreater();
-            if (builder.LoadFamilySymbols(doc))
+            var result = builder.LoadFamilySymbols(doc, true);
+            if (result)
             {
-                bool result = TransactionHelper.DelegateTransaction(doc, "多管标注生成", () =>
+                result = TransactionHelper.DelegateTransaction(doc, "多管标注生成", () =>
                 {
                     switch (builder.GenerateMultipleTagSymbol(doc, selectedIds.Select(c=>c.ElementId), generateOnLineEdge ? MultiPipeTagLocation.OnLine : MultiPipeTagLocation.OnLineEdge))
                     {

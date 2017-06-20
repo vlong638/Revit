@@ -41,17 +41,29 @@ namespace MyRevit.Entities
             var app = uiApp.ControlledApplication;
             app.DocumentOpened += App_DocumentOpened;
 
-            var updater = new PipeAnnotationEditUpdater(new Guid("B593F2C4-F38C-41D7-AE2C-369BB0149D9B"), new Guid("51879AF5-03AE-4B95-9B86-E24DF7181943"));
-            var updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == updater.GetUpdaterName());
+            var editUpdater = new PipeAnnotationEditUpdater(new Guid("B593F2C4-F38C-41D7-AE2C-369BB0149D9B"), new Guid("51879AF5-03AE-4B95-9B86-E24DF7181943"));
+            var updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == editUpdater.GetUpdaterName());
             if (updaterInfo == null)
             {
-                UpdaterRegistry.RegisterUpdater(updater, true);
-                UpdaterRegistry.AddTrigger(updater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
+                UpdaterRegistry.RegisterUpdater(editUpdater, true);
+                UpdaterRegistry.AddTrigger(editUpdater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管
                     new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
                 })
                 , Element.GetChangeTypeAny());
+            }
+            var deleteUpdate = new PipeAnnotationDeleteUpdater(new Guid("B593F2C4-F38C-41D7-AE2C-369BB0149D9B"), new Guid("FAAF594C-FDFE-4276-A823-F4015EF5B8B3"));
+            updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == deleteUpdate.GetUpdaterName());
+            if (updaterInfo == null)
+            {
+                UpdaterRegistry.RegisterUpdater(deleteUpdate, true);
+                UpdaterRegistry.AddTrigger(deleteUpdate.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管
+                    new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
+                })
+                , Element.GetChangeTypeElementDeletion());
             }
             return Result.Succeeded;
         }
@@ -66,7 +78,7 @@ namespace MyRevit.Entities
     /// <summary>
     /// 梁,线,标注 位置处理 IUpdater
     /// </summary>
-    class PipeAnnotationEditUpdater : IUpdater
+    public class PipeAnnotationEditUpdater : IUpdater
     {
         UpdaterId UpdaterId;
 
@@ -76,15 +88,14 @@ namespace MyRevit.Entities
         }
 
         #region MyTestContext.GetCollection方案
-        static bool IsEditing;
         public void Execute(UpdaterData updateData)
         {
             var document = updateData.GetDocument();
             var edits = updateData.GetModifiedElementIds();
             var collection = PipeAnnotationContext.GetCollection(document);
-            if (IsEditing == true)
+            if (PipeAnnotationContext.IsEditing == true)
             {
-                IsEditing = false;
+                PipeAnnotationContext.IsEditing = false;
                 return;
             }
             List<int> movedEntities = new List<int>();
@@ -102,7 +113,7 @@ namespace MyRevit.Entities
                     XYZ skewVector = (line.Location as LocationPoint).Point - entity.StartPoint;
                     creater.RegenerateMultipleTagSymbolByEntity(document, entity, skewVector);
                     movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    PipeAnnotationContext.IsEditing = true;
                 }
                 var pipeMoved = collection.FirstOrDefault(c => c.PipeIds.Contains(editId.IntegerValue));
                 if (pipeMoved != null)
@@ -133,7 +144,7 @@ namespace MyRevit.Entities
                     }
                     creater.RegenerateMultipleTagSymbolByEntity(document, entity, startPoint - projectionPoint);
                     movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    PipeAnnotationContext.IsEditing = true;
                 }
                 var tagMoved = collection.FirstOrDefault(c => c.TagIds.Contains(editId.IntegerValue));
                 if (tagMoved != null)
@@ -173,27 +184,11 @@ namespace MyRevit.Entities
                     XYZ skewVector = startPoint - entity.StartPoint;
                     creater.RegenerateMultipleTagSymbolByEntity(document, entity, skewVector);
                     movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    PipeAnnotationContext.IsEditing = true;
                 }
             }
             PipeAnnotationContext.SaveCollection(document);
         }
-
-        //private XYZ GetHeadPositionForOnLine(XYZ parallelVector, XYZ verticalVector, XYZ startPoint, List<IndependentTag> tags, double height, double skewLength, int i, IndependentTag subTag)
-        //{
-        //    var text = subTag.TagText;
-        //    var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
-        //    var actualLength = textLength / (TextSize * WidthScale);
-        //    return startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector + UnitHelper.ConvertToInch(height - (i - 0.5) * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-        //}
-
-        //private XYZ GetHeadPositionForOnLineEdge(XYZ parallelVector, XYZ verticalVector, XYZ startPoint, double height, double skewLength, int i, IndependentTag subTag)
-        //{
-        //    var text = subTag.TagText;
-        //    var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, Font).Width;
-        //    var actualLength = textLength / (TextSize * WidthScale);
-        //    return startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector + UnitHelper.ConvertToInch(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-        //}
 
         private static XYZ CalculateTagPointAndLinePointFromLine(Curve beamCurve, XYZ vecticalVector, ref XYZ currentPoint0, ref XYZ currentPoint1)
         {
@@ -280,7 +275,7 @@ namespace MyRevit.Entities
         }
         public string GetUpdaterName()
         {
-            return nameof(MyUpdater);
+            return "PipeAnnotationEditUpdater";
         }
     }
     /// <summary>
@@ -296,124 +291,70 @@ namespace MyRevit.Entities
         }
 
         #region MyTestContext.GetCollection方案
-        static bool IsEditing;
         public void Execute(UpdaterData updateData)
         {
             var document = updateData.GetDocument();
-            var edits = updateData.GetModifiedElementIds();
+            var changeIds = updateData.GetDeletedElementIds();
             var collection = PipeAnnotationContext.GetCollection(document);
-            if (IsEditing == true)
+            if (PipeAnnotationContext.IsEditing == true)
             {
-                IsEditing = false;
+                PipeAnnotationContext.IsEditing = false;
                 return;
             }
-            List<int> movedEntities = new List<int>();
-            foreach (var editId in edits)
+            foreach (var changeId in changeIds)
             {
-                var element = document.GetElement(editId);
+                var element = document.GetElement(changeId);
                 PipeAnnotationEntity entity = null;
-                var lineMoved = collection.FirstOrDefault(c => c.LineId == editId.IntegerValue);
+                var lineMoved = collection.FirstOrDefault(c => c.LineId == changeId.IntegerValue);
                 if (lineMoved != null)
                 {
-                    TaskDialog.Show("警告", "线移动了");
+                    TaskDialog.Show("警告", "线.删除了");
                     entity = lineMoved;
-                    var creater = PipeAnnotationContext.Creater;
-                    FamilyInstance movedLine = document.GetElement(new ElementId(entity.LineId)) as FamilyInstance;
-                    XYZ skewVector = (movedLine.Location as LocationPoint).Point - entity.StartPoint;
-                    creater.RegenerateMultipleTagSymbolByEntity(document, entity, skewVector);
-                    movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    foreach (var id in entity.TagIds)
+                        document.Delete(new ElementId(id));
+                    collection.Remove(entity);
                 }
-                var pipeMoved = collection.FirstOrDefault(c => c.PipeIds.Contains(editId.IntegerValue));
+                var pipeMoved = collection.FirstOrDefault(c => c.PipeIds.Contains(changeId.IntegerValue));
                 if (pipeMoved != null)
                 {
-                    TaskDialog.Show("警告", "管道移动了");
+                    TaskDialog.Show("警告", "管道.删除了");
                     entity = pipeMoved;
-                    if (movedEntities.Contains(entity.LineId))
-                        continue;
-                    var creater = PipeAnnotationContext.Creater;
-                    XYZ parallelVector = null;
-                    XYZ verticalVector = null;
-                    parallelVector = ((document.GetElement(new ElementId(entity.PipeIds.First())).Location as LocationCurve).Curve as Line).Direction;
-                    verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                    parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-                    verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-                    int indexOfPipe = entity.PipeIds.IndexOf(editId.IntegerValue);
-                    var startPoint = entity.StartPoint;
-                    var movedPipe = document.GetElement(new ElementId(editId.IntegerValue)) as Pipe;
-                    var pipeLine = (movedPipe.Location as LocationCurve).Curve;
-                    pipeLine.MakeUnbound();
-                    var projectionPoint = pipeLine.Project(startPoint).XYZPoint;
-                    var line = document.GetElement(new ElementId(entity.LineId)) as FamilyInstance;
-                    double preHeight = 0;
-                    if (indexOfPipe > 0)
+                    if (entity.PipeIds.Count() > 1)
                     {
-                        preHeight = line.GetParameters(string.Format("节点{0}距离", indexOfPipe + 1)).First().AsDouble();
-                        startPoint -= preHeight * verticalVector;
+                        entity.PipeIds.Remove(changeId.IntegerValue);
+                        var creater = PipeAnnotationContext.Creater;
+                        creater.RegenerateMultipleTagSymbolByEntity(document, entity, new XYZ(0, 0, 0));
+                        PipeAnnotationContext.IsEditing = true;
                     }
-                    creater.RegenerateMultipleTagSymbolByEntity(document, entity, startPoint - projectionPoint);
-                    movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    else
+                    {
+                        document.Delete(new ElementId(entity.LineId));
+                        collection.Remove(entity);
+                    }
                 }
-                var tagMoved = collection.FirstOrDefault(c => c.TagIds.Contains(editId.IntegerValue));
+                var tagMoved = collection.FirstOrDefault(c => c.TagIds.Contains(changeId.IntegerValue));
                 if (tagMoved != null)
                 {
-                    TaskDialog.Show("警告", "标注移动了");
+                    TaskDialog.Show("警告", "标注.删除了");
                     entity = tagMoved;
-                    if (movedEntities.Contains(entity.LineId))
-                        continue;
-                    var creater = PipeAnnotationContext.Creater;
-                    var indexOfTag = entity.TagIds.IndexOf(editId.IntegerValue);
-                    var subTag = document.GetElement(new ElementId(editId.IntegerValue)) as IndependentTag;
-                    var text = subTag.TagText;
-                    var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
-                    var actualLength = textLength / (creater.TextSize * creater.WidthScale);
-                    XYZ parallelVector = null;
-                    XYZ verticalVector = null;
-                    parallelVector = ((document.GetElement(new ElementId(entity.PipeIds.First())).Location as LocationCurve).Curve as Line).Direction;
-                    verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                    parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-                    verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-                    var height = Convert.ToDouble(document.GetElement(new ElementId(entity.LineId)).GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (entity.PipeIds.Count() - 1) * AnnotationConstaints.TextHeight;
-                    double skewLength = 0;
-                    XYZ startPoint = null;
-                    switch (entity.LocationType)
+                    if (entity.TagIds.Count() > 1)
                     {
-                        case MultiPipeTagLocation.OnLineEdge:
-                            skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
-                            startPoint = subTag.TagHeadPosition - skewLength * parallelVector - actualLength / 25.4 * parallelVector
-                                - UnitHelper.ConvertToInch(height - indexOfTag * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-                            break;
-                        case MultiPipeTagLocation.OnLine:
-                            skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
-                            startPoint = subTag.TagHeadPosition - skewLength * parallelVector - actualLength / 25.4 * parallelVector
-                                - UnitHelper.ConvertToInch(height - indexOfTag * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-                            break;
+                        var index = entity.TagIds.IndexOf(changeId.IntegerValue);
+                        entity.TagIds.Remove(changeId.IntegerValue);
+                        entity.PipeIds.RemoveAt(index);
+                        var creater = PipeAnnotationContext.Creater;
+                        creater.RegenerateMultipleTagSymbolByEntity(document, entity, new XYZ(0, 0, 0));
+                        PipeAnnotationContext.IsEditing = true;
                     }
-                    XYZ skewVector = startPoint - entity.StartPoint;
-                    creater.RegenerateMultipleTagSymbolByEntity(document, entity, skewVector);
-                    movedEntities.Add(entity.LineId);
-                    IsEditing = true;
+                    else
+                    {
+                        document.Delete(new ElementId(entity.LineId));
+                        collection.Remove(entity);
+                    }
                 }
             }
             PipeAnnotationContext.SaveCollection(document);
         }
-
-        //private XYZ GetHeadPositionForOnLine(XYZ parallelVector, XYZ verticalVector, XYZ startPoint, List<IndependentTag> tags, double height, double skewLength, int i, IndependentTag subTag)
-        //{
-        //    var text = subTag.TagText;
-        //    var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
-        //    var actualLength = textLength / (TextSize * WidthScale);
-        //    return startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector + UnitHelper.ConvertToInch(height - (i - 0.5) * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-        //}
-
-        //private XYZ GetHeadPositionForOnLineEdge(XYZ parallelVector, XYZ verticalVector, XYZ startPoint, double height, double skewLength, int i, IndependentTag subTag)
-        //{
-        //    var text = subTag.TagText;
-        //    var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, Font).Width;
-        //    var actualLength = textLength / (TextSize * WidthScale);
-        //    return startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector + UnitHelper.ConvertToInch(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
-        //}
 
         private static XYZ CalculateTagPointAndLinePointFromLine(Curve beamCurve, XYZ vecticalVector, ref XYZ currentPoint0, ref XYZ currentPoint1)
         {
@@ -500,7 +441,7 @@ namespace MyRevit.Entities
         }
         public string GetUpdaterName()
         {
-            return nameof(MyUpdater);
+            return "PipeAnnotationDeleteUpdater";
         }
     }
 }

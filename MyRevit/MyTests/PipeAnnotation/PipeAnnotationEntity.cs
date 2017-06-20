@@ -113,6 +113,9 @@ namespace MyRevit.MyTests.PipeAnnotation
     /// </summary>
     public class PipeAnnotationContext
     {
+        public static bool IsEditing;
+
+
         /// <summary>
         /// 取Entity
         /// </summary>
@@ -269,7 +272,7 @@ namespace MyRevit.MyTests.PipeAnnotation
         public static void UpdateCreater(Document doc)
         {
             Creater = new AnnotationCreater();
-            Creater.LoadFamilySymbols(doc);
+            Creater.LoadFamilySymbols(doc, false);
         }
     }
     #endregion

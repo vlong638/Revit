@@ -338,6 +338,8 @@ namespace MyRevit.Entities
                 var symbol = (element as FamilyInstance).Symbol;
                 symbol.GetParameters(nameof(BeamAnnotationParameters.梁宽)).FirstOrDefault().Set(BeamAnnotationData.BeamWidth);
                 symbol.GetParameters(nameof(BeamAnnotationParameters.梁高)).FirstOrDefault().Set(BeamAnnotationData.BeamHeight);
+                var familyDoc= doc.EditFamily(symbol.Family);
+
                 return true;
             });
             TransactionHelper.DelegateTransaction(doc, "绘图处理", () =>

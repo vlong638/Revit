@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Linq;
 
 namespace MyRevit.MyTests.PipeAnnotation
-{
+{ 
     /// <summary>
     /// 多管标注生成返回码
     /// </summary>
@@ -48,11 +48,23 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// <summary>
         /// 加载族文件
         /// </summary>
-        public bool LoadFamilySymbols(Document doc)
+        public bool LoadFamilySymbols(Document doc,bool needTransaction)
         {
-            SingleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记", BuiltInCategory.OST_PipeTags);
-            MultipleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端", BuiltInCategory.OST_DetailComponents);
-
+            if (needTransaction)
+            {
+                if (!TransactionHelper.DelegateTransaction(doc, "多管标注生成", () =>
+                {
+                    SingleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记", BuiltInCategory.OST_PipeTags);
+                    MultipleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端", BuiltInCategory.OST_DetailComponents);
+                    return true;
+                }))
+                    return false;
+            }
+            else
+            {
+                SingleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记", BuiltInCategory.OST_PipeTags);
+                MultipleTagSymbol = LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0609管道标注\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端", BuiltInCategory.OST_DetailComponents);
+            }
             var familyDoc = doc.EditFamily(SingleTagSymbol.Family);
             var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
             var textSizeStr = textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_SIZE).AsValueString();
@@ -272,13 +284,13 @@ namespace MyRevit.MyTests.PipeAnnotation
                 MultipleTagSymbol.Activate();
             //line = Document.Create.NewFamilyInstance(startPoint, MultipleTagSymbol, view);
             (line.Location as LocationPoint).Point = startPoint;
-            //线 旋转处理
-            if (verticalVector.Y != 1)//TODO 判断是否相同方向
-            {
-                LocationPoint locationPoint = line.Location as LocationPoint;
-                if (locationPoint != null)
-                    locationPoint.RotateByXY(startPoint, verticalVector);
-            }
+            ////线 旋转处理
+            //if (verticalVector.Y != 1)//TODO 判断是否相同方向
+            //{
+            //    LocationPoint locationPoint = line.Location as LocationPoint;
+            //    if (locationPoint != null)
+            //        locationPoint.RotateByXY(startPoint, verticalVector);
+            //}
             //偏移计算
             var verticalSkew = LocationHelper.GetLengthBySide(skewVector, verticalVector);
             var parallelSkew = LocationHelper.GetLengthBySide(skewVector, parallelVector);
