@@ -29,13 +29,17 @@ namespace MyRevit.MyTests.PipeAnnotation
         /// </summary>
         NoLocationType,
     }
+    /// <summary>
+    /// 常量,静态量
+    /// </summary>
     public class AnnotationConstaints
     {
+        public const double SkewLengthForOnLine = 0.2;
+        public const double SkewLengthForOffLine = 0.4;
         public static Font Font = new Font("Angsana New", 20);
         public static double TextHeight = 150;
         public static UnitType UnitType = UnitType.millimeter;
     }
-
     /// <summary>
     /// 标注生成类
     /// </summary>
@@ -192,7 +196,7 @@ namespace MyRevit.MyTests.PipeAnnotation
                     //添加对应的单管直径标注
                     line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, AnnotationConstaints.UnitType));
                     var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (nodePoints.Count() - 1) * AnnotationConstaints.TextHeight;
-                    var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                    var skewLength = AnnotationConstaints.SkewLengthForOffLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
                         var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
@@ -209,7 +213,7 @@ namespace MyRevit.MyTests.PipeAnnotation
                     line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, AnnotationConstaints.UnitType));
                     height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
                      (nodePoints.Count() - 1) * AnnotationConstaints.TextHeight;
-                    skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
+                    skewLength = AnnotationConstaints.SkewLengthForOnLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
                         var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
@@ -306,7 +310,7 @@ namespace MyRevit.MyTests.PipeAnnotation
                 case MultiPipeTagLocation.OnLineEdge:
                     //添加对应的单管直径标注
                     line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, AnnotationConstaints.UnitType));
-                    var skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                    var skewLength = AnnotationConstaints.SkewLengthForOffLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
                         //var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);
@@ -322,7 +326,7 @@ namespace MyRevit.MyTests.PipeAnnotation
                 case MultiPipeTagLocation.OnLine:
                     //添加对应的单管直径标注
                     line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, AnnotationConstaints.UnitType));
-                    skewLength = PipeAnnotationConstaints.SkewLengthForOnLine;
+                    skewLength = AnnotationConstaints.SkewLengthForOnLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
                         //var subTag = Document.Create.NewTag(view, pipes[i], false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, startPoint);

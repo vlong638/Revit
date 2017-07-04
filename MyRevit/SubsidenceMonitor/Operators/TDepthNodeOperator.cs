@@ -30,7 +30,7 @@ namespace MyRevit.SubsidenceMonitor.Operators
         {
             var command = connection.CreateCommand();
             Dictionary<string, string> NameValues = new Dictionary<string, string>();
-            NameValues.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType));
+            NameValues.Add(nameof(entity.IssueType), SQLiteHelper.ToSQLiteString<EIssueType>(entity.IssueType)); 
             NameValues.Add(nameof(entity.IssueDateTime), SQLiteHelper.ToSQLiteString(entity.IssueDateTime));
             NameValues.Add(nameof(entity.NodeCode), SQLiteHelper.ToSQLiteString(entity.NodeCode));
             NameValues.Add(nameof(entity.Depth), SQLiteHelper.ToSQLiteString(entity.Depth));

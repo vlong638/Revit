@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\StorageConsistencyCommand.cs" />
     <Compile Include="MyTests\BeamAnnotationEntity.cs" />
     <Compile Include="MyTests\EventsCommand.cs" />
     <Compile Include="MyTests\FilterElementCommand.cs" />

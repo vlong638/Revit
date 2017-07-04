@@ -15,21 +15,11 @@ using System.Linq;
 namespace MyRevit.Entities
 {
     /// <summary>
-    /// 常量集合
-    /// </summary>
-    public class PipeAnnotationConstaints
-    {
-        public const double SkewLengthForOnLine = 0.2;
-        public const double SkewLengthForOffLine = 0.4;
-    }
-
-    /// <summary>
     /// 编辑Updater
     /// </summary>
     [Transaction(TransactionMode.Manual)]
     public class PipeUpdaterCommand : IExternalApplication
     {
-
         public Result OnShutdown(UIControlledApplication application)
         {
             return Result.Succeeded;
@@ -49,7 +39,7 @@ namespace MyRevit.Entities
                 UpdaterRegistry.AddTrigger(editUpdater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管
                     new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线
-                    new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标
                 })
                 , Element.GetChangeTypeAny());
             }
@@ -171,12 +161,12 @@ namespace MyRevit.Entities
                     switch (entity.LocationType)
                     {
                         case MultiPipeTagLocation.OnLineEdge:
-                            skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                            skewLength = AnnotationConstaints.SkewLengthForOffLine;
                             startPoint = subTag.TagHeadPosition - skewLength * parallelVector - actualLength / 25.4 * parallelVector
                                 - UnitHelper.ConvertToInch(height - index * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                             break;
                         case MultiPipeTagLocation.OnLine:
-                            skewLength = PipeAnnotationConstaints.SkewLengthForOffLine;
+                            skewLength = AnnotationConstaints.SkewLengthForOffLine;
                             startPoint = subTag.TagHeadPosition - skewLength * parallelVector - actualLength / 25.4 * parallelVector
                                 - UnitHelper.ConvertToInch(height - index * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                             break;

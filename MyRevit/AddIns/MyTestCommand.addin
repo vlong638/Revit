@@ -12,6 +12,24 @@
     <FullClassName>MyRevit.Entities.BeamAnnotationCommand</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>68CC12D3-6CFC-46B9-A58E-616353DDE0F6</ClientId>
+    <FullClassName>MyRevit.Entities.StorageConsistencyCommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>68CC12D3-6CFC-46B9-A58E-616353DDE0F7</ClientId>
+    <FullClassName>MyRevit.Entities.StorageConsistencyCommand2</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>68CC12D3-6CFC-46B9-A58E-616353DDE0F8</ClientId>
+    <FullClassName>MyRevit.Entities.StorageConsistencyCommand3</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
   <AddIn Type="Application">
     <Name>PipeUpdaterCommand</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>

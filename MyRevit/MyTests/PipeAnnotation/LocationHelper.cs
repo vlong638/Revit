@@ -5,7 +5,7 @@ namespace MyRevit.MyTests.PipeAnnotation
 {
     public enum QuadrantType
     {
-        One ,
+        One,
         Two,
         Three,
         Four,

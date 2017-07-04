@@ -21,6 +21,5 @@ namespace MyRevit.MyTests.PipeAnnotation
     {
         public double LengthBetweenPipe { set; get; }
         public MultiPipeTagLocation Location { set; get; }
-        //public bool Cover { set; get; }
     }
 }

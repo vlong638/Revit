@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
+using MyRevit.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MyRevit.Utilities
 {
-    class ExtensibleStorageHelper
+    class ExtensibleStorageHelperV1
     {
         public static void Test(Document doc)
         {
@@ -46,6 +47,9 @@ namespace MyRevit.Utilities
                 Entity entityFromRead = storage.GetEntity(schema);
                 short dataFromStore = entityFromRead.Get<short>(schema.GetField(fieldName));
                 string businusessName = entityFromRead.Get<string>(schema.GetField(fieldName2));
+
+                var storageEntity = new TestStorageEntity();
+                var data = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
             }
             if (true)
             {
@@ -200,8 +204,6 @@ namespace MyRevit.Utilities
                 doc.Delete(storage.Id);
         } 
         #endregion
-
-
-
     }
+
 }
