@@ -159,7 +159,7 @@ namespace MyRevit.Entities
         }
         #endregion
 
-        #region 封装后接口
+        #region 封装后接口        
         /// <summary>
         /// 通过storageEntity获取对应dataField的值
         /// </summary>
@@ -187,7 +187,6 @@ namespace MyRevit.Entities
             }
             return entity.Get<string>(schema.GetField(dataField));
         }
-
         /// <summary>
         /// 设置storageEntity对应dataField的值
         /// </summary>
@@ -212,12 +211,62 @@ namespace MyRevit.Entities
             entity.Set<string>(schema.GetField(dataField), data);
             storage.SetEntity(entity);
         }
+
+        #region dataFields
+        /// <summary>
+        /// 通过storageEntity获取对应dataField的值
+        /// </summary>
+        public static string GetData(Document doc, IExtensibleStorageEntity storageEntity, List<string> dataFields, string dataField)
+        {
+            try
+            {
+                return getData(doc, storageEntity, dataFields, dataField);
+            }
+            catch (Exception ex)
+            {
+                RemoveStorage(doc, storageEntity);
+                return getData(doc, storageEntity, dataField);
+            }
+        }
+
+        private static string getData(Document doc, IExtensibleStorageEntity storageEntity, List<string> dataFields, string dataField)
+        {
+            var schema = GetSchema(storageEntity.SchemaId, storageEntity.SchemaName, dataFields);
+            var storage = GetOrCreateStorage(doc, storageEntity.StorageName);
+            Entity entity = storage.GetEntity(schema);
+            if (!entity.IsValid())
+            {
+                return "";
+            }
+            return entity.Get<string>(schema.GetField(dataField));
+        }
+        /// <summary>
+        /// 设置storageEntity对应dataField的值
+        /// </summary>
+        public static void SetData(Document doc, IExtensibleStorageEntity storageEntity, List<string> dataFields, string dataField, string data)
+        {
+            try
+            {
+                setData(doc, storageEntity, dataFields, dataField, data);
+            }
+            catch (Exception ex)
+            {
+                RemoveStorage(doc, storageEntity);
+                setData(doc, storageEntity, dataFields, dataField, data);
+            }
+        }
+
+        private static void setData(Document doc, IExtensibleStorageEntity storageEntity, List<string> dataFields, string dataField, string data)
+        {
+            var storage = GetOrCreateStorage(doc, storageEntity.StorageName);
+            var schema = GetSchema(storageEntity.SchemaId, storageEntity.SchemaName, dataFields);
+            Entity entity = new Entity(schema);
+            entity.Set<string>(schema.GetField(dataField), data);
+            storage.SetEntity(entity);
+        }
+        #endregion
         #endregion
     }
-
-
-
-
 
     [Transaction(TransactionMode.Manual)]
     public class StorageConsistencyCommand : IExternalCommand
@@ -298,33 +347,40 @@ namespace MyRevit.Entities
             var doc = commandData.Application.ActiveUIDocument.Document;
             var view = doc.ActiveView;
             var storageEntity = new TestStorageEntity();
-            var s = "S1";
-            //事务1+事务2 是整体回退还是回退事务2?
-            //回退是事务型回退,事务2被回退了 Data=S1
-            var d1 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
+            //var s = "S1";
+            ////事务1+事务2 是整体回退还是回退事务2?
+            ////回退是事务型回退,事务2被回退了 Data=S1
+            //TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
+            //{
+            //    var d1 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
+            //    ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, s);
+            //    return true;
+            //});
             TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
-                ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, s);
-                return true;
-            });
-            var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
-            TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
-            {
-                s += "S2";
-                ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, s);
-                var schema = ExtensibleStorageHelperV2.GetSchema(storageEntity.SchemaId, storageEntity.SchemaName, storageEntity.FieldNames);
-                var storage = ExtensibleStorageHelperV2.GetOrCreateStorage(doc, storageEntity.StorageName);
-                Entity entity;
-                if (storage == null)
-                {
-                    storage = ExtensibleStorageHelperV2.CreateStorage(doc, storageEntity.StorageName);
-                    entity = new Entity(schema);
-                    entity.Set<string>(schema.GetField(storageEntity.FieldStr), "");
-                    storage.SetEntity(entity);
-                }
-                entity = storage.GetEntity(schema);
-                var data = entity.Get<string>(schema.GetField(storageEntity.FieldStr));
-                var element = doc.Delete(new ElementId(197400));
+                //var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
+                //var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldNames2, storageEntity.FieldStr);
+                ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, "123");
+
+
+
+                ////s += "S2";
+                ////ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, s);
+                //var schema = ExtensibleStorageHelperV2.GetSchema(storageEntity.SchemaId, storageEntity.SchemaName, storageEntity.FieldNames2);
+                //var storage = ExtensibleStorageHelperV2.GetOrCreateStorage(doc, storageEntity.StorageName);
+                //Entity entity;
+                //if (storage == null)
+                //{
+                //    storage = ExtensibleStorageHelperV2.CreateStorage(doc, storageEntity.StorageName);
+                //    entity = new Entity(schema);
+                //    entity.Set<string>(schema.GetField(storageEntity.FieldStr), "");
+                //    storage.SetEntity(entity);
+                //}
+                //entity = storage.GetEntity(schema);
+                //if (entity.IsValid())
+                //{
+                //    var data = entity.Get<string>(schema.GetField(storageEntity.FieldStr));
+                //}
                 return true;
             });
             var d3 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);

@@ -1,5 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
+  <AddIn Type="Application">
+    <Name>UpdaterTestCommand</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>08EF0675-AF5C-4845-85AE-AF305A58C7E0</ClientId>
+    <FullClassName>MyRevit.Entities.UpdaterTestCommand</FullClassName>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>PipeUpdaterCommand</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9B</ClientId>
+    <FullClassName>MyRevit.Entities.PipeUpdaterCommand</FullClassName>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
   <AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9A</ClientId>
@@ -29,14 +45,6 @@
     <ClientId>68CC12D3-6CFC-46B9-A58E-616353DDE0F8</ClientId>
     <FullClassName>MyRevit.Entities.StorageConsistencyCommand3</FullClassName>
     <VendorId>VL</VendorId>
-  </AddIn>
-  <AddIn Type="Application">
-    <Name>PipeUpdaterCommand</Name>
-    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
-    <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9B</ClientId>
-    <FullClassName>MyRevit.Entities.PipeUpdaterCommand</FullClassName>
-    <VendorId>ADSK</VendorId>
-    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
   </AddIn>
   <!--<AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>

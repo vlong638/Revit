@@ -25,6 +25,12 @@ namespace MyRevitConsole
 
         static void Main(string[] args)
         {
+            string s1 = "1234";
+            string s2 = s1;
+            bool eq = s1 == s2;
+            eq = string.ReferenceEquals(s1, s2);
+            eq = s1.Equals("1234");
+
             var i = 1;
             var j = ++i + i++;
 

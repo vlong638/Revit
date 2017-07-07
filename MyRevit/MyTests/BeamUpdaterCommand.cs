@@ -27,7 +27,7 @@ namespace MyRevit.Entities
     [Transaction(TransactionMode.Manual)]
     public class BeamUpdaterCommand : IExternalCommand
     {
-        static MyUpdater Updater;
+        static BeamUpdater Updater;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -49,7 +49,7 @@ namespace MyRevit.Entities
             var app = commandData.Application.Application;
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
-            Updater = new MyUpdater(new Guid("63593602-311D-4142-9AF6-50CC97F6B01A"));
+            Updater = new BeamUpdater(new Guid("63593602-311D-4142-9AF6-50CC97F6B01A"));
             var updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == Updater.GetUpdaterName());
             if (updaterInfo == null)
             {
@@ -57,7 +57,7 @@ namespace MyRevit.Entities
                 UpdaterRegistry.AddTrigger(Updater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() { new ElementCategoryFilter(BuiltInCategory.OST_Lines), new ElementCategoryFilter(BuiltInCategory.OST_StructuralFramingTags) })
                     , Element.GetChangeTypeAny());
             }
-            var updater2 = new MyUpdater2(new Guid("54EB0FC2-89AF-466B-91F8-A1CD10985200"));
+            var updater2 = new BeamUpdater2(new Guid("54EB0FC2-89AF-466B-91F8-A1CD10985200"));
             updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == updater2.GetUpdaterName());
             if (updaterInfo == null)
             {
@@ -78,11 +78,11 @@ namespace MyRevit.Entities
     /// <summary>
     /// 梁,线,标注 位置处理 IUpdater
     /// </summary>
-    class MyUpdater : IUpdater
+    class BeamUpdater : IUpdater
     {
         UpdaterId UpdaterId;
 
-        public MyUpdater(Guid _uid)
+        public BeamUpdater(Guid _uid)
         {
             this.UpdaterId = new UpdaterId(new AddInId(new Guid("B593F2C4-F38C-41D7-AE2C-369BB0149D9B")), _uid);
         }
@@ -403,17 +403,17 @@ namespace MyRevit.Entities
         }
         public string GetUpdaterName()
         {
-            return nameof(MyUpdater);
+            return nameof(BeamUpdater);
         }
     }
     /// <summary>
     /// 梁,线,标注 梁删除 IUpdater
     /// </summary>
-    class MyUpdater2 : IUpdater
+    class BeamUpdater2 : IUpdater
     {
         UpdaterId UpdaterId;
 
-        public MyUpdater2(Guid _uid)
+        public BeamUpdater2(Guid _uid)
         {
             this.UpdaterId = new UpdaterId(new AddInId(new Guid("B593F2C4-F38C-41D7-AE2C-369BB0149D9B")), _uid);
         }
@@ -467,7 +467,7 @@ namespace MyRevit.Entities
         }
         public string GetUpdaterName()
         {
-            return nameof(MyUpdater2);
+            return nameof(BeamUpdater2);
         }
     }
 }

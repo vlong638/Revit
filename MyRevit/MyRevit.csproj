@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\UpdaterTestCommand.cs" />
     <Compile Include="MyTests\StorageConsistencyCommand.cs" />
     <Compile Include="MyTests\BeamAnnotationEntity.cs" />
     <Compile Include="MyTests\EventsCommand.cs" />
@@ -304,7 +305,9 @@
   <ItemGroup>
     <Content Include="AddIns\EarthWork.addin" />
     <Content Include="AddIns\MyExternalApplications.addin" />
-    <Content Include="AddIns\MyTestCommand.addin" />
+    <Content Include="AddIns\MyTestCommand.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\MyExternalCommands.addin" />
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
