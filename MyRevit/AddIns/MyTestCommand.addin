@@ -1,6 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
-  <AddIn Type="Application">
+  <AddIn Type="Command">
+    <Name>CurrentTestCommand</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3501</ClientId>
+    <FullClassName>MyRevit.Entities.CommandOfBeamAlignToFloor</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
     <Name>UpdaterTestCommand</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>08EF0675-AF5C-4845-85AE-AF305A58C7E0</ClientId>

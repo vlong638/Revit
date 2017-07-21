@@ -118,6 +118,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="Utilities\CategoryFilter.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
     <Compile Include="MyTests\UpdaterTestCommand.cs" />
     <Compile Include="MyTests\StorageConsistencyCommand.cs" />
     <Compile Include="MyTests\BeamAnnotationEntity.cs" />
@@ -245,6 +247,7 @@
     <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
     <Compile Include="Utilities\ExtensibleStorageHelper.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
+    <Compile Include="Utilities\MessageHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
     <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
