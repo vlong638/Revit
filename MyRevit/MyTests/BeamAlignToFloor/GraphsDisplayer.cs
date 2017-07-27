@@ -68,7 +68,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         private void DisplayPointsText(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)
         {
             foreach (var point in points)
-                CurrentGraphics.DrawString($"{(int)point.X * Scale},{(int)point.Y * Scale}", DefaultFont, brush, new System.Drawing.Point((int)point.X * Scale + offsetX, (int)point.Y * Scale + offsetY));
+                CurrentGraphics.DrawString($"{(int)point.X },{(int)point.Y }", DefaultFont, brush, new System.Drawing.Point((int)point.X * Scale + offsetX, (int)point.Y * Scale + offsetY));
         }
 
         public void Save()

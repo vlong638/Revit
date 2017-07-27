@@ -27,7 +27,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         }
 
         /// <summary>
-        /// 线段相交判断,首先是矩形重叠判断,在重叠时进行跨立判断
+        /// 线段相交判断,首先是矩形重叠判断,在重叠时进行跨立判断(相互跨立)
         /// </summary>
         public static bool VL_IsIntersect(this Line line1, Line line2)
         {
@@ -39,7 +39,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             if (!VL_IsRectangleCrossed(p1_0, p1_1, p2_0, p2_1))
                 return false;
             //后跨立试验
-            return (p1_0 - p2_0).CrossProduct(p2_1 - p2_0).DotProduct((p2_1 - p2_0).CrossProduct(p1_1 - p2_0)) >= 0;
+            return (p1_0 - p2_0).CrossProduct(p2_1 - p2_0).DotProduct((p2_1 - p2_0).CrossProduct(p1_1 - p2_0)) >= 0
+                && (p2_0 - p1_0).CrossProduct(p1_1 - p1_0).DotProduct((p1_1 - p1_0).CrossProduct(p2_1 - p1_0)) >= 0;
         }
 
         /// <summary>
