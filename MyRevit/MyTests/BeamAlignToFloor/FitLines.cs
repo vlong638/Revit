@@ -6,7 +6,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     /// <summary>
     /// 用以裁剪线段的信息
     /// </summary>
-    class LineSeperatePoints
+    public class LineSeperatePoints
     {
         /// <summary>
         /// 极限高程,用于重叠的多面的裁剪优先级

@@ -50,16 +50,30 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return point1.X == point2.X && point1.Y == point2.Y;
         }
 
+        public static List<XYZ> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points)
+        {
+            var board0 = boardLine.GetEndPoint(0);
+            var board1 = boardLine.GetEndPoint(1);
+            var negativeA = ( board0.Z * board1.Y- board1.Z * board0.Y) / (board0.X * board1.Y - board1.X * board0.Y);
+            var negativeB = (board0.Z * board1.X- board1.Z * board0.X) / (board0.Y * board1.X - board1.Y * board0.X);
+            List<XYZ> result = new List<XYZ>();
+            foreach (var point in points)
+            {
+                result.Add(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y));
+            }
+            return result;
+        }
+
         /// <summary>
-        /// 
+        /// 获得线与线相交或者重叠的点
         /// </summary>
-        public static List<XYZ> VL_GetIntersectedOrContainedPoints(this Line boardLineZ0, Line beamLine)
+        public static List<XYZ> VL_GetIntersectedOrContainedPoints(this Line boardLineZ0, Line beamLineZ0)
         {
             List<XYZ> result = new List<XYZ>();
             var board0 = boardLineZ0.GetEndPoint(0);
             var board1 = boardLineZ0.GetEndPoint(1);
-            var beam0 = beamLine.GetEndPoint(0);
-            var beam1 = beamLine.GetEndPoint(1);
+            var beam0 = beamLineZ0.GetEndPoint(0);
+            var beam1 = beamLineZ0.GetEndPoint(1);
             var board_leftDown = GetLeftDown(board0, board1);
             var board_rightUp = board_leftDown.XYEqualTo(board0) ? board1 : board0;
             var beam_leftDown = GetLeftDown(beam0, beam1);
@@ -79,29 +93,24 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     {
                         result.Add(up_leftDown);
                         result.Add(up_rightUp);
-                        return result;
                     }
                     else if (GetLeftDown(up_leftDown, down_leftDown) == up_leftDown)
                     {
                         result.Add(down_leftDown);
-                        return result;
                     }
                     else
                     {
                         result.Add(up_leftDown);
-                        return result;
                     }
                 }
                 else if (up_leftDown.XYEqualTo(down_rightUp))
                 {
                     result.Add(up_leftDown);
-                    return result;
                 }
                 else
                 {
                     result.Add(up_leftDown);
                     result.Add(down_rightUp);
-                    return result;
                 }
             }
             else
@@ -133,13 +142,16 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     y0 = (kBoard * kBeam * board0.X - kBoard * kBeam * beam0.X + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
                 }
                 result.Add(new XYZ(x0, y0, 0));
-                return result;
             }
+            return result;
         }
 
+        /// <summary>
+        /// 获得左下的点,相同返回前点
+        /// </summary>
         private static XYZ GetLeftDown(XYZ p1_0, XYZ p1_1)
         {
-            return (p1_0.X < p1_1.X || (p1_0.X == p1_1.X && p1_0.Y < p1_1.Y)) ? p1_0 : p1_1;
+            return (p1_0.X < p1_1.X || (p1_0.X == p1_1.X && p1_0.Y <= p1_1.Y)) ? p1_0 : p1_1;
         }
 
 
@@ -191,7 +203,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <summary>
         /// 三角形包含点
         /// </summary>
-        public static bool IsContained(Triangle triangle, XYZ point)
+        public static bool Contains(this Triangle triangle, XYZ point)
         {
             var vB = triangle.B - triangle.A;
             var vC = triangle.C - triangle.A;

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace MyRevit.MyTests.BeamAlignToFloor
 {
-    class LeveledOutLines
+    public class LevelOutLines
     {
-        public bool IsValid { get { return SubOutLines.Count() > 0; } }
-        List<OutLine> SubOutLines = new List<OutLine>();
+        public bool IsValid { get { return OutLines.Count() > 0; } }
+        public List<OutLine> OutLines = new List<OutLine>();
 
         /// <summary>
         /// 添加面所有的轮廓
@@ -22,14 +22,14 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             //闭合区间集合,EdgeArray
             foreach (EdgeArray edgeArray in face.EdgeLoops)
             {
-                Add(new OutLine(face,edgeArray));
+                Add(new OutLine(edgeArray));
             }
         }
 
         void Add(OutLine newOne)
         {
             //子节点的下级
-            foreach (var OutLine in SubOutLines)
+            foreach (var OutLine in OutLines)
             {
                 if (OutLine.Contains(newOne))
                 {
@@ -39,12 +39,12 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             }
             //子节点的上级
             bool isTopLevel = false;
-            for (int i = SubOutLines.Count() - 1; i >= 0; i--)
+            for (int i = OutLines.Count() - 1; i >= 0; i--)
             {
-                var SubOutLine = SubOutLines[i];
+                var SubOutLine = OutLines[i];
                 if (newOne.Contains(SubOutLine))
                 {
-                    SubOutLines.Remove(SubOutLine);
+                    OutLines.Remove(SubOutLine);
                     SubOutLine.RevertAllOutLineType();
                     newOne.SubOutLines.Add(SubOutLine);
                     isTopLevel = true;
@@ -53,18 +53,18 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             if (isTopLevel)
             {
                 newOne.IsSolid = true;
-                SubOutLines.Add(newOne);
+                OutLines.Add(newOne);
                 return;
             }
             //无相关的新节点
-            SubOutLines.Add(newOne);
+            OutLines.Add(newOne);
         }
 
         public bool IsCover(Line line)
         {
-            foreach (var SubOutLine in SubOutLines)
+            foreach (var SubOutLine in OutLines)
             {
-                if (SubOutLine.IsCover(line))
+                if (SubOutLine.IsCover(line) != CoverType.Disjoint)
                     return true;
             }
             return false;
@@ -74,13 +74,47 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// 获得拆分点
         /// </summary>
         /// <returns></returns>
-        public LineSeperatePoints GetFitLines(Line line)
+        public LineSeperatePoints GetFitLines(Line lineZ0)
         {
             LineSeperatePoints fitLines = new LineSeperatePoints();
-            foreach (var SubOutLine in SubOutLines)
-                if (SubOutLine.IsCover(line))
-                    fitLines.Points.AddRange(SubOutLine.GetFitLines(line).Points);
+            var p0 = lineZ0.GetEndPoint(0);
+            var p1 = lineZ0.GetEndPoint(1);
+            foreach (var SubOutLine in OutLines)
+            {
+                var coverType = SubOutLine.IsCover(lineZ0);
+                if (coverType != CoverType.Disjoint)
+                    fitLines.Points.AddRange(SubOutLine.GetFitLines(lineZ0).Points);
+                //线的端点增加
+                var triangle = SubOutLine.GetContainer(p0);
+                if (triangle != null)
+                    fitLines.Points.Add(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)));
+                triangle = SubOutLine.GetContainer(p1);
+                if (triangle != null)
+                    fitLines.Points.Add(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)));
+            }
             return fitLines;
+        }
+
+        /// <summary>
+        /// 一面两点 求线面交点
+        /// t = (vT·pT - vT·pL)/(vT·vL)
+        /// p = pL + t*vL
+        /// </summary>
+        private static XYZ GetIntersection(Triangle triangle, XYZ pL, XYZ pL2)
+        {
+            var pT = triangle.A;
+            var vT = (triangle.B - triangle.A).CrossProduct(triangle.C - triangle.A);
+            var vL = pL2 - pL;
+            var t = (vT.DotProduct(pT) - vT.DotProduct(pL)) / vT.DotProduct(vL);
+            var p = pL + t * vL;
+            return p;
+
+
+            //var unboundLine = Line.CreateBound(point, point + new XYZ(0, 0, 1));
+            //unboundLine.MakeUnbound();
+            //IntersectionResultArray faceIntersect;
+            //face.Intersect(unboundLine, out faceIntersect);
+            //return faceIntersect.get_Item(0).XYZPoint;
         }
     }
 }

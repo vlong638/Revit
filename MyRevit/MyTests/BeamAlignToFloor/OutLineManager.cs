@@ -10,7 +10,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     /// </summary>
     class OutLineManager
     {
-        List<LeveledOutLines> LeveledOutLines = new List<LeveledOutLines>();
+        public List<LevelOutLines> LeveledOutLines = new List<LevelOutLines>();
         Document Document { set; get; }
         BeamAlignToFloorModel Model { set; get; }
 
@@ -28,7 +28,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         {
             var geometry = floor.get_Geometry(new Options() { View = Document.ActiveView });
             var geometryElements = geometry as GeometryElement;
-            LeveledOutLines leveledOutLines = new LeveledOutLines();
+            LevelOutLines leveledOutLines = new LevelOutLines();
             foreach (Solid geometryElement in geometryElements)
             {
                 var faces = geometryElement.Faces;
@@ -72,12 +72,12 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var curve = (beam.Location as LocationCurve).Curve;
             var start = new XYZ(curve.GetEndPoint(0).X, curve.GetEndPoint(0).Y, 0);
             var end = new XYZ(curve.GetEndPoint(1).X, curve.GetEndPoint(1).Y, 0);
-            var beamLine = Line.CreateBound(start, end);
+            var beamLineZ0 = Line.CreateBound(start, end);
             List<LineSeperatePoints> fitLinesCollection = new List<LineSeperatePoints>();
             foreach (var LeveledOutLine in LeveledOutLines)
-                if (LeveledOutLine.IsCover(beamLine))
+                if (LeveledOutLine.IsCover(beamLineZ0))
                 {
-                    var fitLines = LeveledOutLine.GetFitLines(beamLine);
+                    var fitLines = LeveledOutLine.GetFitLines(beamLineZ0);
                     //if (fitLines.Points.Count > 0)
                     fitLines.Z = fitLines.Points.Max(c => c.Z);
                     fitLinesCollection.Add(fitLines);

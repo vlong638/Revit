@@ -74,7 +74,13 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     var beam = doc.GetElement(beamId);
                     var fitLineCollection = collector.Fit(beam);
                     var fitLine =collector.Merge(fitLineCollection);
-                    collector.Adapt(beam, fitLine);
+                    //collector.Adapt(beam, fitLine);
+
+                    //绘图分析
+                    var diaplayer = new GraphicsDisplayer((int)collector.LeveledOutLines.Max(c => c.OutLines.Max(v => v.Points.Max(b => b.X))), (int)collector.LeveledOutLines.Max(c => c.OutLines.Max(v => v.Points.Max(b => b.Y))));
+                    diaplayer.Display(collector.LeveledOutLines);
+                    diaplayer.Display(fitLine);
+                    diaplayer.Save();
                 }
                 return true;
             });

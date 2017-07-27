@@ -119,8 +119,10 @@
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Constraints.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\CoverType.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\FitLines.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\GeometryHelper.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\GraphsDisplayer.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\LeveledOutLines.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLine.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager.cs" />
