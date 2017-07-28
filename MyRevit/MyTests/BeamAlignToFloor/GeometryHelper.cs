@@ -139,8 +139,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 }
                 else
                 {
-                    x0 = (board0.Y - beam0.Y - kBoard * board0.X - kBeam * beam0.X) / (kBeam - kBoard);
-                    y0 = (kBoard * kBeam * board0.X - kBoard * kBeam * beam0.X + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
+                    x0 = (beam0.Y - board0.Y + kBoard * board0.X - kBeam * beam0.X) / (kBoard - kBeam);
+                    y0 = (kBoard * kBeam * (board0.X -beam0.X) + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
                 }
                 result.Add(new XYZ(x0, y0, 0));
             }
