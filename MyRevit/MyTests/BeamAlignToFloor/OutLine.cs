@@ -203,16 +203,16 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// 获得拆分点
         /// </summary>
         /// <returns></returns>
-        public LineSeperatePoints GetFitLines(Line lineZ0)
+        public SeperatePoints GetFitLines(Line lineZ0)
         {
             var intersectLineZ0s = LineZ0s.Where(c => c.VL_IsIntersect(lineZ0));
             //这里计算出了裁剪点,但这里是Z0面的交点
-            LineSeperatePoints result = new LineSeperatePoints();
+            SeperatePoints result = new SeperatePoints();
             foreach (var intersectLineZ0 in intersectLineZ0s)
             {
                 var pointZ0s = intersectLineZ0.VL_GetIntersectedOrContainedPoints(lineZ0);
                 var orientLine = Lines.First(c => c.GetEndPoint(0).XYEqualTo(intersectLineZ0.GetEndPoint(0)) && c.GetEndPoint(1).XYEqualTo(intersectLineZ0.GetEndPoint(1)));
-                result.Points.AddRange(orientLine.VL_GetZLineIntersection(pointZ0s));
+                result.DirectionPoints.AddRange(orientLine.VL_GetZLineIntersection(pointZ0s));
             }
             ////裁剪点需回归到面板
             //foreach (var point in points)
@@ -235,7 +235,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 var coverType = SubOutLine.IsCover(lineZ0);
                 if (coverType != CoverType.Disjoint)
-                    result.Points.AddRange(SubOutLine.GetFitLines(lineZ0).Points);
+                    result.DirectionPoints.AddRange(SubOutLine.GetFitLines(lineZ0).DirectionPoints);
 
             }
             return result;

@@ -67,19 +67,18 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         /// <param name="beam"></param>
         /// <returns></returns>
-        public List<LineSeperatePoints> Fit(Element beam)
+        public List<SeperatePoints> Fit(Element beam)
         {
             var curve = (beam.Location as LocationCurve).Curve;
             var start = new XYZ(curve.GetEndPoint(0).X, curve.GetEndPoint(0).Y, 0);
             var end = new XYZ(curve.GetEndPoint(1).X, curve.GetEndPoint(1).Y, 0);
             var beamLineZ0 = Line.CreateBound(start, end);
-            List<LineSeperatePoints> fitLinesCollection = new List<LineSeperatePoints>();
+            List<SeperatePoints> fitLinesCollection = new List<SeperatePoints>();
             foreach (var LeveledOutLine in LeveledOutLines)
                 if (LeveledOutLine.IsCover(beamLineZ0))
                 {
                     var fitLines = LeveledOutLine.GetFitLines(beamLineZ0);
-                    //if (fitLines.Points.Count > 0)
-                    fitLines.Z = fitLines.Points.Max(c => c.Z);
+                    fitLines.Z = fitLines.DirectionPoints.Max(c => c.Point.Z);
                     fitLinesCollection.Add(fitLines);
                 }
             return fitLinesCollection;
@@ -89,47 +88,55 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         /// <param name="beam"></param>
         /// <param name="lines"></param>
-        public LineSeperatePoints Merge(List<LineSeperatePoints> pointsCollection)
+        public SeperatePoints Merge(List<SeperatePoints> seperatePointsCollection)
         {
-            LineSeperatePoints result = new LineSeperatePoints();
-            if (pointsCollection.Count() == 0)
-                return result;
+            SeperatePoints dealedPoints = new SeperatePoints();
+            if (seperatePointsCollection.Count() == 0)
+                return dealedPoints;
 
-            pointsCollection = pointsCollection.OrderByDescending(c => c.Z).ToList();
-            double max = double.MaxValue;
-            double min = double.MinValue;
-            if (pointsCollection.FirstOrDefault().Points[0].Y == pointsCollection.FirstOrDefault().Points[1].Y)//X轴平行线,以X轴为准
+            seperatePointsCollection = seperatePointsCollection.OrderByDescending(c => c.Z).ToList();
+            var usingX = seperatePointsCollection.FirstOrDefault().DirectionPoints[0].Point.Y == seperatePointsCollection.FirstOrDefault().DirectionPoints[1].Point.Y;
+            if (usingX)
             {
-                foreach (var pointsLine in pointsCollection)
+                foreach (var seperatePoints in seperatePointsCollection)
                 {
-                    foreach (var point in pointsLine.Points)
-                        if (point.X < max && point.X > min)
-                            result.Points.Add(point);
-
-                    max = pointsLine.Points.Max(c => c.X);
-                    min = pointsLine.Points.Min(c => c.X);
+                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.X > dealedPoints.Max).OrderBy(c => c.Point.X))
+                        dealedPoints.Add(point, point.Point.X);
+                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.X < dealedPoints.Min).OrderByDescending(c => c.Point.X))
+                        dealedPoints.Add(point, point.Point.X);
                 }
             }
-            else//其他的以Y轴为准
+            else
             {
-                foreach (var pointsLine in pointsCollection)
+                foreach (var seperatePoints in seperatePointsCollection)
                 {
-                    foreach (var point in pointsLine.Points)
-                        if (point.Y < max && point.Y > min)
-                            result.Points.Add(point);
-
-                    max = pointsLine.Points.Max(c => c.Y);
-                    min = pointsLine.Points.Min(c => c.Y);
+                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.Y > dealedPoints.Max).OrderBy(c => c.Point.Y))
+                        dealedPoints.Add(point, point.Point.Y);
+                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.Y < dealedPoints.Min).OrderByDescending(c => c.Point.Y))
+                        dealedPoints.Add(point, point.Point.Y);
                 }
             }
-            return result;
+
+
+
+            foreach (var seperatePoints in seperatePointsCollection)
+            {
+                foreach (var point in seperatePoints.DirectionPoints)
+                {
+                    if (usingX)
+                        dealedPoints.Add(point, point.Point.X);
+                    else
+                        dealedPoints.Add(point, point.Point.Y);
+                }
+            }
+            return dealedPoints;
         }
         /// <summary>
         /// 梁 适应到 裁剪集合
         /// </summary>
         /// <param name="beam"></param>
         /// <param name="lines"></param>
-        public void Adapt(Element beam, LineSeperatePoints lineSeperatePoints)
+        public void Adapt(Element beam, SeperatePoints lineSeperatePoints)
         {
             //TODO0719
             throw new NotImplementedException();

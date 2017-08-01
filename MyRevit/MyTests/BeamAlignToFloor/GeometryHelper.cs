@@ -51,18 +51,66 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return point1.X == point2.X && point1.Y == point2.Y;
         }
 
-        public static List<XYZ> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points)
+        /// <summary>
+        /// 获得线与点在Z轴上的交点
+        /// </summary>
+        /// <param name="boardLine"></param>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static List<DirectionPoint> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points)
         {
             var board0 = boardLine.GetEndPoint(0);
             var board1 = boardLine.GetEndPoint(1);
             var negativeA = ( board0.Z * board1.Y- board1.Z * board0.Y) / (board0.X * board1.Y - board1.X * board0.Y);
             var negativeB = (board0.Z * board1.X- board1.Z * board0.X) / (board0.Y * board1.X - board1.Y * board0.X);
-            List<XYZ> result = new List<XYZ>();
+            List<DirectionPoint> result = new List<DirectionPoint>();
             foreach (var point in points)
-            {
-                result.Add(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y));
-            }
+                result.Add(new DirectionPoint(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y), boardLine.Direction));
             return result;
+        }
+
+        public static XYZ VL_GetIntersectionOnLine(XYZ board0, XYZ boardDirection, XYZ beam0,XYZ beamDirection)
+        {
+            if (Math.Abs(beamDirection.Y)< ConstraintsOfBeamAlignToFloor.XYZTolerance)
+            {
+                return beam0 + ((beam0.X - board0.X) / beamDirection.X) * beamDirection;
+            }
+            else
+            {
+                return beam0 + ((beam0.Y - board0.Y) / beamDirection.Y) * beamDirection;
+            }
+
+
+            //var beam1 = beam0 + new XYZ(0, 0, 1);
+            //var kBoard = direction.Y / direction.X;
+            //var kBeam = (beam1.Y - beam0.Y) / (beam1.X - beam0.X);
+            //double y0, x0;
+            //if (kBoard == 0)
+            //{
+            //    y0 = board0.Y;
+            //    x0 = double.IsNaN(kBeam) ? beam0.X : (y0 - beam0.Y) / kBeam + beam0.X;
+            //}
+            //else if (kBeam == 0)
+            //{
+            //    y0 = beam0.Y;
+            //    x0 = double.IsNaN(kBoard) ? board0.X : (y0 - board0.Y) / kBoard + board0.X;
+            //}
+            //else if (double.IsNaN(kBoard))
+            //{
+            //    x0 = board0.X;
+            //    y0 = kBeam * (board0.X - beam0.X) + beam0.Y;
+            //}
+            //else if (double.IsNaN(kBeam))
+            //{
+            //    x0 = beam0.X;
+            //    y0 = kBoard * (beam0.X - board0.X) + board0.Y;
+            //}
+            //else
+            //{
+            //    x0 = (beam0.Y - board0.Y + kBoard * board0.X - kBeam * beam0.X) / (kBoard - kBeam);
+            //    y0 = (kBoard * kBeam * (board0.X - beam0.X) + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
+            //}
+            //return new XYZ(x0, y0, 0);
         }
 
         /// <summary>
@@ -155,7 +203,6 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return (p1_0.X < p1_1.X || (p1_0.X == p1_1.X && p1_0.Y <= p1_1.Y)) ? p1_0 : p1_1;
         }
 
-
         /// <summary>
         /// 获取边的所有点
         /// </summary>
@@ -222,14 +269,6 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             if (v < 0 || v > 1)
                 return false;
             return u + v <= 1;
-        }
-
-        /// <summary>
-        /// 相交
-        /// </summary>
-        public static bool IsIntersect()
-        {
-            return false;
         }
     }
 }

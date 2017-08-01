@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace MyRevit.MyTests.BeamAlignToFloor
 {
+    /// <summary>
+    /// 分层轮廓集合,一面一层级的轮廓
+    /// </summary>
     public class LevelOutLines
     {
         public bool IsValid { get { return OutLines.Count() > 0; } }
@@ -74,23 +77,23 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// 获得拆分点
         /// </summary>
         /// <returns></returns>
-        public LineSeperatePoints GetFitLines(Line lineZ0)
+        public SeperatePoints GetFitLines(Line beamLineZ0)
         {
-            LineSeperatePoints fitLines = new LineSeperatePoints();
-            var p0 = lineZ0.GetEndPoint(0);
-            var p1 = lineZ0.GetEndPoint(1);
+            SeperatePoints fitLines = new SeperatePoints();
+            var p0 = beamLineZ0.GetEndPoint(0);
+            var p1 = beamLineZ0.GetEndPoint(1);
             foreach (var SubOutLine in OutLines)
             {
-                var coverType = SubOutLine.IsCover(lineZ0);
+                var coverType = SubOutLine.IsCover(beamLineZ0);
                 if (coverType != CoverType.Disjoint)
-                    fitLines.Points.AddRange(SubOutLine.GetFitLines(lineZ0).Points);
+                    fitLines.DirectionPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).DirectionPoints);
                 //线的端点增加
                 var triangle = SubOutLine.GetContainer(p0);
                 if (triangle != null)
-                    fitLines.Points.Add(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)));
+                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)), beamLineZ0.Direction));
                 triangle = SubOutLine.GetContainer(p1);
                 if (triangle != null)
-                    fitLines.Points.Add(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)));
+                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)), beamLineZ0.Direction));
             }
             return fitLines;
         }

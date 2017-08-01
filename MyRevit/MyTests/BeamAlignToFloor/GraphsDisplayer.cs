@@ -11,7 +11,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         static GraphicsDisplayer GraphicsDisplayer;
 
         #region LineSeperatePoints
-        public static void Display(string path, LineSeperatePoints lineSeperatePoints, List<LevelOutLines> outLinesCollection)
+        public static void Display(string path, SeperatePoints lineSeperatePoints, List<LevelOutLines> outLinesCollection)
         {
             var maxX = (int)outLinesCollection.Max(c => c.OutLines.Max(v => v.Points.Max(b => b.X)));
             var minX = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.X)));
@@ -23,9 +23,9 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             foreach (var levelOutLines in outLinesCollection)
                 foreach (var outLine in levelOutLines.OutLines)
                     Display(outLine);
-            GraphicsDisplayer.DisplayLines(lineSeperatePoints.Points, new Pen(Brushes.Red), true);
+            GraphicsDisplayer.DisplayLines(lineSeperatePoints.DirectionPoints.Select(c=>c.Point).ToList(), new Pen(Brushes.Red), true);
             var randomValue = new Random().Next(10);
-            GraphicsDisplayer.DisplayPointsText(lineSeperatePoints.Points, Brushes.Red, randomValue, randomValue);
+            GraphicsDisplayer.DisplayPointsText(lineSeperatePoints.DirectionPoints.Select(c => c.Point).ToList(), Brushes.Red, randomValue, randomValue);
             GraphicsDisplayer.SaveTo(path);
         }
         static void Display(OutLine outLine)

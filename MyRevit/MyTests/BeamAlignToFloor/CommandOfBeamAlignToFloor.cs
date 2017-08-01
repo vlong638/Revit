@@ -73,11 +73,11 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 {
                     var beam = doc.GetElement(beamId);
                     var fitLineCollection = collector.Fit(beam);
-                    var fitLine = collector.Merge(fitLineCollection);
+                    var seperatePoints = collector.Merge(fitLineCollection);
                     //collector.Adapt(beam, fitLine);
 
                     //绘图分析
-                    GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\display2.png", fitLine, collector.LeveledOutLines);
+                    GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\display2.png", seperatePoints, collector.LeveledOutLines);
                 }
                 return true;
             });
