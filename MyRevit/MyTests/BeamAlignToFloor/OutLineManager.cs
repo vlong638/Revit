@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,7 +89,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         /// <param name="beam"></param>
         /// <param name="lines"></param>
-        public SeperatePoints Merge(List<SeperatePoints> seperatePointsCollection)
+        public SeperatePoints Merge(List<SeperatePoints> seperatePointsCollection, DirectionPoint beamPoint0, DirectionPoint beamPoint1)
         {
             SeperatePoints dealedPoints = new SeperatePoints();
             if (seperatePointsCollection.Count() == 0)
@@ -116,30 +117,46 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                         dealedPoints.Add(point, point.Point.Y);
                 }
             }
-
-
-
-            foreach (var seperatePoints in seperatePointsCollection)
-            {
-                foreach (var point in seperatePoints.DirectionPoints)
-                {
-                    if (usingX)
-                        dealedPoints.Add(point, point.Point.X);
-                    else
-                        dealedPoints.Add(point, point.Point.Y);
-                }
-            }
+            var directionPoint = beamPoint0;
+            if (dealedPoints.DirectionPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+                if (usingX)
+                    dealedPoints.Add(directionPoint, directionPoint.Point.X);
+                else
+                    dealedPoints.Add(directionPoint, directionPoint.Point.Y);
+            directionPoint = beamPoint1;
+            if (dealedPoints.DirectionPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+                if (usingX)
+                    dealedPoints.Add(directionPoint, directionPoint.Point.X);
+                else
+                    dealedPoints.Add(directionPoint, directionPoint.Point.Y);
             return dealedPoints;
+
+
+
+            //foreach (var seperatePoints in seperatePointsCollection)
+            //{
+            //    foreach (var point in seperatePoints.DirectionPoints)
+            //    {
+            //        if (usingX)
+            //            dealedPoints.Add(point, point.Point.X);
+            //        else
+            //            dealedPoints.Add(point, point.Point.Y);
+            //    }
+            //}
         }
         /// <summary>
         /// 梁 适应到 裁剪集合
         /// </summary>
-        /// <param name="beam"></param>
-        /// <param name="lines"></param>
-        public void Adapt(Element beam, SeperatePoints lineSeperatePoints)
+        public void Adapt(Document doc,Element beam, SeperatedLines lines)
         {
-            //TODO0719
-            throw new NotImplementedException();
+            var symbol = (beam as FamilyInstance).Symbol;
+            var level = doc.GetElement(beam.LevelId) as Level;
+            doc.Delete(beam.Id);
+            foreach (var line in lines.Lines)
+            {
+                doc.Create.NewFamilyInstance(line, symbol, level, Autodesk.Revit.DB.Structure.StructuralType.Beam);
+                //m_ReviteDoc.Create.NewFamilyInstance(Curve, familySymbol, simLevelInfo.FloorLevel, StructuralType.Beam);
+            }
         }
     }
 }

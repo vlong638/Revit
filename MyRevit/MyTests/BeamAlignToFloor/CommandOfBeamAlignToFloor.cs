@@ -73,8 +73,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 {
                     var beam = doc.GetElement(beamId);
                     var fitLineCollection = collector.Fit(beam);
-                    var seperatePoints = collector.Merge(fitLineCollection);
-                    //collector.Adapt(beam, fitLine);
+                    var seperatePoints = collector.Merge(fitLineCollection, new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(0), ((beam.Location as LocationCurve).Curve as Line).Direction, false), new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(1), ((beam.Location as LocationCurve).Curve as Line).Direction, false));
+                    collector.Adapt(doc, beam, seperatePoints.SeperatedLines);
 
                     //绘图分析
                     GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\display2.png", seperatePoints, collector.LeveledOutLines);

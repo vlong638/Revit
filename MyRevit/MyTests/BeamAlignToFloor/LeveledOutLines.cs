@@ -90,10 +90,10 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 //线的端点增加
                 var triangle = SubOutLine.GetContainer(p0);
                 if (triangle != null)
-                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)), beamLineZ0.Direction));
+                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)), beamLineZ0.Direction, SubOutLine.IsSolid));
                 triangle = SubOutLine.GetContainer(p1);
                 if (triangle != null)
-                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)), beamLineZ0.Direction));
+                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)), beamLineZ0.Direction, SubOutLine.IsSolid));
             }
             return fitLines;
         }

@@ -15,10 +15,10 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         public static bool VL_IsRectangleCrossed(XYZ point1, XYZ point2, XYZ point3, XYZ point4)
         {
-            var h1 = Math.Abs(point1.Y - point2.Y)/2;
-            var h2 = Math.Abs(point3.Y - point4.Y)/2;
-            var w1 = Math.Abs(point1.X - point2.X)/2;
-            var w2 = Math.Abs(point3.X - point4.X)/2;
+            var h1 = Math.Abs(point1.Y - point2.Y) / 2;
+            var h2 = Math.Abs(point3.Y - point4.Y) / 2;
+            var w1 = Math.Abs(point1.X - point2.X) / 2;
+            var w2 = Math.Abs(point3.X - point4.X) / 2;
             var mid1 = (point1 + point2) / 2;
             var mid2 = (point3 + point4) / 2;
             var h = Math.Abs(mid2.Y - mid1.Y);
@@ -57,60 +57,74 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <param name="boardLine"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static List<DirectionPoint> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points)
+        public static List<DirectionPoint> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points, bool isSolid, Line beamLine)
         {
-            var board0 = boardLine.GetEndPoint(0);
-            var board1 = boardLine.GetEndPoint(1);
-            var negativeA = ( board0.Z * board1.Y- board1.Z * board0.Y) / (board0.X * board1.Y - board1.X * board0.Y);
-            var negativeB = (board0.Z * board1.X- board1.Z * board0.X) / (board0.Y * board1.X - board1.Y * board0.X);
+            XYZ lineP0, lineP1;
+            lineP0 = boardLine.GetEndPoint(0);
+            lineP1 = boardLine.GetEndPoint(1);
+            //if (isSolid)//实体到板
+            //{
+            //    lineP0 = boardLine.GetEndPoint(0);
+            //    lineP1 = boardLine.GetEndPoint(1);
+            //}
+            //else//镂空到梁
+            //{
+            //    lineP0 = beamLine.GetEndPoint(0);
+            //    lineP1 = beamLine.GetEndPoint(1);
+            //}
+            var negativeA = (lineP1.Z * lineP0.Y - lineP0.Z * lineP1.Y) / (lineP1.X * lineP0.Y - lineP0.X * lineP1.Y);
+            var negativeB = (lineP1.Z * lineP0.X - lineP0.Z * lineP1.X) / (lineP1.Y * lineP0.X - lineP0.Y * lineP1.X);
             List<DirectionPoint> result = new List<DirectionPoint>();
             foreach (var point in points)
-                result.Add(new DirectionPoint(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y), boardLine.Direction));
+                result.Add(new DirectionPoint(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y), beamLine.Direction, isSolid));
             return result;
         }
 
-        public static XYZ VL_GetIntersectionOnLine(XYZ board0, XYZ boardDirection, XYZ beam0,XYZ beamDirection)
+        /// <summary>
+        /// 获取XY轴在同一直线上的线的Z轴修正后的点
+        /// </summary>
+        public static XYZ VL_GetIntersectionOnLine(XYZ pre, XYZ preDirection, XYZ next, XYZ nextDirection)//, bool usingX
         {
-            if (Math.Abs(beamDirection.Y)< ConstraintsOfBeamAlignToFloor.XYZTolerance)
-            {
-                return beam0 + ((beam0.X - board0.X) / beamDirection.X) * beamDirection;
-            }
+            if (Math.Abs(nextDirection.X) < ConstraintsOfBeamAlignToFloor.XYZTolerance)
+                return next + ((pre.Y - next.Y) / nextDirection.Y) * nextDirection;
             else
-            {
-                return beam0 + ((beam0.Y - board0.Y) / beamDirection.Y) * beamDirection;
-            }
+                return next + ((pre.X - next.X) / nextDirection.X) * nextDirection;
 
 
-            //var beam1 = beam0 + new XYZ(0, 0, 1);
-            //var kBoard = direction.Y / direction.X;
-            //var kBeam = (beam1.Y - beam0.Y) / (beam1.X - beam0.X);
+            //if (usingX)
+            //    return boardNext + ((boardNext.X - boardPre0.X) / boardNextDirection.X) * boardNextDirection;
+            //else
+            //    return boardNext + ((boardNext.Y - boardPre0.Y) / boardNextDirection.Y) * boardNextDirection;
+
+            //var kPre = preDirection.Y / preDirection.X;
+            //var kNext = nextDirection.Y / nextDirection.X;
             //double y0, x0;
-            //if (kBoard == 0)
+            //if (kPre == 0)
             //{
-            //    y0 = board0.Y;
-            //    x0 = double.IsNaN(kBeam) ? beam0.X : (y0 - beam0.Y) / kBeam + beam0.X;
+            //    y0 = pre.Y;
+            //    x0 = double.IsNaN(kNext) ? next.X : (y0 - next.Y) / kNext + next.X;
             //}
-            //else if (kBeam == 0)
+            //else if (kNext == 0)
             //{
-            //    y0 = beam0.Y;
-            //    x0 = double.IsNaN(kBoard) ? board0.X : (y0 - board0.Y) / kBoard + board0.X;
+            //    y0 = next.Y;
+            //    x0 = double.IsNaN(kPre) ? pre.X : (y0 - pre.Y) / kPre + pre.X;
             //}
-            //else if (double.IsNaN(kBoard))
+            //else if (double.IsNaN(kPre))
             //{
-            //    x0 = board0.X;
-            //    y0 = kBeam * (board0.X - beam0.X) + beam0.Y;
+            //    x0 = pre.X;
+            //    y0 = kNext * (pre.X - next.X) + next.Y;
             //}
-            //else if (double.IsNaN(kBeam))
+            //else if (double.IsNaN(kNext))
             //{
-            //    x0 = beam0.X;
-            //    y0 = kBoard * (beam0.X - board0.X) + board0.Y;
+            //    x0 = next.X;
+            //    y0 = kPre * (next.X - pre.X) + pre.Y;
             //}
             //else
             //{
-            //    x0 = (beam0.Y - board0.Y + kBoard * board0.X - kBeam * beam0.X) / (kBoard - kBeam);
-            //    y0 = (kBoard * kBeam * (board0.X - beam0.X) + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
+            //    x0 = (next.Y - pre.Y + kPre * pre.X - kNext * next.X) / (kPre - kNext);
+            //    y0 = (kPre * kNext * (pre.X - next.X) + kPre * next.Y - kNext * pre.Y) / (kPre - kNext);
             //}
-            //return new XYZ(x0, y0, 0);
+            //return new XYZ(x0, y0, pre.Z);
         }
 
         /// <summary>
@@ -126,7 +140,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var board_leftDown = GetLeftDown(board0, board1);
             var board_rightUp = board_leftDown.XYEqualTo(board0) ? board1 : board0;
             var beam_leftDown = GetLeftDown(beam0, beam1);
-            var beam_rightUp = board_leftDown.XYEqualTo(beam0) ? beam1 : beam0;
+            var beam_rightUp = beam_leftDown.XYEqualTo(beam0) ? beam1 : beam0;
             var kBoard = (board_leftDown.Y - board_rightUp.Y) / (board_leftDown.X - board_rightUp.X);
             var kBeam = (beam_leftDown.Y - beam_rightUp.Y) / (beam_leftDown.X - beam_rightUp.X);
             if (kBoard == kBeam)
@@ -188,7 +202,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 else
                 {
                     x0 = (beam0.Y - board0.Y + kBoard * board0.X - kBeam * beam0.X) / (kBoard - kBeam);
-                    y0 = (kBoard * kBeam * (board0.X -beam0.X) + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
+                    y0 = (kBoard * kBeam * (board0.X - beam0.X) + kBoard * beam0.Y - kBeam * board0.Y) / (kBoard - kBeam);
                 }
                 result.Add(new XYZ(x0, y0, 0));
             }
