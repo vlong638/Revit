@@ -50,6 +50,13 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         {
             return point1.X == point2.X && point1.Y == point2.Y;
         }
+        /// <summary>
+        /// XYZ的X与Y相同判断
+        /// </summary>
+        public static bool XYZEqualTo(this XYZ point1, XYZ point2)
+        {
+            return point1.X == point2.X && point1.Y == point2.Y && point1.Z == point2.Z;
+        }
 
         /// <summary>
         /// 获得线与点在Z轴上的交点
@@ -57,7 +64,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <param name="boardLine"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static List<DirectionPoint> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points, bool isSolid, Line beamLine)
+        public static List<AdvancedPoint> VL_GetZLineIntersection(this Line boardLine, List<XYZ> points, bool isSolid, Line beamLine)
         {
             XYZ lineP0, lineP1;
             lineP0 = boardLine.GetEndPoint(0);
@@ -74,21 +81,23 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             //}
             var negativeA = (lineP1.Z * lineP0.Y - lineP0.Z * lineP1.Y) / (lineP1.X * lineP0.Y - lineP0.X * lineP1.Y);
             var negativeB = (lineP1.Z * lineP0.X - lineP0.Z * lineP1.X) / (lineP1.Y * lineP0.X - lineP0.Y * lineP1.X);
-            List<DirectionPoint> result = new List<DirectionPoint>();
+            List<AdvancedPoint> result = new List<AdvancedPoint>();
             foreach (var point in points)
-                result.Add(new DirectionPoint(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y), beamLine.Direction, isSolid));
+                result.Add(new AdvancedPoint(new XYZ(point.X, point.Y, negativeA * point.X + negativeB * point.Y), beamLine.Direction, isSolid));
             return result;
         }
 
         /// <summary>
-        /// 获取XY轴在同一直线上的线的Z轴修正后的点
+        /// 获取XY轴在同一直线上的线的Z轴修正后的点,即pre.Direction为(0,0,1)或(0,0,-1)
         /// </summary>
-        public static XYZ VL_GetIntersectionOnLine(XYZ pre, XYZ preDirection, XYZ next, XYZ nextDirection)//, bool usingX
+        public static XYZ VL_GetIntersectionOnLine(XYZ pre, XYZ next, XYZ nextDirection)//, bool usingX
         {
-            if (Math.Abs(nextDirection.X) < ConstraintsOfBeamAlignToFloor.XYZTolerance)
+            if (Math.Abs(nextDirection.X) > ConstraintsOfBeamAlignToFloor.XYZTolerance)
+                return next + ((pre.X - next.X) / nextDirection.X) * nextDirection;
+            else if (Math.Abs(nextDirection.Y) > ConstraintsOfBeamAlignToFloor.XYZTolerance)
                 return next + ((pre.Y - next.Y) / nextDirection.Y) * nextDirection;
             else
-                return next + ((pre.X - next.X) / nextDirection.X) * nextDirection;
+                return next + ((pre.Z - next.Z) / nextDirection.Z) * nextDirection;
 
 
             //if (usingX)
@@ -182,19 +191,19 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 if (kBoard == 0)
                 {
                     y0 = board0.Y;
-                    x0 = double.IsNaN(kBeam) ? beam0.X : (y0 - beam0.Y) / kBeam + beam0.X;
+                    x0 = double.IsNaN(kBeam) || double.IsInfinity(kBeam) ? beam0.X : (y0 - beam0.Y) / kBeam + beam0.X;
                 }
                 else if (kBeam == 0)
                 {
                     y0 = beam0.Y;
-                    x0 = double.IsNaN(kBoard) ? board0.X : (y0 - board0.Y) / kBoard + board0.X;
+                    x0 = double.IsNaN(kBoard) || double.IsInfinity(kBoard) ? board0.X : (y0 - board0.Y) / kBoard + board0.X;
                 }
-                else if (double.IsNaN(kBoard))
+                else if (double.IsNaN(kBoard)|| double.IsInfinity(kBoard))
                 {
                     x0 = board0.X;
                     y0 = kBeam * (board0.X - beam0.X) + beam0.Y;
                 }
-                else if (double.IsNaN(kBeam))
+                else if (double.IsNaN(kBeam) || double.IsInfinity(kBeam))
                 {
                     x0 = beam0.X;
                     y0 = kBoard * (beam0.X - board0.X) + board0.Y;
@@ -215,6 +224,13 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         private static XYZ GetLeftDown(XYZ p1_0, XYZ p1_1)
         {
             return (p1_0.X < p1_1.X || (p1_0.X == p1_1.X && p1_0.Y <= p1_1.Y)) ? p1_0 : p1_1;
+        }
+        /// <summary>
+        /// 获得左下的点,相同返回前点
+        /// </summary>
+        public static XYZ GetLeftUp(XYZ p0, XYZ p1)
+        {
+            return (p0.X < p1.X) || (p0.X == p1.X && p0.Y <= p1.Y) ? p0 : p1;
         }
 
         /// <summary>
@@ -277,12 +293,30 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             double dotC_P = vC.DotProduct(vP);
             double inverDeno = 1 / (dotB_B * dotC_C - dotB_C * dotB_C);
             double u = (dotC_C * dotB_P - dotB_C * dotC_P) * inverDeno;
+            if (Math.Abs(u) < ConstraintsOfBeamAlignToFloor.XYZTolerance)
+                u = 0;
             if (u < 0 || u > 1)
                 return false;
             double v = (dotB_B * dotC_P - dotB_C * dotB_P) * inverDeno;
+            if (Math.Abs(v) < ConstraintsOfBeamAlignToFloor.XYZTolerance)
+                v = 0;
             if (v < 0 || v > 1)
                 return false;
             return u + v <= 1;
+        }
+
+        /// <summary>
+        /// 一面两点 求线面交点
+        /// t = (vT·pT - vT·pL)/(vT·vL)
+        /// p = pL + t*vL
+        /// </summary>
+        public  static XYZ GetIntersection(Triangle triangle, XYZ point, XYZ direction)
+        {
+            var pT = triangle.A;
+            var vT = (triangle.B - triangle.A).CrossProduct(triangle.C - triangle.A);
+            var t = (vT.DotProduct(pT) - vT.DotProduct(point)) / vT.DotProduct(direction);
+            var p = point + t * direction;
+            return p;
         }
     }
 }

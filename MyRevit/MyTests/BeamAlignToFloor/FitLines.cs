@@ -4,9 +4,12 @@ using System.Collections.Generic;
 
 namespace MyRevit.MyTests.BeamAlignToFloor
 {
-    public class DirectionPoint
+    /// <summary>
+    /// 加强点,可承载额外的信息
+    /// </summary>
+    public class AdvancedPoint
     {
-        public DirectionPoint(XYZ point, XYZ direction, bool isSolid)
+        public AdvancedPoint(XYZ point, XYZ direction, bool isSolid)
         {
             Point = point;
             Direction = direction;
@@ -28,16 +31,16 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// 极限高程,用于重叠的多面的裁剪优先级
         /// </summary>
         public double Z;
-        public List<DirectionPoint> DirectionPoints = new List<DirectionPoint>();
-        public SeperatedLines SeperatedLines = new SeperatedLines();
+        public List<AdvancedPoint> AdvancedPoints = new List<AdvancedPoint>();
+        //public SeperatedLines SeperatedLines = new SeperatedLines();
         public double Max = double.MinValue;
         public double Min = double.MaxValue;
 
-        public void Add(DirectionPoint directionPoint, double value)
+        public void Add(AdvancedPoint directionPoint, double value)
         {
-            if (DirectionPoints.Count == 0)
+            if (AdvancedPoints.Count == 0)
             {
-                DirectionPoints.Add(directionPoint);
+                AdvancedPoints.Add(directionPoint);
                 Max = Math.Max(Max, value);
                 Min = Math.Min(Min, value);
                 return;
@@ -45,18 +48,18 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             if (value > Max)
             {
                 Max = Math.Max(Max, value);
-                var neighborPoint = DirectionPoints[DirectionPoints.Count - 1].Point;
-                var neighborPointFixed = GeometryHelper.VL_GetIntersectionOnLine(neighborPoint,new XYZ(0,0,1), directionPoint.Point, directionPoint.Direction);
-                SeperatedLines.Add(Line.CreateBound(directionPoint.Point, neighborPointFixed));
-                DirectionPoints.Add(directionPoint);
+                var neighborPoint = AdvancedPoints[AdvancedPoints.Count - 1].Point;
+                //var neighborPointFixed = GeometryHelper.VL_GetIntersectionOnLine(neighborPoint,new XYZ(0,0,1), directionPoint.Point, directionPoint.Direction);
+                //SeperatedLines.Add(Line.CreateBound(directionPoint.Point, neighborPointFixed));
+                AdvancedPoints.Add(directionPoint);
             }
             else if (value < Min)
             {
                 Min = Math.Min(Min, value);
-                var neighborPoint = DirectionPoints[0].Point;
-                var neighborPointFixed = GeometryHelper.VL_GetIntersectionOnLine(neighborPoint, new XYZ(0, 0, 1), directionPoint.Point, directionPoint.Direction);
-                SeperatedLines.Add(Line.CreateBound(directionPoint.Point, neighborPointFixed));
-                DirectionPoints.Insert(0, directionPoint);
+                var neighborPoint = AdvancedPoints[0].Point;
+                //var neighborPointFixed = GeometryHelper.VL_GetIntersectionOnLine(neighborPoint, new XYZ(0, 0, 1), directionPoint.Point, directionPoint.Direction);
+                //SeperatedLines.Add(Line.CreateBound(directionPoint.Point, neighborPointFixed));
+                AdvancedPoints.Insert(0, directionPoint);
             }
         }
     }

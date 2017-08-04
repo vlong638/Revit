@@ -1,5 +1,4 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,31 +78,32 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 if (LeveledOutLine.IsCover(beamLineZ0))
                 {
                     var fitLines = LeveledOutLine.GetFitLines(beamLineZ0);
-                    fitLines.Z = fitLines.DirectionPoints.Max(c => c.Point.Z);
+                    fitLines.Z = fitLines.AdvancedPoints.Max(c => c.Point.Z);
                     fitLinesCollection.Add(fitLines);
                 }
             return fitLinesCollection;
         }
+
         /// <summary>
         /// 多个裁剪集合的整合
         /// </summary>
         /// <param name="beam"></param>
         /// <param name="lines"></param>
-        public SeperatePoints Merge(List<SeperatePoints> seperatePointsCollection, DirectionPoint beamPoint0, DirectionPoint beamPoint1)
+        public SeperatePoints Merge(List<SeperatePoints> seperatePointsCollection, AdvancedPoint beamPoint0, AdvancedPoint beamPoint1)
         {
             SeperatePoints dealedPoints = new SeperatePoints();
             if (seperatePointsCollection.Count() == 0)
                 return dealedPoints;
 
             seperatePointsCollection = seperatePointsCollection.OrderByDescending(c => c.Z).ToList();
-            var usingX = seperatePointsCollection.FirstOrDefault().DirectionPoints[0].Point.Y == seperatePointsCollection.FirstOrDefault().DirectionPoints[1].Point.Y;
+            var usingX = seperatePointsCollection.FirstOrDefault().AdvancedPoints[0].Point.Y == seperatePointsCollection.FirstOrDefault().AdvancedPoints[1].Point.Y;
             if (usingX)
             {
                 foreach (var seperatePoints in seperatePointsCollection)
                 {
-                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.X > dealedPoints.Max).OrderBy(c => c.Point.X))
+                    foreach (var point in seperatePoints.AdvancedPoints.Where(c => c.Point.X > dealedPoints.Max).OrderBy(c => c.Point.X))
                         dealedPoints.Add(point, point.Point.X);
-                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.X < dealedPoints.Min).OrderByDescending(c => c.Point.X))
+                    foreach (var point in seperatePoints.AdvancedPoints.Where(c => c.Point.X < dealedPoints.Min).OrderByDescending(c => c.Point.X))
                         dealedPoints.Add(point, point.Point.X);
                 }
             }
@@ -111,39 +111,27 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 foreach (var seperatePoints in seperatePointsCollection)
                 {
-                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.Y > dealedPoints.Max).OrderBy(c => c.Point.Y))
+                    foreach (var point in seperatePoints.AdvancedPoints.Where(c => c.Point.Y > dealedPoints.Max).OrderBy(c => c.Point.Y))
                         dealedPoints.Add(point, point.Point.Y);
-                    foreach (var point in seperatePoints.DirectionPoints.Where(c => c.Point.Y < dealedPoints.Min).OrderByDescending(c => c.Point.Y))
+                    foreach (var point in seperatePoints.AdvancedPoints.Where(c => c.Point.Y < dealedPoints.Min).OrderByDescending(c => c.Point.Y))
                         dealedPoints.Add(point, point.Point.Y);
                 }
             }
             var directionPoint = beamPoint0;
-            if (dealedPoints.DirectionPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
                 if (usingX)
                     dealedPoints.Add(directionPoint, directionPoint.Point.X);
                 else
                     dealedPoints.Add(directionPoint, directionPoint.Point.Y);
             directionPoint = beamPoint1;
-            if (dealedPoints.DirectionPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
                 if (usingX)
                     dealedPoints.Add(directionPoint, directionPoint.Point.X);
                 else
                     dealedPoints.Add(directionPoint, directionPoint.Point.Y);
             return dealedPoints;
-
-
-
-            //foreach (var seperatePoints in seperatePointsCollection)
-            //{
-            //    foreach (var point in seperatePoints.DirectionPoints)
-            //    {
-            //        if (usingX)
-            //            dealedPoints.Add(point, point.Point.X);
-            //        else
-            //            dealedPoints.Add(point, point.Point.Y);
-            //    }
-            //}
         }
+
         /// <summary>
         /// 梁 适应到 裁剪集合
         /// </summary>

@@ -126,6 +126,7 @@
     <Compile Include="MyTests\BeamAlignToFloor\LeveledOutLines.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLine.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\OutLineManager0802.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Triangle.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />

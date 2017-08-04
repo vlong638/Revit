@@ -29,6 +29,18 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     }
     #endregion
 
+    class LevelFloor
+    {
+        public double Elevation;
+        public Floor Floor;
+
+        public LevelFloor(double elevation, Floor floor)
+        {
+            Elevation = elevation;
+            Floor = floor;
+        }
+    }
+
     [Transaction(TransactionMode.Manual)]
     public class CommandOfBeamAlignToFloor : IExternalCommand
     {
@@ -61,24 +73,68 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             //业务逻辑处理
             TransactionHelper.DelegateTransaction(doc, "梁齐板", () =>
             {
-                OutLineManager collector = new OutLineManager(doc, model);
-                //添加板
+                OutLineManager0802 collector = new OutLineManager0802(doc, model);
+                //对板按高程从高到底处理
+                List<LevelFloor> levelFloors = new List<LevelFloor>();
                 foreach (var floorId in floorIds)
                 {
                     var floor = doc.GetElement(floorId) as Floor;
-                    collector.Add(floor);
+                    var level = doc.GetElement(floor.LevelId) as Level;
+                    levelFloors.Add(new LevelFloor(level.Elevation, floor));
                 }
-                //计算梁的偏移处理
+                //依次对各个梁进行个板面的拆分处理
                 foreach (var beamId in beamIds)
                 {
                     var beam = doc.GetElement(beamId);
-                    var fitLineCollection = collector.Fit(beam);
-                    var seperatePoints = collector.Merge(fitLineCollection, new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(0), ((beam.Location as LocationCurve).Curve as Line).Direction, false), new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(1), ((beam.Location as LocationCurve).Curve as Line).Direction, false));
-                    collector.Adapt(doc, beam, seperatePoints.SeperatedLines);
-
-                    //绘图分析
-                    GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\display2.png", seperatePoints, collector.LeveledOutLines);
+                    var beamSymbol = (beam as FamilyInstance).Symbol;
+                    var beamLevel = doc.GetElement(beam.LevelId) as Level;
+                    var beamLine = (beam.Location as LocationCurve).Curve as Line;
+                    if (beamLine == null)
+                        throw new NotImplementedException("暂不支持曲线梁");
+                    var start = new XYZ(beamLine.GetEndPoint(0).X, beamLine.GetEndPoint(0).Y, 0);
+                    var end = new XYZ(beamLine.GetEndPoint(1).X, beamLine.GetEndPoint(1).Y, 0);
+                    var beamLineZ0 = Line.CreateBound(start, end);
+                    GraphicsDisplayerManager.Display(collector, levelFloors);
+                    List<Line> beamLines = collector.DealAll(beam, new List<Line>() { beamLineZ0 }, levelFloors);
+                    //List<Line> beamLines = new List<Line>() { beamLineZ0 };
+                    ////CARE23415
+                    //GraphicsDisplayerManager.Display(collector, levelFloors);
+                    //foreach (var levelFloor in levelFloors.OrderByDescending(c => c.Elevation))
+                    //{
+                    //    beamLines = collector.Deal(beam, beamLines, levelFloor);
+                    //}
+                    //最终未贴合板的梁段生成
+                    foreach (var ungenerateBeamLine in beamLines)
+                    {
+                        var sp0 = ungenerateBeamLine.GetEndPoint(0);
+                        var sp1 = ungenerateBeamLine.GetEndPoint(1);
+                        var fixedSP0 = GeometryHelper.VL_GetIntersectionOnLine(sp0, beamLine.GetEndPoint(0), beamLine.Direction);
+                        var fixedSP1 = GeometryHelper.VL_GetIntersectionOnLine(sp1, beamLine.GetEndPoint(0), beamLine.Direction);
+                        var sectionBeam = doc.Create.NewFamilyInstance(Line.CreateBound(fixedSP0, fixedSP1), beamSymbol, beamLevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
+                        collector.CreatedBeams.Add(sectionBeam);
+                    }
+                    collector.LinkBeamWithAngleGT180();
+                    doc.Delete(beam.Id);
                 }
+                #region 0803前
+                ////添加板
+                //foreach (var floorId in floorIds)
+                //{
+                //    var floor = doc.GetElement(floorId) as Floor;
+                //    collector.Add(floor);
+                //}
+                ////计算梁的偏移处理
+                //foreach (var beamId in beamIds)
+                //{
+                //    var beam = doc.GetElement(beamId);
+                //    var fitLineCollection = collector.Fit(beam);
+                //    var seperatePoints = collector.Merge(fitLineCollection, new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(0), ((beam.Location as LocationCurve).Curve as Line).Direction, false), new DirectionPoint((beam.Location as LocationCurve).Curve.GetEndPoint(1), ((beam.Location as LocationCurve).Curve as Line).Direction, false));
+                //    collector.Adapt(doc, beam, seperatePoints.SeperatedLines);
+
+                //    //绘图分析
+                //    GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\display2.png", seperatePoints, collector.LeveledOutLines);
+                //} 
+                #endregion
                 return true;
             });
 

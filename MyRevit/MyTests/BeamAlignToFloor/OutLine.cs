@@ -135,6 +135,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         {
             return Contains(outline.PointZ0s);
         }
+
         /// <summary>
         /// 检测轮廓是否被包含 另一轮廓
         /// </summary>
@@ -148,33 +149,53 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             }
             return true;
         }
+
         /// <summary>
         /// 检测轮廓是否被包含 另一轮廓
         /// </summary>
-        public Triangle GetContainer(XYZ point)
+        public Triangle GetContainer(XYZ pointZ0)
         {
-            var triangleZ0 = TriangleZ0s.AsParallel().FirstOrDefault(c => c.Contains(point));
+            var triangleZ0 = TriangleZ0s.AsParallel().FirstOrDefault(c => c.Contains(pointZ0));
             if (triangleZ0 != null)
                 return Triangles.First(c => c.A.XYEqualTo(triangleZ0.A) && c.B.XYEqualTo(triangleZ0.B) && c.C.XYEqualTo(triangleZ0.C));
             return null;
         }
 
+        /// <summary>
+        /// 获取包含点的最小级别的轮廓
+        /// </summary>
+        /// <param name="pointZ0"></param>
+        /// <returns></returns>
+        public OutLine GetContainedOutLine(XYZ pointZ0)
+        {
+            if (this.GetContainer(pointZ0)==null)
+            {
+                return null;
+            }
+            foreach (var SubOutLine in SubOutLines)
+            {
+                var directOutLine = SubOutLine.GetContainedOutLine(pointZ0);
+                if (directOutLine != null)
+                    return directOutLine;
+            }
+            return this;
+        }
 
         /// <summary>
         /// 检测轮廓是否相交或包含 有限线段
         /// </summary>
         /// <param name="outLine"></param>
         /// <returns></returns>
-        public CoverType IsCover(Line line)
+        public CoverType IsCover(Line lineZ0)
         {
             //根据线段相交判断
-            var intersect = LineZ0s.FirstOrDefault(c => c.VL_IsIntersect(line));
+            var intersect = LineZ0s.FirstOrDefault(c => c.VL_IsIntersect(lineZ0));
             if (intersect != null)
                 return CoverType.Intersect;
             //线段包含判断
             List<XYZ> points = new List<XYZ>();
-            points.Add(line.GetEndPoint(0));
-            points.Add(line.GetEndPoint(1));
+            points.Add(lineZ0.GetEndPoint(0));
+            points.Add(lineZ0.GetEndPoint(1));
             if (Contains(points))
                 return CoverType.Contain;
             return CoverType.Disjoint;
@@ -212,7 +233,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 var pointZ0s = intersectLineZ0.VL_GetIntersectedOrContainedPoints(beamLineZ0);
                 var orientLine = Lines.First(c => c.GetEndPoint(0).XYEqualTo(intersectLineZ0.GetEndPoint(0)) && c.GetEndPoint(1).XYEqualTo(intersectLineZ0.GetEndPoint(1)));
-                result.DirectionPoints.AddRange(orientLine.VL_GetZLineIntersection(pointZ0s, IsSolid, beamLineZ0));
+                result.AdvancedPoints.AddRange(orientLine.VL_GetZLineIntersection(pointZ0s, IsSolid, beamLineZ0));
             }
             ////裁剪点需回归到面板
             //foreach (var point in points)
@@ -235,7 +256,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 var coverType = SubOutLine.IsCover(beamLineZ0);
                 if (coverType != CoverType.Disjoint)
-                    result.DirectionPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).DirectionPoints);
+                    result.AdvancedPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).AdvancedPoints);
 
             }
             return result;

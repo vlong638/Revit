@@ -73,6 +73,36 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return false;
         }
 
+        public Triangle GetContainer(XYZ pointZ0)
+        {
+            foreach (var subOutLine in OutLines)
+            {
+                var triangle = subOutLine.GetContainer(pointZ0);
+                if (triangle != null)
+                {
+                    return triangle;
+                }
+            }
+            return null;
+        }
+
+        ///// <summary>
+        ///// 检测轮廓是否相交或包含 有限线段
+        ///// </summary>
+        ///// <param name="outLine"></param>
+        ///// <returns></returns>
+        //public bool IsCover(XYZ pointZ0)
+        //{
+        //    foreach (var subOutLine in OutLines)
+        //    {
+        //        if (subOutLine.GetContainer(pointZ0) != null)
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
         /// <summary>
         /// 获得拆分点
         /// </summary>
@@ -86,38 +116,22 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 var coverType = SubOutLine.IsCover(beamLineZ0);
                 if (coverType != CoverType.Disjoint)
-                    fitLines.DirectionPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).DirectionPoints);
+                    fitLines.AdvancedPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).AdvancedPoints);
                 //线的端点增加
                 var triangle = SubOutLine.GetContainer(p0);
                 if (triangle != null)
-                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p0, p0 + new XYZ(0, 0, 1)), beamLineZ0.Direction, SubOutLine.IsSolid));
+                {
+                    var directOutLine = SubOutLine.GetContainedOutLine(p0);
+                    fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, p0, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                }
                 triangle = SubOutLine.GetContainer(p1);
                 if (triangle != null)
-                    fitLines.DirectionPoints.Add(new DirectionPoint(GetIntersection(triangle, p1, p1 + new XYZ(0, 0, 1)), beamLineZ0.Direction, SubOutLine.IsSolid));
+                {
+                    var directOutLine = SubOutLine.GetContainedOutLine(p1);
+                    fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, p1, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                }
             }
             return fitLines;
-        }
-
-        /// <summary>
-        /// 一面两点 求线面交点
-        /// t = (vT·pT - vT·pL)/(vT·vL)
-        /// p = pL + t*vL
-        /// </summary>
-        private static XYZ GetIntersection(Triangle triangle, XYZ pL, XYZ pL2)
-        {
-            var pT = triangle.A;
-            var vT = (triangle.B - triangle.A).CrossProduct(triangle.C - triangle.A);
-            var vL = pL2 - pL;
-            var t = (vT.DotProduct(pT) - vT.DotProduct(pL)) / vT.DotProduct(vL);
-            var p = pL + t * vL;
-            return p;
-
-
-            //var unboundLine = Line.CreateBound(point, point + new XYZ(0, 0, 1));
-            //unboundLine.MakeUnbound();
-            //IntersectionResultArray faceIntersect;
-            //face.Intersect(unboundLine, out faceIntersect);
-            //return faceIntersect.get_Item(0).XYZPoint;
         }
     }
 }
