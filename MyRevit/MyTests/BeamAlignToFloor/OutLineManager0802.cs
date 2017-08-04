@@ -67,9 +67,9 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 var seperatePoints = leveledOutLines.GetFitLines(beamLineZ0);
                 var pBeamZ0 = beamLineZ0.GetEndPoint(0);
                 var pBeamZ1 = beamLineZ0.GetEndPoint(1);
-                if (seperatePoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(pBeamZ0)) == null)
+                if (seperatePoints.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(pBeamZ0)) == null)
                     seperatePoints.AdvancedPoints.Add(new AdvancedPoint(pBeamZ0, beamLine.Direction, false));
-                if (seperatePoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(pBeamZ1)) == null)
+                if (seperatePoints.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(pBeamZ1)) == null)
                     seperatePoints.AdvancedPoints.Add(new AdvancedPoint(pBeamZ1, beamLine.Direction, false));
                 seperatePoints.AdvancedPoints = seperatePoints.AdvancedPoints.OrderByDescending(c => c.Point.X).ThenBy(c => c.Point.Y).ToList();
                 bool isSolid = seperatePoints.AdvancedPoints.First().IsSolid;//点的IsSolid可能是其他分层的记录,需更新为当前分层的最新值
@@ -115,7 +115,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         /// <param name="levelFloor"></param>
         /// <returns></returns>
-        LevelOutLines GetLeveledOutLines(LevelFloor levelFloor)
+        public　LevelOutLines GetLeveledOutLines(LevelFloor levelFloor)
         {
             var leveledOutLines = new LevelOutLines();
             var geometry = levelFloor.Floor.get_Geometry(new Options() { View = Document.ActiveView });
@@ -150,8 +150,12 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return leveledOutLines;
         }
 
-        internal void LinkBeamWithAngleGT180()
+        /// <summary>
+        /// 衔接点相连且夹角大于90度开角朝上
+        /// </summary>
+        internal void LinkBeamWithAngleGT180(Element orientBeam)
         {
+            var height = orientBeam.GetParameters("顶部高程").First().AsDouble() - orientBeam.GetParameters("底部高程").First().AsDouble();
             CreatedBeams = CreatedBeams.OrderBy(c => (c.Location as LocationCurve).Curve.GetEndPoint(0).X).ThenBy(c => (c.Location as LocationCurve).Curve.GetEndPoint(0).Y).ToList();
             for (int i = 0; i < CreatedBeams.Count-1; i++)
             {
@@ -161,31 +165,48 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 var pCurrent1 = (currentBeam.Location as LocationCurve).Curve.GetEndPoint(1);
                 var pNext0 = (nextBeam.Location as LocationCurve).Curve.GetEndPoint(0);
                 var pNext1 = (nextBeam.Location as LocationCurve).Curve.GetEndPoint(1);
-                XYZ currentDirection, nextDirection;
-                if (pCurrent0.XYZEqualTo(pNext0))
+                XYZ currentDirection, nextDirection;//总是由交点向外侧的方向
+                double angle;
+                XYZ pOuter, pCross;
+                if (pCurrent0.VL_XYZEqualTo(pNext0))
                 {
+                    pOuter = pCurrent1;
+                    pCross = pCurrent0;
                     currentDirection = pCurrent1 - pCurrent0;
                     nextDirection = pNext1 - pNext0;
-                    currentDirection.AngleTo(nextDirection);
                 }
-                else if(pCurrent0.XYZEqualTo(pNext1))
+                else if(pCurrent0.VL_XYZEqualTo(pNext1))
                 {
+                    pOuter = pCurrent1;
+                    pCross = pCurrent0;
                     currentDirection = pCurrent1 - pCurrent0;
                     nextDirection = pNext0 - pNext1;
                 }
-                else if (pCurrent1.XYZEqualTo(pNext0))
+                else if (pCurrent1.VL_XYZEqualTo(pNext0))
                 {
+                    pOuter = pCurrent0;
+                    pCross = pCurrent1;
                     currentDirection = pCurrent0 - pCurrent1;
                     nextDirection = pNext1 - pNext0;
                 }
-                else if (pCurrent1.XYZEqualTo(pNext1))
+                else if (pCurrent1.VL_XYZEqualTo(pNext1))
                 {
+                    pOuter = pCurrent0;
+                    pCross = pCurrent1;
                     currentDirection = pCurrent0 - pCurrent1;
                     nextDirection = pNext0 - pNext1;
                 }
                 else
                 {
                     continue;
+                }
+                angle = currentDirection.AngleTo(nextDirection);
+                if (angle <= Math.PI / 2)
+                    continue;
+                if (currentDirection.Z + nextDirection.Z > 0)//向量和求是否中线向上
+                {
+                    var locationCurve = (currentBeam.Location as LocationCurve);
+                    locationCurve.Curve = Line.CreateBound(pOuter, pCross - currentDirection.Normalize() * (Math.PI - angle) * height);
                 }
             }
             

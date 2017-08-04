@@ -96,13 +96,6 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     var beamLineZ0 = Line.CreateBound(start, end);
                     GraphicsDisplayerManager.Display(collector, levelFloors);
                     List<Line> beamLines = collector.DealAll(beam, new List<Line>() { beamLineZ0 }, levelFloors);
-                    //List<Line> beamLines = new List<Line>() { beamLineZ0 };
-                    ////CARE23415
-                    //GraphicsDisplayerManager.Display(collector, levelFloors);
-                    //foreach (var levelFloor in levelFloors.OrderByDescending(c => c.Elevation))
-                    //{
-                    //    beamLines = collector.Deal(beam, beamLines, levelFloor);
-                    //}
                     //最终未贴合板的梁段生成
                     foreach (var ungenerateBeamLine in beamLines)
                     {
@@ -113,7 +106,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                         var sectionBeam = doc.Create.NewFamilyInstance(Line.CreateBound(fixedSP0, fixedSP1), beamSymbol, beamLevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                         collector.CreatedBeams.Add(sectionBeam);
                     }
-                    collector.LinkBeamWithAngleGT180();
+                    collector.LinkBeamWithAngleGT180(beam);
                     doc.Delete(beam.Id);
                 }
                 #region 0803前

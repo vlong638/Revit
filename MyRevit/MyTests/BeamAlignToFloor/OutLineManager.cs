@@ -118,13 +118,13 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 }
             }
             var directionPoint = beamPoint0;
-            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(directionPoint.Point)) == null)
                 if (usingX)
                     dealedPoints.Add(directionPoint, directionPoint.Point.X);
                 else
                     dealedPoints.Add(directionPoint, directionPoint.Point.Y);
             directionPoint = beamPoint1;
-            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.XYEqualTo(directionPoint.Point)) == null)
+            if (dealedPoints.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(directionPoint.Point)) == null)
                 if (usingX)
                     dealedPoints.Add(directionPoint, directionPoint.Point.X);
                 else

@@ -157,7 +157,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         {
             var triangleZ0 = TriangleZ0s.AsParallel().FirstOrDefault(c => c.Contains(pointZ0));
             if (triangleZ0 != null)
-                return Triangles.First(c => c.A.XYEqualTo(triangleZ0.A) && c.B.XYEqualTo(triangleZ0.B) && c.C.XYEqualTo(triangleZ0.C));
+                return Triangles.First(c => c.A.VL_XYEqualTo(triangleZ0.A) && c.B.VL_XYEqualTo(triangleZ0.B) && c.C.VL_XYEqualTo(triangleZ0.C));
             return null;
         }
 
@@ -232,7 +232,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             foreach (var intersectLineZ0 in intersectLineZ0s)
             {
                 var pointZ0s = intersectLineZ0.VL_GetIntersectedOrContainedPoints(beamLineZ0);
-                var orientLine = Lines.First(c => c.GetEndPoint(0).XYEqualTo(intersectLineZ0.GetEndPoint(0)) && c.GetEndPoint(1).XYEqualTo(intersectLineZ0.GetEndPoint(1)));
+                var orientLine = Lines.First(c => c.GetEndPoint(0).VL_XYEqualTo(intersectLineZ0.GetEndPoint(0)) && c.GetEndPoint(1).VL_XYEqualTo(intersectLineZ0.GetEndPoint(1)));
                 result.AdvancedPoints.AddRange(orientLine.VL_GetZLineIntersection(pointZ0s, IsSolid, beamLineZ0));
             }
             ////裁剪点需回归到面板

@@ -43,19 +43,32 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 && (p2_0 - p1_0).CrossProduct(p1_1 - p1_0).DotProduct((p1_1 - p1_0).CrossProduct(p2_1 - p1_0)) >= 0;
         }
 
+        public const double XYZTolerance = 0.001;
+
         /// <summary>
         /// XYZ的X与Y相同判断
         /// </summary>
-        public static bool XYEqualTo(this XYZ point1, XYZ point2)
+        public static bool VL_XYEqualTo(this XYZ point1, XYZ point2)
         {
-            return point1.X == point2.X && point1.Y == point2.Y;
+            return Math.Abs(point1.X - point2.X) < XYZTolerance && Math.Abs(point1.Y - point2.Y) < XYZTolerance;
         }
         /// <summary>
         /// XYZ的X与Y相同判断
         /// </summary>
-        public static bool XYZEqualTo(this XYZ point1, XYZ point2)
+        public static bool VL_XYZEqualTo(this XYZ point1, XYZ point2)
         {
-            return point1.X == point2.X && point1.Y == point2.Y && point1.Z == point2.Z;
+            return Math.Abs(point1.X - point2.X) < XYZTolerance && Math.Abs(point1.Y - point2.Y) < XYZTolerance && Math.Abs(point1.Z - point2.Z) < XYZTolerance;
+        }
+
+        /// <summary>
+        /// 矩阵叉积,>0则p2在p1的逆时针方向, <0则p2在p1的顺时针方向
+        /// p1.Y * p2.Z - p1.Z * p2.Y 
+        /// p1.Z * p2.X - p1.X * p2.Z
+        /// p1.X * p2.Y - p1.Y * p2.X
+        /// </summary>
+        public static double VL_CrossProduct(this XYZ p1, XYZ p2)
+        {
+            return p1.Y * p2.Z - p1.Z * p2.Y + p1.Z * p2.X - p1.X * p2.Z + p1.X * p2.Y - p1.Y * p2.X;
         }
 
         /// <summary>
@@ -69,16 +82,6 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             XYZ lineP0, lineP1;
             lineP0 = boardLine.GetEndPoint(0);
             lineP1 = boardLine.GetEndPoint(1);
-            //if (isSolid)//实体到板
-            //{
-            //    lineP0 = boardLine.GetEndPoint(0);
-            //    lineP1 = boardLine.GetEndPoint(1);
-            //}
-            //else//镂空到梁
-            //{
-            //    lineP0 = beamLine.GetEndPoint(0);
-            //    lineP1 = beamLine.GetEndPoint(1);
-            //}
             var negativeA = (lineP1.Z * lineP0.Y - lineP0.Z * lineP1.Y) / (lineP1.X * lineP0.Y - lineP0.X * lineP1.Y);
             var negativeB = (lineP1.Z * lineP0.X - lineP0.Z * lineP1.X) / (lineP1.Y * lineP0.X - lineP0.Y * lineP1.X);
             List<AdvancedPoint> result = new List<AdvancedPoint>();
@@ -97,43 +100,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             else if (Math.Abs(nextDirection.Y) > ConstraintsOfBeamAlignToFloor.XYZTolerance)
                 return next + ((pre.Y - next.Y) / nextDirection.Y) * nextDirection;
             else
-                return next + ((pre.Z - next.Z) / nextDirection.Z) * nextDirection;
-
-
-            //if (usingX)
-            //    return boardNext + ((boardNext.X - boardPre0.X) / boardNextDirection.X) * boardNextDirection;
-            //else
-            //    return boardNext + ((boardNext.Y - boardPre0.Y) / boardNextDirection.Y) * boardNextDirection;
-
-            //var kPre = preDirection.Y / preDirection.X;
-            //var kNext = nextDirection.Y / nextDirection.X;
-            //double y0, x0;
-            //if (kPre == 0)
-            //{
-            //    y0 = pre.Y;
-            //    x0 = double.IsNaN(kNext) ? next.X : (y0 - next.Y) / kNext + next.X;
-            //}
-            //else if (kNext == 0)
-            //{
-            //    y0 = next.Y;
-            //    x0 = double.IsNaN(kPre) ? pre.X : (y0 - pre.Y) / kPre + pre.X;
-            //}
-            //else if (double.IsNaN(kPre))
-            //{
-            //    x0 = pre.X;
-            //    y0 = kNext * (pre.X - next.X) + next.Y;
-            //}
-            //else if (double.IsNaN(kNext))
-            //{
-            //    x0 = next.X;
-            //    y0 = kPre * (next.X - pre.X) + pre.Y;
-            //}
-            //else
-            //{
-            //    x0 = (next.Y - pre.Y + kPre * pre.X - kNext * next.X) / (kPre - kNext);
-            //    y0 = (kPre * kNext * (pre.X - next.X) + kPre * next.Y - kNext * pre.Y) / (kPre - kNext);
-            //}
-            //return new XYZ(x0, y0, pre.Z);
+                throw new NotImplementedException("计算错误");
+                //return next + ((pre.Z - next.Z) / nextDirection.Z) * nextDirection;
         }
 
         /// <summary>
@@ -147,21 +115,21 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var beam0 = beamLineZ0.GetEndPoint(0);
             var beam1 = beamLineZ0.GetEndPoint(1);
             var board_leftDown = GetLeftDown(board0, board1);
-            var board_rightUp = board_leftDown.XYEqualTo(board0) ? board1 : board0;
+            var board_rightUp = board_leftDown.VL_XYEqualTo(board0) ? board1 : board0;
             var beam_leftDown = GetLeftDown(beam0, beam1);
-            var beam_rightUp = beam_leftDown.XYEqualTo(beam0) ? beam1 : beam0;
+            var beam_rightUp = beam_leftDown.VL_XYEqualTo(beam0) ? beam1 : beam0;
             var kBoard = (board_leftDown.Y - board_rightUp.Y) / (board_leftDown.X - board_rightUp.X);
             var kBeam = (beam_leftDown.Y - beam_rightUp.Y) / (beam_leftDown.X - beam_rightUp.X);
             if (kBoard == kBeam)
             {
                 //修正板线与梁线重叠的算法
-                var up_rightUp = GetLeftDown(board_rightUp, beam_rightUp).XYEqualTo(board_rightUp) ? board_rightUp : beam_rightUp;//XYEqualTo
-                var up_leftDown = up_rightUp.XYEqualTo(board_rightUp) ? board_leftDown : beam_leftDown;
-                var down_rightUp = up_rightUp.XYEqualTo(board_rightUp) ? beam_rightUp : board_rightUp;
-                var down_leftDown = up_rightUp.XYEqualTo(board_rightUp) ? beam_leftDown : board_leftDown;
-                if (up_rightUp.XYEqualTo(down_rightUp))
+                var up_rightUp = GetLeftDown(board_rightUp, beam_rightUp).VL_XYEqualTo(board_rightUp) ? board_rightUp : beam_rightUp;//XYEqualTo
+                var up_leftDown = up_rightUp.VL_XYEqualTo(board_rightUp) ? board_leftDown : beam_leftDown;
+                var down_rightUp = up_rightUp.VL_XYEqualTo(board_rightUp) ? beam_rightUp : board_rightUp;
+                var down_leftDown = up_rightUp.VL_XYEqualTo(board_rightUp) ? beam_leftDown : board_leftDown;
+                if (up_rightUp.VL_XYEqualTo(down_rightUp))
                 {
-                    if (up_leftDown.XYEqualTo(down_leftDown))
+                    if (up_leftDown.VL_XYEqualTo(down_leftDown))
                     {
                         result.Add(up_leftDown);
                         result.Add(up_rightUp);
@@ -175,7 +143,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                         result.Add(up_leftDown);
                     }
                 }
-                else if (up_leftDown.XYEqualTo(down_rightUp))
+                else if (up_leftDown.VL_XYEqualTo(down_rightUp))
                 {
                     result.Add(up_leftDown);
                 }
@@ -246,7 +214,15 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 var tPoints = edge.Tessellate();
                 if (tPoints.Count == 2)
                 {
-                    points.Add(tPoints[0]);
+                    var point = tPoints[0];
+                    if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
+                        points.Add(point);
+                    else
+                    {
+                        point = tPoints[1];
+                        if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
+                            points.Add(point);
+                    }
                 }
                 else
                 {
