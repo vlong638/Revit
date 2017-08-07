@@ -4,7 +4,7 @@ using Autodesk.Revit.DB;
 namespace MyRevit.MyTests.Utilities
 {
     /// <summary>
-    /// 管道 选择过滤器
+    /// <类型>选择过滤器
     /// </summary>
     public class CategoryFilter : ISelectionFilter
     {

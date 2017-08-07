@@ -73,6 +73,20 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             //业务逻辑处理
             TransactionHelper.DelegateTransaction(doc, "梁齐板", () =>
             {
+                //ValidFaces collector = new ValidFaces(doc, model);
+                ////对板按高程从高到底处理
+                //List<LevelFloor> levelFloors = new List<LevelFloor>();
+                //foreach (var floorId in floorIds)
+                //{
+                //    var floor = doc.GetElement(floorId) as Floor;
+                //    var level = doc.GetElement(floor.LevelId) as Level;
+                //    levelFloors.Add(new LevelFloor(level.Elevation, floor));
+                //}
+                //List<Line> beamLines = collector.DealAll(null, new List<Line>(), levelFloors);
+                //GraphicsDisplayerManager.Display(collector, levelFloors);
+
+
+                #region 0803版本
                 OutLineManager0802 collector = new OutLineManager0802(doc, model);
                 //对板按高程从高到底处理
                 List<LevelFloor> levelFloors = new List<LevelFloor>();
@@ -109,6 +123,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     collector.LinkBeamWithAngleGT180(beam);
                     doc.Delete(beam.Id);
                 }
+                #endregion
+
                 #region 0803前
                 ////添加板
                 //foreach (var floorId in floorIds)

@@ -37,6 +37,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             AddLinesFromPoints(ref Lines, Points);
             LineZ0s = new List<Line>();
             AddLinesFromPoints(ref LineZ0s, PointZ0s);
+            //TODO 某些轮廓是由多个面组成,需修正Triangle的分解算法,此处修正即支持非平面的轮廓集合的处理
             Triangles = GeometryHelper.GetTriangles(Points);
             TriangleZ0s = GeometryHelper.GetTriangles(PointZ0s);
             IsSolid = true;

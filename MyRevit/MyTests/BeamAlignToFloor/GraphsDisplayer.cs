@@ -71,6 +71,23 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             GraphicsDisplayer.SaveTo(path);
         }
         #endregion
+
+        internal static void Display(ValidFaces collector, List<LevelFloor> levelFloors)
+        {
+            var outLinesCollection = levelFloors.Select(c => collector.GetLeveledOutLines(c));
+            var maxX = (int)outLinesCollection.Max(c => c.OutLines.Max(v => v.Points.Max(b => b.X)));
+            var minX = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.X)));
+            var maxY = (int)outLinesCollection.Max(c => c.OutLines.Max(v => v.Points.Max(b => b.Y)));
+            var minY = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.Y)));
+            var offSetX = -minX;
+            var offSetY = -minY;
+            GraphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            foreach (var levelOutLines in outLinesCollection)
+                foreach (var outLine in levelOutLines.OutLines)
+                    Display(outLine);
+
+            GraphicsDisplayerManager.Save(@"E:\WorkingSpace\Outputs\Images\display4.png");
+        }
     }
 
 
