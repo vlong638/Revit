@@ -278,7 +278,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 v = 0;
             if (v < 0 || v > 1)
                 return false;
-            return u + v <= 1;
+            return u + v <= 1 + GeometryHelper.XYZTolerance;
         }
 
         /// <summary>

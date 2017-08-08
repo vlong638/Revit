@@ -26,12 +26,14 @@ namespace MyRevit.MyTests.BeamAlignToFloor
 
         internal List<Line> DealAll(Element beam, List<Line> beamLineZ0s, List<LevelFloor> levelFloors)
         {
-            List<Line> result = new List<Line>();
+            List<Line> undealedLines = beamLineZ0s;
             foreach (var levelFloor in levelFloors.OrderByDescending(c => c.Elevation))
             {
-                result.AddRange(Deal(beam, beamLineZ0s, levelFloor));
+                if (undealedLines.Count == 0)
+                    return undealedLines;
+                undealedLines = Deal(beam, undealedLines, levelFloor);
             }
-            return result;
+            return undealedLines;
         }
 
         internal List<Line> Deal(Element beam, List<Line> beamLineZ0s, LevelFloor levelFloor)
@@ -105,7 +107,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             }
             else
             {
-                undealedZ0.Add(beamLine);
+                undealedZ0.Add(beamLineZ0);
             }
             return undealedZ0;
         }

@@ -20,10 +20,10 @@ namespace MyRevit.Commands
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            if (!PmSoft.Common.MFCDll.CRevitModelCheck.Instance().HasModel())
-            {
-                return Result.Cancelled;
-            }
+            //if (!PmSoft.Common.MFCDll.CRevitModelCheck.Instance().HasModel())
+            //{
+            //    return Result.Cancelled;
+            //}
             WarnSettingsSet set = new WarnSettingsSet(commandData);
             if (!set.DoCmd())
             {

@@ -117,18 +117,26 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 var coverType = SubOutLine.IsCover(beamLineZ0);
                 if (coverType != CoverType.Disjoint)
                     fitLines.AdvancedPoints.AddRange(SubOutLine.GetFitLines(beamLineZ0).AdvancedPoints);
-                //线的端点增加
-                var triangle = SubOutLine.GetContainer(p0);
-                if (triangle != null)
+                //线的端点增加 注意检测是否已存在
+                var point = p0;
+                if (fitLines.AdvancedPoints.FirstOrDefault(c=>c.Point.VL_XYEqualTo(point))==null)
                 {
-                    var directOutLine = SubOutLine.GetContainedOutLine(p0);
-                    fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, p0, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                    var triangle = SubOutLine.GetContainer(point);
+                    if (triangle != null)
+                    {
+                        var directOutLine = SubOutLine.GetContainedOutLine(point);
+                        fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                    }
                 }
-                triangle = SubOutLine.GetContainer(p1);
-                if (triangle != null)
+                point = p1;
+                if (fitLines.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(point)) == null)
                 {
-                    var directOutLine = SubOutLine.GetContainedOutLine(p1);
-                    fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, p1, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                    var triangle = SubOutLine.GetContainer(point);
+                    if (triangle != null)
+                    {
+                        var directOutLine = SubOutLine.GetContainedOutLine(point);
+                        fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                    }
                 }
             }
             return fitLines;
