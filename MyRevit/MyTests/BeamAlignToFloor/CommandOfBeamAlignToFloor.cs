@@ -26,6 +26,10 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     {
         public ContentType ContentType { set; get; }
         public AlignType AlignType { set; get; }
+        /// <summary>
+        /// 偏移,用于链接模型存在偏移的情况
+        /// </summary>
+        public XYZ Offset = new XYZ(0, 0, 0);
     }
     #endregion
 
@@ -44,35 +48,73 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     [Transaction(TransactionMode.Manual)]
     public class CommandOfBeamAlignToFloor : IExternalCommand
     {
+        static BeamAlignToFloorModel model = new BeamAlignToFloorModel()
+        {
+            AlignType = AlignType.BeamTopToFloorBottom,
+            ContentType = ContentType.LinkDocument,
+        };
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiApp = commandData.Application;
             var app = commandData.Application.Application;
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
-            BeamAlignToFloorModel model = new BeamAlignToFloorModel()
-            {
-                AlignType = AlignType.BeamTopToFloorTop,
-                ContentType = ContentType.Document,
-            };
+
+            ////链接模板测试
+            //var linkFilter = new CategoryFilter(BuiltInCategory.OST_Floors, true);
+            //Reference reference = uiDoc.Selection.PickObject(ObjectType.LinkedElement, linkFilter, "先选择一个链接文件");
+            //Element element = doc.GetElement(reference.ElementId);
+            //if (element.Category.Name != "RVT 链接")
+            //    return Result.Cancelled;
+            //var floors = uiDoc.Selection.PickObjects(ObjectType.LinkedElement, linkFilter, "在链接文件中选择板:").ToList();
+            ////194278
+            //element = doc.GetElement(new ElementId(194278));
+            //var linkInstance = doc.GetElement(reference.ElementId) as RevitLinkInstance;
+            //if (linkInstance!=null)
+            //{
+            //    var linkDoc = linkInstance.GetLinkDocument();
+            //    element = linkDoc.GetElement(new ElementId(194278));
+            //}
 
             //MessageHelper.TaskDialogShow("开始选择板");
-            IEnumerable<ElementId> floorIds = null;
-            if (model.ContentType == ContentType.Document)
-            {
-                //基础板,OST_StructuralFoundation
-                //结构楼板,OST_Floors
-                floorIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_Floors)).Select(c => c.ElementId);
-                if (floorIds == null || floorIds.Count() == 0)
-                    return Result.Cancelled;
-            }
-            //MessageHelper.TaskDialogShow("开始选择梁");
-            var beamIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_StructuralFraming)).Select(c => c.ElementId);
-            if (beamIds == null || beamIds.Count() == 0)
-                return Result.Cancelled;
             //业务逻辑处理
             TransactionHelper.DelegateTransaction(doc, "梁齐板", () =>
             {
+                Document linkDocument = null;
+                IEnumerable<ElementId> floorIds = null;
+                if (model.ContentType == ContentType.Document)
+                {
+                    //基础板,OST_StructuralFoundation
+                    //结构楼板,OST_Floors
+                    floorIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_Floors), "选择楼板").Select(c => c.ElementId);
+                    if (floorIds == null || floorIds.Count() == 0)
+                        return false;
+                }
+                else
+                {
+                    var linkFilter = new CategoryFilter(BuiltInCategory.OST_Floors, true);
+                    Reference reference = uiDoc.Selection.PickObject(ObjectType.LinkedElement, linkFilter, "先选择一个链接文件");
+                    Element element = doc.GetElement(reference.ElementId);
+                    if (element.Category.Name != "RVT 链接")
+                        return false;
+                    linkDocument = (element as RevitLinkInstance).GetLinkDocument();
+                    floorIds = uiDoc.Selection.PickObjects(ObjectType.LinkedElement, linkFilter, "在链接文件中选择板:").Select(c => c.LinkedElementId);
+                    model.Offset = (element as Instance).GetTotalTransform().Origin;
+
+                    ////链接元素测试
+                    //foreach (var floor in floors)
+                    //{
+                    //    var f = doc.GetElement(floor.ElementId);
+                    //    f = (element as RevitLinkInstance).GetLinkDocument().GetElement(floor.ElementId);
+                    //}
+                }
+                //MessageHelper.TaskDialogShow("开始选择梁");
+                var beamIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_StructuralFraming), "选择梁").Select(c => c.ElementId);
+                if (beamIds == null || beamIds.Count() == 0)
+                    return false;
+
+
                 //ValidFaces collector = new ValidFaces(doc, model);
                 ////对板按高程从高到底处理
                 //List<LevelFloor> levelFloors = new List<LevelFloor>();
@@ -92,9 +134,19 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 List<LevelFloor> levelFloors = new List<LevelFloor>();
                 foreach (var floorId in floorIds)
                 {
-                    var floor = doc.GetElement(floorId) as Floor;
-                    var level = doc.GetElement(floor.LevelId) as Level;
-                    levelFloors.Add(new LevelFloor(level.Elevation, floor));
+                    if (model.ContentType == ContentType.Document)
+                    {
+                        var floor = doc.GetElement(floorId) as Floor;
+                        var level = doc.GetElement(floor.LevelId) as Level;
+                        levelFloors.Add(new LevelFloor(level.Elevation, floor));
+                    }
+                    else
+                    {
+                        collector.LinkDocument = linkDocument;
+                        var floor = linkDocument.GetElement(floorId) as Floor;
+                        var level = linkDocument.GetElement(floor.LevelId) as Level;
+                        levelFloors.Add(new LevelFloor(level.Elevation, floor));
+                    }
                 }
                 //依次对各个梁进行个板面的拆分处理
                 foreach (var beamId in beamIds)
@@ -146,7 +198,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 #endregion
                 return true;
             });
-
+            model.ContentType = model.ContentType == ContentType.Document ? ContentType.LinkDocument : ContentType.Document;
             return Result.Succeeded;
         }
     }

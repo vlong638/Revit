@@ -131,13 +131,13 @@
     <Compile Include="MyTests\BeamAlignToFloor\ValidFaces.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
-    <Compile Include="MyTests\UpdaterTestCommand.cs" />
-    <Compile Include="MyTests\StorageConsistencyCommand.cs" />
-    <Compile Include="MyTests\BeamAnnotationEntity.cs" />
-    <Compile Include="MyTests\EventsCommand.cs" />
-    <Compile Include="MyTests\FilterElementCommand.cs" />
-    <Compile Include="MyTests\MyExternalApplication.cs" />
-    <Compile Include="MyTests\AdvancedRevitCommand.cs" />
+    <Compile Include="MyTests\0Commands\UpdaterTestCommand.cs" />
+    <Compile Include="MyTests\0Commands\StorageConsistencyCommand.cs" />
+    <Compile Include="MyTests\0Commands\BeamAnnotationEntity.cs" />
+    <Compile Include="MyTests\0Commands\EventsCommand.cs" />
+    <Compile Include="MyTests\0Commands\FilterElementCommand.cs" />
+    <Compile Include="MyTests\0Commands\MyExternalApplication.cs" />
+    <Compile Include="MyTests\0Commands\AdvancedRevitCommand.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationBuilder.cs" />
     <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\MultiPipeAnnotationSettings.cs" />
@@ -146,20 +146,20 @@
     <Compile Include="MyTests\PipeAnnotation\SinglePipeAnnotationSettings.cs" />
     <Compile Include="MyTests\PipeAnnotation\TagProperty.cs" />
     <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
-    <Compile Include="MyTests\PipeUpdaterCommand.cs" />
-    <Compile Include="MyTests\PipeAnnotationCommand.cs" />
-    <Compile Include="MyTests\BeamUpdaterCommand.cs" />
-    <Compile Include="MyTests\BeamAnnotationCommand.cs" />
-    <Compile Include="MyTests\MyExternalCommand.cs" />
-    <Compile Include="MyTests\SelectFilteredElementCommand.cs" />
-    <Compile Include="MyTests\SelectElementCommand.cs" />
+    <Compile Include="MyTests\0Commands\PipeUpdaterCommand.cs" />
+    <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
+    <Compile Include="MyTests\0Commands\BeamUpdaterCommand.cs" />
+    <Compile Include="MyTests\0Commands\BeamAnnotationCommand.cs" />
+    <Compile Include="MyTests\0Commands\MyExternalCommand.cs" />
+    <Compile Include="MyTests\0Commands\SelectFilteredElementCommand.cs" />
+    <Compile Include="MyTests\0Commands\SelectElementCommand.cs" />
     <Compile Include="MyTests\UI\PipeAnnotationForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MyTests\UI\PipeAnnotationForm.Designer.cs">
       <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyTests\ViewCommand.cs" />
+    <Compile Include="MyTests\0Commands\ViewCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
     <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
     <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />

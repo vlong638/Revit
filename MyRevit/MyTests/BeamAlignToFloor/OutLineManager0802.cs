@@ -12,7 +12,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     /// </summary>
     class OutLineManager0802
     {
-        Document Document { set; get; }
+        public Document Document { set; get; }
+        public Document LinkDocument { set; get; }
         BeamAlignToFloorModel Model { set; get; }
         public FamilySymbol BeamSymbol { set; get; }
         public List<Element> CreatedBeams { set; get; }
@@ -120,7 +121,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         public　LevelOutLines GetLeveledOutLines(LevelFloor levelFloor)
         {
             var leveledOutLines = new LevelOutLines();
-            var geometry = levelFloor.Floor.get_Geometry(new Options() { View = Document.ActiveView });
+            var option = new Options() { View = Document.ActiveView };
+            var geometry = levelFloor.Floor.get_Geometry(option);
             var geometryElements = geometry as GeometryElement;
             foreach (Solid geometryElement in geometryElements)
             {
@@ -147,7 +149,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     }
                 }
                 foreach (var addFace in addFaces.OrderByDescending(c => c.Area))
-                    leveledOutLines.Add(addFace);
+                    leveledOutLines.Add(addFace, Model);
             }
             return leveledOutLines;
         }

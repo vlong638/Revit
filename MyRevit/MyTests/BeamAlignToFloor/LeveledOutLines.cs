@@ -14,18 +14,17 @@ namespace MyRevit.MyTests.BeamAlignToFloor
     {
         public bool IsValid { get { return OutLines.Count() > 0; } }
         public List<OutLine> OutLines = new List<OutLine>();
-
         /// <summary>
         /// 添加面所有的轮廓
         /// </summary>
         /// <param name="face"></param>
-        public void Add(Face face)
+        public void Add(Face face, BeamAlignToFloorModel model)
         {
             var current = this;
             //闭合区间集合,EdgeArray
             foreach (EdgeArray edgeArray in face.EdgeLoops)
             {
-                Add(new OutLine(edgeArray));
+                Add(new OutLine(edgeArray, model));
             }
         }
 

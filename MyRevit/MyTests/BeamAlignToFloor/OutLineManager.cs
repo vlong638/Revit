@@ -54,7 +54,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     }
                 }
                 foreach (var addFace in addFaces.OrderByDescending(c => c.Area))
-                    leveledOutLines.Add(addFace);
+                    leveledOutLines.Add(addFace, Model);
             }
             if (!leveledOutLines.IsValid)
                 throw new NotImplementedException("添加的板无效,无子轮廓");

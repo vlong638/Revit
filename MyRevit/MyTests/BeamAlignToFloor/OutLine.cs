@@ -23,15 +23,15 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         public bool IsSolid { set; get; }
 
         #region Constructor
-        public OutLine(EdgeArray edgeArray)
+        public OutLine(EdgeArray edgeArray, BeamAlignToFloorModel model)
         {
-            Init(edgeArray);
+            Init(edgeArray, model);
         }
 
-        void Init(EdgeArray edgeArray)
+        void Init(EdgeArray edgeArray, BeamAlignToFloorModel model)
         {
             Edges = edgeArray;
-            Points = GeometryHelper.GetPoints(Edges);
+            Points = GeometryHelper.GetPoints(Edges, model);
             PointZ0s = Points.Select(c => new XYZ(c.X, c.Y, 0)).ToList();
             Lines = new List<Line>();
             AddLinesFromPoints(ref Lines, Points);

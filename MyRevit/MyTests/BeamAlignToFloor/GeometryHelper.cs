@@ -206,7 +206,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// </summary>
         /// <param name="edgeArray"></param>
         /// <returns></returns>
-        public static List<XYZ> GetPoints(EdgeArray edgeArray)
+        public static List<XYZ> GetPoints(EdgeArray edgeArray, BeamAlignToFloorModel model)
         {
             List<XYZ> points = new List<XYZ>();
             foreach (Edge edge in edgeArray)
@@ -216,19 +216,21 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 {
                     var point = tPoints[0];
                     if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                        points.Add(point);
+                    {
+                        points.Add(point + model.Offset);
+                    }
                     else
                     {
                         point = tPoints[1];
                         if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                            points.Add(point);
+                            points.Add(point + model.Offset);
                     }
                 }
                 else
                 {
                     foreach (var point in tPoints)
                         if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                            points.Add(point);
+                            points.Add(point + model.Offset);
                 }
             }
             return points;

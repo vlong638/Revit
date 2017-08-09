@@ -91,7 +91,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     }
                 }
                 foreach (var addFace in addFaces.OrderByDescending(c => c.Area))
-                    leveledOutLines.Add(addFace);
+                    leveledOutLines.Add(addFace, Model);
             }
             return leveledOutLines;
         }
