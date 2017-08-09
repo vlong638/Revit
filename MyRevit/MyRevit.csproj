@@ -129,6 +129,23 @@
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager0802.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Triangle.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\ValidFaces.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AnnotationCreater.cs" />
+    <Compile Include="MyTests\PipeAnnotation\DelegateHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotation\ExtensibleStorageHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotation\FamilySymbolHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationCmd.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationContext.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationEntity.cs" />
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationForm.Designer.cs">
+      <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationUIData.cs" />
+    <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
     <Compile Include="MyTests\0Commands\UpdaterTestCommand.cs" />
@@ -138,14 +155,14 @@
     <Compile Include="MyTests\0Commands\FilterElementCommand.cs" />
     <Compile Include="MyTests\0Commands\MyExternalApplication.cs" />
     <Compile Include="MyTests\0Commands\AdvancedRevitCommand.cs" />
-    <Compile Include="MyTests\PipeAnnotation\AnnotationBuilder.cs" />
-    <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
-    <Compile Include="MyTests\PipeAnnotation\MultiPipeAnnotationSettings.cs" />
-    <Compile Include="MyTests\PipeAnnotation\PipeAnnotationEntity.cs" />
-    <Compile Include="MyTests\PipeAnnotation\PipeFilter.cs" />
-    <Compile Include="MyTests\PipeAnnotation\SinglePipeAnnotationSettings.cs" />
-    <Compile Include="MyTests\PipeAnnotation\TagProperty.cs" />
-    <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\AnnotationBuilder.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\LocationHelper.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\MultiPipeAnnotationSettings.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\PipeAnnotationEntity.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\PipeFilter.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\SinglePipeAnnotationSettings.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\TagProperty.cs" />
+    <Compile Include="MyTests\PipeAnnotationTest\UnitHelper.cs" />
     <Compile Include="MyTests\0Commands\PipeUpdaterCommand.cs" />
     <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
     <Compile Include="MyTests\0Commands\BeamUpdaterCommand.cs" />
@@ -274,6 +291,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EarthWork\UI\EarthworkBlockingForm.resx">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyTests\PipeAnnotation\PipeAnnotationForm.resx">
+      <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MyTests\UI\PipeAnnotationForm.resx">
       <DependentUpon>PipeAnnotationForm.cs</DependentUpon>

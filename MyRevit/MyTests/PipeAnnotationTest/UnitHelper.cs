@@ -1,19 +1,13 @@
 ﻿using System;
 
-namespace PmSoft.Optimization.DrawingProduction
+namespace MyRevit.MyTests.PipeAnnotation
 {
-
-    /// <summary>
-    /// 单位枚举
-    /// </summary>
     public enum UnitType
     {
         centimeter,//厘米
         millimeter,//毫米
     }
-    /// <summary>
-    /// 单位换算帮助类
-    /// </summary>
+
     public class UnitHelper
     {
         static double MmPerInch = 304.8;//304.8mm

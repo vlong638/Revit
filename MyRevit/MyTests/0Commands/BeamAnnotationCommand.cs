@@ -256,6 +256,7 @@ namespace MyRevit.Entities
             FamilySymbol tagSymbol = null;
             TransactionHelper.DelegateTransaction(doc, "加载族", () =>
             {
+                #region 加载族
                 //查找族类型
                 var symbols = new FilteredElementCollector(doc)
                     .WherePasses(new ElementCategoryFilter(BuiltInCategory.OST_StructuralFramingTags))
@@ -274,10 +275,10 @@ namespace MyRevit.Entities
                         var familySymbolIds = family.GetFamilySymbolIds();
                         foreach (var familySymbolId in familySymbolIds)
                         {
-                            var element = doc.GetElement(familySymbolId) as FamilySymbol;
-                            if (element != null && element.FamilyName == tagName)
+                            var e = doc.GetElement(familySymbolId) as FamilySymbol;
+                            if (e != null && e.FamilyName == tagName)
                             {
-                                tagSymbol = element;
+                                tagSymbol = e;
                                 break;
                             }
                         }
@@ -287,12 +288,10 @@ namespace MyRevit.Entities
                         TaskDialogShow("加载族文件失败");
                     }
                 }
-                return true;
-            });
-            if (tagSymbol == null)
-                return Result.Failed;
-            TransactionHelper.DelegateTransaction(doc, "参数赋值", () =>
-            {
+                #endregion
+                if (tagSymbol == null)
+                    return false;
+                #region 参数赋值
                 //如果上述两者获取到了对应的族
                 var view = doc.ActiveView;
                 var element = doc.GetElement(selectedId);
@@ -338,12 +337,10 @@ namespace MyRevit.Entities
                 var symbol = (element as FamilyInstance).Symbol;
                 symbol.GetParameters(nameof(BeamAnnotationParameters.梁宽)).FirstOrDefault().Set(BeamAnnotationData.BeamWidth);
                 symbol.GetParameters(nameof(BeamAnnotationParameters.梁高)).FirstOrDefault().Set(BeamAnnotationData.BeamHeight);
-                var familyDoc= doc.EditFamily(symbol.Family);
+                var familyDoc = doc.EditFamily(symbol.Family);
+                #endregion
 
-                return true;
-            });
-            TransactionHelper.DelegateTransaction(doc, "绘图处理", () =>
-            {
+                #region 绘图处理
                 //绘图处理
                 double parallelLength = BeamAnnotationConstaints.parallelLength;
                 int vecticalLength = BeamAnnotationConstaints.vecticalLength;
@@ -352,7 +349,7 @@ namespace MyRevit.Entities
                 string relatedTagField = BeamAnnotationConstaints.relatedTagField;
                 string relatedBeamField = BeamAnnotationConstaints.relatedBeamField;
                 string relatedViewField = BeamAnnotationConstaints.relatedViewField;
-                var view = doc.ActiveView;
+                view = doc.ActiveView;
                 var beam = doc.GetElement(selectedId);
                 //中点出线
                 var locationCurve = (beam.Location as LocationCurve).Curve;
@@ -364,38 +361,17 @@ namespace MyRevit.Entities
                 var line = doc.Create.NewDetailCurve(view, Line.CreateBound(midPoint, midPoint + standardLength * vecticalVector));
                 //中点绘字
                 var tag1 = doc.Create.NewTag(view, beam, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint);
-                //通过BoundingBox计算
-                //var boundingBox = tag1.get_BoundingBox(view);
-                //var diagonalLine = Line.CreateBound(boundingBox.Max ,boundingBox.Min);
-                //var intersectionAngle = parallelVector.AngleTo(diagonalLine.Direction);
-                //var targetPoint = midPoint + diagonalLine.Length * Math.Abs(Math.Sin(intersectionAngle))* vecticalVector + diagonalLine.Length * Math.Abs(Math.Cos(intersectionAngle)) * parallelVector;
                 //确定长宽
                 var targetPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2 + parallelLength * parallelVector + vecticalLength * vecticalVector;
                 ////删除中点绘字
                 doc.Delete(tag1.Id);
-                ////平行移动
-                //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + parallelLength * parallelVector);
-                ////垂直移动
-                //doc.Create.NewTag(view, element, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + vecticalLength * vecticalVector);
                 //综合移动
                 var tag2 = doc.Create.NewTag(view, beam, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, targetPoint);
-
-                ////更新扩展存储
-                //var opr = new SchemaEntityOpr(line);
-                //opr.SetParm(relatedViewField, view.Id.IntegerValue.ToString());
-                //opr.SetParm(relatedBeamField, beam.Id.IntegerValue.ToString());
-                //opr.SetParm(relatedTagField, tag2.Id.IntegerValue.ToString());
-                //opr.SaveTo(line);
-                //opr = new SchemaEntityOpr(tag2);
-                //opr.SetParm(relatedViewField, view.Id.IntegerValue.ToString());
-                //opr.SetParm(relatedBeamField, beam.Id.IntegerValue.ToString());
-                //opr.SetParm(relatedLineField, line.Id.IntegerValue.ToString());
-                //opr.SaveTo(tag2);
-
                 //关系存储
                 var collection = MyTestContext.GetCollection(doc);
                 collection.Add(new BeamAnnotationEntity(view.Id.IntegerValue, beam.Id.IntegerValue, line.Id.IntegerValue, tag2.Id.IntegerValue));
-                MyTestContext.SaveCollection(doc);
+                MyTestContext.SaveCollection(doc); 
+                #endregion
                 return true;
             });
             return Result.Succeeded;
