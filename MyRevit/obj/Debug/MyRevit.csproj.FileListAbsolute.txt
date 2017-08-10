@@ -67,9 +67,9 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.WindowsAPICodeP
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockCPSettingsForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\PmSoft.Optimization.DrawingProduction.PipeAnnotationForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.MyTests.UI.PipeAnnotationForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.Properties.Resources.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.ChartForm.resources
@@ -81,4 +81,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\PmSoft.Optimization.DrawingProduction.PipeAnnotationForm.resources
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache

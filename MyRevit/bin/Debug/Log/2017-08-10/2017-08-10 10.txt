@@ -1,0 +1,8 @@
+2017-08-10 10:03:55.458,错误方法:Boolean LoadFamily(System.String, Autodesk.Revit.DB.Family ByRef) ,错误信息:E:\Work\last\2016\SysFamily\出图深化 
+2017-08-10 10:04:11.088,错误方法:Boolean LoadFamily(System.String, Autodesk.Revit.DB.Family ByRef) ,错误信息:E:\Work\last\2016\SysFamily\出图深化 
+2017-08-10 10:04:56.430,错误方法:Boolean LoadFamily(System.String, Autodesk.Revit.DB.Family ByRef) ,错误信息:E:\Work\last\2016\SysFamily\出图深化 
+2017-08-10 10:05:26.606,错误方法:Boolean LoadFamily(System.String, Autodesk.Revit.DB.Family ByRef) ,错误信息:E:\Work\last\2016\SysFamily\出图深化 
+2017-08-10 10:07:12.695,错误方法:Autodesk.Revit.Proxy.DB.FilteredElementCollectorProxy ?A0x7638f71e.FilteredElementCollectorProxy_constructor(Autodesk.Revit.DB.Document) ,错误信息:The input argument "document" of function `anonymous-namespace'::FilteredElementCollector_constructor or one item in the collection is null at line 320 of file d:\ship\2016_px64\source\revit\revitdbapi\gensrc\APIFilteredElementCollectorProxy.cpp.
+Parameter name: document 
+2017-08-10 10:07:12.748,错误方法:Autodesk.Revit.Proxy.DB.FilteredElementCollectorProxy ?A0x7638f71e.FilteredElementCollectorProxy_constructor(Autodesk.Revit.DB.Document) ,错误信息:The input argument "document" of function `anonymous-namespace'::FilteredElementCollector_constructor or one item in the collection is null at line 320 of file d:\ship\2016_px64\source\revit\revitdbapi\gensrc\APIFilteredElementCollectorProxy.cpp.
+Parameter name: document 

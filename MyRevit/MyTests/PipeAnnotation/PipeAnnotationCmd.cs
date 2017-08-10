@@ -42,17 +42,6 @@ namespace PmSoft.Optimization.DrawingProduction
         public Document Document { get { return UIApplication.ActiveUIDocument.Document; } }
         public PipeAnnotationUIData PipeAnnotationUIData;
 
-
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="revit"></param>
-        public PipeAnnotationCmd(ExternalCommandData revit) : base(revit)
-        {
-            Init(revit.Application);
-        }
-
         /// <summary>
         /// 构造函数
         /// </summary>

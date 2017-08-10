@@ -48,7 +48,7 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\bin\Debug\ManagedMC3.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\bin\Debug\RevitAPI.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\bin\Debug\RevitAPIUI.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\bin\Debug\VL.Logger.pdb
+E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\obj\Debug\MyRevitConsole.csprojResolveAssemblyReference.cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\obj\Debug\MyRevitConsole.csproj.MyRevitConsole.exe.config
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\obj\Debug\MyRevitConsole.exe
 E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\obj\Debug\MyRevitConsole.pdb
-E:\WorkingSpace\Repository\Git\Revit\MyRevitConsole\obj\Debug\MyRevitConsole.csprojResolveAssemblyReference.cache

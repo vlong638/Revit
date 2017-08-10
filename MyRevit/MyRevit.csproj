@@ -118,11 +118,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Constraints.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CoverType.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\FitLines.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\GeometryHelper.cs" />
-    <Compile Include="MyTests\BeamAlignToFloor\GraphsDisplayer.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\GraphicsDisplayerManager.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\LeveledOutLines.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLine.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager.cs" />
@@ -164,15 +165,13 @@
     <Compile Include="MyTests\PipeAnnotationTest\TagProperty.cs" />
     <Compile Include="MyTests\PipeAnnotationTest\UnitHelper.cs" />
     <Compile Include="MyTests\0Commands\PipeUpdaterCommand.cs" />
-    <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
+    <Compile Include="MyTests\0Commands\PipeAnnotationTestCommand.cs" />
     <Compile Include="MyTests\0Commands\BeamUpdaterCommand.cs" />
     <Compile Include="MyTests\0Commands\BeamAnnotationCommand.cs" />
     <Compile Include="MyTests\0Commands\MyExternalCommand.cs" />
     <Compile Include="MyTests\0Commands\SelectFilteredElementCommand.cs" />
     <Compile Include="MyTests\0Commands\SelectElementCommand.cs" />
-    <Compile Include="MyTests\UI\PipeAnnotationForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="MyTests\UI\PipeAnnotationForm.cs" />
     <Compile Include="MyTests\UI\PipeAnnotationForm.Designer.cs">
       <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
     </Compile>
@@ -274,6 +273,7 @@
     <Compile Include="Utilities\ExcelHelper.cs" />
     <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
     <Compile Include="Utilities\ExtensibleStorageHelper.cs" />
+    <Compile Include="Utilities\GraphsDisplayer.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />

@@ -30,7 +30,7 @@ namespace PmSoft.Optimization.DrawingProduction
         {
             if (Collection != null)
                 return Collection;
-            Collection= DelegateHelper.DelegateTryCatch(
+            Collection = DelegateHelper.DelegateTryCatch(
                 () =>
                 {
                     string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfData);
@@ -105,7 +105,7 @@ namespace PmSoft.Optimization.DrawingProduction
             );
         }
         #endregion
-        
+
         #region SharedSettings
         private static FamilySymbol SingleTagSymbol { set; get; }
         public static FamilySymbol GetSingleTagSymbol(Document doc)
@@ -118,7 +118,7 @@ namespace PmSoft.Optimization.DrawingProduction
         private static FamilySymbol MultipleTagSymbol { set; get; }
         public static FamilySymbol GetMultipleTagSymbol(Document doc)
         {
-            if (MultipleTagSymbol == null|| !MultipleTagSymbol.IsValidObject)
+            if (MultipleTagSymbol == null || !MultipleTagSymbol.IsValidObject)
                 LoadFamilySymbols(doc);
             return MultipleTagSymbol;
         }
@@ -130,8 +130,8 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <returns></returns>
         public static bool LoadFamilySymbols(Document doc)
         {
-            SingleTagSymbol = FamilySymbolHelper.LoadFamilySymbol(doc, "管道尺寸标记", "管道尺寸标记");
-            MultipleTagSymbol = FamilySymbolHelper.LoadFamilySymbol(doc, "多管直径标注", "引线标注_文字在右端");
+            SingleTagSymbol = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\Work\last\2016\SysFamily\出图深化\管道尺寸标记.rfa", "管道尺寸标记", "管道尺寸标记");
+            MultipleTagSymbol = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\Work\last\2016\SysFamily\出图深化\多管直径标注.rfa", "多管直径标注", "引线标注_文字在右端");
             return true;
         }
 

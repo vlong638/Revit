@@ -453,14 +453,14 @@ namespace PmSoft.Optimization.DrawingProduction
                     for (int i = Branches.Count() - 1; i >= 0; i--)
                     {
                         var branch = Branches[i];
-                        //如果间距超出了限制,则做一波结算
-                        if (branch.SkewPipes.Count == AnnotationConstaints.PipeCountMax - 1)
+                        if (branch.SkewPipes.Count == AnnotationConstaints.PipeCountMax - 1)//如果分组个数超出了规定 则不予生成
                         {
+                            throw new NotImplementedException("管道超出了并排6个的上限");
                             branch.Push(skewPipe);
                             collection.Add(branch.ToPipeGroup());
                             Branches.Remove(branch);
                         }
-                        else if (!IsValidInterval(branch.LatestSkewPipe, skewPipe))
+                        else if (!IsValidInterval(branch.LatestSkewPipe, skewPipe))//如果间距超出了限制,则做一波结算
                         {
                             collection.Add(branch.ToPipeGroup());
                             Branches.Remove(branch);
