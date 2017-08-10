@@ -71,7 +71,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// </summary>
         public AnnotationBuildResult GenerateMultipleTagSymbol(Document document, IEnumerable<ElementId> selectedIds, MultiPipeAnnotationSettings setting, bool generateSingleOne)
         {
-            if (selectedIds.Count()> AnnotationConstaints.PipeCountMax)
+            if (selectedIds.Count() > AnnotationConstaints.PipeCountMax)
                 throw new NotImplementedException("暂不支持8根以上及管道的多管直径标注生成");
             Document = document;
             Collection = PipeAnnotationContext.GetCollection(Document);
@@ -84,7 +84,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 Collection.Add(entity);
                 Collection.Save(Document);
             }
-            else if(result == AnnotationBuildResult.Success)
+            else if (result == AnnotationBuildResult.Success)
             {
                 Collection.Add(entity);
             }
@@ -93,8 +93,8 @@ namespace PmSoft.Optimization.DrawingProduction
 
         public void FinishMultipleGenerate(Document document)
         {
-            if (Collection==null)
-                Collection= PipeAnnotationContext.GetCollection(Document);
+            if (Collection == null)
+                Collection = PipeAnnotationContext.GetCollection(Document);
             Collection.Save(Document);
         }
 
@@ -143,7 +143,7 @@ namespace PmSoft.Optimization.DrawingProduction
             if (parallelVector.Y == 1)
                 verticalVector = -verticalVector;
             //平行检测
-            if (!CheckParallel(pipeAndNodePoints.Select(c=>c.Pipe), verticalVector))
+            if (!CheckParallel(pipeAndNodePoints.Select(c => c.Pipe), verticalVector))
             {
                 return AnnotationBuildResult.NotParallel;
             }
@@ -167,7 +167,7 @@ namespace PmSoft.Optimization.DrawingProduction
             if (locationPoint != null)
                 locationPoint.RotateByXY(startPoint, verticalVector);
             //线 参数设置
-            UpdateLineParameters(orderedNodePoints, line);
+            UpdateLineParameters(orderedNodePoints, line, verticalVector);
             //标注 创建
             var textSize = PipeAnnotationContext.TextSize;
             var widthScale = PipeAnnotationContext.WidthScale;
@@ -291,7 +291,7 @@ namespace PmSoft.Optimization.DrawingProduction
             var verticalSkew = LocationHelper.GetLengthBySide(skewVector, verticalVector);
             var parallelSkew = LocationHelper.GetLengthBySide(skewVector, parallelVector);
             //线参数
-            UpdateLineParameters(nodePoints, line);
+            UpdateLineParameters(nodePoints, line, verticalVector);
             //标注 创建
             var nodesHeight = UnitHelper.ConvertToInch((nodePoints.Count() - 1) * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType);
             var lineHeight = orientLineHeight + verticalSkew > nodesHeight ? orientLineHeight + verticalSkew : nodesHeight;
@@ -351,9 +351,9 @@ namespace PmSoft.Optimization.DrawingProduction
         /// </summary>
         /// <param name="nodePoints"></param>
         /// <param name="line"></param>
-        private void UpdateLineParameters(List<XYZ> nodePoints, FamilyInstance line)
+        private void UpdateLineParameters(List<XYZ> nodePoints, FamilyInstance line, XYZ verticalVector)
         {
-            double deepLength = nodePoints.First().DistanceTo(nodePoints.Last());
+            double deepLength = Math.Abs((nodePoints.Last() - nodePoints.First()).DotProduct(verticalVector));//nodePoints.First().DistanceTo(nodePoints.Last())
             line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
             line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToInch(AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType));
             line.GetParameters(TagProperty.文字行数.ToString()).First().Set(nodePoints.Count());
@@ -364,7 +364,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 {
                     var cur = nodePoints[i - 1];
                     line.GetParameters(string.Format("节点{0}可见性", i)).First().Set(1);
-                    line.GetParameters(string.Format("节点{0}距离", i)).First().Set(cur.DistanceTo(first));
+                    line.GetParameters(string.Format("节点{0}距离", i)).First().Set(Math.Abs((cur - first).DotProduct(verticalVector)));//cur.DistanceTo(first)
                 }
                 else
                 {
