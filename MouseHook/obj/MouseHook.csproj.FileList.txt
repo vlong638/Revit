@@ -1,0 +1,8 @@
+bin\Debug\MouseHook.exe
+bin\Debug\MouseHook.pdb
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\MouseHook.Form1.resources
+obj\Debug\MouseHook.Properties.Resources.resources
+obj\Debug\MouseHook.csproj.GenerateResource.Cache
+obj\Debug\MouseHook.exe
+obj\Debug\MouseHook.pdb
