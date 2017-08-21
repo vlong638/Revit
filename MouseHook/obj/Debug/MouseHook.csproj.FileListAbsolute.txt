@@ -8,5 +8,11 @@ C:\Users\Administrator\Desktop\MouseHook\MouseHook\obj\Debug\MouseHook.csproj.Ge
 C:\Users\Administrator\Desktop\MouseHook\MouseHook\obj\Debug\MouseHook.Form1.resources
 C:\Users\Administrator\Desktop\MouseHook\MouseHook\bin\Debug\MouseHook.exe.config
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.exe.config
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.exe
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.pdb
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Form1.resources
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Properties.Resources.resources
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.exe
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.pdb

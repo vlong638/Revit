@@ -1,0 +1,12 @@
+2017-08-18 11:05:11.970,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 
+2017-08-18 11:05:14.630,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 
+2017-08-18 11:05:15.710,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 
+2017-08-18 11:05:16.101,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 
+2017-08-18 11:05:33.132,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 
+2017-08-18 11:05:55.187,错误方法:Autodesk.Revit.DB.XYZ op_Multiply(Double, Autodesk.Revit.DB.XYZ) ,错误信息:value must be a finite number.
+Parameter name: value 

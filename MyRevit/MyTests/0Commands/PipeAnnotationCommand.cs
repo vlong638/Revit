@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MyRevit.Utilities;
 using PmSoft.Optimization.DrawingProduction;
 using System;
 using System.Linq;
@@ -27,6 +28,13 @@ namespace MyRevit.Entities
                 PmSoft.Common.Controls.PMMessageBox.Show("需选择二维视图或者图纸");
                 return Result.Cancelled;
             }
+            //TODO0817 增加功能面板启动时获取字体高度
+            TransactionHelper.DelegateTransaction(doc, "获取字体高度", () =>
+            {
+                PipeAnnotationContext.LoadFamilySymbols(doc);
+                return true;
+            });
+            PipeAnnotationContext.LoadTextHeight(doc);
 
             PipeAnnotationForm form = new PipeAnnotationForm(new PipeAnnotationCmd(uiApp));
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.Retry;
