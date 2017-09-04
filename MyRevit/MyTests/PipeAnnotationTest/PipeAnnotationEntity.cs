@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 {
     #region 关联存储
     /// <summary>

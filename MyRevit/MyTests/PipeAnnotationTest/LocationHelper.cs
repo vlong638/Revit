@@ -1,7 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using System;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 {
     public enum QuadrantType
     {

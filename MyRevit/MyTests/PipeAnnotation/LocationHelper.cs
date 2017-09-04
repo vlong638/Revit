@@ -46,6 +46,8 @@ namespace PmSoft.Optimization.DrawingProduction
 
         /// <summary>
         /// 将方向调整到指定象限
+        /// OneAndFour在Y=-1的时候,调整为向上
+        /// OneAndTwo在X=-1的时候,调整为向右
         /// </summary>
         /// <param name="vector"></param>
         /// <param name="quadrantType"></param>
@@ -192,7 +194,6 @@ namespace PmSoft.Optimization.DrawingProduction
         }
         #endregion
 
-
         /// <summary>
         /// 按XY的点的Z轴旋转
         /// </summary>
@@ -202,7 +203,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public static void RotateByXY(this LocationPoint point, XYZ xyz, XYZ verticalVector)
         {
             Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
-            if (verticalVector.X > 0)
+            if (verticalVector.X > AnnotationConstaints.MiniValueForXYZ)
                 point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));

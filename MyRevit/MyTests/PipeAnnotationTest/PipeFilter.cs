@@ -1,7 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI.Selection;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 {
     /// <summary>
     /// 管道 选择过滤器

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 {
     /// <summary>
     /// 多管直径标注 位置类型

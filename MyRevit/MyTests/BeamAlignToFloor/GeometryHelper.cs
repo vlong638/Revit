@@ -13,14 +13,14 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <summary>
         /// 计算两个矩形是否重叠
         /// </summary>
-        public static bool VL_IsRectangleCrossed(XYZ point1, XYZ point2, XYZ point3, XYZ point4)
+        public static bool VL_IsRectangleCrossed(XYZ rectangle1P1, XYZ rectangle1P2, XYZ rectangle2P1, XYZ rectangle2P2)
         {
-            var h1 = Math.Abs(point1.Y - point2.Y) / 2;
-            var h2 = Math.Abs(point3.Y - point4.Y) / 2;
-            var w1 = Math.Abs(point1.X - point2.X) / 2;
-            var w2 = Math.Abs(point3.X - point4.X) / 2;
-            var mid1 = (point1 + point2) / 2;
-            var mid2 = (point3 + point4) / 2;
+            var h1 = Math.Abs(rectangle1P1.Y - rectangle1P2.Y) / 2;
+            var h2 = Math.Abs(rectangle2P1.Y - rectangle2P2.Y) / 2;
+            var w1 = Math.Abs(rectangle1P1.X - rectangle1P2.X) / 2;
+            var w2 = Math.Abs(rectangle2P1.X - rectangle2P2.X) / 2;
+            var mid1 = (rectangle1P1 + rectangle1P2) / 2;
+            var mid2 = (rectangle2P1 + rectangle2P2) / 2;
             var h = Math.Abs(mid2.Y - mid1.Y);
             var w = Math.Abs(mid2.X - mid1.X);
             return h <= h1 + h2 && w <= w1 + w2;
@@ -254,6 +254,78 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 triangles.Add(new Triangle(start, points[i], points[i + 1]));
             }
             return triangles;
+        }
+
+        public enum VLCoverType
+        {
+            /// <summary>
+            /// 无关
+            /// </summary>
+            Disjoint,
+            /// <summary>
+            /// 相交
+            /// </summary>
+            Intersect,
+            /// <summary>
+            /// 包含
+            /// </summary>
+            Contain,
+        }
+
+        #region 标注避让 二维平面避让
+        public static VLCoverType IsPlanarCover(List<Line> lines, Triangle triangle, Line line)
+        {
+            //根据线段相交判断
+            var p0 = line.GetEndPoint(0);
+            var p1 = line.GetEndPoint(1);
+            var intersect = lines.FirstOrDefault(c => c.VL_IsIntersect(line));
+            if (intersect != null)
+                return VLCoverType.Intersect;
+            //线段包含判断
+            List<XYZ> points = new List<XYZ>();
+            points.Add(line.GetEndPoint(0));
+            points.Add(line.GetEndPoint(1));
+            foreach (var point in points)
+                if (triangle.PlanarContains(point))
+                    return VLCoverType.Contain;
+            return VLCoverType.Disjoint;
+        }
+
+        /// <summary>
+        /// 检测轮廓是否被包含 另一轮廓
+        /// </summary>
+        public static bool PlanarContains(List<Triangle> triangles, List<XYZ> points)
+        {
+            foreach (var pointZ0 in points)
+            {
+                var container = triangles.AsParallel().FirstOrDefault(c => c.Contains(pointZ0));
+                if (container == null)
+                    return false;
+            }
+            return true;
+        } 
+        #endregion
+
+        /// <summary>
+        /// 某轮廓对应的边和三角形 是否与某线有相交或包含关系
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="triangles"></param>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public static VLCoverType IsCover(List<Line> lines, List<Triangle> triangles, Line line)
+        {
+            //根据线段相交判断
+            var intersect = lines.FirstOrDefault(c => c.VL_IsIntersect(line));
+            if (intersect != null)
+                return VLCoverType.Intersect;
+            //线段包含判断
+            List<XYZ> points = new List<XYZ>();
+            points.Add(line.GetEndPoint(0));
+            points.Add(line.GetEndPoint(1));
+            if (PlanarContains(triangles,points))
+                return VLCoverType.Contain;
+            return VLCoverType.Disjoint;
         }
 
         /// <summary>

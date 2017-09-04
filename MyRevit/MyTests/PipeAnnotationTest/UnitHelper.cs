@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 {
     public enum UnitType
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace MyRevit.MyTests.PipeAnnotation
+namespace MyRevit.MyTests.PipeAnnotationTest
 { 
     /// <summary>
     /// 多管标注生成返回码

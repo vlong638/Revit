@@ -1,0 +1,4 @@
+2017-08-25 13:53:49.229,   在 Autodesk.Revit.DB.UpdaterRegistry.RegisterUpdater(IUpdater updater, Boolean isOptional)
+   在 PmSoft.MainModel.MainUI.CommandExe.CPmStartUpExe.RegisterUpdater(UIControlledApplication application)
+   在 PmSoft.MainModel.MainUI.CommandExe.CPmStartUpExe.OnStartup(UIControlledApplication application)
+2017-08-25 13:53:53.312,DucumentClosing设置界面

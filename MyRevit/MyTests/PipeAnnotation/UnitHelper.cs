@@ -16,7 +16,36 @@ namespace PmSoft.Optimization.DrawingProduction
     /// </summary>
     public class UnitHelper
     {
-        static double MmPerInch = 304.8;//304.8mm
+        #region Foot,英尺
+        static double MmPerFoot = 304.8;
+        public static double ConvertFromFootTo(double inch, UnitType type)
+        {
+            switch (type)
+            {
+                case UnitType.centimeter:
+                    return inch * MmPerFoot / 10;
+                case UnitType.millimeter:
+                    return inch * MmPerFoot;
+                default:
+                    throw new NotImplementedException("未实现该类型的单位换算");
+            }
+        }
+        public static double ConvertToFoot(double value, UnitType type)
+        {
+            switch (type)
+            {
+                case UnitType.centimeter:
+                    return value / MmPerFoot * 10;
+                case UnitType.millimeter:
+                    return value / MmPerFoot;
+                default:
+                    throw new NotImplementedException("未实现该类型的单位换算");
+            }
+        }
+        #endregion
+
+        #region Inch,英寸
+        static double MmPerInch= 25.4;
         public static double ConvertFromInchTo(double inch, UnitType type)
         {
             switch (type)
@@ -41,5 +70,6 @@ namespace PmSoft.Optimization.DrawingProduction
                     throw new NotImplementedException("未实现该类型的单位换算");
             }
         }
+        #endregion
     }
 }

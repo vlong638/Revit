@@ -762,7 +762,6 @@ namespace PmSoft.Optimization.DrawingProduction
             }
         }
 
-
         /// <summary>
         /// 多管一键标注
         /// </summary>
@@ -922,7 +921,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public PipeAnnotationUIData Parent { set; get; }
         public bool NeedLeader { set; get; }
         public int LengthFromLine_Milimeter { set; get; }
-        public double LengthFromLine_Inch { get { return UnitHelper.ConvertToInch(LengthFromLine_Milimeter, UnitType.millimeter); } }
+        public double LengthFromLine_Inch { get { return UnitHelper.ConvertToFoot(LengthFromLine_Milimeter, UnitType.millimeter); } }
         public SinglePipeTagLocation Location { set; get; }
 
         public SinglePipeAnnotationSettings(PipeAnnotationUIData parent)
@@ -971,7 +970,7 @@ namespace PmSoft.Optimization.DrawingProduction
     {
         public PipeAnnotationUIData Parent { set; get; }
         public int LengthBetweenPipe_Milimeter { set; get; }
-        public double LengthBetweenPipe_Inch { get { return UnitHelper.ConvertToInch(LengthBetweenPipe_Milimeter, UnitType.millimeter); } }
+        public double LengthBetweenPipe_Inch { get { return UnitHelper.ConvertToFoot(LengthBetweenPipe_Milimeter, UnitType.millimeter); } }
         public MultiPipeTagLocation Location { set; get; }
 
         public MultiPipeAnnotationSettings(PipeAnnotationUIData parent)
@@ -988,7 +987,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public bool AutoPreventCollision { set; get; }
         public bool FilterVertical { set; get; }
         public int MinLength_Milimeter { set; get; }
-        public double MinLength_Inch { get { return UnitHelper.ConvertToInch(MinLength_Milimeter, UnitType.millimeter); } }
+        public double MinLength_Inch { get { return UnitHelper.ConvertToFoot(MinLength_Milimeter, UnitType.millimeter); } }
     }
     #endregion
 }

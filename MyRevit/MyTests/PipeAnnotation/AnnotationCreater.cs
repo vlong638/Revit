@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB.Plumbing;
+using MyRevit.MyTests.BeamAlignToFloor;
+using MyRevit.MyTests.PipeAnnotation;
 
 namespace PmSoft.Optimization.DrawingProduction
 {
@@ -123,7 +125,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <param name="entity"></param>
         /// <param name="view"></param>
         /// <returns></returns>
-        private AnnotationBuildResult GenerateMultipleTagSymbol(Document document, IEnumerable<ElementId> selectedIds, PipeAnnotationEntity entity, MultiPipeAnnotationSettings setting)
+        AnnotationBuildResult GenerateMultipleTagSymbol(Document document, IEnumerable<ElementId> selectedIds, PipeAnnotationEntity entity, MultiPipeAnnotationSettings setting)
         {
             View view = document.ActiveView;
             XYZ startPoint = null;
@@ -147,8 +149,10 @@ namespace PmSoft.Optimization.DrawingProduction
             {
                 return AnnotationBuildResult.NotParallel;
             }
+            XYZ rightOfLefts;//左侧点的右边界
+            XYZ leftOfRights;//右侧点的左边界
             //节点计算
-            if (!GetNodePoints(pipeAndNodePoints))
+            if (!GetNodePoints(pipeAndNodePoints, out rightOfLefts, out leftOfRights))
             {
                 return AnnotationBuildResult.NoOverlap;
             }
@@ -171,12 +175,17 @@ namespace PmSoft.Optimization.DrawingProduction
             //标注 创建
             var textSize = PipeAnnotationContext.TextSize;
             var widthScale = PipeAnnotationContext.WidthScale;
+            //碰撞检测区域点
+            XYZ avoidP1_Line1 = orderedNodePoints.Last();
+            XYZ avoidP2_Line2 = null;
+            XYZ avoidP3_Annotation1 = null;
             switch (entity.LocationType)
             {
                 case MultiPipeTagLocation.OnLineEdge:
                     //添加对应的单管直径标注
-                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, AnnotationConstaints.UnitType));
+                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(200, AnnotationConstaints.UnitType));
                     var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (orderedNodePoints.Count() - 1) * AnnotationConstaints.TextHeight;
+                    avoidP2_Line2 = avoidP1_Line1 + UnitHelper.ConvertToFoot(height, AnnotationConstaints.UnitType) * verticalVector;
                     var skewLength = AnnotationConstaints.SkewLengthForOffLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
@@ -184,16 +193,19 @@ namespace PmSoft.Optimization.DrawingProduction
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
-                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector
-                            + UnitHelper.ConvertToInch(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
+                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength,UnitType.millimeter) * parallelVector
+                            + UnitHelper.ConvertToFoot(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                         tags.Add(subTag);
+                        if (i == 0)
+                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector 
+                                + UnitHelper.ConvertToFoot(0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                     }
                     break;
                 case MultiPipeTagLocation.OnLine:
                     //添加对应的单管直径标注
-                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, AnnotationConstaints.UnitType));
-                    height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) +
-                     (orderedNodePoints.Count() - 1) * AnnotationConstaints.TextHeight;
+                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(800, AnnotationConstaints.UnitType));
+                    height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (orderedNodePoints.Count() - 1) * AnnotationConstaints.TextHeight;
+                    avoidP2_Line2 = avoidP1_Line1 + UnitHelper.ConvertToFoot(height, AnnotationConstaints.UnitType) * verticalVector;
                     skewLength = AnnotationConstaints.SkewLengthForOnLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
@@ -201,9 +213,12 @@ namespace PmSoft.Optimization.DrawingProduction
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
-                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector
-                            + UnitHelper.ConvertToInch(height - i * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
+                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector
+                            + UnitHelper.ConvertToFoot(height - i * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                         tags.Add(subTag);
+                        if (i == 0)
+                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector 
+                                + UnitHelper.ConvertToFoot(AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                     }
                     break;
                 default:
@@ -216,8 +231,100 @@ namespace PmSoft.Optimization.DrawingProduction
             foreach (var tag in tags)
                 entity.TagIds.Add(tag.Id.IntegerValue);
             entity.StartPoint = startPoint;
+            //碰撞检测
+            Triangle triangle = new Triangle(avoidP1_Line1, avoidP2_Line2, avoidP3_Annotation1);
+            List<Line> lines = triangle.GetLines();
+            AvoidData data = new AvoidData(document, selectedIds, entity, lines, triangle, multipleTagSymbol, parallelVector, rightOfLefts.GetLength(), leftOfRights.GetLength());
+            AvoidStrategy strategty = AvoidStrategy.MoveLeft;
+            var strategyEntity = AvoidStrategyFactory.GetAvoidStrategyEntity(strategty);
+            strategyEntity.Data = data;
+            while (strategyEntity.CheckCollision(strategyEntity.Data))
+            {
+                if (strategyEntity.TryAvoid())
+                {
+                    strategyEntity.Apply(data);
+                    break;
+                }
+                else
+                {
+                    strategyEntity = strategyEntity.GetNextStratetyEntity();
+                }
+            }
             return AnnotationBuildResult.Success;
+
+            #region old
+            //if (CheckCollision(document, view, selectedIds, line, lines, triangle, multipleTagSymbol))
+            //{
+            //    int offsetLength = 10;
+            //    XYZ offset = null;
+            //    if (rightOfLefts.GetLength() > offsetLength)
+            //        offset = parallelVector * offsetLength;
+            //    else if (leftOfRights.GetLength() > offsetLength)
+            //        offset = -parallelVector * offsetLength;
+            //    else
+            //        return AnnotationBuildResult.Success;
+
+            //    avoidP1_Line1 += offset;
+            //    avoidP2_Line2 += offset;
+            //    avoidP3_Annotation1 += offset;
+            //    lines = GetLines(avoidP1_Line1, avoidP2_Line2, avoidP3_Annotation1);
+            //    triangle = new Triangle(avoidP1_Line1, avoidP2_Line2, avoidP3_Annotation1);
+            //    if (!CheckCollision(document, view, selectedIds, line, lines, triangle, multipleTagSymbol))
+            //    {
+            //        //TODO 偏移处理
+            //        Autodesk.Revit.DB.ElementTransformUtils.MoveElement(document, new ElementId(entity.LineId), offset);
+            //        foreach (var tagId in entity.TagIds)
+            //        {
+            //            Autodesk.Revit.DB.ElementTransformUtils.MoveElement(document, new ElementId(tagId), offset);
+            //        }
+            //    }
+            //}
+            //return AnnotationBuildResult.Success; 
+            #endregion
         }
+
+        //private static bool CheckCollision(Document document, View view, IEnumerable<ElementId> selectedPipeIds, FamilyInstance currentLine, List<Line> currentLines, Triangle currentTriangle, FamilySymbol multipleTagSymbol)
+        //{
+        //    //管道避让
+        //    var otherPipeLines = new FilteredElementCollector(document).OfClass(typeof(Pipe))
+        //        .Select(c => Line.CreateBound((c.Location as LocationCurve).Curve.GetEndPoint(0), (c.Location as LocationCurve).Curve.GetEndPoint(1))).ToList();
+        //    var pipeCollisions = new FilteredElementCollector(document).OfClass(typeof(Pipe)).Excluding(selectedPipeIds.ToList())
+        //        .Select(c => Line.CreateBound((c.Location as LocationCurve).Curve.GetEndPoint(0), (c.Location as LocationCurve).Curve.GetEndPoint(1))).ToList()
+        //        .Where(c => GeometryHelper.IsCover(currentLines, currentTriangle, c) != GeometryHelper.VLCoverType.Disjoint).ToList();
+        //    //TODO 标注避让
+        //    var collector = new FilteredElementCollector(document).OfClass(typeof(FamilyInstance)).WhereElementIsNotElementType().Excluding(new List<ElementId>() { currentLine.Id });
+        //    var otherLines = collector.Where(c => (c as FamilyInstance).Symbol.Id == multipleTagSymbol.Id);
+        //    var boundingBoxes = otherLines.Select(c => c.get_BoundingBox(view));
+        //    List<BoundingBoxXYZ> crossedBoundingBox = new List<BoundingBoxXYZ>();
+        //    List<BoundingBoxXYZ> uncrossedBoundingBox = new List<BoundingBoxXYZ>();
+        //    foreach (var boundingBox in boundingBoxes.Where(c => c != null))
+        //        if (GeometryHelper.VL_IsRectangleCrossed(currentTriangle.A, currentTriangle.C, boundingBox.Min, boundingBox.Max))
+        //            crossedBoundingBox.Add(boundingBox);
+        //        else
+        //            uncrossedBoundingBox.Add(boundingBox);
+        //    Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\0822标注避让1.png", currentTriangle, otherPipeLines, pipeCollisions, crossedBoundingBox, uncrossedBoundingBox);
+        //    return crossedBoundingBox.Count() > 0;
+        //}
+
+        //private static List<Triangle> GetTrianglesFromBoundingBox(BoundingBoxXYZ lineBoundingBox)
+        //{
+        //    return new List<Triangle>()
+        //    {
+        //        new Triangle(lineBoundingBox.Min,lineBoundingBox.Max,lineBoundingBox.Min+new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).Y,0)),
+        //        new Triangle(lineBoundingBox.Min,lineBoundingBox.Max,lineBoundingBox.Min+new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).X,0)),
+        //    };
+        //}
+
+        //private static List<Line> GetLinesFromBoundingBox(BoundingBoxXYZ lineBoundingBox)
+        //{
+        //    return new List<Line>()
+        //    {
+        //        Line.CreateBound(lineBoundingBox.Min,lineBoundingBox.Min+new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).Y,0)),
+        //        Line.CreateBound(lineBoundingBox.Max,lineBoundingBox.Min+new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).Y,0)),
+        //        Line.CreateBound(lineBoundingBox.Max,lineBoundingBox.Max-new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).Y,0)),
+        //        Line.CreateBound(lineBoundingBox.Min,lineBoundingBox.Max-new XYZ(0,(lineBoundingBox.Max-lineBoundingBox.Min).Y,0)),
+        //    };
+        //}
 
         /// <summary>
         /// 根据线的移动,重定位内容
@@ -293,7 +400,7 @@ namespace PmSoft.Optimization.DrawingProduction
             //线参数
             UpdateLineParameters(nodePoints, line, verticalVector);
             //标注 创建
-            var nodesHeight = UnitHelper.ConvertToInch((nodePoints.Count() - 1) * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType);
+            var nodesHeight = UnitHelper.ConvertToFoot((nodePoints.Count() - 1) * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType);
             var lineHeight = orientLineHeight + verticalSkew > nodesHeight ? orientLineHeight + verticalSkew : nodesHeight;
             var tagHeight = lineHeight + nodesHeight;
             line.GetParameters(TagProperty.线高度1.ToString()).First().Set(lineHeight);
@@ -303,7 +410,7 @@ namespace PmSoft.Optimization.DrawingProduction
             {
                 case MultiPipeTagLocation.OnLineEdge:
                     //添加对应的单管直径标注
-                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(200, AnnotationConstaints.UnitType));
+                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(200, AnnotationConstaints.UnitType));
                     var skewLength = AnnotationConstaints.SkewLengthForOffLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
@@ -313,13 +420,13 @@ namespace PmSoft.Optimization.DrawingProduction
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
                         subTag.TagHeadPosition = startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector
-                            + (tagHeight + UnitHelper.ConvertToInch(-i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType)) * verticalVector;
+                            + (tagHeight + UnitHelper.ConvertToFoot(-i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType)) * verticalVector;
                         tags.Add(subTag);
                     }
                     break;
                 case MultiPipeTagLocation.OnLine:
                     //添加对应的单管直径标注
-                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToInch(800, AnnotationConstaints.UnitType));
+                    line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(800, AnnotationConstaints.UnitType));
                     skewLength = AnnotationConstaints.SkewLengthForOnLine;
                     for (int i = 0; i < pipes.Count(); i++)
                     {
@@ -329,7 +436,7 @@ namespace PmSoft.Optimization.DrawingProduction
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
                         subTag.TagHeadPosition = startPoint + skewLength * parallelVector + actualLength / 25.4 * parallelVector
-                            + (tagHeight + UnitHelper.ConvertToInch(-i * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType)) * verticalVector;
+                            + (tagHeight + UnitHelper.ConvertToFoot(-i * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType)) * verticalVector;
                         tags.Add(subTag);
                     }
                     break;
@@ -351,11 +458,11 @@ namespace PmSoft.Optimization.DrawingProduction
         /// </summary>
         /// <param name="nodePoints"></param>
         /// <param name="line"></param>
-        private void UpdateLineParameters(List<XYZ> nodePoints, FamilyInstance line, XYZ verticalVector)
+        void UpdateLineParameters(List<XYZ> nodePoints, FamilyInstance line, XYZ verticalVector)
         {
             double deepLength = Math.Abs((nodePoints.Last() - nodePoints.First()).DotProduct(verticalVector));//nodePoints.First().DistanceTo(nodePoints.Last())
             line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
-            line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToInch(AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType));
+            line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToFoot(AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType));
             line.GetParameters(TagProperty.文字行数.ToString()).First().Set(nodePoints.Count());
             for (int i = 2; i <= 8; i++)
             {
@@ -377,7 +484,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <summary>
         /// 节点计算 不带初始点参数,即首次生成,需检测重叠区间
         /// </summary>
-        private static List<XYZ> GetNodePoints(List<Pipe> pipes)
+        static List<XYZ> GetNodePoints(List<Pipe> pipes)
         {
             List<XYZ> nodePoints = new List<XYZ>();
             //重叠区间
@@ -434,7 +541,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <summary>
         /// 节点计算 带初始点参数,即定位变更,非首次生成
         /// </summary>
-        private static List<XYZ> GetNodePoints(List<Pipe> pipes, XYZ startPoint)
+        static List<XYZ> GetNodePoints(List<Pipe> pipes, XYZ startPoint)
         {
             List<XYZ> nodePoints = new List<XYZ>();
             //节点计算
@@ -451,7 +558,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <summary>
         /// 节点计算 带初始点参数,即定位变更,非首次生成
         /// </summary>
-        private static void GetNodePoints(List<PipeAndNodePoint> pipes, XYZ startPoint)
+        static void GetNodePoints(List<PipeAndNodePoint> pipes, XYZ startPoint)
         {
             //节点计算
             for (int i = 0; i < pipes.Count(); i++)
@@ -466,7 +573,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <summary>
         /// 节点计算 不带初始点参数,即首次生成,需检测重叠区间
         /// </summary>
-        private static bool GetNodePoints(List<PipeAndNodePoint> pipes)
+        static bool GetNodePoints(List<PipeAndNodePoint> pipes, out XYZ rightOfLefts, out XYZ leftOfRights)
         {
             //重叠区间
             List<XYZ> lefts = new List<XYZ>();
@@ -503,8 +610,8 @@ namespace PmSoft.Optimization.DrawingProduction
                     }
                 }
             }
-            var rightOfLefts = lefts.First(c => c.X == lefts.Max(p => p.X));
-            var leftOfRights = rights.First(c => c.X == rights.Min(p => p.X));
+            rightOfLefts = lefts.First(c => c.X == lefts.Max(p => p.X));
+            leftOfRights = rights.First(c => c.X == rights.Min(p => p.X));
             if (rightOfLefts.X > leftOfRights.X)
                 return false;
             //节点计算
@@ -525,7 +632,7 @@ namespace PmSoft.Optimization.DrawingProduction
         /// <param name="pipes"></param>
         /// <param name="verticalVector"></param>
         /// <returns></returns>
-        private bool CheckParallel(IEnumerable<Pipe> pipes, XYZ verticalVector)
+        bool CheckParallel(IEnumerable<Pipe> pipes, XYZ verticalVector)
         {
             foreach (var pipe in pipes)
             {

@@ -1,0 +1,4 @@
+2017-08-25 10:13:03.159,错误方法:Void Save(System.String, System.Drawing.Imaging.ImageCodecInfo, System.Drawing.Imaging.EncoderParameters) ,错误信息:GDI+ 中发生一般性错误。 
+2017-08-25 10:22:19.697,错误方法:Void Save(System.String, System.Drawing.Imaging.ImageCodecInfo, System.Drawing.Imaging.EncoderParameters) ,错误信息:GDI+ 中发生一般性错误。 
+2017-08-25 10:36:07.738,错误方法:Void Save(System.String, System.Drawing.Imaging.ImageCodecInfo, System.Drawing.Imaging.EncoderParameters) ,错误信息:GDI+ 中发生一般性错误。 
+2017-08-25 10:46:46.967,错误方法:Void Save(System.String, System.Drawing.Imaging.ImageCodecInfo, System.Drawing.Imaging.EncoderParameters) ,错误信息:GDI+ 中发生一般性错误。 

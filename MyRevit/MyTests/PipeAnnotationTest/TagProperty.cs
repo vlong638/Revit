@@ -1,4 +1,4 @@
-﻿namespace MyRevit.MyTests.PipeAnnotation
+﻿namespace MyRevit.MyTests.PipeAnnotationTest
 {
     /// <summary>
     /// 多管直径标注的属性
