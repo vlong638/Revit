@@ -48,6 +48,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Work\export\Revit\2016\Aliyun.OSS.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>False</EmbedInteropTypes>
@@ -86,6 +90,7 @@
       <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.MainModel.EntData.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
       <HintPath>..\..\..\..\..\WorkTools\Revit\Revit 2016\RevitAPI.dll</HintPath>
       <Private>False</Private>
@@ -101,6 +106,7 @@
       <HintPath>..\..\..\..\..\Work\export\Revit\2016\System.Data.SQLite.DLL</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -130,6 +136,11 @@
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager0802.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Triangle.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\ValidFaces.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml.cs">
+      <DependentUpon>CompoundStructureAnnotationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationCreater.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidData.cs" />
@@ -333,6 +344,8 @@
     <EmbeddedResource Include="SubsidenceMonitor\UI\WarnSettingsForm.resx">
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -366,7 +379,12 @@
     <Content Include="Images\logoko.png" />
     <Content Include="Images\UpNode.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Page Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

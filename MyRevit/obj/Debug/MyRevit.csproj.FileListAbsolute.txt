@@ -32,10 +32,13 @@ E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.xml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll.config
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\AdWindows.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Aliyun.OSS.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.Office.Interop.Excel.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CADBase20_x64.dll
@@ -61,13 +64,11 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\AddInManager.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitUIAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\BuildingSystemsUIAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\UIFrameworkServices.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\stdole.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.pdb
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockCPSettingsForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.EarthWork.UI.EarthworkBlockingForm.resources
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\PmSoft.Optimization.DrawingProduction.PipeAnnotationForm.resources
@@ -82,3 +83,8 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.g.cs
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit_MarkupCompile.cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit_MarkupCompile.lref
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.g.resources
