@@ -212,26 +212,33 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             foreach (Edge edge in edgeArray)
             {
                 var tPoints = edge.Tessellate();
-                if (tPoints.Count == 2)
+                //链接顺序 1S-1E,2E-1S,3E-2S,4E-3S
+                for (int i = tPoints.Count()-1; i >=0 ; i--)
                 {
-                    var point = tPoints[0];
+                    var point = tPoints[i];
                     if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                    {
-                        points.Add(point + model.Offset);
-                    }
-                    else
-                    {
-                        point = tPoints[1];
-                        if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                            points.Add(point + model.Offset);
-                    }
+                        points.Insert(0, point + model.Offset);
                 }
-                else
-                {
-                    foreach (var point in tPoints)
-                        if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
-                            points.Add(point + model.Offset);
-                }
+                //if (tPoints.Count == 2)
+                //{
+                //    var point = tPoints[0];
+                //    if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
+                //    {
+                //        points.Add(point + model.Offset);
+                //    }
+                //    else
+                //    {
+                //        point = tPoints[1];
+                //        if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
+                //            points.Add(point + model.Offset);
+                //    }
+                //}
+                //else
+                //{
+                //    foreach (var point in tPoints)
+                //        if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
+                //            points.Add(point + model.Offset);
+                //}
             }
             return points;
         }

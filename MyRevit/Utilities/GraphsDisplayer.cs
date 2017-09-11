@@ -151,6 +151,12 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 }
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="pen">null for default</param>
+        /// <param name="needText"></param>
         public void DisplayPoints(List<XYZ> points, Pen pen, bool needText = false)
         {
             if (points.Count == 0)
@@ -161,8 +167,8 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point.X, point.Y, 5, 5);
                 if (needText)
                 {
-                    var brush = pen.Brush;
-                    CurrentGraphics.DrawString($"{(int)pXYZ.X },{(int)pXYZ.Y }", DefaultFont, brush ?? DefaultBrush, point);
+                    var brush = (pen ?? DefaultPen).Brush;
+                    CurrentGraphics.DrawString($"{(int)pXYZ.X },{(int)pXYZ.Y }", DefaultFont, brush, point);
                 }
             }
         }
@@ -197,7 +203,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         /// 点的文本
         /// </summary>
         /// <param name="points"></param>
-        /// <param name="brush"></param>
+        /// <param name="brush">null for default</param>
         /// <param name="offsetX"></param>
         /// <param name="offsetY"></param>
         public void DisplayPointsText(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)

@@ -74,7 +74,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     seperatePoints.AdvancedPoints.Add(new AdvancedPoint(pBeamZ0, beamLine.Direction, false));
                 if (seperatePoints.AdvancedPoints.FirstOrDefault(c => c.Point.VL_XYEqualTo(pBeamZ1)) == null)
                     seperatePoints.AdvancedPoints.Add(new AdvancedPoint(pBeamZ1, beamLine.Direction, false));
-                seperatePoints.AdvancedPoints = seperatePoints.AdvancedPoints.OrderByDescending(c => c.Point.X).ThenBy(c => c.Point.Y).ToList();
+                seperatePoints.AdvancedPoints = new AdvancedPoints(seperatePoints.AdvancedPoints.OrderByDescending(c => c.Point.X).ThenBy(c => c.Point.Y).ToList());
                 bool isSolid = seperatePoints.AdvancedPoints.First().IsSolid;//点的IsSolid可能是其他分层的记录,需更新为当前分层的最新值
                 var beamSymbol = (beam as FamilyInstance).Symbol;
                 var beamLevel = Document.GetElement(beam.LevelId) as Level;
@@ -139,13 +139,36 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                         else if (Model.AlignType == AlignType.BeamTopToFloorBottom && planarFace.FaceNormal.Z < 0)
                             addFaces.Add(face);
                     }
-                    //圆面
-                    var cylindricalFace = face as CylindricalFace;
-                    if (cylindricalFace != null)
+                    ////圆面
+                    //var cylindricalFace = face as CylindricalFace;
+                    //if (cylindricalFace != null)
+                    //{
+                    //    if (cylindricalFace.Axis.Z > 0)
+                    //    {
+                    //        addFaces.Add(cylindricalFace);
+                    //    }
+                    //}
+                }
+                if (addFaces.Count == 0)
+                {
+                    double area = -1;
+                    RuledFace currentFace=null;
+                    foreach (Face face in faces)
                     {
-                        //最外的轮廓面必为矩形
-                        //即如有其他原型作为最外轮廓面的...需重写逻辑,要判断最外轮廓面
-                        //矩形面的最外轮廓可以通过XYZ(0,0,1)取得
+                        //定制面
+                        var ruledFace = face as RuledFace;
+                        if (ruledFace != null)
+                        {
+                            if (area<ruledFace.Area)
+                            {
+                                area = ruledFace.Area;
+                                currentFace = ruledFace;
+                            }
+                        }
+                    }
+                    if (currentFace!=null)
+                    {
+                        addFaces.Add(currentFace);
                     }
                 }
                 foreach (var addFace in addFaces.OrderByDescending(c => c.Area))

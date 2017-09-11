@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyRevit.MyTests.BeamAlignToFloor
 {
@@ -21,6 +22,34 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         public bool IsSolid { set; get; }
     }
 
+    public class AdvancedPoints : List<AdvancedPoint>
+    {
+        public AdvancedPoints()
+        {
+        }
+        public AdvancedPoints(List<AdvancedPoint> xPoints)
+        {
+            this.AddRange(xPoints);
+        }
+
+
+        public new void Add(AdvancedPoint xPoint)
+        {
+            if (this.FirstOrDefault(c => c.Point.VL_XYEqualTo(xPoint.Point)) == null)
+            {
+                base.Add(xPoint);
+            }
+        }
+
+        public void AddRange(List<AdvancedPoint> points)
+        {
+            foreach (var point in points)
+            {
+                this.Add(point);
+            }
+        }
+    }
+
 
     /// <summary>
     /// 用以裁剪线段的信息
@@ -31,7 +60,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// 极限高程,用于重叠的多面的裁剪优先级
         /// </summary>
         public double Z;
-        public List<AdvancedPoint> AdvancedPoints = new List<AdvancedPoint>();
+        public AdvancedPoints AdvancedPoints = new AdvancedPoints();
         //public SeperatedLines SeperatedLines = new SeperatedLines();
         public double Max = double.MinValue;
         public double Min = double.MaxValue;

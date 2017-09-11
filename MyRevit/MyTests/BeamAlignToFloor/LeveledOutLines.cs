@@ -26,6 +26,30 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             {
                 Add(new OutLine(edgeArray, model));
             }
+
+            //if (face is PlanarFace)
+            //{
+            //    var current = this;
+            //    //闭合区间集合,EdgeArray
+            //    foreach (EdgeArray edgeArray in face.EdgeLoops)
+            //    {
+            //        Add(new OutLine(edgeArray, model));
+            //    }
+            //}
+            //else if (face is CylindricalFace)
+            //{
+            //    var current = this;
+            //    //闭合区间集合,EdgeArray TODO 改回去 无效调整
+            //    EdgeArray edgeArrayColleciton = new EdgeArray();
+            //    foreach (EdgeArray edgeArray in face.EdgeLoops)
+            //    {
+            //        for (int i = 0; i < edgeArray.Size; i++)
+            //        {
+            //            edgeArrayColleciton.Append(edgeArray.get_Item(i));
+            //        }
+            //    }
+            //    Add(new OutLine(edgeArrayColleciton, model));
+            //}
         }
 
         void Add(OutLine newOne)

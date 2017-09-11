@@ -51,7 +51,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         static BeamAlignToFloorModel model = new BeamAlignToFloorModel()
         {
             AlignType = AlignType.BeamTopToFloorBottom,
-            ContentType = ContentType.LinkDocument,
+            ContentType = ContentType.Document,
         };
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -198,7 +198,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                 #endregion
                 return true;
             });
-            model.ContentType = model.ContentType == ContentType.Document ? ContentType.LinkDocument : ContentType.Document;
+            //model.ContentType = model.ContentType == ContentType.Document ? ContentType.LinkDocument : ContentType.Document;
             return Result.Succeeded;
         }
     }

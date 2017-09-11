@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.UI.Selection;
 using Autodesk.Revit.DB;
+using System;
 
 namespace MyRevit.MyTests.Utilities
 {
@@ -7,15 +8,15 @@ namespace MyRevit.MyTests.Utilities
     /// BuiltInCategory选择过滤器
     /// 支持文档及链接文档内的选择
     /// </summary>
-    public class CategoryFilter : ISelectionFilter
+    public class ClassFilter : ISelectionFilter
     {
-        BuiltInCategory TargetCategory { set; get; }
+        Type TargetType{ set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
 
-        public CategoryFilter(BuiltInCategory category,bool isLinkInstance=false)
+        public ClassFilter(Type targetType, bool isLinkInstance=false)
         {
-            TargetCategory = category;
+            TargetType = targetType;
             IsLinkInstance = isLinkInstance;
         }
 
@@ -28,9 +29,7 @@ namespace MyRevit.MyTests.Utilities
             }
             else
             {
-                var document = element.Document;
-                var category = Category.GetCategory(document, TargetCategory);
-                return element.Category.Id == category.Id;
+                return TargetType.IsAssignableFrom(element.GetType());
             }
         }
 
@@ -41,8 +40,7 @@ namespace MyRevit.MyTests.Utilities
 
             Document linkedDoc = LinkInstance.GetLinkDocument();
             Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            var category = Category.GetCategory(linkedDoc, TargetCategory);
-            return element.Category.Id == category.Id;
+            return TargetType.IsAssignableFrom(element.GetType());
         }
     }
 }

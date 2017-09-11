@@ -5,5 +5,35 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MyRevit.MyTests.CompoundStructureAnnotation"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="160" d:DesignWidth="200">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="MyResourceDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.CommandBindings>
+            <CommandBinding Command="ApplicationCommands.New"  Executed="CommandBinding_Executed_New" />
+            <CommandBinding Command="ApplicationCommands.Close" Executed="CommandBinding_Executed_Close" />
+        </Grid.CommandBindings>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Margin="10" Text="文字样式:"/>
+            <ComboBox Width="100"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <RadioButton x:Name="Rb_CurrentDocument" Content="文字在线段" IsChecked="{Binding IsDocument}" Width="76"/>
+            <RadioButton x:Name="Rb_LinkedDocument" Content="文字在线上" IsChecked="{Binding IsLinkDocument}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Button x:Name="Btn_Submit" Content="选择墙,板,屋顶" Command="ApplicationCommands.New" Width="100"/>
+            <Button x:Name="Btn_Cancel" Content="取消" Command="ApplicationCommands.Close"/>
+        </StackPanel>
+    </Grid>
 </Window>

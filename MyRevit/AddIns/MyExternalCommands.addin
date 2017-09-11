@@ -2,6 +2,12 @@
 <RevitAddIns>
   <AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>429F2A2D-8A5E-476E-B465-246D92605AAA</ClientId>
+    <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfCompoundStructureAnnotation</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>B593F2C4-F38C-41D7-AE2C-369BB0149D9A</ClientId>
     <FullClassName>MyRevit.Entities.MyExternalCommand</FullClassName>
     <VendorId>VL</VendorId>

@@ -18,7 +18,7 @@
     <Name>CurrentTestCommand</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3501</ClientId>
-    <FullClassName>MyRevit.Entities.CommandOfBeamAlignToFloor</FullClassName>
+    <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfBeamAlignToFloor</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">

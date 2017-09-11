@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MyRevit.MyTests.BeamAlignToFloor;
+using PmSoft.Optimization.DrawingProduction;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,14 +17,31 @@ using System.Windows.Shapes;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
+
     /// <summary>
     /// CompoundStructureAnnotationWindow.xaml 的交互逻辑
     /// </summary>
     public partial class CompoundStructureAnnotationWindow : Window
     {
-        public CompoundStructureAnnotationWindow()
+        public CompoundStructureAnnotationViewModel ViewModel { set; get; }
+        CompoundStructureAnnotationSet Set{ set; get; }
+
+        public CompoundStructureAnnotationWindow(CompoundStructureAnnotationSet set)
         {
             InitializeComponent();
+
+            Set = set;
+            ViewModel = new CompoundStructureAnnotationViewModel();
+        }
+
+        private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CommandBinding_Executed_New(object sender, ExecutedRoutedEventArgs e)
+        {
+            ViewModel.ViewType = CompoundStructureAnnotationViewType.Select;
         }
     }
 }

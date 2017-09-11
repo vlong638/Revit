@@ -38,6 +38,9 @@ namespace MyRevit.MyTests.BeamAlignToFloor
 
             foreach (var subOutLine in outLine.SubOutLines)
                 Display(subOutLine);
+
+            GraphicsDisplayer.DisplayPoints(outLine.Points, null, true);
+
         }
 
         #endregion

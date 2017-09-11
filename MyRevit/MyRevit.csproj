@@ -124,7 +124,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
     <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
+    <Compile Include="MyTests\BeamAlignToFloor\BeamAlignToFloorViewModel.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Constraints.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CoverType.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\FitLines.cs" />
@@ -136,9 +138,16 @@
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager0802.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Triangle.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\ValidFaces.cs" />
+    <Page Include="MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="MyTests\CompoundStructureAnnotation\CommandOfCompoundStructureAnnotation.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationViewModel.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml.cs">
       <DependentUpon>CompoundStructureAnnotationWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationSet.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />
@@ -165,6 +174,7 @@
     </Compile>
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationUIData.cs" />
     <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
+    <Compile Include="Utilities\ClassFilter.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
     <Compile Include="MyTests\0Commands\UpdaterTestCommand.cs" />
