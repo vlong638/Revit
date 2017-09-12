@@ -10,11 +10,11 @@ namespace MyRevit.MyTests.Utilities
     /// </summary>
     public class ClassFilter : ISelectionFilter
     {
-        Type TargetType{ set; get; }
+        Type TargetType { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
 
-        public ClassFilter(Type targetType, bool isLinkInstance=false)
+        public ClassFilter(Type targetType, bool isLinkInstance = false)
         {
             TargetType = targetType;
             IsLinkInstance = isLinkInstance;

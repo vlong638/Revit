@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ComponentModel;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
@@ -23,7 +24,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// </summary>
     public partial class CompoundStructureAnnotationWindow : Window
     {
-        public CompoundStructureAnnotationViewModel ViewModel { set; get; }
         CompoundStructureAnnotationSet Set{ set; get; }
 
         public CompoundStructureAnnotationWindow(CompoundStructureAnnotationSet set)
@@ -31,17 +31,25 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             InitializeComponent();
 
             Set = set;
-            ViewModel = new CompoundStructureAnnotationViewModel();
         }
 
         private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            this.Close();
+            Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Close;
+            DialogResult = true;
         }
 
         private void CommandBinding_Executed_New(object sender, ExecutedRoutedEventArgs e)
         {
-            ViewModel.ViewType = CompoundStructureAnnotationViewType.Select;
+            Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Select;
+            DialogResult = true;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (Set.ViewModel.ViewType!=CompoundStructureAnnotationViewType.Select)
+                Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Close;
+            base.OnClosing(e);
         }
     }
 }

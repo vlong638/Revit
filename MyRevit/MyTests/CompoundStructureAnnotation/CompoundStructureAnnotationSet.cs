@@ -22,6 +22,8 @@ namespace PmSoft.Optimization.DrawingProduction
     {
         public UIApplication UIApplication;
         public Document Document { get { return UIApplication.ActiveUIDocument.Document; } }
+        public CompoundStructureAnnotationViewModel ViewModel { set; get; }
+
 
         /// <summary>
         /// 构造函数
@@ -30,6 +32,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public CompoundStructureAnnotationSet(UIApplication app) : base(app)
         {
             Init(app);
+            ViewModel = new CompoundStructureAnnotationViewModel();
         }
 
         /// <summary>
@@ -53,94 +56,12 @@ namespace PmSoft.Optimization.DrawingProduction
             var app = UIApplication.Application;
             var uiDoc = UIApplication.ActiveUIDocument;
             var doc = UIApplication.ActiveUIDocument.Document;
-
-            //CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);
-            //var model = window.ViewModel.Model;
-            //PmSoft.Common.RevitClass.PickObjectsMouseHook mouseHook = new Common.RevitClass.PickObjectsMouseHook();
-            //while (window.ViewModel.ViewType != CompoundStructureAnnotationViewType.Close)
-            //{
-            //    try
-            //    {
-            //        switch (window.ViewModel.ViewType)
-            //        {
-            //            case CompoundStructureAnnotationViewType.Idle:
-            //                break;
-            //            case CompoundStructureAnnotationViewType.Select:
-            //                mouseHook.InstallHook(Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
-            //                Document linkDocument = null;
-            //                IEnumerable<ElementId> elementIds = null;
-            //                //选择
-            //                if (model.ContentType == ContentType.Document)
-            //                {
-            //                    elementIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_Floors), "选择楼板").Select(c => c.ElementId);
-            //                    if (elementIds == null || elementIds.Count() == 0)
-            //                        break;
-            //                }
-            //                else
-            //                {
-            //                    var linkFilter = new CategoryFilter(BuiltInCategory.OST_Floors, true);
-            //                    Reference reference = uiDoc.Selection.PickObject(ObjectType.LinkedElement, linkFilter, "先选择一个链接文件");
-            //                    Element element = doc.GetElement(reference.ElementId);
-            //                    if (element.Category.Name != "RVT 链接")
-            //                        break;
-            //                    linkDocument = (element as RevitLinkInstance).GetLinkDocument();
-            //                    elementIds = uiDoc.Selection.PickObjects(ObjectType.LinkedElement, linkFilter, "在链接文件中选择板:").Select(c => c.LinkedElementId);
-            //                    model.LinkDocument = linkDocument;
-            //                    model.Offset = (element as Instance).GetTotalTransform().Origin;
-            //                }
-            //                //状态更改
-            //                if (elementIds == null || elementIds.Count() == 0)
-            //                {
-            //                    window.ViewModel.ViewType = ViewTypeOfBeamAlignToFloor.Idle;
-            //                }
-            //                else
-            //                {
-            //                    window.ViewModel.Model.FloorIds = elementIds;
-            //                    window.ViewModel.ViewType = ViewTypeOfBeamAlignToFloor.SelectBeam;
-            //                }
-            //                break;
-            //            case ViewTypeOfBeamAlignToFloor.SelectBeam:
-            //                mouseHook.InstallHook(Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
-            //                elementIds = uiDoc.Selection.PickObjects(ObjectType.Element, new CategoryFilter(BuiltInCategory.OST_StructuralFraming)).Select(c => c.ElementId);
-            //                //状态更改
-            //                if (elementIds == null || elementIds.Count() == 0)
-            //                {
-            //                    window.ViewModel.ViewType = ViewTypeOfBeamAlignToFloor.Idle;
-            //                }
-            //                else
-            //                {
-            //                    window.ViewModel.Model.BeamIds = elementIds;
-            //                    window.ViewModel.ViewType = ViewTypeOfBeamAlignToFloor.BeamAlignToFloor;
-            //                }
-            //                break;
-            //            case ViewTypeOfBeamAlignToFloor.BeamAlignToFloor:
-            //                break;
-            //            default:
-            //                break;
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        mouseHook.UninstallHook();
-            //        window.ViewModel.ViewType = ViewTypeOfBeamAlignToFloor.Idle;
-            //    }
-            //    mouseHook.UninstallHook();
-            //    window.Work();
-            //}
-            //window.Close();
-
-
-
             try
             {
                 CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);
-                IntPtr rvtPtr = Autodesk.Windows.ComponentManager.ApplicationWindow;
-                WindowInteropHelper helper = new WindowInteropHelper(window);
-                helper.Owner = rvtPtr;
-                window.ShowDialog();
-                while (window.ViewModel.ViewType != CompoundStructureAnnotationViewType.Close)
+                while (ViewModel.ViewType != CompoundStructureAnnotationViewType.Close)
                 {
-                    window.ViewModel.Execute(window, uiDoc);
+                    ViewModel.Execute(window, this, uiDoc);
                 }
                 return true;
             }

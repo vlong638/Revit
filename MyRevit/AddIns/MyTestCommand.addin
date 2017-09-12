@@ -1,17 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
   <AddIn Type="Command">
-    <Name>获取类型结构属性</Name>
+    <Name>调研_获取类型结构属性</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
-    <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3508</ClientId>
+    <ClientId>61969ECA-BB23-46C0-BBE3-D055F117E206</ClientId>
     <FullClassName>MyRevit.Entities.调研_获取类型结构属性</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
-    <Name>关联更新类型结构属性</Name>
+    <Name>调研_关联更新类型结构属性</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
-    <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3CC</ClientId>
+    <ClientId>5DFF55C3-754C-4320-9327-7E4A1C86D5B8</ClientId>
     <FullClassName>MyRevit.Entities.调研_关联更新类型结构属性</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Name>命令_结构做法标注</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>4A718227-CA66-41F9-A0FD-BFA5D93C03AE</ClientId>
+    <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfCompoundStructureAnnotation</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
