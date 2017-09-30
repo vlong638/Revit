@@ -15,7 +15,6 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var app = commandData.Application.Application;
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
-
             return new CompoundStructureAnnotationSet(uiApp).DoCmd() ? Result.Succeeded : Result.Failed;
 
             //new CompoundStructureAnnotationWindow().ShowDialog();

@@ -22,8 +22,7 @@ namespace PmSoft.Optimization.DrawingProduction
     {
         public UIApplication UIApplication;
         public Document Document { get { return UIApplication.ActiveUIDocument.Document; } }
-        public CompoundStructureAnnotationViewModel ViewModel { set; get; }
-
+        public CSAViewModel ViewModel { set; get; }
 
         /// <summary>
         /// 构造函数
@@ -32,7 +31,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public CompoundStructureAnnotationSet(UIApplication app) : base(app)
         {
             Init(app);
-            ViewModel = new CompoundStructureAnnotationViewModel();
+            ViewModel = new CSAViewModel(app.ActiveUIDocument.Document);
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace PmSoft.Optimization.DrawingProduction
             try
             {
                 CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);
-                while (ViewModel.ViewType != CompoundStructureAnnotationViewType.Close)
+                while (ViewModel.ViewType != CSAViewType.Close)
                 {
                     ViewModel.Execute(window, this, uiDoc);
                 }

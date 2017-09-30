@@ -29,7 +29,7 @@ namespace MyRevit.MyTests.Utilities
             }
             else
             {
-                return TargetType.IsAssignableFrom(element.GetType());
+                return TargetType == element.GetType();
             }
         }
 
@@ -40,7 +40,7 @@ namespace MyRevit.MyTests.Utilities
 
             Document linkedDoc = LinkInstance.GetLinkDocument();
             Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            return TargetType.IsAssignableFrom(element.GetType());
+            return TargetType == element.GetType();
         }
     }
 }

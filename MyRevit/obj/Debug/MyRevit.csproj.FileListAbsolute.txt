@@ -32,12 +32,8 @@ E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\MyRevit\MyRevit\bin\Debug\Newtonsoft.Json.xml
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CommonClass.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.Controls.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.RevitClass.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.MainModel.EntData.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll.config
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\AdWindows.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Aliyun.OSS.dll
@@ -45,8 +41,12 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.Office.Interop.Excel.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CADBase20_x64.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CommonClass.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.Controls.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PMSoft.Common.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.MFCDll20_x64.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.RevitClass.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.MainModel.EntData.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\System.Data.SQLite.DLL
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.dll
@@ -90,4 +90,3 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache

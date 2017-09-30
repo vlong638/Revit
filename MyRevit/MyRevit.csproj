@@ -148,6 +148,7 @@
       <DependentUpon>CompoundStructureAnnotationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationSet.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\FamilySymbolHelper.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />

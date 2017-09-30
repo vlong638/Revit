@@ -26,11 +26,11 @@
         </Grid.CommandBindings>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <TextBlock Margin="10" Text="文字样式:"/>
-            <ComboBox Width="100"/>
+            <ComboBox Width="100" ItemsSource="{Binding TextNoteTypes}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding TextNoteTypeElementId}" SelectedIndex="0"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <RadioButton x:Name="Rb_CurrentDocument" Content="文字在线段" IsChecked="{Binding IsDocument}" Width="76"/>
-            <RadioButton x:Name="Rb_LinkedDocument" Content="文字在线上" IsChecked="{Binding IsLinkDocument}"/>
+            <RadioButton Content="文字在线端" IsChecked="{Binding IsOnEdge}" Width="76"/>
+            <RadioButton Content="文字在线上" IsChecked="{Binding IsOnLine}"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <Button x:Name="Btn_Submit" Content="选择墙,板,屋顶" Command="ApplicationCommands.New" Width="100"/>

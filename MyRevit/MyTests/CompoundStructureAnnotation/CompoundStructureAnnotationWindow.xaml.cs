@@ -31,24 +31,25 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             InitializeComponent();
 
             Set = set;
+            DataContext = set.ViewModel;
         }
 
         private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Close;
+            Set.ViewModel.ViewType = CSAViewType.Close;
             DialogResult = true;
         }
 
         private void CommandBinding_Executed_New(object sender, ExecutedRoutedEventArgs e)
         {
-            Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Select;
+            Set.ViewModel.ViewType = CSAViewType.Select;
             DialogResult = true;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (Set.ViewModel.ViewType!=CompoundStructureAnnotationViewType.Select)
-                Set.ViewModel.ViewType = CompoundStructureAnnotationViewType.Close;
+            if (Set.ViewModel.ViewType!=CSAViewType.Select)
+                Set.ViewModel.ViewType = CSAViewType.Close;
             base.OnClosing(e);
         }
     }

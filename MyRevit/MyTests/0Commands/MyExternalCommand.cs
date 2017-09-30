@@ -22,6 +22,7 @@ namespace MyRevit.Entities
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
 
+
             #region 放置类型为"0762*2032 mm"的门
             //首先通过类型过滤出 类型为门的族类型,找到名称相同的
             string doorTypeName = "0762*2032 mm";
