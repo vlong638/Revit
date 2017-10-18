@@ -30,13 +30,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     public enum CSALocationType
     {
         /// <summary>
-        /// 在线上
-        /// </summary>
-        OnLine,
-        /// <summary>
         /// 在线端
         /// </summary>
         OnEdge,
+        /// <summary>
+        /// 在线上
+        /// </summary>
+        OnLine,
     }
 
     /// <summary>
@@ -62,10 +62,24 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         public Document Document { set; get; }
 
+        public double TextSize;
+
         /// <summary>
         /// 文字样式
         /// </summary>
-        public ElementId TextNoteTypeElementId { set; get; }
+        public ElementId TextNoteTypeElementId
+        {
+            get
+            {
+                return textNoteTypeElementId;
+            }
+            set
+            {
+                textNoteTypeElementId = value;
+                TextNoteType
+            }
+        }
+        private ElementId textNoteTypeElementId = null;
 
         /// <summary>
         /// 文字的定位方案
@@ -123,7 +137,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <returns></returns>
         public static List<TextNoteType> GetTextNoteTypes(this CSAModel model)
         {
-            return new FilteredElementCollector(model.Document).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+            var textNoteTypes = new FilteredElementCollector(model.Document).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+            return textNoteTypes;
         }
 
         /// <summary>
@@ -300,7 +315,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
     public class ViewModelBase : DependencyObject, INotifyPropertyChanged
     {
-
         #region INotifyPropertyChanged
         /// <summary>
         /// 实现INPC接口 监控属性改变
@@ -367,7 +381,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         }
         #endregion
 
-
         public void Execute(CompoundStructureAnnotationWindow window, CompoundStructureAnnotationSet set, UIDocument uiDoc)
         {
             switch (ViewType)
@@ -409,9 +422,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var texts = Model.FetchTextsFromCompoundStructure(doc, compoundStructure);//获取文本数据
                         if (texts.Count == 0)
                             return false;
+
+                        #region 线生成
                         var lineFamilySymbol = CSAConstraints.GetMultipleTagSymbol(doc);//获取线标注类型
-                        var line = doc.Create.NewFamilyInstance(new XYZ(0,0,0), lineFamilySymbol, doc.ActiveView);//生成 线
-                        Model.FetchLocations(element,line);//计算内容定位
+                        var line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
+                        Model.FetchLocations(element, line);//计算内容定位
                         var targetLocation = Model.LineLocation;
                         var lineLocation = Model.LineLocation;
                         var textLocations = Model.TextLocations;
@@ -419,7 +434,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         LocationPoint locationPoint = line.Location as LocationPoint;//线 旋转处理
                         locationPoint.RotateByXY(lineLocation, Model.VerticalVector);
                         Model.LineId = line.Id;
-                        Model.UpdateLineParameters(line, 500, 200, AnnotationConstaints.TextHeight, Model.Texts.Count());//线参数设置
+                        Model.UpdateLineParameters(line, 500, 200, AnnotationConstaints.TextHeight, Model.Texts.Count());//线参数设置 
+                        #endregion
+
                         List<TextNote> textNotes = new List<TextNote>();
                         foreach (var text in Model.Texts)//生成 文本
                         {
