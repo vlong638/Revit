@@ -18,14 +18,14 @@ namespace PmSoft.Optimization.DrawingProduction
     {
         #region Foot,英尺
         static double MmPerFoot = 304.8;
-        public static double ConvertFromFootTo(double inch, UnitType type)
+        public static double ConvertFromFootTo(double foot, UnitType type)
         {
             switch (type)
             {
                 case UnitType.centimeter:
-                    return inch * MmPerFoot / 10;
+                    return foot * MmPerFoot / 10;
                 case UnitType.millimeter:
-                    return inch * MmPerFoot;
+                    return foot * MmPerFoot;
                 default:
                     throw new NotImplementedException("未实现该类型的单位换算");
             }

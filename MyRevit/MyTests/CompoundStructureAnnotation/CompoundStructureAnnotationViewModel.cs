@@ -39,30 +39,22 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         OnLine,
     }
 
+    public class TextLocation
+    {
+        public XYZ Start { set; get; }
+        public XYZ End { set; get; }
+    }
+
     /// <summary>
     /// CompoundStructureAnnotation数据的载体
     /// </summary>
     public class CSAModel
     {
-        //public CSAModel()
-        //{
-        //    Document = null;
-        //    Texts = new List<string>();
-        //    TextLocations = new List<XYZ>();
-        //}
-        public CSAModel(Document doc)
+        public CSAModel()
         {
-            Document = doc;
             Texts = new List<string>();
             TextLocations = new List<XYZ>();
         }
-
-        /// <summary>
-        /// 文档
-        /// </summary>
-        public Document Document { set; get; }
-
-        public double TextSize;
 
         /// <summary>
         /// 文字样式
@@ -76,7 +68,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             set
             {
                 textNoteTypeElementId = value;
-                TextNoteType
+                var textNoteType = VLConstraints.Doc.GetElement(textNoteTypeElementId) as TextNoteType;
+                VLConstraints.FontSizeScale= UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(),PmSoft.Optimization.DrawingProduction.UnitType.millimeter);//文本大小
+                VLConstraints.FontWidthScale= textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
             }
         }
         private ElementId textNoteTypeElementId = null;
@@ -105,6 +99,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 需要显示的结构标注信息
         /// </summary>
         public List<string> Texts { set; get; }
+
+        #region old
         /// <summary>
         /// 线 位置
         /// </summary>
@@ -113,6 +109,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 文字 位置
         /// </summary>
         public List<XYZ> TextLocations { set; get; }
+        #endregion
+
+        #region 1019
+        public XYZ LineStartLocation { set; get; }
+        public XYZ LineEndLocation { set; get; }
+        public List<TextLocation> TwoWayTextLocations { set; get; }
+        #endregion
 
         /// <summary>
         /// 坐标定位,平行于标注对象
@@ -122,7 +125,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 坐标定位,垂直于标注对象
         /// </summary>
         public XYZ VerticalVector = null;
-
     }
 
     /// <summary>
@@ -137,7 +139,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <returns></returns>
         public static List<TextNoteType> GetTextNoteTypes(this CSAModel model)
         {
-            var textNoteTypes = new FilteredElementCollector(model.Document).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+            var textNoteTypes = new FilteredElementCollector(VLConstraints.Doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
             return textNoteTypes;
         }
 
@@ -215,6 +217,37 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             return location;
         }
 
+        public static void CalculateLocations(this CSAModel model, Element element)
+        {
+            var width = 200;
+            var height = 200;
+            var textSizeScale = (1 / VLConstraints.FontWidthScale) * VLConstraints.FontSizeScale;
+            var textWidthScale = textSizeScale * VLConstraints.FontWidthScale;
+            XYZ parallelVector = null;//右
+            XYZ verticalVector = null;//上
+            var locationCurve = element.Location as LocationCurve;
+            parallelVector = (locationCurve.Curve as Line).Direction;
+            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            double xyzTolarance = 0.01;
+            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
+            {
+                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+            }
+            //线起始点
+            model.LineStartLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
+            //文本位置
+            model.
+
+
+
+
+
+            //线终点
+            model.LineEndLocation = model.LineStartLocation + verticalVector * (height + (model.Texts.Count() - 1) *VLConstraints.CurrentFontHeight)
+        }
+
         /// <summary>
         /// 从需要标注的对象中获取标注的源位置
         /// </summary>
@@ -224,7 +257,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             var locationCurve = element.Location as LocationCurve;
             model.LineLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
-            //平行,垂直 向量
             XYZ parallelVector = null;
             XYZ verticalVector = null;
             parallelVector = (locationCurve.Curve as Line).Direction;
@@ -334,10 +366,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// </summary>
     public class CSAViewModel : ViewModelBase
     {
-        public CSAViewModel(Document doc)
+        public CSAViewModel()
         {
             ViewType = CSAViewType.Idle;
-            Model = new CSAModel(doc);
+            Model = new CSAModel();
             LocationType = CSALocationType.OnLine;
         }
 
@@ -424,6 +456,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             return false;
 
                         #region 线生成
+                        Model.CalculateLocations(element);//计算内容定位
+
+
+
+
+
+
                         var lineFamilySymbol = CSAConstraints.GetMultipleTagSymbol(doc);//获取线标注类型
                         var line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
                         Model.FetchLocations(element, line);//计算内容定位

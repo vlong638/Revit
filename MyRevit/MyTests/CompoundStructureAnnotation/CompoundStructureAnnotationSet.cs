@@ -31,7 +31,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public CompoundStructureAnnotationSet(UIApplication app) : base(app)
         {
             Init(app);
-            ViewModel = new CSAViewModel(app.ActiveUIDocument.Document);
+            ViewModel = new CSAViewModel();
         }
 
         /// <summary>
@@ -55,6 +55,7 @@ namespace PmSoft.Optimization.DrawingProduction
             var app = UIApplication.Application;
             var uiDoc = UIApplication.ActiveUIDocument;
             var doc = UIApplication.ActiveUIDocument.Document;
+            VLConstraints.InitByDocument(uiDoc);
             try
             {
                 CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);

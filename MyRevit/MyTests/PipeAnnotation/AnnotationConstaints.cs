@@ -11,8 +11,9 @@ namespace PmSoft.Optimization.DrawingProduction
         public const int PipeCountMax = 7;
         public const double SkewLengthForOnLine = 0.2;
         public const double SkewLengthForOffLine = 0.4;
-        public static Font Font = new Font("Angsana New", 20);
-        public static double TextHeight = 150;
+        public static Font Font = new Font("Angsana New", 21);//21码 7.35毫米
+        public static double FontSizeScale = 7.35;
+        public static double TextHeight = UnitHelper.ConvertFromFootTo(150, UnitType.millimeter);
         public static UnitType UnitType = UnitType.millimeter;
 
         public static double MiniValueForXYZ = 0.001;
