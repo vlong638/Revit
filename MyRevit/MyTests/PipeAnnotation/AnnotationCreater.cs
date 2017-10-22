@@ -5,6 +5,7 @@ using System.Linq;
 using Autodesk.Revit.DB.Plumbing;
 using MyRevit.MyTests.BeamAlignToFloor;
 using MyRevit.MyTests.PipeAnnotation;
+using MyRevit.MyTests.PipeAnnotationTest;
 
 namespace PmSoft.Optimization.DrawingProduction
 {
@@ -193,11 +194,11 @@ namespace PmSoft.Optimization.DrawingProduction
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
-                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength,UnitType.millimeter) * parallelVector
+                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, VLUnitType.millimeter) * parallelVector
                             + UnitHelper.ConvertToFoot(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                         tags.Add(subTag);
                         if (i == 0)
-                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector 
+                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, VLUnitType.millimeter) * parallelVector 
                                 + UnitHelper.ConvertToFoot(0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                     }
                     break;
@@ -213,11 +214,11 @@ namespace PmSoft.Optimization.DrawingProduction
                         var text = subTag.TagText;
                         var textLength = System.Windows.Forms.TextRenderer.MeasureText(text, AnnotationConstaints.Font).Width;
                         var actualLength = textLength / (textSize * widthScale);
-                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector
+                        subTag.TagHeadPosition = startPoint + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, VLUnitType.millimeter) * parallelVector
                             + UnitHelper.ConvertToFoot(height - i * AnnotationConstaints.TextHeight + 0.5 * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                         tags.Add(subTag);
                         if (i == 0)
-                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, UnitType.millimeter) * parallelVector 
+                            avoidP3_Annotation1 = subTag.TagHeadPosition + skewLength * parallelVector + UnitHelper.ConvertToInch(actualLength, VLUnitType.millimeter) * parallelVector 
                                 + UnitHelper.ConvertToFoot(AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType) * verticalVector;
                     }
                     break;

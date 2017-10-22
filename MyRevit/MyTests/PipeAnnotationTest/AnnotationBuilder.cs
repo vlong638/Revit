@@ -38,7 +38,7 @@ namespace MyRevit.MyTests.PipeAnnotationTest
         public const double SkewLengthForOffLine = 0.4;
         public static Font Font = new Font("Angsana New", 20);
         public static double TextHeight = 150;
-        public static UnitType UnitType = UnitType.millimeter;
+        public static VLUnitType UnitType = VLUnitType.millimeter;
     }
     /// <summary>
     /// 标注生成类

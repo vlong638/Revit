@@ -1,9 +1,9 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MyRevit.MyTests.PipeAnnotationTest;
 using MyRevit.MyTests.Utilities;
 using MyRevit.Utilities;
-using PmSoft.Optimization.DrawingProduction;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,6 +41,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
     public class TextLocation
     {
+        public TextLocation(XYZ start, XYZ end)
+        {
+            Start = start;
+            End = end;
+        }
+
         public XYZ Start { set; get; }
         public XYZ End { set; get; }
     }
@@ -69,8 +75,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 textNoteTypeElementId = value;
                 var textNoteType = VLConstraints.Doc.GetElement(textNoteTypeElementId) as TextNoteType;
-                VLConstraints.FontSizeScale= UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(),PmSoft.Optimization.DrawingProduction.UnitType.millimeter);//文本大小
-                VLConstraints.FontWidthScale= textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
+                VLConstraints.CurrentFontSizeScale= UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(),VLUnitType.millimeter);//文本大小
+                VLConstraints.CurrentFontWidthScale= textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
             }
         }
         private ElementId textNoteTypeElementId = null;
@@ -114,7 +120,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #region 1019
         public XYZ LineStartLocation { set; get; }
         public XYZ LineEndLocation { set; get; }
-        public List<TextLocation> TwoWayTextLocations { set; get; }
+        public List<TextLocation> ParallelLinesLocations { set; get; }
         #endregion
 
         /// <summary>
@@ -148,10 +154,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         public static void UpdateLineParameters(this CSAModel model, FamilyInstance line, double lineHeight, double lineWidth, double space, int textCount)
         {
-            line.GetParameters(TagProperty.线高度1.ToString()).First().Set(UnitHelper.ConvertToFoot(lineHeight, AnnotationConstaints.UnitType));
-            line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(lineWidth, AnnotationConstaints.UnitType));
+            line.GetParameters(TagProperty.线高度1.ToString()).First().Set(UnitHelper.ConvertToFoot(lineHeight, VLConstraints.CurrentUnitType));
+            line.GetParameters(TagProperty.线宽度.ToString()).First().Set(UnitHelper.ConvertToFoot(lineWidth, VLConstraints.CurrentUnitType));
             line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(0);
-            line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToFoot(space, AnnotationConstaints.UnitType));
+            line.GetParameters(TagProperty.间距.ToString()).First().Set(UnitHelper.ConvertToFoot(space, VLConstraints.CurrentUnitType));
             line.GetParameters(TagProperty.文字行数.ToString()).First().Set(textCount);
         }
 
@@ -220,9 +226,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static void CalculateLocations(this CSAModel model, Element element)
         {
             var width = 200;
+            var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
             var height = 200;
-            var textSizeScale = (1 / VLConstraints.FontWidthScale) * VLConstraints.FontSizeScale;
-            var textWidthScale = textSizeScale * VLConstraints.FontWidthScale;
+            var heightFoot = UnitHelper.ConvertToFoot(height, VLUnitType.millimeter);
             XYZ parallelVector = null;//右
             XYZ verticalVector = null;//上
             var locationCurve = element.Location as LocationCurve;
@@ -235,17 +241,21 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
             }
-            //线起始点
+            model.VerticalVector = verticalVector;
+            model.ParallelVector = parallelVector;
+            //线起始点 (中点)
             model.LineStartLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
-            //文本位置
-            model.
-
-
-
-
-
-            //线终点
-            model.LineEndLocation = model.LineStartLocation + verticalVector * (height + (model.Texts.Count() - 1) *VLConstraints.CurrentFontHeight)
+            //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
+            //高度,宽度 取决于文本
+            model.ParallelLinesLocations = new List<TextLocation>();
+            for (int i = 0; i < model.Texts.Count(); i++)
+            {
+                var start = model.LineStartLocation + (heightFoot + i * VLConstraints.CurrentFontHeight) * verticalVector;
+                var end = start + widthFoot * parallelVector;
+                model.ParallelLinesLocations.Add(new TextLocation(start, end));
+            }
+            //线终点 (最高的文本位置)
+            model.LineEndLocation = model.ParallelLinesLocations[model.ParallelLinesLocations.Count - 1].Start;
         }
 
         /// <summary>
@@ -255,40 +265,40 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <returns></returns>
         public static void FetchLocations(this CSAModel model, Element element, FamilyInstance line)
         {
-            var locationCurve = element.Location as LocationCurve;
-            model.LineLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
-            XYZ parallelVector = null;
-            XYZ verticalVector = null;
-            parallelVector = (locationCurve.Curve as Line).Direction;
-            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-            double xyzTolarance = 0.01;
-            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-            {
-                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-            }
-            model.ParallelVector = parallelVector;
-            model.VerticalVector = verticalVector;
-            var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (model.Texts.Count() - 1) * AnnotationConstaints.TextHeight;
-            var textSize = PipeAnnotationContext.TextSize;
-            var widthScale = PipeAnnotationContext.WidthScale;
-            for (int i = 0; i < model.Texts.Count(); i++)
-            {
-                var textLength = System.Windows.Forms.TextRenderer.MeasureText(model.Texts[i], AnnotationConstaints.Font).Width;
-                var actualLength = textLength / (textSize * widthScale);
-                switch (model.CSALocationType)
-                {
-                    case CSALocationType.OnLine:
-                        model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
-                        break;
-                    case CSALocationType.OnEdge:
-                        model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
-                        break;
-                    default:
-                        break;
-                }
-            }
+            //var locationCurve = element.Location as LocationCurve;
+            //model.LineLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
+            //XYZ parallelVector = null;
+            //XYZ verticalVector = null;
+            //parallelVector = (locationCurve.Curve as Line).Direction;
+            //verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+            //parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            //verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            //double xyzTolarance = 0.01;
+            //if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
+            //{
+            //    verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+            //}
+            //model.ParallelVector = parallelVector;
+            //model.VerticalVector = verticalVector;
+            //var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (model.Texts.Count() - 1) * VLConstraints.TextHeight;
+            //var textSize = PipeAnnotationContext.TextSize;
+            //var widthScale = PipeAnnotationContext.WidthScale;
+            //for (int i = 0; i < model.Texts.Count(); i++)
+            //{
+            //    var textLength = System.Windows.Forms.TextRenderer.MeasureText(model.Texts[i], VLConstraints.Font).Width;
+            //    var actualLength = textLength / (textSize * widthScale);
+            //    switch (model.CSALocationType)
+            //    {
+            //        case CSALocationType.OnLine:
+            //            model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
+            //            break;
+            //        case CSALocationType.OnEdge:
+            //            model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //}
         }
 
         /// <summary>
@@ -300,7 +310,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static void RotateByXY(this LocationPoint point, XYZ xyz, XYZ verticalVector)
         {
             Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
-            if (verticalVector.X > AnnotationConstaints.MiniValueForXYZ)
+            if (verticalVector.X > VLConstraints.MiniValueForXYZ)
                 point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
@@ -315,7 +325,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static void RotateByXY(this Location point, XYZ xyz, XYZ verticalVector)
         {
             Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
-            if (verticalVector.X > AnnotationConstaints.MiniValueForXYZ)
+            if (verticalVector.X > VLConstraints.MiniValueForXYZ)
                 point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
@@ -337,7 +347,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ parallelVector = model.ParallelVector;
             XYZ verticalVector = model.VerticalVector;
             XYZ startPoint = model.LineLocation;
-            var result = startPoint + (UnitHelper.ConvertToFoot(height - i * AnnotationConstaints.TextHeight, AnnotationConstaints.UnitType)) * verticalVector
+            var result = startPoint + (UnitHelper.ConvertToFoot(height - i * VLConstraints.OrientFontHeight, VLConstraints.CurrentUnitType)) * verticalVector
             + horizontalFix * parallelVector + verizontalFix * verticalVector
             + actualLength / 25.4 * parallelVector;
             return result;
@@ -413,7 +423,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         }
         #endregion
 
-        public void Execute(CompoundStructureAnnotationWindow window, CompoundStructureAnnotationSet set, UIDocument uiDoc)
+        public void Execute(CompoundStructureAnnotationWindow window, PmSoft.Optimization.DrawingProduction.CompoundStructureAnnotationSet set, UIDocument uiDoc)
         {
             switch (ViewType)
             {
@@ -457,29 +467,34 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
                         #region 线生成
                         Model.CalculateLocations(element);//计算内容定位
+                        List<Line> lines = new List<Line>();
+                        lines.Add(Line.CreateBound(Model.LineStartLocation, Model.LineEndLocation));
+                        foreach (var parallelLinesLocation in Model.ParallelLinesLocations)
+                        {
+                            lines.Add( Line.CreateBound(parallelLinesLocation.Start, parallelLinesLocation.End));
+                        }
+                        foreach (var line in lines)
+                        {
+                            doc.Create.NewModelCurve(line, VLConstraints.UIDoc.ActiveView.SketchPlane);
+                        }
 
-
-
-
-
-
-                        var lineFamilySymbol = CSAConstraints.GetMultipleTagSymbol(doc);//获取线标注类型
-                        var line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
-                        Model.FetchLocations(element, line);//计算内容定位
-                        var targetLocation = Model.LineLocation;
-                        var lineLocation = Model.LineLocation;
-                        var textLocations = Model.TextLocations;
-                        ElementTransformUtils.MoveElement(doc, line.Id, lineLocation);//线定位
-                        LocationPoint locationPoint = line.Location as LocationPoint;//线 旋转处理
-                        locationPoint.RotateByXY(lineLocation, Model.VerticalVector);
-                        Model.LineId = line.Id;
-                        Model.UpdateLineParameters(line, 500, 200, AnnotationConstaints.TextHeight, Model.Texts.Count());//线参数设置 
+                        //var lineFamilySymbol = CSAConstraints.GetMultipleTagSymbol(doc);//获取线标注类型
+                        //var line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
+                        //Model.FetchLocations(element, line);//计算内容定位
+                        //var targetLocation = Model.LineLocation;
+                        //var lineLocation = Model.LineLocation;
+                        //var textLocations = Model.TextLocations;
+                        //ElementTransformUtils.MoveElement(doc, line.Id, lineLocation);//线定位
+                        //LocationPoint locationPoint = line.Location as LocationPoint;//线 旋转处理
+                        //locationPoint.RotateByXY(lineLocation, Model.VerticalVector);
+                        //Model.LineId = line.Id;
+                        //Model.UpdateLineParameters(line, 500, 200, VLConstraints.OrientFontHeight, Model.Texts.Count());//线参数设置 
                         #endregion
 
                         List<TextNote> textNotes = new List<TextNote>();
                         foreach (var text in Model.Texts)//生成 文本
                         {
-                            var textLocation = textLocations[Model.Texts.IndexOf(text)];
+                            var textLocation = Model.ParallelLinesLocations[Model.Texts.IndexOf(text)].Start;
                             var textNote = TextNote.Create(doc, doc.ActiveView.Id, textLocation, text, Model.TextNoteTypeElementId);
                             textNotes.Add(textNote);
                             textNote.Location.RotateByXY(textLocation, Model.VerticalVector);

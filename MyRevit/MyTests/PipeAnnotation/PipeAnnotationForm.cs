@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
+using MyRevit.MyTests.PipeAnnotationTest;
 using PmSoft.Common.CommonClass;
 using PmSoft.Common.Controls;
 using PmSoft.Optimization.DrawingProduction.Utils;
@@ -921,7 +922,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public PipeAnnotationUIData Parent { set; get; }
         public bool NeedLeader { set; get; }
         public int LengthFromLine_Milimeter { set; get; }
-        public double LengthFromLine_Inch { get { return UnitHelper.ConvertToFoot(LengthFromLine_Milimeter, UnitType.millimeter); } }
+        public double LengthFromLine_Inch { get { return UnitHelper.ConvertToFoot(LengthFromLine_Milimeter, VLUnitType.millimeter); } }
         public SinglePipeTagLocation Location { set; get; }
 
         public SinglePipeAnnotationSettings(PipeAnnotationUIData parent)
@@ -970,7 +971,7 @@ namespace PmSoft.Optimization.DrawingProduction
     {
         public PipeAnnotationUIData Parent { set; get; }
         public int LengthBetweenPipe_Milimeter { set; get; }
-        public double LengthBetweenPipe_Inch { get { return UnitHelper.ConvertToFoot(LengthBetweenPipe_Milimeter, UnitType.millimeter); } }
+        public double LengthBetweenPipe_Inch { get { return UnitHelper.ConvertToFoot(LengthBetweenPipe_Milimeter, VLUnitType.millimeter); } }
         public MultiPipeTagLocation Location { set; get; }
 
         public MultiPipeAnnotationSettings(PipeAnnotationUIData parent)
@@ -987,7 +988,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public bool AutoPreventCollision { set; get; }
         public bool FilterVertical { set; get; }
         public int MinLength_Milimeter { set; get; }
-        public double MinLength_Inch { get { return UnitHelper.ConvertToFoot(MinLength_Milimeter, UnitType.millimeter); } }
+        public double MinLength_Inch { get { return UnitHelper.ConvertToFoot(MinLength_Milimeter, VLUnitType.millimeter); } }
     }
     #endregion
 }

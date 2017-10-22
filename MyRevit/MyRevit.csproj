@@ -92,11 +92,13 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>..\..\..\..\..\WorkTools\Revit\Revit 2016\RevitAPI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\Revit2016\Revit 2016\RevitAPI.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="RevitAPIUI">
-      <HintPath>..\..\..\..\..\WorkTools\Revit\Revit 2016\RevitAPIUI.dll</HintPath>
+    <Reference Include="RevitAPIUI, Version=16.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Revit2016\Revit 2016\RevitAPIUI.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -157,14 +159,14 @@
     <Compile Include="MyTests\PipeAnnotation\AvoidData.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategy.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_MoveLeft.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_MoveRight.cs" />
+    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_None.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategyFactory.cs" />
     <Compile Include="MyTests\PipeAnnotation\DelegateHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\ExtensibleStorageHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\FamilySymbolHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
-    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_None.cs" />
-    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_MoveRight.cs" />
-    <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_MoveLeft.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationCmd.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationContext.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationEntity.cs" />

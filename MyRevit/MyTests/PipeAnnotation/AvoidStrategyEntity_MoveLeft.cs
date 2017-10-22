@@ -13,7 +13,7 @@ namespace MyRevit.MyTests.PipeAnnotation
 
         public override bool TryAvoid()
         {
-            if (PipeAnnotationTest.UnitHelper.ConvertToInch(Data.LeftSpace, PipeAnnotationTest.UnitType.millimeter) < OffsetLength)
+            if (PipeAnnotationTest.UnitHelper.ConvertToInch(Data.LeftSpace, PipeAnnotationTest.VLUnitType.millimeter) < OffsetLength)
                 return false;
 
             Data.TemporaryTriangle = new Triangle(Data.CurrentTriangle, GetSideVector());

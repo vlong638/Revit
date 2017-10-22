@@ -15,3 +15,12 @@ E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Properties.Re
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.exe
 E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.pdb
+G:\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.exe.config
+G:\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.exe
+G:\Repository\Git\Revit\MouseHook\bin\Debug\MouseHook.pdb
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csprojResolveAssemblyReference.cache
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Form1.resources
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Properties.Resources.resources
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csproj.GenerateResource.Cache
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.exe
+G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.pdb
