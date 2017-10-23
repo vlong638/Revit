@@ -4,7 +4,7 @@
 library
 C#
 .cs
-G:\Repository\Git\Revit\MyRevit\obj\Debug\
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\
 MyRevit
 none
 false
@@ -13,7 +13,7 @@ DEBUG;TRACE
 2-1177554569
 191886786941
 150-1188649252
-34-1774150424
+341196855730
 MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
 
 False
