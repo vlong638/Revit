@@ -75,8 +75,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 textNoteTypeElementId = value;
                 var textNoteType = VLConstraints.Doc.GetElement(textNoteTypeElementId) as TextNoteType;
-                VLConstraints.CurrentFontSizeScale= UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(),VLUnitType.millimeter);//文本大小
-                VLConstraints.CurrentFontWidthScale= textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
+                VLConstraints.CurrentFontSizeScale = UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(), VLUnitType.millimeter);//文本大小
+                VLConstraints.CurrentFontWidthScale = textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
             }
         }
         private ElementId textNoteTypeElementId = null;
@@ -342,7 +342,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <param name="i">第几个标注文字</param>
         /// <param name="actualLength">文本长度</param>
         /// <returns></returns>
-        private static XYZ GetTagHeadPositionWithParam(CSAModel model,  double height, double horizontalFix, double verizontalFix, int i, double actualLength)
+        private static XYZ GetTagHeadPositionWithParam(CSAModel model, double height, double horizontalFix, double verizontalFix, int i, double actualLength)
         {
             XYZ parallelVector = model.ParallelVector;
             XYZ verticalVector = model.VerticalVector;
@@ -409,7 +409,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             get { return LocationType == CSALocationType.OnEdge; }
             set { if (value) LocationType = CSALocationType.OnEdge; }
-        } 
+        }
 
         public List<TextNoteType> TextNoteTypes { get { return Model.GetTextNoteTypes(); } }
         public ElementId TextNoteTypeElementId
@@ -478,7 +478,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         lines.Add(Line.CreateBound(Model.LineStartLocation, Model.LineEndLocation));
                         foreach (var parallelLinesLocation in Model.ParallelLinesLocations)
                         {
-                            lines.Add( Line.CreateBound(parallelLinesLocation.Start, parallelLinesLocation.End));
+                            lines.Add(Line.CreateBound(parallelLinesLocation.Start, parallelLinesLocation.End));
                         }
                         foreach (var line in lines)
                         {
