@@ -26,7 +26,7 @@
         </Grid.CommandBindings>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <TextBlock Margin="10" Text="文字样式:"/>
-            <ComboBox Width="100" ItemsSource="{Binding TextNoteTypes}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding TextNoteTypeElementId}" SelectedIndex="0"/>
+            <ComboBox Width="100" ItemsSource="{Binding TextNoteTypes}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding TextNoteTypeElementId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <RadioButton Content="文字在线端" IsChecked="{Binding IsOnEdge}" Width="76"/>

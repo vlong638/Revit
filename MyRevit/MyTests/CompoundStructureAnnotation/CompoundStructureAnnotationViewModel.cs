@@ -414,7 +414,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public List<TextNoteType> TextNoteTypes { get { return Model.GetTextNoteTypes(); } }
         public ElementId TextNoteTypeElementId
         {
-            get { return Model.TextNoteTypeElementId; }
+            get
+            {
+                if (Model.TextNoteTypeElementId == null)
+                {
+                    Model.TextNoteTypeElementId = TextNoteTypes.FirstOrDefault().Id;
+                }
+                return Model.TextNoteTypeElementId;
+            }
             set
             {
                 Model.TextNoteTypeElementId = value;
