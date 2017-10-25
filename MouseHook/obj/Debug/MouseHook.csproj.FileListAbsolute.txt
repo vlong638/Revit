@@ -24,3 +24,4 @@ G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.Properties.Resources.resou
 G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csproj.GenerateResource.Cache
 G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.exe
 G:\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.pdb
+E:\WorkingSpace\Repository\Git\Revit\MouseHook\obj\Debug\MouseHook.csprojResolveAssemblyReference.cache

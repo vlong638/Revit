@@ -25,16 +25,16 @@
             <CommandBinding Command="ApplicationCommands.Close" Executed="CommandBinding_Executed_Close" />
         </Grid.CommandBindings>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Margin="10,10,0,0" Text="文字样式:"/>
-            <ComboBox Width="140" ItemsSource="{Binding TextNoteTypes}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding TextNoteTypeElementId,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Margin="10,12,0,0" Text="文字样式:"/>
+            <ComboBox Width="140" ItemsSource="{Binding TextNoteTypes}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding TextNoteTypeElementId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <RadioButton Content="文字在线端" IsChecked="{Binding IsOnEdge}" Width="86" Margin="30,10,0,0"/>
             <RadioButton Content="文字在线上" IsChecked="{Binding IsOnLine}"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <Button x:Name="Btn_Submit" Content="选择墙,板,屋顶" Command="ApplicationCommands.New" Width="100" Margin="30,10,10,10"/>
-            <Button x:Name="Btn_Cancel" Content="取消" Command="ApplicationCommands.Close"/>
+            <Button x:Name="Btn_Submit" Content="选择墙,板,屋顶" Command="ApplicationCommands.New" Width="100" Margin="30,0,0,0"/>
+            <Button x:Name="Btn_Cancel" Content="取消" Command="ApplicationCommands.Close" Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>
 </Window>

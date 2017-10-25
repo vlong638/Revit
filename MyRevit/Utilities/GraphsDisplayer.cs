@@ -97,6 +97,32 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         //    GraphicsDisplayer.SaveTo(path);
         //}
         #endregion
+
+        #region 结构做法标注
+        public static void Display(string path,  List<Line> lines, List<XYZ> textLocations)
+        {
+            if (lines.Count() == 0)
+                return;
+
+            var uncross = new Pen(Brushes.LightGray);
+            var cross = new Pen(Brushes.Red);
+            var self = new Pen(Brushes.Black);
+            var maxX = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.X));
+            var minX = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.X));
+            var maxY = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.Y));
+            var minY = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.Y));
+            minX--;
+            minY--;
+            maxX++;
+            maxY++;
+            var offSetX = -minX;
+            var offSetY = -minY;
+            var graphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            graphicsDisplayer.DisplayLines(lines, uncross, true, true);
+            graphicsDisplayer.DisplayPoints(textLocations, Pens.Red, true);
+            graphicsDisplayer.SaveTo(path);
+        }
+        #endregion
     }
 
     public class GraphicsDisplayer
@@ -223,7 +249,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         /// <returns></returns>
         private System.Drawing.Point GetPoint(XYZ c, int offsetX = 0, int offsetY = 0)
         {
-            return new System.Drawing.Point((int)(Math.Round(c.X, 0) + OffsetX) * Scale + PaddingX + offsetX, Height - ((int)Math.Round(c.Y, 0) + OffsetY) * Scale + PaddingY + offsetY);
+            return new System.Drawing.Point((int)Math.Round(c.X * Scale, 0) + OffsetX * Scale + PaddingX + offsetX, Height - (int)Math.Round(c.Y * Scale, 0) - OffsetY * Scale + PaddingY + offsetY);
         }
 
         /// <summary>

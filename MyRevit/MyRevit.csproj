@@ -145,6 +145,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="MyTests\CompoundStructureAnnotation\CommandOfCompoundStructureAnnotation.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CommandOfCSAUpdater_Edit.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationContext.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationUpdater_Edit.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationViewModel.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml.cs">
       <DependentUpon>CompoundStructureAnnotationWindow.xaml</DependentUpon>

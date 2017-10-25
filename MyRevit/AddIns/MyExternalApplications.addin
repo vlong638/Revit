@@ -4,7 +4,7 @@
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <AddInId>B593F2C4-F38C-41D7-AE2C-369BB0149D90</AddInId>
     <Name>VLApplication</Name>
-    <FullClassName>MyRevit.Entities.MyExternalApplication</FullClassName>
+    <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfCSAUpdater_Edit</FullClassName>
     <VendorId>VL</VendorId>
   </AddIn>
 </RevitAddIns>
