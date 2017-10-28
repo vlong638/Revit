@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.PipeAnnotationTest;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,7 +41,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 foreach (var changeId in edits)
                 {
                     CSAModel model = null;
-
+                    if (VLConstraints.Doc==null)
+                        VLConstraints.Doc=document;
                     #region 根据Target重新生成
                     var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == changeId.IntegerValue);
                     if (targetMoved != null)
@@ -81,42 +83,55 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         if (model.Texts[index] != newText)
                         {
                             CompoundStructure compoundStructure = null;
+                            HostObjAttributes hoster = null;
                             if (target is Wall)
-                                compoundStructure = (target as Wall).WallType.GetCompoundStructure();
+                            {
+                                hoster = (HostObjAttributes)((target as Wall).WallType);
+                                compoundStructure = hoster.GetCompoundStructure();
+                            }
                             if (target is Floor)
-                                compoundStructure = (target as Floor).FloorType.GetCompoundStructure();
+                            {
+                                hoster = (HostObjAttributes)((target as Floor).FloorType);
+                                compoundStructure = hoster.GetCompoundStructure();
+                            }
                             if (target is RoofBase)//屋顶有多种类型
-                                compoundStructure = (target as RoofBase).RoofType.GetCompoundStructure();
+                            {
+                                hoster = (HostObjAttributes)((target as RoofBase).RoofType);
+                                compoundStructure = hoster.GetCompoundStructure();
+                            }
                             if (compoundStructure == null)
                                 throw new NotImplementedException("关联更新失败,未获取有效的CompoundStructure类型");
                             var layers = compoundStructure.GetLayers();
-                            string pattern = @"[\d+,\.]+(.+)[\n]+";
+                            string pattern = @"([\d+\.]+)毫米,(.+)[\r]?";
                             Regex regex = new Regex(pattern);
                             var match = regex.Match(newText);
                             if (!match.Success)
                                 return;
-                            var materialName = match.Groups[1].Value;
+                            var length = match.Groups[1].Value;
+                            var lengthFoot = UnitHelper.ConvertToFoot(Convert.ToDouble(length), VLUnitType.millimeter);
+                            var materialName = match.Groups[2].Value;
                             var material = new FilteredElementCollector(document).OfClass(typeof(Material))
                                 .FirstOrDefault(c => c.Name == materialName);
                             if (material==null)
                                 return;
-                            //无效
-                            //var layer = layers[index];
-                            //compoundStructure.SetMaterialId(index, material.Id);
+                            //更新
+                            layers[index].Width = lengthFoot;
+                            layers[index].MaterialId = material.Id;
+                            compoundStructure.SetLayers(layers);
+                            hoster.SetCompoundStructure(compoundStructure);
 
-                            //无效
-                            //layers[index].MaterialId = material.Id;
-                            //compoundStructure.SetLayers(layers);
-
-                            //报错This operation is valid only for non-vertically compound structures
-                            var layer = layers[index];
-                            layer.MaterialId = material.Id;
-                            compoundStructure.SetLayer(index, layer);
+                            ////报错This operation is valid only for non-vertically compound structures
+                            //layer = layers[index];
+                            //layer.MaterialId = material.Id;
+                            ////compoundStructure.SetLayer(index, layer);
                         }
-                        //文本偏移处理
-                        //var index = model.TextNoteIds.IndexOf(changeId);
-                        //var offset = (document.GetElement(changeId) as TextNote).Coord - model.TextLocations[index];
-                        //CompoundStructureAnnotationContext.Creater.Regenerate(document, model, target, offset);
+                        else
+                        {
+                            //文本偏移处理
+                            //var index = model.TextNoteIds.IndexOf(changeId);
+                            //var offset = (document.GetElement(changeId) as TextNote).Coord - model.TextLocations[index];
+                            //CompoundStructureAnnotationContext.Creater.Regenerate(document, model, target, offset);
+                        }
                         movedEntities.Add(model.TargetId.IntegerValue);
                         CompoundStructureAnnotationContext.IsEditing = true;
                     }

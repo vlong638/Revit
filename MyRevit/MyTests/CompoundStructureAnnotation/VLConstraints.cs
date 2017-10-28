@@ -7,14 +7,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
     class VLConstraints
     {
-        public static Document Doc { private set; get; }
-        public static UIDocument UIDoc { private set; get; }
-
-        public static void InitByDocument(UIDocument uidoc)
-        {
-            UIDoc = uidoc;
-            Doc = UIDoc.Document;
-        }
+        public static Document Doc { set; get; }
 
         public static VLUnitType CurrentUnitType = VLUnitType.millimeter;
         public static double MiniValueForXYZ = 0.001;

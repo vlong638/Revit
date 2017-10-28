@@ -51,11 +51,86 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public XYZ Start { set; get; }
         public XYZ End { set; get; }
     }
+    public enum TargetType
+    {
+        Wall,
+        Floor,
+        RoofBase,
+    }
+    public static class TargetTypeEx
+    {
+        public static Line GetLine(this TargetType targetType, Element element)
+        {
+            switch (targetType)
+            {
+                case TargetType.Wall:
+                    return (element.Location as LocationCurve).Curve as Line;
+                case TargetType.Floor:
+                case TargetType.RoofBase:
+                    var option = new Options() { View = VLConstraints.Doc.ActiveView };
+                    var geometry = element.get_Geometry(option);
+                    var geometryElements = geometry as GeometryElement;
+                    var solid = geometryElements.FirstOrDefault() as Solid;
+                    if (solid == null)
+                        throw new NotImplementedException("实体与预期不一致");
+                    List<Face> faces = new List<Face>();
+                    foreach (Face face in solid.Faces)
+                    {
+                        //矩形面
+                        var planarFace = face as PlanarFace;
+                        if (planarFace != null)
+                        {
+                            if (planarFace.FaceNormal.Z > 0)
+                                faces.Add(face);
+                        }
+                    }
+                    //选出
+                    Line topLine = null;
+                    topLine = GetTopLine(faces);
+                    var z = VLConstraints.Doc.ActiveView.SketchPlane.GetPlane().Origin.Z;
+                    XYZ p1 = topLine.GetEndPoint(0);
+                    XYZ p2 = topLine.GetEndPoint(1);
+                    return Line.CreateBound(new XYZ(p1.X, p1.Y, z), new XYZ(p2.X, p2.Y, z));
+                default:
+                    throw new NotImplementedException("该类型暂不支持");
+            }
+        }
+
+        private static Line GetTopLine(List<Face> faces)
+        {
+            Line topLine = null;
+            double weightY = double.MinValue;//Revit中 从上到下 Y递减 上大
+            double weightX = double.MaxValue;//Revit中 从左到右 X递增 右大
+            foreach (var face in faces)
+            {
+                foreach (EdgeArray edgeLoop in face.EdgeLoops)
+                {
+                    foreach (Edge edge in edgeLoop)
+                    {
+                        var points = edge.Tessellate();
+                        for (int i = 0; i <= points.Count - 2; i++)
+                        {
+                            var currentWeightY = points[i].Y + points[i + 1].Y;
+                            var currentWeightX = points[i].X + points[i + 1].X;
+                            if (currentWeightY > weightY || (currentWeightY == weightY && currentWeightX < weightX))
+                            {
+                                topLine = Line.CreateBound(points[i], points[i + 1]);
+                                weightY = currentWeightY;
+                                weightX = currentWeightX;
+                            }
+                        }
+                    }
+                }
+            }
+            PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\1028轮廓.png", faces);
+            return topLine;
+        }
+    }
 
     /// <summary>
     /// CompoundStructureAnnotation数据的载体
     /// </summary>
-    public class CSAModel: ModelBase<CSAModel>
+    public class CSAModel : ModelBase<CSAModel>
     {
         public CSAModel(string data = "") : base(data)
         {
@@ -137,6 +212,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #endregion
 
         #region 无需留存的数据
+        public TargetType TargetType { set; get; }
         /// <summary>
         /// 文字样式
         /// </summary>
@@ -182,11 +258,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #endregion
 
         #region 方法
-        public void UpdateVectors( LocationCurve locationCurve)
+        public void UpdateVectors(Line locationCurve)
         {
             XYZ parallelVector = null;
             XYZ verticalVector = null;
-            parallelVector = (locationCurve.Curve as Line).Direction;
+            parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
             parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
             verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
@@ -207,15 +283,15 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
             var heightFoot = UnitHelper.ConvertToFoot(height, VLUnitType.millimeter);
             var verticalFix = UnitHelper.ConvertToFoot(100, VLUnitType.millimeter) * scale;
-            var locationCurve = element.Location as LocationCurve;
+            var locationCurve = TargetType.GetLine(element);
             UpdateVectors(locationCurve);
             //线起始点 (中点)
-            LineStartLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
+            LineStartLocation = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
             //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
             //高度,宽度 取决于文本 
             ParallelLinesLocations = new List<TextLocation>();
             TextLocations = new List<XYZ>();
-            for (int i = 0; i < Texts.Count(); i++)
+            for (int i = Texts.Count() - 1; i >= 0; i--)
             {
                 var start = LineStartLocation + (heightFoot + i * VLConstraints.CurrentFontHeight) * VerticalVector;
                 var end = start + widthFoot * ParallelVector;
@@ -223,7 +299,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 TextLocations.Add(CSALocationType.GetTextLocation(verticalFix, VerticalVector, start, end));
             }
             //线终点 (最高的文本位置)
-            LineEndLocation = ParallelLinesLocations[ParallelLinesLocations.Count - 1].Start;
+            LineEndLocation = ParallelLinesLocations[0].Start;
         }
 
         public void CalculateLocations(Element element)
@@ -285,14 +361,17 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             if (element is Wall)
             {
                 compoundStructure = (element as Wall).WallType.GetCompoundStructure();
+                model.TargetType = TargetType.Wall;
             }
             else if (element is Floor)
             {
                 compoundStructure = (element as Floor).FloorType.GetCompoundStructure();
+                model.TargetType = TargetType.Floor;
             }
-            else if (element is ExtrusionRoof)//TODO 屋顶有多种类型
+            else if (element is RoofBase)//TODO 屋顶有多种类型
             {
-                compoundStructure = (element as ExtrusionRoof).RoofType.GetCompoundStructure();
+                compoundStructure = (element as RoofBase).RoofType.GetCompoundStructure();
+                model.TargetType = TargetType.RoofBase;
             }
             else
             {
@@ -313,12 +392,15 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             var texts = new List<string>();
             foreach (var layer in layers)
             {
-                if (layer.MaterialId.IntegerValue < 0)
-                    continue;
+                string name = "";
+                //if (layer.MaterialId.IntegerValue < 0)
+                //    name="未设置";
                 var material = doc.GetElement(layer.MaterialId);
                 if (material == null)
-                    continue;
-                texts.Add(layer.Width + doc.GetElement(layer.MaterialId).Name);
+                    name = "未设置";
+                else
+                    name = doc.GetElement(layer.MaterialId).Name;
+                texts.Add(UnitHelper.ConvertFromFootTo(layer.Width, VLUnitType.millimeter) + "毫米," + name);
             }
             model.Texts = texts;
             return texts;
@@ -382,28 +464,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
         }
-
-
-        ///// <summary>
-        ///// 获取OnLineEdge方案的标注点位
-        ///// </summary>
-        ///// <param name="model">模型数据</param>
-        ///// <param name="height">线高度</param>
-        ///// <param name="horizontalFix">对应策略的水平修正</param>
-        ///// <param name="verizontalFix">对应策略的垂直修正</param>
-        ///// <param name="i">第几个标注文字</param>
-        ///// <param name="actualLength">文本长度</param>
-        ///// <returns></returns>
-        //private static XYZ GetTagHeadPositionWithParam(CSAModel model, double height, double horizontalFix, double verizontalFix, int i, double actualLength)
-        //{
-        //    XYZ parallelVector = model.ParallelVector;
-        //    XYZ verticalVector = model.VerticalVector;
-        //    XYZ startPoint = model.LineLocation;
-        //    var result = startPoint + (UnitHelper.ConvertToFoot(height - i * VLConstraints.OrientFontHeight, VLConstraints.CurrentUnitType)) * verticalVector
-        //    + horizontalFix * parallelVector + verizontalFix * verticalVector
-        //    + actualLength / 25.4 * parallelVector;
-        //    return result;
-        //}
     }
 
 
@@ -501,7 +561,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         MouseHook.InstallHook(PmSoft.Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
                         try
                         {
-                            Model.TargetId = uiDoc.Selection.PickObject(ObjectType.Element, new ClassFilter(typeof(Wall))).ElementId;
+                            Model.TargetId = uiDoc.Selection.PickObject(ObjectType.Element
+                                , new ClassesFilter(false, typeof(Wall), typeof(Floor), typeof(ExtrusionRoof), typeof(FootPrintRoof))).ElementId;
                             MouseHook.UninstallHook();
                             ViewType = CSAViewType.Generate;
                         }
@@ -517,16 +578,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     if (TransactionHelper.DelegateTransaction(doc, "生成结构标注", (Func<bool>)(() =>
                     {
                         var element = doc.GetElement(Model.TargetId);
-                        CompoundStructure compoundStructure = Model.GetCompoundStructure(element);//获取文本载体
-                        if (compoundStructure == null)
-                            return false;
-                        var texts = Model.FetchTextsFromCompoundStructure(doc, compoundStructure);//获取文本数据
-                        if (texts.Count == 0)
-                            return false;
-
                         var Collection = CompoundStructureAnnotationContext.GetCollection(doc);
-                        if (Collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue) != null)
-                            return false;
+                        //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
+                        //if (Collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue) != null)
+                        //    return false;
                         CompoundStructureAnnotationContext.Creater.Generate(doc, Model, element);
                         Collection.Data.Add(Model);
                         Collection.Save(doc);
@@ -554,6 +609,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
         private void Generate(Document doc, CSAModel model, Element element, XYZ offset)
         {
+            CompoundStructure compoundStructure = model.GetCompoundStructure(element);//获取文本载体
+            if (compoundStructure == null)
+                return;
+            var texts = model.FetchTextsFromCompoundStructure(doc, compoundStructure);//获取文本数据
+            if (texts.Count == 0)
+                return;
             //主体
             model.TargetId = element.Id;
             //线生成
@@ -565,7 +626,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             model.LineIds = new List<ElementId>();
             foreach (var line in lines)
             {
-                var lineElement = doc.Create.NewModelCurve(line, VLConstraints.UIDoc.ActiveView.SketchPlane);
+                var lineElement = doc.Create.NewModelCurve(line, VLConstraints.Doc.ActiveView.SketchPlane);
                 model.LineIds.Add(lineElement.Id);
             }
             //文本生成
@@ -584,7 +645,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
         internal void Regenerate(Document doc, CSAModel model, Element target)
         {
-            CompoundStructureAnnotationContext.Creater.Regenerate(doc, model, target, new XYZ(0,0,0));
+            CompoundStructureAnnotationContext.Creater.Regenerate(doc, model, target, new XYZ(0, 0, 0));
         }
 
         internal void Regenerate(Document doc, CSAModel model, Element target, XYZ offset)
@@ -601,6 +662,18 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 if (doc.GetElement(item) != null)
                     doc.Delete(item);
             Generate(doc, model, target, offset);
+        }
+
+        internal void Clear(Document doc, CSAModel model)
+        {
+            //删除线
+            foreach (var item in model.LineIds)
+                if (doc.GetElement(item) != null)
+                    doc.Delete(item);
+            //删除标注
+            foreach (var item in model.TextNoteIds)
+                if (doc.GetElement(item) != null)
+                    doc.Delete(item);
         }
     }
 }

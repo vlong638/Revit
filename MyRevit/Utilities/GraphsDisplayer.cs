@@ -49,6 +49,109 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 bounding.Max - new XYZ(0, (bounding.Max - bounding.Min).Y, 0),
             };
         }
+
+        internal static void Display(string path,List<Face> faces)
+        {
+            List<Line> lines = new List<Line>();
+            List<Edge> edges = new List<Edge>();
+            foreach (var face in faces)
+            {
+                foreach (EdgeArray edgeLoop in face.EdgeLoops)
+                {
+                    var points = GetPoints(edgeLoop);
+                    for (int i = 0; i < points.Count - 1; i++)
+                        lines.Add(Line.CreateBound(points[i], points[i + 1]));
+                    lines.Add(Line.CreateBound(points[points.Count - 1], points[0]));
+                }
+            }
+
+            if (lines.Count() == 0)
+                return;
+
+            var uncross = new Pen(Brushes.LightGray);
+            var cross = new Pen(Brushes.Red);
+            var self = new Pen(Brushes.Black);
+            var maxX = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.X));
+            var minX = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.X));
+            var maxY = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.Y));
+            var minY = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.Y));
+            var offSetX = -minX;
+            var offSetY = -minY;
+            var graphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            graphicsDisplayer.DisplayLines(lines, uncross, false, true);
+            graphicsDisplayer.SaveTo(path);
+        }
+
+        /// <summary>
+        /// 获取边的所有点
+        /// </summary>
+        /// <param name="edgeArray"></param>
+        /// <returns></returns>
+        /// <summary>
+        static List<XYZ> GetPoints(EdgeArray edgeArray)
+        {
+            List<XYZ> points = new List<XYZ>();
+            List<List<XYZ>> pointsCollectionToDeal = new List<List<XYZ>>();
+            foreach (Edge edge in edgeArray)
+            {
+                pointsCollectionToDeal.Add(edge.Tessellate().ToList());
+            }
+            while (pointsCollectionToDeal.Count > 1)
+            {
+                var current = pointsCollectionToDeal[0];
+                if (points.Count == 0)
+                {
+                    foreach (var point in current)
+                    {
+                        points.Add(point);
+                    }
+                }
+                else
+                {
+                    if (points.Last().VL_XYZEqualTo(current.First()))
+                    {
+                        for (int i = 1; i < current.Count(); i++)
+                        {
+                            var point = current[i];
+                            points.Add(point);
+                        }
+                    }
+                    else if (points.First().VL_XYZEqualTo(current.First()))
+                    {
+                        for (int i = 1; i < current.Count(); i++)
+                        {
+                            var point = current[i];
+                            points.Insert(0, point);
+                        }
+                    }
+                    else if (points.Last().VL_XYZEqualTo(current.Last()))
+                    {
+                        for (int i = current.Count() - 2; i >= 0; i--)
+                        {
+                            var point = current[i];
+                            points.Add(point);
+                        }
+                    }
+                    else if (points.First().VL_XYZEqualTo(current.Last()))
+                    {
+                        for (int i = current.Count() - 2; i >= 0; i--)
+                        {
+                            var point = current[i];
+                            points.Insert(0, point);
+                        }
+                    }
+                    else
+                    {
+                        var temp = pointsCollectionToDeal[0];
+                        pointsCollectionToDeal.RemoveAt(0);
+                        pointsCollectionToDeal.Add(temp);
+                        continue;
+                    }
+                }
+                pointsCollectionToDeal.RemoveAt(0);
+            }
+            return points;
+        }
         #endregion
 
         #region 梁齐板分析支持
