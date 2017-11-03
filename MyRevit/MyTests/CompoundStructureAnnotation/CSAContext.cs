@@ -19,12 +19,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static string PropertySplitter = "~";
         public static char PropertySplitter_Char = '~';
 
-        public ModelBase(string data)
+        public ModelBase()
         {
-            FromData(data);
         }
 
-        public abstract void FromData(string data);
+        public abstract bool FromData(string data);
         public abstract string ToData();
     }
 
@@ -46,15 +45,15 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// 存储对象集合
     /// </summary>
-    public class CSAModelCollection:CollectionBase<CSAModel>
+    public class CSAModelCollection:CollectionBase<CSAModelForFamilyInstance>
     {
         public CSAModelCollection(string data) : base(data)
         {
         }
 
-        public override List<CSAModel> FromData(string dataStr)
+        public override List<CSAModelForFamilyInstance> FromData(string dataStr)
         {
-            List<CSAModel> models = new List<CSAModel>();
+            List<CSAModelForFamilyInstance> models = new List<CSAModelForFamilyInstance>();
             if (string.IsNullOrEmpty(dataStr))
                 return models;
             var entityStrs = dataStr.Split(EntitySplitter_Char);
@@ -62,7 +61,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 if (string.IsNullOrEmpty(entityStr))
                     continue;
-                models.Add(new CSAModel(entityStr));
+                var model = new CSAModelForFamilyInstance();
+                if (model.FromData(entityStr))
+                    models.Add(model);
             }
             return models;
         }
@@ -78,7 +79,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <param name="doc"></param>
         public void Save(Document doc)
         {
-            CompoundStructureAnnotationContext.SaveCollection(doc);
+            CSAContext.SaveCollection(doc);
         }
     }
 
@@ -96,7 +97,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public string FieldOfSetting { get { return "CompoundStructureAnnotation_Settings"; } }
     }
 
-    class CompoundStructureAnnotationContext
+    class CSAContext
     {
         public static bool IsEditing;
         private static CSAModelCollection Collection;

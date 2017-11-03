@@ -146,7 +146,7 @@
     </Page>
     <Compile Include="MyTests\CompoundStructureAnnotation\CommandOfCompoundStructureAnnotation.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CommandOfCSAUpdater.cs" />
-    <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationContext.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CSAContext.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationUpdater_Delete.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationUpdater_Edit.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationViewModel.cs" />

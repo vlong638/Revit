@@ -25,7 +25,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 var doc = updateData.GetDocument();
                 var deletes = updateData.GetDeletedElementIds();
-                var collection = CompoundStructureAnnotationContext.GetCollection(doc);
+                var collection = CSAContext.GetCollection(doc);
                 if (deletes.Count == 0)
                     return;
                 bool isDeleted = false;
@@ -37,13 +37,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     if (itemToDelete != null)
                     {
                         collection.Data.Remove(itemToDelete);
-                        var creater = CompoundStructureAnnotationContext.Creater;
+                        var creater = CSAContext.Creater;
                         creater.Clear(doc, itemToDelete);
                         isDeleted = true;
                     }
                 }
                 if (isDeleted)
-                    CompoundStructureAnnotationContext.SaveCollection(doc);
+                    CSAContext.SaveCollection(doc);
             }
             catch (Exception ex)
             {
