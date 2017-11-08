@@ -96,6 +96,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
         }
 
+        /// <summary>
+        /// 根据Y优先上面 X次优先左面的方案取附着线
+        /// </summary>
+        /// <param name="faces"></param>
+        /// <returns></returns>
         private static Line GetTopLine(List<Face> faces)
         {
             Line topLine = null;
@@ -153,29 +158,21 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         public List<ElementId> TextNoteIds { set; get; }
         /// <summary>
-        /// 线起点
-        /// </summary>
-        public XYZ LineLocation { set; get; }
-        /// <summary>
-        /// 线高度
-        /// </summary>
-        public double LineHeight { set; get; }
-        /// <summary>
-        /// 线宽度
-        /// </summary>
-        public double LineWidth { set; get; }
-        /// <summary>
         /// 文字 定位方案
         /// </summary>
         public CSALocationType CSALocationType { set; get; }
         /// <summary>
-        /// 文本高度
+        /// 字体的毫米数
         /// </summary>
-        public double TextHeight { set; get; }
+        public double FontScale { get; set; }
         /// <summary>
-        /// 文本间距
+        /// 字体高度高度 由基础基础字体高度/4*FontScale得出
         /// </summary>
-        public double LineSpace { set; get; }
+        public double LineHeight { set; get; }
+        /// <summary>
+        /// 线起点 在附着体上
+        /// </summary>
+        public XYZ LineLocation { set; get; }
         /// <summary>
         /// 需要显示的结构标注信息
         /// </summary>
@@ -186,38 +183,26 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             if (string.IsNullOrEmpty(data))
                 return false;
             var values = data.Split(PropertySplitter_Char);
-            if (values.Count() != 6)
+            if (values.Count() != 8)
                 return false;
-                //throw new NotImplementedException("数据格式错误");
-
-            //TargetId
             TargetId = new ElementId(Convert.ToInt32(values[0]));
-            //LineId
             LineId = new ElementId(Convert.ToInt32(values[1]));
-            //TextNoteIds
             TextNoteIds = new List<ElementId>();
             foreach (var item in values[2].Split(PropertyInnerSplitter_Char))
                 TextNoteIds.Add(new ElementId(Convert.ToInt32(item)));
             CSALocationType = (CSALocationType)Enum.Parse(typeof(CSALocationType), values[3]);
+            FontScale = Convert.ToDouble(values[4]);
+            LineHeight = Convert.ToDouble(values[5]);
+            var subLocations = values[6].Split(PropertyInnerSplitter2_Char);
+            LineLocation = new XYZ(Convert.ToDouble(subLocations[0]), Convert.ToDouble(subLocations[1]), Convert.ToDouble(subLocations[2]));
+            Texts = new List<string>();
+            foreach (var item in values[7].Split(PropertyInnerSplitter_Char))
+            {
+                if (string.IsNullOrEmpty(item))
+                    continue;
+                Texts.Add(item);
+            }
             return true;
-            //TODO1103
-            ////TextLocations
-            //TextLocations = new List<XYZ>();
-            //foreach (var item in values[4].Split(PropertyInnerSplitter_Char))
-            //{
-            //    if (string.IsNullOrEmpty(item))
-            //        continue;
-            //    var innerItem = item.Split(PropertyInnerSplitter2_Char);
-            //    TextLocations.Add(new XYZ(Convert.ToDouble(innerItem[0]), Convert.ToDouble(innerItem[1]), Convert.ToDouble(innerItem[2])));
-            //}
-            ////Texts
-            //Texts = new List<string>();
-            //foreach (var item in values[5].Split(PropertyInnerSplitter_Char))
-            //{
-            //    if (string.IsNullOrEmpty(item))
-            //        continue;
-            //    Texts.Add(item);
-            //}
         }
 
         public override string ToData()
@@ -225,14 +210,18 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             return TargetId.IntegerValue
             + PropertySplitter + LineId.IntegerValue
             + PropertySplitter + string.Join(PropertyInnerSplitter, TextNoteIds.Select(c => c.IntegerValue))
-            + PropertySplitter + (int)CSALocationType;
-            //TODO1103
-            //+PropertySplitter + string.Join(PropertyInnerSplitter, TextLocations.Select(c => c.X + PropertyInnerSplitter2 + c.Y + PropertyInnerSplitter2 + c.Z))
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, Texts);
+            + PropertySplitter + (int)CSALocationType
+            + PropertySplitter + FontScale
+            + PropertySplitter + LineHeight
+            + PropertySplitter + LineLocation.X + PropertyInnerSplitter2 + LineLocation.Y + PropertyInnerSplitter2 + LineLocation.Z
+            + PropertySplitter + string.Join(PropertyInnerSplitter, Texts);
         }
         #endregion
 
         #region 无需留存的数据
+        /// <summary>
+        /// 主体目标的类型
+        /// </summary>
         public TargetType TargetType { set; get; }
         /// <summary>
         /// 文字样式
@@ -256,6 +245,15 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 文本 位置
         /// </summary>
         public List<XYZ> TextLocations { set; get; }
+        /// <summary>
+        /// 线宽
+        /// </summary>
+        public double LineWidth { get; private set; }
+        /// <summary>
+        /// 间距
+        /// </summary>
+        public double LineSpace { get; private set; }
+
         /// <summary>
         /// 坐标定位,平行于标注对象
         /// </summary>
@@ -322,28 +320,39 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #region 线族的计算方案
         public void CalculateLocations(Element element, FamilyInstance line, XYZ offset)
         {
-            //计算线的定位位置
-            var locationCurve = TargetType.GetLine(element);
-            LineLocation = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
             //数据准备
+            var locationCurve = TargetType.GetLine(element);
+            FontScale = 1 / VLConstraints.OrientFontSizeScale * VLConstraints.CurrentFontSizeScale;
+            var fontHeight = VLConstraints.CurrentFontHeight;
             XYZ parallelVector = null;
             XYZ verticalVector = null;
             parallelVector = (locationCurve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
             parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
             verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            //计算线的定位位置
+            bool isRegenerate = offset != null;
+            if (!isRegenerate)
+            {
+                LineLocation = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+                offset = new XYZ(0, 0, 0);
+                LineHeight = fontHeight;
+            }
+            else
+            {
+                LineLocation = locationCurve.Project(LineLocation + offset).XYZPoint;
+                LineHeight= line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() + LocationHelper.GetLengthBySide(offset, verticalVector);
+                LineHeight = LineHeight > fontHeight ? LineHeight : fontHeight;//确保最短长度有一个文字高度
+            }
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
                 verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
             ParallelVector = parallelVector;
             VerticalVector = verticalVector;
             //高度,宽度 取决于文本 
-            var scale = 1 / VLConstraints.OrientFontSizeScale * VLConstraints.CurrentFontSizeScale;
-            LineWidth = UnitHelper.ConvertToFoot(CSALocationType.GetLineWidth() * scale, VLUnitType.millimeter);
-            LineHeight = VLConstraints.CurrentFontHeight;
-            TextHeight = VLConstraints.CurrentFontHeight;
-            var verticalFix = TextHeight * 0.3;;//偏移修正 为了显示更没管
-            LineSpace = TextHeight * 1.3;
+            LineWidth = UnitHelper.ConvertToFoot(CSALocationType.GetLineWidth() * FontScale, VLUnitType.millimeter);
+            var verticalFix = fontHeight * VLConstraints.TextSpace;;//偏移修正 为了显示更好 方便更改
+            LineSpace = fontHeight * (1 + VLConstraints.TextSpace);
             TextLocations = new List<XYZ>();
             for (int i = Texts.Count() - 1; i >= 0; i--)
             {
@@ -665,10 +674,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 string name = "";
                 var material = doc.GetElement(layer.MaterialId);
                 if (material == null)
-                    name = "未设置";
+                    name = "<按类别>";
                 else
                     name = doc.GetElement(layer.MaterialId).Name;
-                texts.Add(UnitHelper.ConvertFromFootTo(layer.Width, VLUnitType.millimeter) + "毫米," + name);
+                texts.Add(UnitHelper.ConvertFromFootTo(layer.Width, VLUnitType.millimeter) + "厚" + name);
             }
             model.Texts = texts;
             return texts;
@@ -848,8 +857,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var element = doc.GetElement(Model.TargetId);
                         var Collection = CSAContext.GetCollection(doc);
                         //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
-                        //if (Collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue) != null)
-                        //    return false;
+                        var existedModel = Collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue);
+                        if (existedModel != null)
+                        {
+                            Collection.Data.Remove(existedModel);
+                            CSAContext.Creater.Clear(doc, existedModel);
+                        }
                         CSAContext.Creater.Generate(doc, Model, element);
                         Collection.Data.Add(Model);
                         Collection.Save(doc);
@@ -965,9 +978,16 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #region 线族方案
         public void Generate(Document doc, CSAModelForFamilyInstance model, Element element)
         {
-            Generate(doc, model, element, new XYZ(0, 0, 0));
+            Generate(doc, model, element, null);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="model"></param>
+        /// <param name="element"></param>
+        /// <param name="offset">offset for Generate, offset should not be null when Regenerate </param>
         private void Generate(Document doc, CSAModelForFamilyInstance model, Element element, XYZ offset)
         {
             CompoundStructure compoundStructure = model.GetCompoundStructure(element);//获取文本载体
@@ -978,14 +998,26 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 return;
             if (texts.Count==1)
             {
-                //简单标注
+                TaskDialog.Show("警告", "暂不支持单层的结构做法标注");
             }
             else
             {
                 model.TargetId = element.Id;//主体
                 var lineFamilySymbol = VLConstraints.GetMultipleTagSymbol(doc);//获取线标注类型 
-                var line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
-                model.CalculateLocations(element, line, offset);//计算内容定位
+                bool isRegenerate = offset != null;
+                FamilyInstance line;
+                if (isRegenerate)
+                {
+                    line = doc.GetElement(model.LineId) as FamilyInstance;
+                    model.CalculateLocations(element, line, offset);//计算内容定位
+                    Clear(doc, model);
+                    line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
+                }
+                else
+                {
+                    line = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), lineFamilySymbol, doc.ActiveView);//生成 线
+                    model.CalculateLocations(element, line, offset);//计算内容定位
+                }
                 var lineLocation = model.LineLocation;
                 var textLocations = model.TextLocations;
                 ElementTransformUtils.MoveElement(doc, line.Id, lineLocation);//线定位
@@ -993,7 +1025,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 locationPoint.RotateByXY(lineLocation, model.VerticalVector);
                 model.LineId = line.Id;
                 model.UpdateLineParameters(line, model.LineHeight, model.LineWidth, model.LineSpace, model.Texts.Count());//线参数设置
-                                                                                                                          //文本生成
                 List<TextNote> textNotes = new List<TextNote>();
                 foreach (var text in model.Texts)//生成 文本
                 {
@@ -1010,7 +1041,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
         internal void Regenerate(Document doc, CSAModelForFamilyInstance model, Element target)
         {
-            CSAContext.Creater.Regenerate(doc, model, target, new XYZ(0, 0, 0));
+            FamilyInstance line = doc.GetElement(model.LineId) as FamilyInstance;
+            CSAContext.Creater.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         }
 
         internal void Regenerate(Document doc, CSAModelForFamilyInstance model, Element target, XYZ offset)
@@ -1018,13 +1050,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             //不是选取的文本类型 以Text的文本类型为准
             if (model.TextNoteTypeElementId == null)
                 model.TextNoteTypeElementId = (doc.GetElement(model.TextNoteIds[0]) as TextNote).TextNoteType.Id;
-            //删除线
-            if (model.LineId != null && doc.GetElement(model.LineId) != null)
-                doc.Delete(model.LineId);
-            //删除标注
-            foreach (var item in model.TextNoteIds)
-                if (doc.GetElement(item) != null)
-                    doc.Delete(item);
             Generate(doc, model, target, offset);
         }
 

@@ -56,6 +56,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 当前文本 Revit中的宽度缩放比例
         /// </summary>
         public static double CurrentFontWidthScale { set; get; }
+        /// <summary>
+        /// 线间额外距离,0.3*文字高度
+        /// </summary>
+        public static double TextSpace = 0.5;
+
         #endregion
 
         #region 线族

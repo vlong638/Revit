@@ -33,6 +33,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 {
                     var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == deleteId.IntegerValue);
                     if (itemToDelete == null)
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.LineId.IntegerValue == deleteId.IntegerValue);
+                    if (itemToDelete == null)
                         itemToDelete = collection.Data.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == deleteId.IntegerValue) != null);
                     if (itemToDelete != null)
                     {

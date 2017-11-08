@@ -1,5 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.MyTests.PipeAnnotationTest;
+using PmSoft.Common.CommonClass;
+using PmSoft.Common.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,8 +43,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 foreach (var changeId in edits)
                 {
                     CSAModelForFamilyInstance model = null;
-                    if (VLConstraints.Doc==null)
-                        VLConstraints.Doc=document;
+                    if (VLConstraints.Doc == null)
+                        VLConstraints.Doc = document;
+
                     #region 根据Target重新生成
                     var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == changeId.IntegerValue);
                     if (targetMoved != null)
@@ -57,7 +60,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             collection.Data.Remove(model);
                             continue;
                         }
-                        CSAContext.Creater.Regenerate(document, model, target);
+                        CSAContext.Creater.Regenerate(document, model, target, new XYZ(0,0,0));
                         movedEntities.Add(model.TargetId.IntegerValue);
                         CSAContext.IsEditing = true;
                     }
@@ -102,23 +105,40 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             if (compoundStructure == null)
                                 throw new NotImplementedException("关联更新失败,未获取有效的CompoundStructure类型");
                             var layers = compoundStructure.GetLayers();
-                            string pattern = @"([\d+\.]+)毫米,(.+)[\r]?";
+                            string pattern = @"([\d+\.]+)厚(.+)[\r]?";
                             Regex regex = new Regex(pattern);
                             var match = regex.Match(newText);
                             if (!match.Success)
+                            {
+                                PMMessageBox.ShowError("关联更新失败,文本不符合规范");
                                 return;
+                            }
                             var length = match.Groups[1].Value;
                             var lengthFoot = UnitHelper.ConvertToFoot(Convert.ToDouble(length), VLUnitType.millimeter);
                             var materialName = match.Groups[2].Value;
                             var material = new FilteredElementCollector(document).OfClass(typeof(Material))
                                 .FirstOrDefault(c => c.Name == materialName);
-                            if (material==null)
+                            if (material == null)
+                            {
+                                PMMessageBox.ShowError("关联更新失败,未获取到对应名称的材质");
                                 return;
+                            }
                             //更新
                             layers[index].Width = lengthFoot;
                             layers[index].MaterialId = material.Id;
                             compoundStructure.SetLayers(layers);
-                            hoster.SetCompoundStructure(compoundStructure);
+                            IDictionary<int, CompoundStructureError> report = null;
+                            IDictionary<int, int> errorMap;
+                            try
+                            {
+                                compoundStructure.IsValid(document, out report, out errorMap);
+                                hoster.SetCompoundStructure(compoundStructure);
+                            }
+                            catch (Exception ex)
+                            {
+                                PMMessageBox.ShowError("材质设置失败,错误详情:" + (report != null ? string.Join(",", report.Select(c => c.Value)) : ""));
+                                throw ex;
+                            }
 
                             ////报错This operation is valid only for non-vertically compound structures
                             //layer = layers[index];
@@ -131,7 +151,28 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             //var index = model.TextNoteIds.IndexOf(changeId);
                             //var offset = (document.GetElement(changeId) as TextNote).Coord - model.TextLocations[index];
                             //CompoundStructureAnnotationContext.Creater.Regenerate(document, model, target, offset);
+
+                            //CSAContext.IsEditing = true;//移动会导致偏移 从而二次触发
                         }
+                        movedEntities.Add(model.TargetId.IntegerValue);
+                    }
+                    #endregion
+
+                    #region 根据Line重新生成
+                    var lineMoved = collection.Data.FirstOrDefault(c => c.LineId.IntegerValue == changeId.IntegerValue);
+                    if (lineMoved != null)
+                    {
+                        model = lineMoved;
+                        if (movedEntities.Contains(model.TargetId.IntegerValue))
+                            continue;
+                        var creater = CSAContext.Creater;
+                        var target = document.GetElement(model.TargetId);
+                        if (target == null)
+                        {
+                            collection.Data.Remove(model);
+                            continue;
+                        }
+                        CSAContext.Creater.Regenerate(document, model, target);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         CSAContext.IsEditing = true;
                     }
@@ -141,7 +182,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
             catch (Exception ex)
             {
-                var logger = new TextLogger("PmLogger.txt", @"D:\");
+                var logger = new TextLogger("PmLogger.txt", ApplicationPath.GetParentPathOfCurrent + @"\SysData");
                 logger.Error(ex.ToString());
             }
         }
