@@ -127,6 +127,7 @@
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\0Base\VLViewModelBase.cs" />
     <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\BeamAlignToFloorViewModel.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Constraints.cs" />
@@ -154,8 +155,13 @@
       <DependentUpon>CompoundStructureAnnotationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationSet.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CSAModel.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CSAModelCollection.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\FamilySymbolHelper.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\VLSerialize.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\VLConstraints.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\VLModelBase.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\VLModelCollectionBase.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />
@@ -402,6 +408,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MyTests\PipeAttributesAnnotation\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

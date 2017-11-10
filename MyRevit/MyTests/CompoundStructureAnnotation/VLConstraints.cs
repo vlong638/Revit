@@ -5,7 +5,23 @@ using System.Drawing;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
-    class VLConstraints
+    public partial class VLConstraints
+    {
+        public static string Splitter = " ";
+        public static string InnerSplitter = "^";
+
+        //Model的预留关键字: [;-&~]
+        public static string EntitySplitter = ";";
+        public static char EntitySplitter_Char = ';';
+        public static string PropertyInnerSplitter = "_";
+        public static char PropertyInnerSplitter_Char = '_';
+        public static string PropertyInnerSplitter2 = "&";
+        public static char PropertyInnerSplitter2_Char = '&';
+        public static string PropertySplitter = "~";
+        public static char PropertySplitter_Char = '~';
+    }
+
+    public partial class VLConstraints
     {
         public static Document Doc { set; get; }
 
@@ -31,31 +47,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         ///// </summary>
         //public static double HeightSpan = UnitHelper.ConvertToFoot(20, VLUnitType.millimeter);
 
-        //选中的文本长宽关键信息
-        private static double currentFontSizeScale;
-        /// <summary>
-        /// 当前文本大小比例 以毫米表示
-        /// </summary>
-        public static double CurrentFontSizeScale
-        {
-            get
-            {
-                return currentFontSizeScale;
-            }
-            set
-            {
-                currentFontSizeScale = value;
-                CurrentFontHeight = OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
-            }
-        }
-        /// <summary>
-        /// 当前文本高度 double = foot
-        /// </summary>
-        public static double CurrentFontHeight { set; get; }
-        /// <summary>
-        /// 当前文本 Revit中的宽度缩放比例
-        /// </summary>
-        public static double CurrentFontWidthScale { set; get; }
         /// <summary>
         /// 线间额外距离,0.3*文字高度
         /// </summary>

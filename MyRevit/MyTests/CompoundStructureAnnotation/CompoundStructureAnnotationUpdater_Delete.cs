@@ -31,14 +31,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 bool isDeleted = false;
                 foreach (var deleteId in deletes)
                 {
-                    var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == deleteId.IntegerValue);
+                    var itemToDelete = collection.Datas.FirstOrDefault(c => c.TargetId.IntegerValue == deleteId.IntegerValue);
                     if (itemToDelete == null)
-                        itemToDelete = collection.Data.FirstOrDefault(c => c.LineId.IntegerValue == deleteId.IntegerValue);
+                        itemToDelete = collection.Datas.FirstOrDefault(c => c.LineId.IntegerValue == deleteId.IntegerValue);
                     if (itemToDelete == null)
-                        itemToDelete = collection.Data.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == deleteId.IntegerValue) != null);
+                        itemToDelete = collection.Datas.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == deleteId.IntegerValue) != null);
                     if (itemToDelete != null)
                     {
-                        collection.Data.Remove(itemToDelete);
+                        collection.Datas.Remove(itemToDelete);
                         var creater = CSAContext.Creater;
                         creater.Clear(doc, itemToDelete);
                         isDeleted = true;
