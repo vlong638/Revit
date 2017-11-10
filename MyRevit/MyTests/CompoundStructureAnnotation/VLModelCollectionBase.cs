@@ -17,15 +17,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             LoadData(data);
         }
 
-        public  string ToData()
+        public string ToData()
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in Datas)
-            {
-                sb.AppendItem(item.ToData());
-            }
-            return sb.ToData();
+                sb.Append(item.ToData());
+            return sb.ToString();
         }
+
         //public abstract bool LoadData(string data);
         public bool LoadData(string dataStr)
         {
@@ -37,6 +36,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 var t = new T();
                 if (t.LoadData(subData))
                     Datas.Add(t);
+                subData = sr.ReadFormatString();
             }
             return true;
         }

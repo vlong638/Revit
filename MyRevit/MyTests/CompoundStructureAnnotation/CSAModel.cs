@@ -369,14 +369,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         public CSALocationType CSALocationType { set; get; }
         /// <summary>
-        /// 字体的毫米数
-        /// </summary>
-        public double FontScale { get; set; }
-        /// <summary>
-        /// 字体高度高度 由基础基础字体高度/4*FontScale得出
-        /// </summary>
-        public double LineHeight { set; get; }
-        /// <summary>
         /// 线起点 在附着体上
         /// </summary>
         public XYZ LineLocation { set; get; }
@@ -384,6 +376,17 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 需要显示的结构标注信息
         /// </summary>
         public List<string> Texts { set; get; }
+
+
+        //TODO
+        /// <summary>
+        /// 字体的毫米数
+        /// </summary>
+        public double FontScale { get; set; }
+        /// <summary>
+        /// 字体高度高度 由基础基础字体高度/4*FontScale得出
+        /// </summary>
+        public double LineHeight { set; get; }
 
         public override bool LoadData(string data)
         {
@@ -397,7 +400,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 TextNoteIds = sr.ReadFormatStringAsElementIds();
                 TextNoteTypeElementId = sr.ReadFormatStringAsElementId();
                 CSALocationType = sr.ReadFormatStringAsEnum<CSALocationType>();
-                TextLocations = sr.ReadFormatStringAsXYZs();
+                LineLocation = sr.ReadFormatStringAsXYZ();
                 Texts = sr.ReadFormatStringAsStrings();
                 return true;
             }
@@ -416,7 +419,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             sb.AppendItem(TextNoteIds);
             sb.AppendItem(TextNoteTypeElementId);
             sb.AppendItem(CSALocationType);
-            sb.AppendItem(TextLocations);
+            sb.AppendItem(LineLocation);
             sb.AppendItem(Texts);
             return sb.ToData();
         }

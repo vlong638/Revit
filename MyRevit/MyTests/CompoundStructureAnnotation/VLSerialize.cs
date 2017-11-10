@@ -53,6 +53,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 sub.Append(GetFormatStr(item.X + InnerSplitterForXYZ + item.Y + InnerSplitterForXYZ + item.Z));
             sb.Append(GetFormatStr(sub.ToString()));
         }
+        public static void AppendItem(this StringBuilder sb, XYZ item)
+        {
+            sb.Append(GetFormatStr(item.X + InnerSplitterForXYZ + item.Y + InnerSplitterForXYZ + item.Z));
+        }
         public static string ToData(this StringBuilder sb)
         {
             return GetFormatStr(sb.ToString());
@@ -125,6 +129,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             var str = ReadFormatString(sr);
             return (T)Enum.Parse(typeof(T), str);
+        }
+        public static XYZ ReadFormatStringAsXYZ(this StringReader sr)
+        {
+            var str = ReadFormatString(sr);
+            var values = str.Split(InnerSplitterForXYZ_Char);
+            return new XYZ(Convert.ToDouble(values[0]), Convert.ToDouble(values[1]), Convert.ToDouble(values[2]));
         }
         public static List<XYZ> ReadFormatStringAsXYZs(this StringReader sr)
         {
