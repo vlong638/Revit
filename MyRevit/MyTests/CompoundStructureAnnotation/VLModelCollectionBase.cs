@@ -8,9 +8,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     public abstract class VLModelCollectionBase<T>: VLSerialize 
         where T: VLModelBase<T>, new()
     {
-        public static string EntitySplitter { get { return VLConstraints.EntitySplitter; } }
-        public static char EntitySplitter_Char { get { return VLConstraints.EntitySplitter_Char; } }
-        public List<T> Datas = new List<T>();
+        public List<T> Data = new List<T>();
 
         public VLModelCollectionBase(string data)
         {
@@ -20,7 +18,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public string ToData()
         {
             StringBuilder sb = new StringBuilder();
-            foreach (var item in Datas)
+            foreach (var item in Data)
                 sb.Append(item.ToData());
             return sb.ToString();
         }
@@ -28,14 +26,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         //public abstract bool LoadData(string data);
         public bool LoadData(string dataStr)
         {
-            Datas = new List<T>();
+            Data = new List<T>();
             var sr = new StringReader(dataStr);
             var subData= sr.ReadFormatString();
             while (subData != null)
             {
                 var t = new T();
                 if (t.LoadData(subData))
-                    Datas.Add(t);
+                    Data.Add(t);
                 subData = sr.ReadFormatString();
             }
             return true;

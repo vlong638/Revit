@@ -8,20 +8,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     public partial class VLConstraints
     {
         public static string Splitter = " ";
-        public static string InnerSplitter = "^";
-
-        //Model的预留关键字: [;-&~]
-        public static string EntitySplitter = ";";
-        public static char EntitySplitter_Char = ';';
-        public static string PropertyInnerSplitter = "_";
-        public static char PropertyInnerSplitter_Char = '_';
-        public static string PropertyInnerSplitter2 = "&";
-        public static char PropertyInnerSplitter2_Char = '&';
-        public static string PropertySplitter = "~";
-        public static char PropertySplitter_Char = '~';
+        //public static string InnerSplitter = "^";
     }
 
-    public partial class VLConstraints
+    public partial class VLConstraintsForCSA
     {
         public static Document Doc { set; get; }
 

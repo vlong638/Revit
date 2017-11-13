@@ -42,12 +42,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 List<int> movedEntities = new List<int>();
                 foreach (var changeId in edits)
                 {
-                    CSAModelForFamilyInstance model = null;
-                    if (VLConstraints.Doc == null)
-                        VLConstraints.Doc = document;
+                    CSAModel model = null;
+                    if (VLConstraintsForCSA.Doc == null)
+                        VLConstraintsForCSA.Doc = document;
 
                     #region 根据Target重新生成
-                    var targetMoved = collection.Datas.FirstOrDefault(c => c.TargetId.IntegerValue == changeId.IntegerValue);
+                    var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == changeId.IntegerValue);
                     if (targetMoved != null)
                     {
                         model = targetMoved;
@@ -57,7 +57,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var target = document.GetElement(model.TargetId);//标注主体失效时删除
                         if (target == null)
                         {
-                            collection.Datas.Remove(model);
+                            collection.Data.Remove(model);
                             continue;
                         }
                         CSAContext.Creater.Regenerate(document, model, target, new XYZ(0,0,0));
@@ -67,7 +67,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     #endregion
 
                     #region 根据Text重新生成
-                    var textMoved = collection.Datas.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == changeId.IntegerValue) != null);
+                    var textMoved = collection.Data.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == changeId.IntegerValue) != null);
                     if (textMoved != null)
                     {
                         model = textMoved;
@@ -77,7 +77,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var target = document.GetElement(model.TargetId);//标注主体失效时删除
                         if (target == null)
                         {
-                            collection.Datas.Remove(model);
+                            collection.Data.Remove(model);
                             continue;
                         }
                         //文本更改处理
@@ -159,7 +159,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                                 //var index = model.TextNoteIds.IndexOf(changeId);
                                 //var offset = (document.GetElement(changeId) as TextNote).Coord - model.TextLocations[index];
                                 //CompoundStructureAnnotationContext.Creater.Regenerate(document, model, target, offset);
-
                                 //CSAContext.IsEditing = true;//移动会导致偏移 从而二次触发
                             }
                         }
@@ -168,7 +167,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     #endregion
 
                     #region 根据Line重新生成
-                    var lineMoved = collection.Datas.FirstOrDefault(c => c.LineId.IntegerValue == changeId.IntegerValue);
+                    var lineMoved = collection.Data.FirstOrDefault(c => c.LineId.IntegerValue == changeId.IntegerValue);
                     if (lineMoved != null)
                     {
                         model = lineMoved;
@@ -178,7 +177,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var target = document.GetElement(model.TargetId);
                         if (target == null)
                         {
-                            collection.Datas.Remove(model);
+                            collection.Data.Remove(model);
                             continue;
                         }
                         CSAContext.Creater.Regenerate(document, model, target);

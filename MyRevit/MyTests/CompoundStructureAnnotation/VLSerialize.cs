@@ -7,6 +7,14 @@ using System.Text;
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
     /// <summary>
+    /// 格式定制
+    /// </summary>
+    interface VLSerialize
+    {
+        bool LoadData(string data);
+        string ToData();
+    }
+    /// <summary>
     /// Data构建用的扩展
     /// </summary>
     public static class StringBuilderEx
@@ -155,14 +163,5 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             return str.Length + VLConstraints.Splitter + str;
         }
-    }
-
-    /// <summary>
-    /// 格式定制
-    /// </summary>
-    interface VLSerialize
-    {
-        bool LoadData(string data);
-        string ToData();
     }
 }

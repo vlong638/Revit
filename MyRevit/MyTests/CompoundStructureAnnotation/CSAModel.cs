@@ -12,7 +12,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotation数据的载体 详图线方案
     /// </summary>
-    public class CSAModelForDetailLine : VLModelBase<CSAModelForFamilyInstance>
+    public class CSAModelForDetailLine : VLModelBase<CSAModel>
     {
         public CSAModelForDetailLine(string data = "") : base(data)
         {
@@ -170,7 +170,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             set
             {
                 currentFontSizeScale = value;
-                CurrentFontHeight = VLConstraints.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
+                CurrentFontHeight = VLConstraintsForCSA.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
             }
         }
         /// <summary>
@@ -229,7 +229,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #region 详图线的计算方案
         public void CalculateLocations(Element element, XYZ offset)
         {
-            var scale = 1 / VLConstraints.OrientFontSizeScale * CurrentFontSizeScale;
+            var scale = 1 / VLConstraintsForCSA.OrientFontSizeScale * CurrentFontSizeScale;
             var width = CSALocationType.GetLineWidth() * scale;
             var height = 400 * scale;
             var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
@@ -303,20 +303,17 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         #endregion
     }
 
-
-
-
     /// <summary>
     /// CompoundStructureAnnotation数据的载体 线族方案
     /// </summary>
-    public class CSAModelForFamilyInstance : VLModelBase<CSAModelForFamilyInstance>
+    public class CSAModel : VLModelBase<CSAModel>
     {
         #region Construction
-        public CSAModelForFamilyInstance() : base("")
+        public CSAModel() : base("")
         {
             Init();
         }
-        public CSAModelForFamilyInstance(string data) : base(data)
+        public CSAModel(string data) : base(data)
         {
             Init();
         }
@@ -351,7 +348,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 textNoteTypeElementId = value;
                 if (value == null)
                     return;
-                var element = VLConstraints.Doc.GetElement(value);
+                var element = VLConstraintsForCSA.Doc.GetElement(value);
                 if (element == null || element as TextNoteType == null)
                     return;
                 var textNoteType = element as TextNoteType;
@@ -440,7 +437,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             set
             {
                 currentFontSizeScale = value;
-                CurrentFontHeight = VLConstraints.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
+                CurrentFontHeight = VLConstraintsForCSA.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
             }
         }
         /// <summary>
@@ -536,7 +533,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             //数据准备
             var locationCurve = TargetType.GetLine(element);
-            FontScale = 1 / VLConstraints.OrientFontSizeScale * CurrentFontSizeScale;
+            FontScale = 1 / VLConstraintsForCSA.OrientFontSizeScale * CurrentFontSizeScale;
             var fontHeight = CurrentFontHeight;
             XYZ parallelVector = null;
             XYZ verticalVector = null;
@@ -565,8 +562,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             VerticalVector = verticalVector;
             //高度,宽度 取决于文本 
             LineWidth = UnitHelper.ConvertToFoot(CSALocationType.GetLineWidth() * FontScale, VLUnitType.millimeter);
-            var verticalFix = fontHeight * VLConstraints.TextSpace; ;//偏移修正 为了显示更好 方便更改
-            LineSpace = fontHeight * (1 + VLConstraints.TextSpace);
+            var verticalFix = fontHeight * VLConstraintsForCSA.TextSpace; ;//偏移修正 为了显示更好 方便更改
+            LineSpace = fontHeight * (1 + VLConstraintsForCSA.TextSpace);
             TextLocations = new List<XYZ>();
             for (int i = Texts.Count() - 1; i >= 0; i--)
             {

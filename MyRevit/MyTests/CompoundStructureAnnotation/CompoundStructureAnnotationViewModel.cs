@@ -68,7 +68,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     return (element.Location as LocationCurve).Curve as Line;
                 case TargetType.Floor:
                 case TargetType.RoofBase:
-                    var option = new Options() { View = VLConstraints.Doc.ActiveView };
+                    var option = new Options() { View = VLConstraintsForCSA.Doc.ActiveView };
                     var geometry = element.get_Geometry(option);
                     var geometryElements = geometry as GeometryElement;
                     var solid = geometryElements.FirstOrDefault() as Solid;
@@ -88,7 +88,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     //选出
                     Line topLine = null;
                     topLine = GetTopLine(faces);
-                    var z = VLConstraints.Doc.ActiveView.SketchPlane.GetPlane().Origin.Z;
+                    var z = VLConstraintsForCSA.Doc.ActiveView.SketchPlane.GetPlane().Origin.Z;
                     XYZ p1 = topLine.GetEndPoint(0);
                     XYZ p2 = topLine.GetEndPoint(1);
                     return Line.CreateBound(new XYZ(p1.X, p1.Y, z), new XYZ(p2.X, p2.Y, z));
@@ -158,16 +158,16 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public static List<TextNoteType> GetTextNoteTypes(this CSAModelForFamilyInstance model)
+        public static List<TextNoteType> GetTextNoteTypes(this CSAModel model)
         {
-            var textNoteTypes = new FilteredElementCollector(VLConstraints.Doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
+            var textNoteTypes = new FilteredElementCollector(VLConstraintsForCSA.Doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).ToList();
             return textNoteTypes;
         }
 
         /// <summary>
         /// 线 参数设置
         /// </summary>
-        public static void UpdateLineParameters(this CSAModelForFamilyInstance model, FamilyInstance line, double lineHeight, double lineWidth, double space, int textCount)
+        public static void UpdateLineParameters(this CSAModel model, FamilyInstance line, double lineHeight, double lineWidth, double space, int textCount)
         {
             line.GetParameters(TagProperty.线高度1.ToString()).First().Set(lineHeight);
             line.GetParameters(TagProperty.线宽度.ToString()).First().Set(lineWidth);
@@ -180,7 +180,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public static CompoundStructure GetCompoundStructure(this CSAModelForFamilyInstance model, Element element)
+        public static CompoundStructure GetCompoundStructure(this CSAModel model, Element element)
         {
             CompoundStructure compoundStructure = null;
             if (element is Wall)
@@ -211,7 +211,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <param name="doc"></param>
         /// <param name="compoundStructure"></param>
         /// <returns></returns>
-        public static List<string> FetchTextsFromCompoundStructure(this CSAModelForFamilyInstance model, Document doc, CompoundStructure compoundStructure)
+        public static List<string> FetchTextsFromCompoundStructure(this CSAModel model, Document doc, CompoundStructure compoundStructure)
         {
             var layers = compoundStructure.GetLayers();
             var texts = new List<string>();
@@ -234,14 +234,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
-        public static XYZ GetElementLocation(this CSAModelForFamilyInstance model, Element element)
+        public static XYZ GetElementLocation(this CSAModel model, Element element)
         {
             var locationCurve = element.Location as LocationCurve;
             var location = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
             return location;
         }
 
-        private static void SetCurveFromLine(CSAModelForFamilyInstance model, LocationCurve locationCurve)
+        private static void SetCurveFromLine(CSAModel model, LocationCurve locationCurve)
         {
             XYZ parallelVector = null;
             XYZ verticalVector = null;
@@ -267,7 +267,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static void RotateByXY(this LocationPoint point, XYZ xyz, XYZ verticalVector)
         {
             Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
-            if (verticalVector.X > VLConstraints.MiniValueForXYZ)
+            if (verticalVector.X > VLConstraintsForCSA.MiniValueForXYZ)
                 point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
@@ -282,7 +282,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public static void RotateByXY(this Location point, XYZ xyz, XYZ verticalVector)
         {
             Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
-            if (verticalVector.X > VLConstraints.MiniValueForXYZ)
+            if (verticalVector.X > VLConstraintsForCSA.MiniValueForXYZ)
                 point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
             else
                 point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
@@ -314,12 +314,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public CSAViewModel()
         {
             ViewType = CSAViewType.Idle;
-            Model = new CSAModelForFamilyInstance();
+            Model = new CSAModel();
             LocationType = CSALocationType.OnEdge;
         }
 
         public CSAViewType ViewType { set; get; }
-        public CSAModelForFamilyInstance Model { set; get; }
+        public CSAModel Model { set; get; }
 
         #region 绑定用属性 需在ViewModel中初始化
         CSALocationType LocationType
@@ -403,14 +403,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         var element = doc.GetElement(Model.TargetId);
                         var Collection = CSAContext.GetCollection(doc);
                         //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
-                        var existedModel = Collection.Datas.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue);
+                        var existedModel = Collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue);
                         if (existedModel != null)
                         {
-                            Collection.Datas.Remove(existedModel);
+                            Collection.Data.Remove(existedModel);
                             CSAContext.Creater.Clear(doc, existedModel);
                         }
                         CSAContext.Creater.Generate(doc, Model, element);
-                        Collection.Datas.Add(Model);
+                        Collection.Data.Add(Model);
                         Collection.Save(doc);
                         return true;
                     })))
@@ -522,7 +522,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
 
         #region 线族方案
-        public void Generate(Document doc, CSAModelForFamilyInstance model, Element element)
+        public void Generate(Document doc, CSAModel model, Element element)
         {
             Generate(doc, model, element, null);
         }
@@ -534,7 +534,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <param name="model"></param>
         /// <param name="element"></param>
         /// <param name="offset">offset for Generate, offset should not be null when Regenerate </param>
-        private void Generate(Document doc, CSAModelForFamilyInstance model, Element element, XYZ offset)
+        private void Generate(Document doc, CSAModel model, Element element, XYZ offset)
         {
             CompoundStructure compoundStructure = model.GetCompoundStructure(element);//获取文本载体
             if (compoundStructure == null)
@@ -549,7 +549,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             else
             {
                 model.TargetId = element.Id;//主体
-                var lineFamilySymbol = VLConstraints.GetMultipleTagSymbol(doc);//获取线标注类型 
+                var lineFamilySymbol = VLConstraintsForCSA.GetMultipleTagSymbol(doc);//获取线标注类型 
                 bool isRegenerate = offset != null;
                 FamilyInstance line;
                 if (isRegenerate)
@@ -585,13 +585,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
         }
 
-        internal void Regenerate(Document doc, CSAModelForFamilyInstance model, Element target)
+        internal void Regenerate(Document doc, CSAModel model, Element target)
         {
             FamilyInstance line = doc.GetElement(model.LineId) as FamilyInstance;
             CSAContext.Creater.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         }
 
-        internal void Regenerate(Document doc, CSAModelForFamilyInstance model, Element target, XYZ offset)
+        internal void Regenerate(Document doc, CSAModel model, Element target, XYZ offset)
         {
             //不是选取的文本类型 以Text的文本类型为准
             if (model.TextNoteTypeElementId == null)
@@ -599,7 +599,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             Generate(doc, model, target, offset);
         }
 
-        internal void Clear(Document doc, CSAModelForFamilyInstance model)
+        internal void Clear(Document doc, CSAModel model)
         {
             //删除线
             if (model.LineId != null && doc.GetElement(model.LineId) != null)

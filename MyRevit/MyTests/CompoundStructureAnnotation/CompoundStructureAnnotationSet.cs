@@ -55,7 +55,7 @@ namespace PmSoft.Optimization.DrawingProduction
             var app = UIApplication.Application;
             var uiDoc = UIApplication.ActiveUIDocument;
             var doc = UIApplication.ActiveUIDocument.Document;
-            VLConstraints.Doc = doc;
+            VLConstraintsForCSA.Doc = doc;
             try
             {
                 CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);
