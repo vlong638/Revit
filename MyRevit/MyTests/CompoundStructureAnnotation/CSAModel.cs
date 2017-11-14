@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.MyTests.PipeAnnotationTest;
+using MyRevit.MyTests.VLBase;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +13,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotation数据的载体 详图线方案
     /// </summary>
-    public class CSAModelForDetailLine : VLModelBase<CSAModel>
+    public class CSAModelForDetailLine : VLModel
     {
         public CSAModelForDetailLine(string data = "") : base(data)
         {
@@ -306,7 +307,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotation数据的载体 线族方案
     /// </summary>
-    public class CSAModel : VLModelBase<CSAModel>
+    public class CSAModel : VLModel
     {
         #region Construction
         public CSAModel() : base("")

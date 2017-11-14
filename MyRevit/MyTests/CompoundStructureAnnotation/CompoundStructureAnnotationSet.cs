@@ -31,7 +31,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public CompoundStructureAnnotationSet(UIApplication app) : base(app)
         {
             Init(app);
-            ViewModel = new CSAViewModel();
+            ViewModel = new CSAViewModel(app);
         }
 
         /// <summary>
@@ -58,11 +58,12 @@ namespace PmSoft.Optimization.DrawingProduction
             VLConstraintsForCSA.Doc = doc;
             try
             {
-                CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(this);
-                while (ViewModel.ViewType != CSAViewType.Close)
-                {
-                    ViewModel.Execute(window, this, uiDoc);
-                }
+                CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(ViewModel);
+                ViewModel.Execute();
+                //while (ViewModel.ViewType != CSAViewType.Close)
+                //{
+                //    ViewModel.Execute(window, this, uiDoc);
+                //}
                 return true;
             }
             catch (Exception ex)

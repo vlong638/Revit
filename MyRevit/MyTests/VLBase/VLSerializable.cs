@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace MyRevit.MyTests.CompoundStructureAnnotation
+namespace MyRevit.MyTests.VLBase
 {
     /// <summary>
     /// 格式定制
     /// </summary>
-    interface VLSerialize
+    interface VLSerializable
     {
         bool LoadData(string data);
         string ToData();

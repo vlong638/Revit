@@ -2,11 +2,11 @@
 using System.IO;
 using System.Text;
 
-namespace MyRevit.MyTests.CompoundStructureAnnotation
+namespace MyRevit.MyTests.VLBase
 {
-    public abstract class VLModelBase<T> : VLSerialize
+    public abstract class VLModel : VLSerializable
     {
-        public VLModelBase(string data)
+        public VLModel(string data)
         {
             LoadData(data);
         }

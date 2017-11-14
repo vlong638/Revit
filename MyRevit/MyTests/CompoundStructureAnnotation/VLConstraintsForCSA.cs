@@ -5,11 +5,6 @@ using System.Drawing;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
-    public partial class VLConstraints
-    {
-        public static string Splitter = " ";
-        //public static string InnerSplitter = "^";
-    }
 
     public partial class VLConstraintsForCSA
     {

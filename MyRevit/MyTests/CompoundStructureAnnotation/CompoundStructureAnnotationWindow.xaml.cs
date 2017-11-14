@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.ComponentModel;
+using MyRevit.MyTests.VLBase;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
@@ -9,39 +10,37 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotationWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class CompoundStructureAnnotationWindow : Window
+    public partial class CompoundStructureAnnotationWindow : VLWindow
     {
-        CompoundStructureAnnotationSet Set{ set; get; }
+        //不写入基类是由于XAML泛型基类的替换困难...
+        public CSAViewModel ViewModel { set; get; }
 
-        public CompoundStructureAnnotationWindow(CompoundStructureAnnotationSet set)
+        public CompoundStructureAnnotationWindow(CSAViewModel viewModel) : base()
         {
-            InitializeComponent();
-
-            Set = set;
-            DataContext = set.ViewModel;
+            ViewModel = viewModel;
         }
 
         private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            Set.ViewModel.ViewType = CSAViewType.Close;
+            ViewModel.ViewType = CSAViewType.Close;
             DialogResult = true;
         }
 
         private void CommandBinding_Executed_New(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Set.ViewModel.TextNoteTypeElementId == null)
+            if (ViewModel.TextNoteTypeElementId == null)
             {
                 MessageBox.Show("请先选择文字样式");
                 return;
             }
-            Set.ViewModel.ViewType = CSAViewType.Select;
+            ViewModel.ViewType = CSAViewType.Select;
             DialogResult = true;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (Set.ViewModel.ViewType!=CSAViewType.Select)
-                Set.ViewModel.ViewType = CSAViewType.Close;
+            if (ViewModel.ViewType!=CSAViewType.Select)
+                ViewModel.ViewType = CSAViewType.Close;
             base.OnClosing(e);
         }
     }

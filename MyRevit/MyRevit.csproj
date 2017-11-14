@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -127,7 +127,22 @@
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
-    <Compile Include="MyTests\0Base\VLViewModelBase.cs" />
+    <Compile Include="MyTests\Template\TemplateModel.cs" />
+    <Compile Include="MyTests\Template\TemplateSet.cs" />
+    <Compile Include="MyTests\Template\TemplateViewModel.cs" />
+    <Compile Include="MyTests\Template\TemplateWindow.xaml.cs">
+      <DependentUpon>TemplateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAModel.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAASet.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAViewModel.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml.cs">
+      <DependentUpon>PAAWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MyTests\VLBase\VLConstraints.cs" />
+    <Compile Include="MyTests\VLBase\VLStorable.cs" />
+    <Compile Include="MyTests\VLBase\VLViewModel.cs" />
+    <Compile Include="MyTests\VLBase\VLWindow.cs" />
     <Compile Include="MyTests\0Commands\PipeAnnotationCommand.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\BeamAlignToFloorViewModel.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\Constraints.cs" />
@@ -157,11 +172,13 @@
     <Compile Include="MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationSet.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CSAModel.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\CSAModelCollection.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CSAViewModel.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\FamilySymbolHelper.cs" />
-    <Compile Include="MyTests\CompoundStructureAnnotation\VLSerialize.cs" />
-    <Compile Include="MyTests\CompoundStructureAnnotation\VLConstraints.cs" />
-    <Compile Include="MyTests\CompoundStructureAnnotation\VLModelBase.cs" />
+    <Compile Include="MyTests\VLBase\VLSerializable.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\VLConstraintsForCSA.cs" />
+    <Compile Include="MyTests\VLBase\VLModel.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\VLModelCollectionBase.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\VLViewModelBase.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
     <Compile Include="MyTests\PipeAnnotation\AnnotationConstaints.cs" />
@@ -318,6 +335,7 @@
     <Compile Include="Utilities\GraphsDisplayer.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />
+    <Compile Include="Utilities\MouseHookHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
     <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
@@ -379,6 +397,22 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Page Include="MyTests\Template\ResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MyTests\Template\TemplateWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddIns\EarthWork.addin" />
@@ -409,9 +443,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MyTests\PipeAttributesAnnotation\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

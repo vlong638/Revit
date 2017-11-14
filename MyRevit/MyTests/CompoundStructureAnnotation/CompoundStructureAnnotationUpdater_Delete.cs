@@ -45,7 +45,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     }
                 }
                 if (isDeleted)
-                    CSAContext.SaveCollection(doc);
+                    CSAContext.Save(doc);
             }
             catch (Exception ex)
             {

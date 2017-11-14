@@ -52,7 +52,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <param name="doc"></param>
         public void Save(Document doc)
         {
-            CSAContext.SaveCollection(doc);
+            CSAContext.Save(doc);
         }
     }
+
 }

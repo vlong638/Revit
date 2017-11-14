@@ -1,5 +1,6 @@
 ﻿
 using Autodesk.Revit.DB;
+using PmSoft.Common.CommonClass;
 using System;
 using VL.Logger;
 
@@ -32,6 +33,15 @@ namespace MyRevit.Utilities
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// 异常记录,有待优化
+        /// </summary>
+        /// <param name="ex"></param>
+        private static void Log(Exception ex)
+        {
+            LogClass.GetInstance().AddLog(ex);
         }
     }
 }

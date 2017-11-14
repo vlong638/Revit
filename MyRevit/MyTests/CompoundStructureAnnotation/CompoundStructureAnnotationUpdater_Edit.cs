@@ -186,7 +186,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     }
                     #endregion
                 }
-                CSAContext.SaveCollection(document);
+                CSAContext.Save(document);
             }
             catch (Exception ex)
             {

@@ -57,22 +57,24 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// 保存Collection
         /// </summary>
         /// <param name="doc"></param>
-        public static void SaveCollection(Document doc, bool isSecondTry = false)
+        public static bool Save(Document doc)
         {
             if (Collection == null)
-                return;
+                return false;
             var data = Collection.ToData();
-            DelegateHelper.DelegateTryCatch(
-               () =>
-               {
-                   ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfData, data);
-               },
-               () =>
-               {
-                   ExtensibleStorageHelper.RemoveStorage(doc, CStorageEntity);
-                   ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfData, data);
-               }
-           );
+            return DelegateHelper.DelegateTryCatch(
+                () =>
+                {
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfData, data);
+                    return true;
+                },
+                () =>
+                {
+                    ExtensibleStorageHelper.RemoveStorage(doc, CStorageEntity);
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfData, data);
+                    return false;
+                }
+            );
         }
     }
 }

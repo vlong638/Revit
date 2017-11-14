@@ -1,12 +1,13 @@
-﻿using System;
+﻿using MyRevit.MyTests.VLBase;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
-    public abstract class VLModelCollectionBase<T>: VLSerialize 
-        where T: VLModelBase<T>, new()
+    public abstract class VLModelCollectionBase<T>: VLSerializable 
+        where T: VLModel, new()
     {
         public List<T> Data = new List<T>();
 
