@@ -13,5 +13,15 @@ namespace MyRevit.MyTests.PAA
         {
             ViewModel = viewModel;
         }
+
+        private void Btn_Single_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
+
+        private void Btn_Multiple_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

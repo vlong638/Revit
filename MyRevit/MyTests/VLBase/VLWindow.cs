@@ -1,6 +1,4 @@
-﻿using Autodesk.Revit.DB;
-using MyRevit.MyTests.VLBase;
-using PmSoft.Common.CommonClass;
+﻿using PmSoft.Common.CommonClass;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,6 +14,7 @@ namespace MyRevit.MyTests.VLBase
     {
         protected VLViewModel ViewModel;
 
+        public VLWindow() { }//页面需要无参数构造函数
         public VLWindow(VLViewModel viewModel)
         {
             ViewModel = viewModel;
