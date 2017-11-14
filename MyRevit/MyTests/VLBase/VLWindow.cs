@@ -1,4 +1,5 @@
-﻿using MyRevit.MyTests.VLBase;
+﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.VLBase;
 using PmSoft.Common.CommonClass;
 using System;
 using System.ComponentModel;
@@ -13,10 +14,12 @@ namespace MyRevit.MyTests.VLBase
     /// </summary>
     public class VLWindow : Window
     {
-        public VLViewModel ViewModel { set; get; }
+        protected VLViewModel ViewModel;
 
-        public VLWindow()
+        public VLWindow(VLViewModel viewModel)
         {
+            ViewModel = viewModel;
+
             #region ESC退出
             Loaded += VLWindowBase_Loaded;
             Closing += VLWindowBase_Closing;

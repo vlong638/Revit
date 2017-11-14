@@ -1,7 +1,7 @@
 ﻿using MyRevit.MyTests.VLBase;
 using System;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.Template
 {
     public class TemplateModel : VLModel
     {

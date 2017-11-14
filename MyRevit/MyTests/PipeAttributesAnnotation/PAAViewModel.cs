@@ -3,7 +3,7 @@ using Autodesk.Revit.UI;
 using MyRevit.MyTests.VLBase;
 using MyRevit.Utilities;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.PAA
 {
     public enum PAAViewType
     {

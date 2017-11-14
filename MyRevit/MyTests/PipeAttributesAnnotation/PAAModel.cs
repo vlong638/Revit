@@ -1,7 +1,7 @@
 ﻿using MyRevit.MyTests.VLBase;
 using System;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.PAA
 {
     public class PAAModel : VLModel
     {

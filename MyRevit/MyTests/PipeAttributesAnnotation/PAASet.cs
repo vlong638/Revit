@@ -3,7 +3,7 @@ using Autodesk.Revit.UI;
 using PmSoft.Optimization.DrawingProduction;
 using System;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.PAA
 {
     /// <summary>
     /// 命令对象

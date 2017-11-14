@@ -1,14 +1,17 @@
 ﻿using MyRevit.MyTests.VLBase;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.Template
 {
     /// <summary>
     /// PAAWindow.xaml 的交互逻辑
     /// </summary>
     public partial class TemplateWindow : VLWindow
     {
-        public TemplateWindow(TemplateViewModel viewModel) : base()
+        public new TemplateViewModel ViewModel { set; get; }
+
+        public TemplateWindow(TemplateViewModel viewModel) : base(viewModel)
         {
+            ViewModel = viewModel;
         }
     }
 }

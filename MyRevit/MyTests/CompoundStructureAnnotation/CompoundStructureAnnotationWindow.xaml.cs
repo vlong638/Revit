@@ -13,9 +13,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     public partial class CompoundStructureAnnotationWindow : VLWindow
     {
         //不写入基类是由于XAML泛型基类的替换困难...
-        public CSAViewModel ViewModel { set; get; }
+        public new CSAViewModel ViewModel { set; get; }
 
-        public CompoundStructureAnnotationWindow(CSAViewModel viewModel) : base()
+        public CompoundStructureAnnotationWindow(CSAViewModel viewModel) : base(viewModel)
         {
             ViewModel = viewModel;
         }

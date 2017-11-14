@@ -22,6 +22,13 @@
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
+    <Name>命令_管道特性标注</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>4A718227-CA66-41F9-A0FD-BFA5D93C88AE</ClientId>
+    <FullClassName>MyRevit.MyTests.PAA.PAACommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
     <Name>CurrentTestCommand</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3501</ClientId>

@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -127,6 +127,8 @@
   <ItemGroup>
     <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAACommand.cs" />
+    <Compile Include="MyTests\Template\TemplateCommand.cs" />
     <Compile Include="MyTests\Template\TemplateModel.cs" />
     <Compile Include="MyTests\Template\TemplateSet.cs" />
     <Compile Include="MyTests\Template\TemplateViewModel.cs" />

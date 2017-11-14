@@ -1,13 +1,11 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using MyRevit.MyTests.CompoundStructureAnnotation;
-using PmSoft.Optimization.DrawingProduction;
 
-namespace MyRevit.MyTests.BeamAlignToFloor
+namespace MyRevit.MyTests.Template
 {
     [Transaction(TransactionMode.Manual)]
-    public class CommandOfCompoundStructureAnnotation : IExternalCommand
+    class TemplateCommand : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -15,7 +13,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var app = commandData.Application.Application;
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
-            return new CompoundStructureAnnotationSet(uiApp).DoCmd() ? Result.Succeeded : Result.Failed;
+            return new TemplateSet(uiApp).DoCmd() ? Result.Succeeded : Result.Failed;
         }
     }
 }
