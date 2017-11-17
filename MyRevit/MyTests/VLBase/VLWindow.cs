@@ -18,15 +18,11 @@ namespace MyRevit.MyTests.VLBase
         public VLWindow(VLViewModel viewModel)
         {
             ViewModel = viewModel;
-
-            #region ESC退出
+            //ESC退出
             Loaded += VLWindowBase_Loaded;
             Closing += VLWindowBase_Closing;
-            #endregion
-
-            #region 窗体定位
+            //窗体定位
             Relocate();
-            #endregion
         }
 
         #region 窗体定位
@@ -78,7 +74,7 @@ namespace MyRevit.MyTests.VLBase
         /// <returns></returns>
         int KeyBoarHook_OnKeyDownEvent(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (ViewModel != null && ViewModel.CanClose && e.KeyData == System.Windows.Forms.Keys.Escape)
+            if (ViewModel != null && ViewModel.IsIdling && e.KeyData == System.Windows.Forms.Keys.Escape)
             {
                 this.Close();
                 return 1;
@@ -90,7 +86,7 @@ namespace MyRevit.MyTests.VLBase
         #region 窗体常规处理(关闭)
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (ViewModel.CanClose)
+            if (ViewModel.IsIdling)
                 ViewModel.Close();
             base.OnClosing(e);
         } 

@@ -169,7 +169,9 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateRe
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PipeAttributesAnnotation\PAAWindow.g.cs
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\TemplateWindow.g.cs
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\TemplateWindow.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\ResourceDictionary.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PipeAttributesAnnotation\ResourceDictionary.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\Utilities\DrawAreaView.g.cs
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\Utilities\DrawAreaView.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\Window.g.cs
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\Window.baml

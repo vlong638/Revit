@@ -53,14 +53,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         model = targetMoved;
                         if (movedEntities.Contains(model.TargetId.IntegerValue))
                             continue;
-                        var creater = CSAContext.Creater;
+                        var creater = CSAContext.Creator;
                         var target = document.GetElement(model.TargetId);//标注主体失效时删除
                         if (target == null)
                         {
                             collection.Data.Remove(model);
                             continue;
                         }
-                        CSAContext.Creater.Regenerate(document, model, target, new XYZ(0,0,0));
+                        CSAContext.Creator.Regenerate(document, model, target, new XYZ(0,0,0));
                         movedEntities.Add(model.TargetId.IntegerValue);
                         CSAContext.IsEditing = true;
                     }
@@ -73,7 +73,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         model = textMoved;
                         if (movedEntities.Contains(model.TargetId.IntegerValue))
                             continue;
-                        var creater = CSAContext.Creater;
+                        var creater = CSAContext.Creator;
                         var target = document.GetElement(model.TargetId);//标注主体失效时删除
                         if (target == null)
                         {
@@ -151,7 +151,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             if (model.TextNoteTypeElementId.IntegerValue!= textNote.TextNoteType.Id.IntegerValue)
                             {
                                 model.TextNoteTypeElementId = textNote.TextNoteType.Id;
-                                CSAContext.Creater.Regenerate(document, model, target, new XYZ(0, 0, 0));
+                                CSAContext.Creator.Regenerate(document, model, target, new XYZ(0, 0, 0));
                             }
                             else
                             {
@@ -173,14 +173,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         model = lineMoved;
                         if (movedEntities.Contains(model.TargetId.IntegerValue))
                             continue;
-                        var creater = CSAContext.Creater;
+                        var creater = CSAContext.Creator;
                         var target = document.GetElement(model.TargetId);
                         if (target == null)
                         {
                             collection.Data.Remove(model);
                             continue;
                         }
-                        CSAContext.Creater.Regenerate(document, model, target);
+                        CSAContext.Creator.Regenerate(document, model, target);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         CSAContext.IsEditing = true;
                     }

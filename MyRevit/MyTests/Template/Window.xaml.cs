@@ -1,15 +1,15 @@
 ﻿using MyRevit.MyTests.VLBase;
 
-namespace MyRevit.MyTests.PAA
+namespace MyRevit.MyTests.Template
 {
     /// <summary>
     /// TemplateWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class PAAWindow : VLWindow
+    public partial class TemplateWindow : VLWindow
     {
-        public new PAAViewModel ViewModel { set; get; }
+        public new TemplateViewModel ViewModel { set; get; }
 
-        public PAAWindow(PAAViewModel viewModel) : base(viewModel)
+        public TemplateWindow(TemplateViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
 
@@ -21,7 +21,7 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PAAViewType.PickSinglePipe_Pipe;
+            ViewModel.ViewType = TemplateViewType.PickSinglePipe_Pipe;
             ViewModel.Execute();
         }
 
@@ -30,7 +30,7 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PAAViewType.PickMultiplePipes;
+            ViewModel.ViewType = TemplateViewType.PickMultiplePipes;
             ViewModel.Execute();
         }
     }

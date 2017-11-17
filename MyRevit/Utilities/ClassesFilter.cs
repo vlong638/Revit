@@ -1,24 +1,24 @@
-﻿using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyRevit.MyTests.Utilities
+namespace MyRevit.Utilities
 {
     /// <summary>
-    /// class 选择过滤器
+    /// multiple class 选择过滤器
     /// 支持文档及链接文档内的选择
     /// </summary>
-    public class ClassFilter : ISelectionFilter
+    public class ClassesFilter : ISelectionFilter
     {
-        Type TargetType { set; get; }
+        List<Type> TargetTypes { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
 
-        public ClassFilter(Type targetType, bool isLinkInstance = false)
+        public ClassesFilter(bool isLinkInstance, params Type[] types)
         {
-            TargetType = targetType;
+            TargetTypes = types.ToList();
             IsLinkInstance = isLinkInstance;
         }
 
@@ -31,7 +31,7 @@ namespace MyRevit.MyTests.Utilities
             }
             else
             {
-                return TargetType == element.GetType();
+                return TargetTypes.Contains(element.GetType());
             }
         }
 
@@ -42,7 +42,7 @@ namespace MyRevit.MyTests.Utilities
 
             Document linkedDoc = LinkInstance.GetLinkDocument();
             Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            return TargetType == element.GetType();
+            return TargetTypes.Contains(element.GetType());
         }
     }
 }

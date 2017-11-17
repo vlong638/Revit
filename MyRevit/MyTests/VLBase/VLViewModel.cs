@@ -6,8 +6,8 @@ using System;
 
 namespace MyRevit.MyTests.VLBase
 {
-    public abstract class VLViewModel<TModel, TView> : VLViewModel
-        where TModel:VLModel where TView:VLWindow
+    public abstract class VLViewModel<TModel, TView, TViewType> : VLViewModel
+        where TModel : VLModel where TView : VLWindow
     {
         public VLViewModel(UIApplication app) : base(app)
         {
@@ -17,6 +17,8 @@ namespace MyRevit.MyTests.VLBase
         public TModel Model { set; get; }
         //View
         public TView View { set; get; }
+        //ViewType
+        public TViewType ViewType { set; get; }
     }
 
     public abstract class VLViewModel: DependencyObject, INotifyPropertyChanged
@@ -39,7 +41,7 @@ namespace MyRevit.MyTests.VLBase
         /// <summary>
         /// 界面是否处于ESC可退出的状态
         /// </summary>
-        public abstract bool CanClose { get; }
+        public abstract bool IsIdling { get; }
         public abstract void Close();
         #endregion
 

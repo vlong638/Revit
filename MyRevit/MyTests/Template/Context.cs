@@ -1,51 +1,33 @@
 ﻿using Autodesk.Revit.DB;
-using MyRevit.Entities;
 using PmSoft.Optimization.DrawingProduction;
 using PmSoft.Optimization.DrawingProduction.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MyRevit.MyTests.CompoundStructureAnnotation
+namespace MyRevit.MyTests.Template
 {
-    /// <summary>
-    /// PipeAnnotationEntityCollection扩展存储对象
-    /// </summary>
-    class CollectionStorageEntity : PmSoft.Optimization.DrawingProduction.IExtensibleStorageEntity
-    {
-        public List<string> FieldNames { get { return new List<string>() { FieldOfData, FieldOfSetting }; } }
-        public Guid SchemaId { get { return new Guid("5E0549F8-1F10-4388-A0B5-2FAA6884E81B"); } }
-        public string StorageName { get { return "CompoundStructureAnnotation_Schema"; } }
-        public string SchemaName { get { return "CompoundStructureAnnotation_Schema"; } }
-        public string FieldOfData { get { return "CompoundStructureAnnotation_Collection"; } }
-        public string FieldOfSetting { get { return "CompoundStructureAnnotation_Settings"; } }
-    }
-
-    class CSAContext
+    class TemplateContext
     {
         #region Creator
-        private static CSACreater _Creator = null;
-        public static CSACreater Creator
+        private static TemplateCreator _Creator = null;
+        public static TemplateCreator Creator
         {
             get
             {
-                return _Creator ?? (_Creator = new CSACreater());
+                return _Creator ?? (_Creator = new TemplateCreator());
             }
         }
         #endregion
 
+
         #region Storage
         public static bool IsEditing;
-        private static CSAModelCollection Collection;
+        private static TemplateModelCollection Collection;
         private static CollectionStorageEntity CStorageEntity = new CollectionStorageEntity();
         /// <summary>
         /// 取数据Collection
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        public static CSAModelCollection GetCollection(Document doc)
+        public static TemplateModelCollection GetCollection(Document doc)
         {
             //if (Collection != null)
             //    return Collection;
@@ -53,11 +35,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 () =>
                 {
                     string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfData);
-                    return new CSAModelCollection(data);
+                    return new TemplateModelCollection(data);
                 },
                 () =>
                 {
-                    return new CSAModelCollection("");
+                    return new TemplateModelCollection("");
                 }
             );
             return Collection;
@@ -85,7 +67,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     return false;
                 }
             );
-        } 
+        }
         #endregion
+
     }
 }

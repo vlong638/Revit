@@ -15,16 +15,13 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotation ViewModel
     /// </summary>
-    public class CSAViewModel : VLViewModel<CSAModel,CompoundStructureAnnotationWindow>
+    public class CSAViewModel : VLViewModel<CSAModel,CompoundStructureAnnotationWindow, CSAViewType>
     {
         public CSAViewModel(UIApplication app) : base(app)
         {
             Model = new CSAModel();
             LocationType = CSALocationType.OnEdge;
         }
-
-        public CSAViewType ViewType { set; get; }
-        public CSAModel Model { set; get; }
 
         #region 绑定用属性 需在ViewModel中初始化
         CSALocationType LocationType
@@ -69,7 +66,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
         }
 
-        public override bool CanClose
+        public override bool IsIdling
         {
             get
             {
@@ -120,9 +117,9 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         if (existedModel != null)
                         {
                             Collection.Data.Remove(existedModel);
-                            CSAContext.Creater.Clear(doc, existedModel);
+                            CSAContext.Creator.Clear(doc, existedModel);
                         }
-                        CSAContext.Creater.Generate(doc, Model, element);
+                        CSAContext.Creator.Generate(doc, Model, element);
                         Collection.Data.Add(Model);
                         Collection.Save(doc);
                         return true;

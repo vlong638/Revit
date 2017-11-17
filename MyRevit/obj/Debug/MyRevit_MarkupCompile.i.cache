@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 
-6988674120
-191886786941
-180-1555068885
+7-1613759402
+191292709687
+191-1467826161
 341196855730
-MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\Template\ResourceDictionary.xaml;MyTests\Template\TemplateWindow.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
+MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\Template\Window.xaml;MyTests\Template\ResourceDictionary.xaml;Utilities\DrawAreaView.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
 
 False
 

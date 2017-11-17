@@ -8,7 +8,7 @@ using Autodesk.Revit.DB;
 using MyRevit.MyTests.PipeAttributesAnnotation;
 using System.Collections.Generic;
 
-namespace MyRevit.MyTests.PAA
+namespace MyRevit.MyTests.Template
 {
     public class ElementIdComparer : IEqualityComparer<ElementId>
     {
@@ -22,7 +22,7 @@ namespace MyRevit.MyTests.PAA
         }
     }
 
-    public enum PAAViewType
+    public enum TemplateViewType
     {
         Idle,//闲置
         Close,//关闭
@@ -32,29 +32,29 @@ namespace MyRevit.MyTests.PAA
         PickMultiplePipes,//选择多管
     }
 
-    public class PAAViewModel : VLViewModel<PAAModel, PAAWindow, PAAViewType>
+    public class TemplateViewModel : VLViewModel<TemplateModel, TemplateWindow, TemplateViewType>
     {
-        public PAAViewModel(UIApplication app) : base(app)
+        public TemplateViewModel(UIApplication app) : base(app)
         {
-            Model = new PAAModel("");
-            View = new PAAWindow(this);
+            Model = new TemplateModel("");
+            View = new TemplateWindow(this);
         }
 
-        public override bool IsIdling { get { return ViewType == PAAViewType.Idle; } }
-        public override void Close() { ViewType = PAAViewType.Close; }
+        public override bool IsIdling { get { return ViewType == TemplateViewType.Idle; } }
+        public override void Close() { ViewType = TemplateViewType.Close; }
 
         public override void Execute()
         {
             switch (ViewType)
             {
-                case PAAViewType.Idle:
-                    View = new PAAWindow(this);
+                case TemplateViewType.Idle:
+                    View = new TemplateWindow(this);
                     View.ShowDialog();
                     break;
-                case PAAViewType.Close:
+                case TemplateViewType.Close:
                     View.Close();
                     break;
-                case PAAViewType.PickSinglePipe_Pipe:
+                case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
                     MouseHookHelper.DelegateMouseHook(() =>
                     {
@@ -63,14 +63,14 @@ namespace MyRevit.MyTests.PAA
                         var targetType = Model.GetFilter();
                         Model.TargetIds = new System.Collections.Generic.List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
                         if (Model.TargetIds.Count > 0)
-                            ViewType = PAAViewType.PickSinglePipe_Location;
+                            ViewType = TemplateViewType.PickSinglePipe_Location;
                     }, () =>
                     {
-                        ViewType = PAAViewType.Idle;
+                        ViewType = TemplateViewType.Idle;
                     });
                     Execute();
                     break;
-                case PAAViewType.PickSinglePipe_Location:
+                case TemplateViewType.PickSinglePipe_Location:
                     MouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
@@ -81,20 +81,20 @@ namespace MyRevit.MyTests.PAA
                         var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
                         var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart);
                         if (pEnd == null)
-                            ViewType = PAAViewType.Idle;
+                            ViewType = TemplateViewType.Idle;
                         else
-                            ViewType = PAAViewType.GenerateSinglePipe;
+                            ViewType = TemplateViewType.GenerateSinglePipe;
                     }, () =>
                     {
-                        ViewType = PAAViewType.Idle;
+                        ViewType = TemplateViewType.Idle;
                     });
                     Execute();
                     break;
-                case PAAViewType.GenerateSinglePipe:
+                case TemplateViewType.GenerateSinglePipe:
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
                             var element = Document.GetElement(Model.TargetIds.First());
-                            var Collection = PAAContext.GetCollection(Document);
+                            var Collection = TemplateContext.GetCollection(Document);
                             //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
                             var existedModels = Collection.Data.Where(c => c.TargetIds.Intersect(Model.TargetIds, new ElementIdComparer()) != null);
                             if (existedModels != null)
@@ -102,17 +102,17 @@ namespace MyRevit.MyTests.PAA
                                 foreach (var existedModel in existedModels)
                                 {
                                     Collection.Data.Remove(existedModel);
-                                    PAAContext.Creator.Clear(Document, existedModel);
+                                    TemplateContext.Creator.Clear(Document, existedModel);
                                 }
                             }
-                            PAAContext.Creator.Generate(Document, Model, element);
+                            TemplateContext.Creator.Generate(Document, Model, element);
                             Collection.Data.Add(Model);
                             Collection.Save(Document);
                             return true;
                         })))
-                            ViewType = PAAViewType.PickSinglePipe_Pipe;
+                            ViewType = TemplateViewType.PickSinglePipe_Pipe;
                     else
-                        ViewType = PAAViewType.Idle;
+                        ViewType = TemplateViewType.Idle;
                     Execute();
                     break;
                 default:
@@ -121,7 +121,7 @@ namespace MyRevit.MyTests.PAA
         }
 
         #region RatioButtons
-        PAATargetType TargetType
+        TemplateTargetType TargetType
         {
             get
             {
@@ -138,26 +138,26 @@ namespace MyRevit.MyTests.PAA
         }
         public bool TargetType_Pipe
         {
-            get { return TargetType == PAATargetType.Pipe; }
-            set { if (value) TargetType = PAATargetType.Pipe; }
+            get { return TargetType == TemplateTargetType.Pipe; }
+            set { if (value) TargetType = TemplateTargetType.Pipe; }
         }
         public bool TargetType_Duct
         {
-            get { return TargetType == PAATargetType.Duct; }
-            set { if (value) TargetType = PAATargetType.Duct; }
+            get { return TargetType == TemplateTargetType.Duct; }
+            set { if (value) TargetType = TemplateTargetType.Duct; }
         }
         public bool TargetType_CableTray
         {
-            get { return TargetType == PAATargetType.CableTray; }
-            set { if (value) TargetType = PAATargetType.CableTray; }
+            get { return TargetType == TemplateTargetType.CableTray; }
+            set { if (value) TargetType = TemplateTargetType.CableTray; }
         }
         public bool TargetType_Conduit
         {
-            get { return TargetType == PAATargetType.Conduit; }
-            set { if (value) TargetType = PAATargetType.Conduit; }
+            get { return TargetType == TemplateTargetType.Conduit; }
+            set { if (value) TargetType = TemplateTargetType.Conduit; }
         }
 
-        PAAAnnotationType AnnotationType
+        TemplateAnnotationType AnnotationType
         {
             get
             {
@@ -173,21 +173,21 @@ namespace MyRevit.MyTests.PAA
         }
         public bool AnnotationType_SPL
         {
-            get { return AnnotationType == PAAAnnotationType.SPL; }
-            set { if (value) AnnotationType = PAAAnnotationType.SPL; }
+            get { return AnnotationType == TemplateAnnotationType.SPL; }
+            set { if (value) AnnotationType = TemplateAnnotationType.SPL; }
         }
         public bool AnnotationType_SL
         {
-            get { return AnnotationType == PAAAnnotationType.SL; }
-            set { if (value) AnnotationType = PAAAnnotationType.SL; }
+            get { return AnnotationType == TemplateAnnotationType.SL; }
+            set { if (value) AnnotationType = TemplateAnnotationType.SL; }
         }
         public bool AnnotationType_PL
         {
-            get { return AnnotationType == PAAAnnotationType.PL; }
-            set { if (value) AnnotationType = PAAAnnotationType.PL; }
+            get { return AnnotationType == TemplateAnnotationType.PL; }
+            set { if (value) AnnotationType = TemplateAnnotationType.PL; }
         }
 
-        PAALocationType LocationType
+        TemplateLocationType LocationType
         {
             get
             {
@@ -203,22 +203,22 @@ namespace MyRevit.MyTests.PAA
         }
         public bool LocationType_Center
         {
-            get { return LocationType == PAALocationType.Center; }
-            set { if (value) LocationType = PAALocationType.Center; }
+            get { return LocationType == TemplateLocationType.Center; }
+            set { if (value) LocationType = TemplateLocationType.Center; }
         }
         public bool LocationType_Top
         {
-            get { return LocationType == PAALocationType.Top; }
-            set { if (value) LocationType = PAALocationType.Top; }
+            get { return LocationType == TemplateLocationType.Top; }
+            set { if (value) LocationType = TemplateLocationType.Top; }
         }
         public bool LocationType_Bottom
         {
-            get { return LocationType == PAALocationType.Bottom; }
-            set { if (value) LocationType = PAALocationType.Bottom; }
+            get { return LocationType == TemplateLocationType.Bottom; }
+            set { if (value) LocationType = TemplateLocationType.Bottom; }
         }
 
 
-        PAATextType TextType
+        TemplateTextType TextType
         {
             get
             {
@@ -233,13 +233,13 @@ namespace MyRevit.MyTests.PAA
         }
         public bool TextType_OnLine
         {
-            get { return TextType == PAATextType.OnLine; }
-            set { if (value) TextType = PAATextType.OnLine; }
+            get { return TextType == TemplateTextType.OnLine; }
+            set { if (value) TextType = TemplateTextType.OnLine; }
         }
         public bool TextType_OnEdge
         {
-            get { return TextType == PAATextType.OnEdge; }
-            set { if (value) TextType = PAATextType.OnEdge; }
+            get { return TextType == TemplateTextType.OnEdge; }
+            set { if (value) TextType = TemplateTextType.OnEdge; }
         }
         #endregion
 

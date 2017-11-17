@@ -17,7 +17,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -125,22 +125,31 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EarthWork\Command\EarthworkBlockCommand.cs" />
+    <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
+    <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAACommand.cs" />
-    <Compile Include="MyTests\Template\TemplateCommand.cs" />
-    <Compile Include="MyTests\Template\TemplateModel.cs" />
-    <Compile Include="MyTests\Template\TemplateSet.cs" />
-    <Compile Include="MyTests\Template\TemplateViewModel.cs" />
-    <Compile Include="MyTests\Template\TemplateWindow.xaml.cs">
-      <DependentUpon>TemplateWindow.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAContext.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAACreator.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAModel.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAModelCollection.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAASet.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAViewModel.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml.cs">
       <DependentUpon>PAAWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MyTests\PipeAttributesAnnotation\VLPointPicker.cs" />
+    <Compile Include="MyTests\Template\Command.cs" />
+    <Compile Include="MyTests\Template\Context.cs" />
+    <Compile Include="MyTests\Template\Creator.cs" />
+    <Compile Include="MyTests\Template\Model.cs" />
+    <Compile Include="MyTests\Template\ModelCollection.cs" />
+    <Compile Include="MyTests\Template\Set.cs" />
+    <Compile Include="MyTests\Template\ViewModel.cs" />
+    <Compile Include="MyTests\Template\Window.xaml.cs">
+      <DependentUpon>Window.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MyTests\Template\VLPointPicker.cs" />
     <Compile Include="MyTests\VLBase\VLConstraints.cs" />
     <Compile Include="MyTests\VLBase\VLStorable.cs" />
     <Compile Include="MyTests\VLBase\VLViewModel.cs" />
@@ -207,6 +216,7 @@
     </Compile>
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationUIData.cs" />
     <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
+    <Compile Include="Utilities\ClassesFilter.cs" />
     <Compile Include="Utilities\ClassFilter.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
@@ -237,99 +247,102 @@
       <DependentUpon>PipeAnnotationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MyTests\0Commands\ViewCommand.cs" />
-    <Compile Include="SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
-    <Compile Include="SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
-    <Compile Include="EarthWork\Entity\EarthworkBlock.cs" />
-    <Compile Include="EarthWork\Entity\EarthworkBlockCPSettings.cs" />
-    <Compile Include="EarthWork\Entity\EarthworkBlockImplementationInfo.cs" />
-    <Compile Include="EarthWork\Entity\EarthworkBlocking.cs" />
-    <Compile Include="EarthWork\Entity\MemorableData.cs" />
-    <Compile Include="EarthWork\Entity\SaveKeyHelper.cs" />
-    <Compile Include="EarthWork\Entity\SectionalData.cs" />
-    <Compile Include="EarthWork\UI\EarthworkBlockCPSettingsForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\Command\WarnSettingsCommand.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Command\SubsidenceMonitorCommand.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\EarthworkBlock.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\EarthworkBlockCPSettings.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\EarthworkBlockImplementationInfo.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\EarthworkBlocking.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\MemorableData.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\SaveKeyHelper.cs" />
+    <Compile Include="MyTests\EarthWork\Entity\SectionalData.cs" />
+    <Compile Include="MyTests\EarthWork\UI\EarthworkBlockCPSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EarthWork\UI\EarthworkBlockCPSettingsForm.Designer.cs">
+    <Compile Include="MyTests\EarthWork\UI\EarthworkBlockCPSettingsForm.Designer.cs">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="EarthWork\UI\EarthworkBlockingForm.cs">
+    <Compile Include="MyTests\EarthWork\UI\EarthworkBlockingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EarthWork\UI\EarthworkBlockingForm.Designer.cs">
+    <Compile Include="MyTests\EarthWork\UI\EarthworkBlockingForm.Designer.cs">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\MyDGV0427.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\CPSettings.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\DateTimeValue.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\SkewBack.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\UnpressedPipeLineSubsidence.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\PressedPipeLineSubsidence.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueType.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\STBAP.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\SurfaceSubsidence.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\ElementParameterValueSet.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\MemorableDetail.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\TDepthNode.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\TDetail.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\TList.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\TNode.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\WarnSettings.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\ICloneableData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\IContainer.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\ILazyLoadData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\IMemorableData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\IPDMTBase.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\IStringBasedData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\ITNodeData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\ITNodeDataCollection.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\MemorableData.cs" />
-    <Compile Include="SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
-    <Compile Include="SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\BLLResult.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\Facade.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\TListOperator.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\TDetailOperator.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\TDepthNodeOperator.cs" />
-    <Compile Include="SubsidenceMonitor\Operators\TNodeOperator.cs" />
-    <Compile Include="SubsidenceMonitor\UI\ChartForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\CPSettings.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\DateTimeValue.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\SkewBack.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\UnpressedPipeLineSubsidence.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\PressedPipeLineSubsidence.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueType.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\STBAP.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\SurfaceSubsidence.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\BuildingSubsidence.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\EIssueTypeEntities\EIssueTypeEntity.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\ElementParameterValueSet.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\MemorableDetail.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\TDepthNode.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\TDetail.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\TList.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\TNode.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\WarnSettings.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\ICloneableData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\IContainer.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\ILazyLoadData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\IMemorableData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\IPDMTBase.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\IStringBasedData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\ITNodeData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\ITNodeDataCollection.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\MemorableData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Interfaces\MultipleSingleMemorableData.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Entities\MultipleSingleMemorableDetails.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\BLLResult.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\Facade.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\TListOperator.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\TDetailOperator.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\TDepthNodeOperator.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\Operators\TNodeOperator.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\UI\ChartForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\ChartForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\ChartForm.Designer.cs">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\CPSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\CPSettingsForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\CPSettingsForm.Designer.cs">
       <DependentUpon>CPSettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\ListForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\ListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\ListForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\ListForm.Designer.cs">
       <DependentUpon>ListForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\UIEnums.cs" />
-    <Compile Include="SubsidenceMonitor\UI\SkewBackMonitorForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\UIEnums.cs" />
+    <Compile Include="MyTests\SubsidenceMonitor\UI\SkewBackMonitorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\SkewBackMonitorForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\SkewBackMonitorForm.Designer.cs">
       <DependentUpon>SkewBackMonitorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\SubsidenceMonitorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\SubsidenceMonitorForm.Designer.cs">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\WarnSettingsForm.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\WarnSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubsidenceMonitor\UI\WarnSettingsForm.Designer.cs">
+    <Compile Include="MyTests\SubsidenceMonitor\UI\WarnSettingsForm.Designer.cs">
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\DrawAreaView.xaml.cs">
+      <DependentUpon>DrawAreaView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utilities\ExcelHelper.cs" />
     <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
@@ -347,11 +360,11 @@
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
     <Compile Include="Utilities\TransactionHelper.cs" />
     <Compile Include="Utilities\UnitTransUtils.cs" />
-    <EmbeddedResource Include="EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
+    <EmbeddedResource Include="MyTests\EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="EarthWork\UI\EarthworkBlockingForm.resx">
+    <EmbeddedResource Include="MyTests\EarthWork\UI\EarthworkBlockingForm.resx">
       <DependentUpon>EarthworkBlockingForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MyTests\PipeAnnotation\PipeAnnotationForm.resx">
@@ -370,22 +383,22 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\ChartForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\ChartForm.resx">
       <DependentUpon>ChartForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\CPSettingsForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\CPSettingsForm.resx">
       <DependentUpon>CPSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\ListForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\ListForm.resx">
       <DependentUpon>ListForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\SkewBackMonitorForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\SkewBackMonitorForm.resx">
       <DependentUpon>SkewBackMonitorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\SubsidenceMonitorForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\SubsidenceMonitorForm.resx">
       <DependentUpon>SubsidenceMonitorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubsidenceMonitor\UI\WarnSettingsForm.resx">
+    <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\WarnSettingsForm.resx">
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
@@ -399,21 +412,25 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Page Include="MyTests\Template\ResourceDictionary.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MyTests\Template\TemplateWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MyTests\Template\Window.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MyTests\Template\ResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Utilities\DrawAreaView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -425,12 +442,12 @@
     <Content Include="AddIns\MyExternalCommands.addin" />
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
-    <Content Include="EarthWork\Images\AddElement.png" />
-    <Content Include="EarthWork\Images\AddNode.png" />
-    <Content Include="EarthWork\Images\DeleteElement.png" />
-    <Content Include="EarthWork\Images\DeleteNode.png" />
-    <Content Include="EarthWork\Images\DownNode.png" />
-    <Content Include="EarthWork\Images\UpNode.png" />
+    <Content Include="MyTests\EarthWork\Images\AddElement.png" />
+    <Content Include="MyTests\EarthWork\Images\AddNode.png" />
+    <Content Include="MyTests\EarthWork\Images\DeleteElement.png" />
+    <Content Include="MyTests\EarthWork\Images\DeleteNode.png" />
+    <Content Include="MyTests\EarthWork\Images\DownNode.png" />
+    <Content Include="MyTests\EarthWork\Images\UpNode.png" />
     <Content Include="Images\AddElement.png" />
     <Content Include="Images\AddNode.png" />
     <Content Include="Images\DeleteElement.png" />

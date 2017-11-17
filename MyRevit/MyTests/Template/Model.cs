@@ -8,12 +8,12 @@ using MyRevit.MyTests.VLBase;
 using System;
 using System.Collections.Generic;
 
-namespace MyRevit.MyTests.PAA
+namespace MyRevit.MyTests.Template
 {
     /// <summary>
     /// 标注对象
     /// </summary>
-    public enum PAATargetType
+    public enum TemplateTargetType
     {
         /// <summary>
         /// 管道
@@ -35,7 +35,7 @@ namespace MyRevit.MyTests.PAA
     /// <summary>
     /// 标记样式
     /// </summary>
-    public enum PAAAnnotationType
+    public enum TemplateAnnotationType
     {
         /// <summary>
         /// 系统缩写 管道尺寸 离地高度
@@ -53,7 +53,7 @@ namespace MyRevit.MyTests.PAA
     /// <summary>
     /// 离地模式
     /// </summary>
-    public enum PAALocationType
+    public enum TemplateLocationType
     {
         /// <summary>
         /// 中心离地
@@ -71,7 +71,7 @@ namespace MyRevit.MyTests.PAA
     /// <summary>
     /// 文字方式
     /// </summary>
-    public enum PAATextType
+    public enum TemplateTextType
     {
         /// <summary>
         /// 文字在线上
@@ -83,19 +83,19 @@ namespace MyRevit.MyTests.PAA
         OnEdge,
     }
 
-    public class PAAModel : VLModel
+    public class TemplateModel : VLModel
     {
-        public PAATargetType TargetType { set; get; }//标注对象
-        public PAAAnnotationType AnnotationType { set; get; }//标记样式
-        public PAALocationType LocationType { set; get; }//离地模式
-        public PAATextType TextType { set; get; }//文字方式
+        public TemplateTargetType TargetType { set; get; }//标注对象
+        public TemplateAnnotationType AnnotationType { set; get; }//标记样式
+        public TemplateLocationType LocationType { set; get; }//离地模式
+        public TemplateTextType TextType { set; get; }//文字方式
 
         public List<ElementId> TargetIds { set; get; }//标记的目标对象
 
-        public PAAModel() : base("")
+        public TemplateModel() : base("")
         {
         }
-        public PAAModel(string data) : base(data)
+        public TemplateModel(string data) : base(data)
         {
         }
 
@@ -113,13 +113,13 @@ namespace MyRevit.MyTests.PAA
         {
             switch (TargetType)
             {
-                case PAATargetType.Pipe:
+                case TemplateTargetType.Pipe:
                     return new ClassFilter(typeof(Pipe));
-                case PAATargetType.Duct:
+                case TemplateTargetType.Duct:
                     return new ClassFilter(typeof(Duct));
-                case PAATargetType.CableTray:
+                case TemplateTargetType.CableTray:
                     return new ClassFilter(typeof(CableTray));
-                case PAATargetType.Conduit:
+                case TemplateTargetType.Conduit:
                     return new ClassFilter(typeof(Conduit));
                 default:
                     throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());

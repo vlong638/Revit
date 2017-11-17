@@ -1,13 +1,15 @@
 ﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.CompoundStructureAnnotation;
+using MyRevit.MyTests.PAA;
 
-namespace MyRevit.MyTests.CompoundStructureAnnotation
+namespace MyRevit.MyTests.PipeAttributesAnnotation
 {
     /// <summary>
-    /// 存储对象集合
+    /// Model数据集合
     /// </summary>
-    public class CSAModelCollection : VLModelCollectionBase<CSAModel>
+    public class PAAModelCollection : VLModelCollectionBase<PAAModel>
     {
-        public CSAModelCollection(string data) : base(data)
+        public PAAModelCollection(string data) : base(data)
         {
         }
 

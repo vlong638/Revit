@@ -39,7 +39,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     if (itemToDelete != null)
                     {
                         collection.Data.Remove(itemToDelete);
-                        var creater = CSAContext.Creater;
+                        var creater = CSAContext.Creator;
                         creater.Clear(doc, itemToDelete);
                         isDeleted = true;
                     }
