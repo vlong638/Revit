@@ -2,12 +2,12 @@
 using MyRevit.MyTests.CompoundStructureAnnotation;
 using MyRevit.MyTests.PAA;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.PAA
 {
     /// <summary>
     /// Model数据集合
     /// </summary>
-    public class PAAModelCollection : VLModelCollectionBase<PAAModel>
+    public class PAAModelCollection : VLModelCollectionBase<PAAModelForSingle>
     {
         public PAAModelCollection(string data) : base(data)
         {

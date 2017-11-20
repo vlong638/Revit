@@ -101,12 +101,40 @@ namespace MyRevit.MyTests.Template
 
         public override bool LoadData(string data)
         {
-            return false;
+            if (string.IsNullOrEmpty(data))
+                return false;
+            //try
+            //{
+            //    StringReader sr = new StringReader(data);
+            //    TargetId = sr.ReadFormatStringAsElementId();
+            //    LineIds = sr.ReadFormatStringAsElementIds();
+            //    TextNoteIds = sr.ReadFormatStringAsElementIds();
+            //    TextNoteTypeElementId = sr.ReadFormatStringAsElementId();
+            //    CSALocationType = sr.ReadFormatStringAsEnum<CSALocationType>();
+            //    TextLocations = sr.ReadFormatStringAsXYZs();
+            //    Texts = sr.ReadFormatStringAsStrings();
+            //    return true;
+            //}
+            //catch (Exception ex)
+            //{
+            //    //TODO log
+            //    return false;
+            //}
+            return true;
         }
 
         public override string ToData()
         {
             return "";
+            //StringBuilder sb = new StringBuilder();
+            //sb.AppendItem(TargetId);
+            //sb.AppendItem(LineIds);
+            //sb.AppendItem(TextNoteIds);
+            //sb.AppendItem(TextNoteTypeElementId);
+            //sb.AppendItem(CSALocationType);
+            //sb.AppendItem(TextLocations);
+            //sb.AppendItem(Texts);
+            //return sb.ToData();
         }
 
         public ISelectionFilter GetFilter()

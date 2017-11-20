@@ -1,16 +1,12 @@
 ﻿using Autodesk.Revit.DB;
-using MyRevit.MyTests.PAA;
+using MyRevit.Utilities;
 using PmSoft.Optimization.DrawingProduction;
 using PmSoft.Optimization.DrawingProduction.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 
-namespace MyRevit.MyTests.PipeAttributesAnnotation
+namespace MyRevit.MyTests.PAA
 {
-    class PAAContext
+    public class PAAContext
     {
         #region Creator
         private static PAACreator _Creator = null;
@@ -22,7 +18,6 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
             }
         }
         #endregion
-
 
         #region Storage
         public static bool IsEditing;
@@ -76,5 +71,7 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
         }
         #endregion
 
+        //字体
+        public static FontManagement FontManagement = new FontManagement();
     }
 }

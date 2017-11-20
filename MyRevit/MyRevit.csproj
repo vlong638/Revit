@@ -234,7 +234,8 @@
     <Compile Include="MyTests\PipeAnnotationTest\PipeFilter.cs" />
     <Compile Include="MyTests\PipeAnnotationTest\SinglePipeAnnotationSettings.cs" />
     <Compile Include="MyTests\PipeAnnotationTest\TagProperty.cs" />
-    <Compile Include="MyTests\PipeAnnotationTest\UnitHelper.cs" />
+    <Compile Include="Utilities\FontManagement.cs" />
+    <Compile Include="Utilities\UnitHelper.cs" />
     <Compile Include="MyTests\0Commands\PipeUpdaterCommand.cs" />
     <Compile Include="MyTests\0Commands\PipeAnnotationTestCommand.cs" />
     <Compile Include="MyTests\0Commands\BeamUpdaterCommand.cs" />
@@ -348,6 +349,7 @@
     <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
     <Compile Include="Utilities\ExtensibleStorageHelper.cs" />
     <Compile Include="Utilities\GraphsDisplayer.cs" />
+    <Compile Include="Utilities\LocationHelper.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />
     <Compile Include="Utilities\MouseHookHelper.cs" />

@@ -56,7 +56,7 @@ namespace MyRevit.MyTests.Template
                     break;
                 case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
-                    MouseHookHelper.DelegateMouseHook(() =>
+                    if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -64,30 +64,26 @@ namespace MyRevit.MyTests.Template
                         Model.TargetIds = new System.Collections.Generic.List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
                         if (Model.TargetIds.Count > 0)
                             ViewType = TemplateViewType.PickSinglePipe_Location;
-                    }, () =>
-                    {
+                    }))
                         ViewType = TemplateViewType.Idle;
-                    });
                     Execute();
                     break;
                 case TemplateViewType.PickSinglePipe_Location:
-                    MouseHookHelper.DelegateMouseHook(() =>
+                    if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         var target = Document.GetElement(Model.TargetIds.First());
                         var targetLocation = target.Location as LocationCurve;
-                        var p0= targetLocation.Curve.GetEndPoint(0);
-                        var p1= targetLocation.Curve.GetEndPoint(1);
+                        var p0 = targetLocation.Curve.GetEndPoint(0);
+                        var p1 = targetLocation.Curve.GetEndPoint(1);
                         var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
                         var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart);
                         if (pEnd == null)
                             ViewType = TemplateViewType.Idle;
                         else
                             ViewType = TemplateViewType.GenerateSinglePipe;
-                    }, () =>
-                    {
+                    }))
                         ViewType = TemplateViewType.Idle;
-                    });
                     Execute();
                     break;
                 case TemplateViewType.GenerateSinglePipe:

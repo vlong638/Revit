@@ -14,7 +14,7 @@ namespace MyRevit.MyTests.PAA
     {
         public bool Equals(ElementId t1, ElementId t2)
         {
-            return (t1.IntegerValue == t2.IntegerValue );
+            return (t1.IntegerValue == t2.IntegerValue);
         }
         public int GetHashCode(ElementId t)
         {
@@ -32,11 +32,11 @@ namespace MyRevit.MyTests.PAA
         PickMultiplePipes,//选择多管
     }
 
-    public class PAAViewModel : VLViewModel<PAAModel, PAAWindow, PAAViewType>
+    public class PAAViewModel : VLViewModel<PAAModelForSingle, PAAWindow, PAAViewType>
     {
         public PAAViewModel(UIApplication app) : base(app)
         {
-            Model = new PAAModel("");
+            Model = new PAAModelForSingle("");
             View = new PAAWindow(this);
         }
 
@@ -56,47 +56,47 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
                     View.Close();
-                    MouseHookHelper.DelegateMouseHook(() =>
+                    if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
                         var targetType = Model.GetFilter();
-                        Model.TargetIds = new System.Collections.Generic.List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
-                        if (Model.TargetIds.Count > 0)
+                        var obj = UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点");
+                        if (obj != null)
+                        {
+                            Model.TargetId = obj.ElementId;
                             ViewType = PAAViewType.PickSinglePipe_Location;
-                    }, () =>
-                    {
+                        }
+                    }))
                         ViewType = PAAViewType.Idle;
-                    });
                     Execute();
                     break;
                 case PAAViewType.PickSinglePipe_Location:
-                    MouseHookHelper.DelegateMouseHook(() =>
+                    if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
-                        var target = Document.GetElement(Model.TargetIds.First());
+                        var target = Document.GetElement(Model.TargetId);
                         var targetLocation = target.Location as LocationCurve;
-                        var p0= targetLocation.Curve.GetEndPoint(0);
-                        var p1= targetLocation.Curve.GetEndPoint(1);
+                        var p0 = targetLocation.Curve.GetEndPoint(0);
+                        var p1 = targetLocation.Curve.GetEndPoint(1);
                         var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
                         var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart);
+                        Model.BodyStartPoint = pStart;
+                        Model.BodyEndPoint = pEnd;
                         if (pEnd == null)
                             ViewType = PAAViewType.Idle;
                         else
                             ViewType = PAAViewType.GenerateSinglePipe;
-                    }, () =>
-                    {
+                    }))
                         ViewType = PAAViewType.Idle;
-                    });
                     Execute();
                     break;
                 case PAAViewType.GenerateSinglePipe:
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
-                            var element = Document.GetElement(Model.TargetIds.First());
+                            var element = Document.GetElement(Model.TargetId);
                             var Collection = PAAContext.GetCollection(Document);
-                            //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
-                            var existedModels = Collection.Data.Where(c => c.TargetIds.Intersect(Model.TargetIds, new ElementIdComparer()) != null);
+                            var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue==Model.TargetId.IntegerValue);//避免重复生成
                             if (existedModels != null)
                             {
                                 foreach (var existedModel in existedModels)
@@ -110,7 +110,7 @@ namespace MyRevit.MyTests.PAA
                             Collection.Save(Document);
                             return true;
                         })))
-                            ViewType = PAAViewType.PickSinglePipe_Pipe;
+                        ViewType = PAAViewType.PickSinglePipe_Pipe;
                     else
                         ViewType = PAAViewType.Idle;
                     Execute();
@@ -242,6 +242,5 @@ namespace MyRevit.MyTests.PAA
             set { if (value) TextType = PAATextType.OnEdge; }
         }
         #endregion
-
     }
 }

@@ -12,7 +12,7 @@ namespace MyRevit.Utilities
         /// <param name="func"></param>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public static void DelegateMouseHook(Action action, Action onError)
+        public static bool DelegateMouseHook(Action action)
         {
             using (PmSoft.Common.RevitClass.PickObjectsMouseHook MouseHook = new PmSoft.Common.RevitClass.PickObjectsMouseHook())
             {
@@ -21,12 +21,13 @@ namespace MyRevit.Utilities
                 {
                     action();
                     MouseHook.UninstallHook();
+                    return true;
                 }
                 catch (Exception ex)
                 {
-                    Log(ex);
+                    //Log(ex);
                     MouseHook.UninstallHook();
-                    onError();
+                    return false;
                 }
             }
         }
@@ -50,7 +51,7 @@ namespace MyRevit.Utilities
                 }
                 catch (Exception ex)
                 {
-                    Log(ex);
+                    //Log(ex);
                     MouseHook.UninstallHook();
                     onError();
                 }

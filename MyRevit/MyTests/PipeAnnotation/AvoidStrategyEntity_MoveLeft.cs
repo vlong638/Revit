@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.MyTests.BeamAlignToFloor;
+using MyRevit.Utilities;
 
 namespace MyRevit.MyTests.PipeAnnotation
 {
@@ -13,7 +14,7 @@ namespace MyRevit.MyTests.PipeAnnotation
 
         public override bool TryAvoid()
         {
-            if (PipeAnnotationTest.UnitHelper.ConvertToInch(Data.LeftSpace, PipeAnnotationTest.VLUnitType.millimeter) < OffsetLength)
+            if (UnitHelper.ConvertToInch(Data.LeftSpace, VLUnitType.millimeter) < OffsetLength)
                 return false;
 
             Data.TemporaryTriangle = new Triangle(Data.CurrentTriangle, GetSideVector());

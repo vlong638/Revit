@@ -132,14 +132,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             return topLine;
         }
     }
-
-    static class CSALocationTypeEx
+    public static class CSALocationTypeEx
     {
         public static double GetLineWidth(this CSALocationType CSALocationType)
         {
             return CSALocationType == CSALocationType.OnEdge ? 400 : 3000;
         }
-
         public static XYZ GetTextLocation(this CSALocationType CSALocationType, double currentFontHeight, double verticalFix, XYZ verticalVector, XYZ start, XYZ end)
         {
             return CSALocationType == CSALocationType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + verticalFix) * verticalVector;
