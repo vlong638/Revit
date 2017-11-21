@@ -2,7 +2,7 @@
 using PmSoft.Common.RevitClass.Utils;
 using System.Linq;
 
-namespace PmSoft.Optimization.DrawingProduction.Utils
+namespace MyRevit.Utilities
 {
     public class FamilySymbolHelper
     {

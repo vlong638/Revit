@@ -29,13 +29,24 @@ namespace MyRevit.Utilities
         /// <summary>
         /// 桥梁 对接基本的字体和现用的字体
         /// </summary>
-        /// <param name="textNoteType"></param>
+        /// <param name="textType"></param>
         /// <returns></returns>
-        public void SetCurrentFont(TextNoteType textNoteType)
+        public void SetCurrentFont(TextNoteType textType)
         {
-            CurrentFontSizeScale = UnitHelper.ConvertFromFootTo(textNoteType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(), VLUnitType.millimeter);//文本大小
+            CurrentFontSizeScale = UnitHelper.ConvertFromFootTo(textType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(), VLUnitType.millimeter);//文本大小
             CurrentFontHeight = OrientFontHeight / 4 * CurrentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
-            CurrentFontWidthScale = textNoteType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
+            CurrentFontWidthScale = textType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
+        }
+        /// <summary>
+        /// 桥梁 对接基本的字体和现用的字体
+        /// </summary>
+        /// <param name="textType"></param>
+        /// <returns></returns>
+        public void SetCurrentFont(TextElementType textType)
+        {
+            CurrentFontSizeScale = UnitHelper.ConvertFromFootTo(textType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(), VLUnitType.millimeter);//文本大小
+            CurrentFontHeight = OrientFontHeight / 4 * CurrentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
+            CurrentFontWidthScale = textType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
         }
         /// <summary>
         /// 当前文本大小比例 以毫米表示

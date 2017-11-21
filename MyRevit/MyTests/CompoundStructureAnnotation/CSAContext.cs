@@ -1,19 +1,15 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.Entities;
-using PmSoft.Optimization.DrawingProduction;
-using PmSoft.Optimization.DrawingProduction.Utils;
+using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
     /// <summary>
     /// PipeAnnotationEntityCollection扩展存储对象
     /// </summary>
-    class CollectionStorageEntity : PmSoft.Optimization.DrawingProduction.IExtensibleStorageEntity
+    class CollectionStorageEntity : IExtensibleStorageEntity
     {
         public List<string> FieldNames { get { return new List<string>() { FieldOfData, FieldOfSetting }; } }
         public Guid SchemaId { get { return new Guid("5E0549F8-1F10-4388-A0B5-2FAA6884E81B"); } }

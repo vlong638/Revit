@@ -80,7 +80,7 @@ namespace MyRevit.MyTests.PAA
                         var p0 = targetLocation.Curve.GetEndPoint(0);
                         var p1 = targetLocation.Curve.GetEndPoint(1);
                         var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart);
+                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart).ToSameZ(pStart);
                         Model.BodyStartPoint = pStart;
                         Model.BodyEndPoint = pEnd;
                         if (pEnd == null)
@@ -92,6 +92,26 @@ namespace MyRevit.MyTests.PAA
                     Execute();
                     break;
                 case PAAViewType.GenerateSinglePipe:
+                    //获取族
+                    Family family = null;
+                    if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                    {
+                        family = Model.AnnotationType.GetTagFamily(Document).Family;
+                        return true;
+                    })))
+                    //TODO SHOW 加载族内信息失败
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                    }
+                    //准备族内参数
+                    if (!PAAContext.FontManagement.IsCurrentFontSettled)
+                    {
+                        var familyDoc = Document.EditFamily(family);
+                        var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                        var textElementType = textElement.Symbol as TextElementType;
+                        PAAContext.FontManagement.SetCurrentFont(textElementType);
+                    }
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
                             var element = Document.GetElement(Model.TargetId);
@@ -105,6 +125,9 @@ namespace MyRevit.MyTests.PAA
                                     PAAContext.Creator.Clear(Document, existedModel);
                                 }
                             }
+                            Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
+                            Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
+                            Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
                             PAAContext.Creator.Generate(Document, Model, element);
                             Collection.Data.Add(Model);
                             Collection.Save(Document);

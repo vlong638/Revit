@@ -17,6 +17,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
         public CompoundStructureAnnotationWindow(CSAViewModel viewModel) : base(viewModel)
         {
+            InitializeComponent();
             ViewModel = viewModel;
         }
 

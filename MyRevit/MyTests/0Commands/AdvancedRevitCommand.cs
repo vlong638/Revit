@@ -23,7 +23,7 @@ namespace MyRevit.Entities
 
             TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
-                ExtensibleStorageHelperV1.Test(doc);
+                //ExtensibleStorageHelperV1.Test(doc);
                 return true;
             });
 

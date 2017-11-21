@@ -104,6 +104,26 @@ namespace MyRevit.MyTests.PAA
         /// </summary>
         PL,
     }
+    static class PAAAnnotationTypeEx
+    {
+        /// <summary>
+        /// 获取
+        /// </summary>
+        public static FamilySymbol GetTagFamily(this PAAAnnotationType type,Document doc)
+        {
+            switch (type)
+            {
+                case PAAAnnotationType.SPL:
+                    return PAAContext.GetSPLTag(doc);
+                case PAAAnnotationType.SL:
+                    return PAAContext.GetSLTag(doc);
+                case PAAAnnotationType.PL:
+                    return PAAContext.GetPLTag(doc);
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
+    }
     /// <summary>
     /// 离地模式
     /// </summary>
@@ -145,7 +165,7 @@ namespace MyRevit.MyTests.PAA
         /// <returns></returns>
         public static double GetLineWidth(this PAATextType textType)
         {
-            return textType == PAATextType.OnEdge ? 400 : 3000;
+            return textType == PAATextType.OnEdge ? 200 : 1000;
         }
         /// <summary>
         /// 获取文本的定位
@@ -159,7 +179,7 @@ namespace MyRevit.MyTests.PAA
         /// <returns></returns>
         public static XYZ GetTextLocation(this PAATextType textType, double currentFontHeight, double verticalFix, XYZ verticalVector, XYZ start, XYZ end)
         {
-            return textType == PAATextType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + verticalFix) * verticalVector;
+            return textType == PAATextType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + 0) * verticalVector;//verticalFix
         }
     }
 
@@ -176,8 +196,17 @@ namespace MyRevit.MyTests.PAA
         public XYZ LeafEndPoint { set; get; }//支线终点
         public XYZ TextLocation { set; get; }//文本位置
 
+
+
+        public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
+        public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
+        public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
+
+
+
+
         public void UpdateVectors(Line locationCurve)
         {
             XYZ parallelVector = null;
@@ -188,9 +217,7 @@ namespace MyRevit.MyTests.PAA
             verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-            {
                 verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-            }
             VerticalVector = verticalVector;
             ParallelVector = parallelVector;
         }
@@ -257,7 +284,7 @@ namespace MyRevit.MyTests.PAA
 
         public void CalculateLocations(Element element, XYZ offset)
         {
-            var scale = PAAContext.FontManagement.OrientFontSizeScale * PAAContext.FontManagement.CurrentFontSizeScale;
+            var scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
             var width = TextType.GetLineWidth() * scale;
             var height = 400 * scale;
             var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
@@ -278,14 +305,12 @@ namespace MyRevit.MyTests.PAA
                 else { } //否则不改变原始坐标,仅重置
             }
             else
-            {
                 BodyStartPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
-            }
             //支线终点
-            LeafEndPoint= BodyStartPoint + widthFoot * ParallelVector;
+            LeafEndPoint= BodyEndPoint + widthFoot * ParallelVector;
             //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
             //高度,宽度 取决于文本 
-            TextLocation =TextType.GetTextLocation(PAAContext.FontManagement.CurrentFontHeight, verticalFix, VerticalVector, BodyStartPoint, LeafEndPoint);
+            TextLocation =TextType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, BodyEndPoint, LeafEndPoint);
         }
     }
 }

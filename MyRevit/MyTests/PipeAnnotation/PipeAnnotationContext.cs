@@ -149,6 +149,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 var textSizeStr = textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_SIZE).AsValueString();
                 var textSize = double.Parse(textSizeStr.Substring(0, textSizeStr.IndexOf(" mm")));
                 TextHeight = UnitHelper.ConvertToFoot(48, VLUnitType.millimeter) * textSize;//48是字体大小1mm在Revit中对应的高度
+                var textWidth = textElement.Symbol.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsValueString();
             }
         }
 

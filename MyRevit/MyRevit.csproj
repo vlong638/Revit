@@ -201,9 +201,7 @@
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_MoveRight.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategyEntity_None.cs" />
     <Compile Include="MyTests\PipeAnnotation\AvoidStrategyFactory.cs" />
-    <Compile Include="MyTests\PipeAnnotation\DelegateHelper.cs" />
-    <Compile Include="MyTests\PipeAnnotation\ExtensibleStorageHelper.cs" />
-    <Compile Include="MyTests\PipeAnnotation\FamilySymbolHelper.cs" />
+    <Compile Include="Utilities\FamilySymbolHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\LocationHelper.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationCmd.cs" />
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationContext.cs" />
@@ -234,6 +232,7 @@
     <Compile Include="MyTests\PipeAnnotationTest\PipeFilter.cs" />
     <Compile Include="MyTests\PipeAnnotationTest\SinglePipeAnnotationSettings.cs" />
     <Compile Include="MyTests\PipeAnnotationTest\TagProperty.cs" />
+    <Compile Include="Utilities\DelegateHelper.cs" />
     <Compile Include="Utilities\FontManagement.cs" />
     <Compile Include="Utilities\UnitHelper.cs" />
     <Compile Include="MyTests\0Commands\PipeUpdaterCommand.cs" />
@@ -403,7 +402,13 @@
     <EmbeddedResource Include="MyTests\SubsidenceMonitor\UI\WarnSettingsForm.resx">
       <DependentUpon>WarnSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="log4net.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

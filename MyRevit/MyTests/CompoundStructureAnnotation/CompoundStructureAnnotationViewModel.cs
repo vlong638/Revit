@@ -40,6 +40,17 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         OnLine,
     }
+    public static class CSALocationTypeEx
+    {
+        public static double GetLineWidth(this CSALocationType CSALocationType)
+        {
+            return CSALocationType == CSALocationType.OnEdge ? 400 : 3000;
+        }
+        public static XYZ GetTextLocation(this CSALocationType CSALocationType, double currentFontHeight, double verticalFix, XYZ verticalVector, XYZ start, XYZ end)
+        {
+            return CSALocationType == CSALocationType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + verticalFix) * verticalVector;
+        }
+    }
 
     public class TextLocation
     {
@@ -52,6 +63,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         public XYZ Start { set; get; }
         public XYZ End { set; get; }
     }
+
     public enum TargetType
     {
         Wall,
@@ -130,17 +142,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
             PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\1028轮廓.png", faces);
             return topLine;
-        }
-    }
-    public static class CSALocationTypeEx
-    {
-        public static double GetLineWidth(this CSALocationType CSALocationType)
-        {
-            return CSALocationType == CSALocationType.OnEdge ? 400 : 3000;
-        }
-        public static XYZ GetTextLocation(this CSALocationType CSALocationType, double currentFontHeight, double verticalFix, XYZ verticalVector, XYZ start, XYZ end)
-        {
-            return CSALocationType == CSALocationType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + verticalFix) * verticalVector;
         }
     }
 

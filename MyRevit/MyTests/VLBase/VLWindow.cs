@@ -18,6 +18,7 @@ namespace MyRevit.MyTests.VLBase
         public VLWindow(VLViewModel viewModel)
         {
             ViewModel = viewModel;
+            DataContext = ViewModel;
             //ESC退出
             Loaded += VLWindowBase_Loaded;
             Closing += VLWindowBase_Closing;

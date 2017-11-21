@@ -175,3 +175,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\Utilities\DrawAreaView.g.
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\Utilities\DrawAreaView.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\Window.g.cs
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\Window.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.config
