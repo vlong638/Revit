@@ -78,7 +78,7 @@ namespace PmSoft.Optimization.DrawingProduction
             if (selectedIds.Count() > AnnotationConstaints.PipeCountMax)
                 throw new NotImplementedException("暂不支持8根以上及管道的多管直径标注生成");
             Document = document;
-            Collection = PipeAnnotationContext.GetCollection(Document);
+            Collection = PAContext.GetCollection(Document);
             PipeAnnotationEntity entity = new PipeAnnotationEntity();
             entity.LocationType = setting.Location;
             View view = Document.ActiveView;
@@ -98,7 +98,7 @@ namespace PmSoft.Optimization.DrawingProduction
         public void FinishMultipleGenerate(Document document)
         {
             if (Collection == null)
-                Collection = PipeAnnotationContext.GetCollection(Document);
+                Collection = PAContext.GetCollection(Document);
             Collection.Save(Document);
         }
 
@@ -164,7 +164,7 @@ namespace PmSoft.Optimization.DrawingProduction
             //起始点
             startPoint = orderedNodePoints.First();
             //线 创建
-            var multipleTagSymbol = PipeAnnotationContext.GetMultipleTagSymbol(document);
+            var multipleTagSymbol = PAContext.GetMultipleTagSymbol(document);
             if (!multipleTagSymbol.IsActive)
                 multipleTagSymbol.Activate();
             line = Document.Create.NewFamilyInstance(startPoint, multipleTagSymbol, view);
@@ -175,8 +175,8 @@ namespace PmSoft.Optimization.DrawingProduction
             //线 参数设置
             UpdateLineParameters(orderedNodePoints, line, verticalVector);
             //标注 创建
-            var textSize = PipeAnnotationContext.TextSize;
-            var widthScale = PipeAnnotationContext.WidthScale;
+            var textSize = PAContext.TextSize;
+            var widthScale = PAContext.WidthScale;
             //碰撞检测区域点
             XYZ avoidP1_Line1 = orderedNodePoints.Last();
             XYZ avoidP2_Line2 = null;
@@ -384,7 +384,7 @@ namespace PmSoft.Optimization.DrawingProduction
             //起始点
             startPoint = nodePoints.First();
             //线 创建
-            var multipleTagSymbol = PipeAnnotationContext.GetMultipleTagSymbol(document);
+            var multipleTagSymbol = PAContext.GetMultipleTagSymbol(document);
             if (!multipleTagSymbol.IsActive)
                 multipleTagSymbol.Activate();
             //line = Document.Create.NewFamilyInstance(startPoint, MultipleTagSymbol, view);
@@ -406,8 +406,8 @@ namespace PmSoft.Optimization.DrawingProduction
             var lineHeight = orientLineHeight + verticalSkew > nodesHeight ? orientLineHeight + verticalSkew : nodesHeight;
             var tagHeight = lineHeight + nodesHeight;
             line.GetParameters(TagProperty.线高度1.ToString()).First().Set(lineHeight);
-            var textSize = PipeAnnotationContext.TextSize;
-            var widthScale = PipeAnnotationContext.WidthScale;
+            var textSize = PAContext.TextSize;
+            var widthScale = PAContext.WidthScale;
             switch (entity.LocationType)
             {
                 case MultiPipeTagLocation.OnLineEdge:

@@ -18,11 +18,10 @@ namespace MyRevit.MyTests.Template
         }
         #endregion
 
-
         #region Storage
         public static bool IsEditing;
         private static TemplateModelCollection Collection;
-        private static CollectionStorageEntity CStorageEntity = new CollectionStorageEntity();
+        private static TemplateStorageEntity CStorageEntity = new TemplateStorageEntity();
         /// <summary>
         /// 取数据Collection
         /// </summary>
@@ -30,8 +29,6 @@ namespace MyRevit.MyTests.Template
         /// <returns></returns>
         public static TemplateModelCollection GetCollection(Document doc)
         {
-            //if (Collection != null)
-            //    return Collection;
             Collection = DelegateHelper.DelegateTryCatch(
                 () =>
                 {

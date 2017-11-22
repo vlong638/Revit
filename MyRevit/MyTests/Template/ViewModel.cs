@@ -213,7 +213,6 @@ namespace MyRevit.MyTests.Template
             set { if (value) LocationType = TemplateLocationType.Bottom; }
         }
 
-
         TemplateTextType TextType
         {
             get

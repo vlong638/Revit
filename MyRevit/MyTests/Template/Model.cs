@@ -125,6 +125,26 @@ namespace MyRevit.MyTests.Template
 
         public override string ToData()
         {
+            //public PAAAnnotationType AnnotationType { set; get; }//标记样式
+            //public string AnnotationPrefix { set; get; }//离地模式前缀
+            //public PAALocationType LocationType { set; get; }//离地模式
+            //public PAATextType TextType { set; get; }//文字方式
+            //public List<ElementId> LineIds { get; set; }//线对象
+            //public ElementId GroupId { get; set; }//线组对象
+            //public XYZ BodyEndPoint { get; set; }//干线终点
+            //public XYZ BodyStartPoint { get; set; }//干线起点
+            //public XYZ LeafEndPoint { set; get; }//支线终点
+            //public XYZ TextLocation { set; get; }//文本定位坐标
+            //public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
+            //public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
+            //public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
+
+
+            //public ([\w<>]+) (\w+) .+
+            //=>
+            //sb.AppendItem($2);
+
+
             return "";
             //StringBuilder sb = new StringBuilder();
             //sb.AppendItem(TargetId);

@@ -189,6 +189,7 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 Model.AnnotationType = value;
+                UpdateModelAnnotationPrefix();
                 RaisePropertyChanged("AnnotationType_SPL");
                 RaisePropertyChanged("AnnotationType_SL");
                 RaisePropertyChanged("AnnotationType_PL");
@@ -240,7 +241,6 @@ namespace MyRevit.MyTests.PAA
             set { if (value) LocationType = PAALocationType.Bottom; }
         }
 
-
         PAATextType TextType
         {
             get
@@ -264,6 +264,71 @@ namespace MyRevit.MyTests.PAA
             get { return TextType == PAATextType.OnEdge; }
             set { if (value) TextType = PAATextType.OnEdge; }
         }
+
+        private string centerPrefix = "CL+";
+        public string CenterPrefix
+        {
+            get
+            {
+                return centerPrefix;
+            }
+
+            set
+            {
+                centerPrefix = value;
+                UpdateModelAnnotationPrefix();
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+            }
+        }
+
+        private void UpdateModelAnnotationPrefix()
+        {
+            if (Model.LocationType == PAALocationType.Center)
+                Model.AnnotationPrefix = CenterPrefix;
+            else if (Model.LocationType == PAALocationType.Top)
+                Model.AnnotationPrefix = TopPrefix;
+            else if (Model.LocationType == PAALocationType.Bottom)
+                Model.AnnotationPrefix = BottomPrefix;
+        }
+
+        private string topPrefix = "TL+";
+        public string TopPrefix
+        {
+            get
+            {
+                return topPrefix;
+            }
+
+            set
+            {
+                topPrefix = value;
+                UpdateModelAnnotationPrefix();
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+            }
+        }
+
+        private string bottomPrefix = "BL+";
+        public string BottomPrefix
+        {
+            get
+            {
+                return bottomPrefix;
+            }
+
+            set
+            {
+                bottomPrefix = value;
+                UpdateModelAnnotationPrefix();
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+            }
+        }
+
+        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); }  }
+        public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
+        public string PLPreview { get { return "如:ZP DN100"; } }
         #endregion
     }
 }

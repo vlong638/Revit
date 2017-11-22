@@ -1,27 +1,36 @@
 ﻿using Autodesk.Revit.DB;
-using System;
 using PmSoft.Common.CommonClass;
 using System.Linq;
-using Autodesk.Revit.DB.ExtensibleStorage;
-using PmSoft.Optimization.DrawingProduction.Utils;
-using System.Collections;
-using System.Collections.Generic;
 using MyRevit.MyTests.PipeAnnotationTest;
 using MyRevit.Utilities;
+using System.Collections.Generic;
+using System;
 
-namespace PmSoft.Optimization.DrawingProduction
+namespace MyRevit.MyTests.PipeAnnotation
 {
+    /// <summary>
+    /// PipeAnnotationEntityCollection扩展存储对象
+    /// </summary>
+    public class PAStorageEntity : IExtensibleStorageEntity
+    {
+        public List<string> FieldNames { get { return new List<string>() { FieldOfData, FieldOfSetting }; } }
+        public Guid SchemaId { get { return new Guid("4A622209-267D-4BA7-BFFD-55C3CDA0F808"); } }
+        public string StorageName { get { return "PAA_Schema"; } }
+        public string SchemaName { get { return "PAA_Schema"; } }
+        public string FieldOfData { get { return "PAA_Collection"; } }
+        public string FieldOfSetting { get { return "PAA_Settings"; } }
+    }
     /// <summary>
     /// 上下文
     /// </summary>
-    public class PipeAnnotationContext
+    public class PAContext
     {
         public static bool IsEditing;
         public static AnnotationCreater Creater = new AnnotationCreater();
 
         #region Collection
         private static PipeAnnotationEntityCollection Collection;
-        private static CollectionStorageEntity CStorageEntity = new CollectionStorageEntity();
+        private static PAStorageEntity CStorageEntity = new PAStorageEntity();
 
         /// <summary>
         /// 取数据Collection
@@ -166,18 +175,5 @@ namespace PmSoft.Optimization.DrawingProduction
             return symbolFile;
         }
         #endregion
-    }
-
-    /// <summary>
-    /// PipeAnnotationEntityCollection扩展存储对象
-    /// </summary>
-    class CollectionStorageEntity : IExtensibleStorageEntity
-    {
-        public List<string> FieldNames { get { return new List<string>() { FieldOfData, FieldOfSetting }; } }
-        public Guid SchemaId { get { return new Guid("D5874EC4-BAA8-45B0-988E-0776607CED39"); } }
-        public string StorageName { get { return "PipeAnnotation_Schema"; } }
-        public string SchemaName { get { return "PipeAnnotation_Schema"; } }
-        public string FieldOfData { get { return "PipeAnnotation_Collection"; } }
-        public string FieldOfSetting { get { return "PipeAnnotation_Settings"; } }
     }
 }

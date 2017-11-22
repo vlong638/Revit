@@ -43,16 +43,16 @@
                         <Setter Property="Margin" Value="0,10,0,0"/>
                     </Style>
                     <Style TargetType="{x:Type TextBlock}">
-                        <Setter Property="Margin" Value="0,5,0,0"/>
+                        <Setter Property="Margin" Value="10,5,0,0"/>
                         <Setter Property="Foreground" Value="Brown"/>
                     </Style>
                 </StackPanel.Resources>
                 <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL}"/>
-                <TextBlock Text="  如:ZP DN100 CL+2600"/>
+                <TextBlock Text="{Binding SPLPreview}"/>
                 <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL}"/>
-                <TextBlock Text="  如:ZP CL+2600"/>
+                <TextBlock Text="{Binding SLPreview}"/>
                 <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL}"/>
-                <TextBlock Text="  如:ZP DN100"/>
+                <TextBlock Text="{Binding PLPreview}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="离地模式选择" Grid.Row="2">
@@ -76,11 +76,11 @@
                     <ColumnDefinition Width="120"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <RadioButton Content="中心离地" IsChecked="{Binding LocationType_Center}" Grid.Row="0"/>
-                <TextBox Text="CL+" Grid.Row="0" Grid.Column="1"></TextBox>
+                <TextBox Text="{Binding CenterPrefix, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="0" Grid.Column="1"></TextBox>
                 <RadioButton Content="顶部离地" IsChecked="{Binding LocationType_Top}" Grid.Row="1"/>
-                <TextBox Text="TL+" Grid.Row="1" Grid.Column="1"></TextBox>
+                <TextBox Text="{Binding TopPrefix, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="1" Grid.Column="1"></TextBox>
                 <RadioButton Content="底部离地" IsChecked="{Binding LocationType_Bottom}" Grid.Row="2"/>
-                <TextBox Text="BL+" Grid.Row="2" Grid.Column="1"></TextBox>
+                <TextBox Text="{Binding BottomPrefix, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="2" Grid.Column="1"></TextBox>
             </Grid>
         </GroupBox>
         <GroupBox Header="文字方式" Grid.Row="3">

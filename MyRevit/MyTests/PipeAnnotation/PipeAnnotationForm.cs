@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
+using MyRevit.MyTests.PipeAnnotation;
 using MyRevit.MyTests.PipeAnnotationTest;
 using MyRevit.Utilities;
 using PmSoft.Common.CommonClass;
@@ -781,7 +782,7 @@ namespace PmSoft.Optimization.DrawingProduction
             //先删除后新增
             var lines = new FilteredElementCollector(Doc, View.Id)
                 .OfClass(typeof(FamilyInstance))
-                .WherePasses(new FamilyInstanceFilter(Doc, PipeAnnotationContext.GetMultipleTagSymbol(Doc).Id));
+                .WherePasses(new FamilyInstanceFilter(Doc, PAContext.GetMultipleTagSymbol(Doc).Id));
             var pipeTags = new FilteredElementCollector(Doc, View.Id)
                 .OfCategory(BuiltInCategory.OST_PipeTags)
                 .WhereElementIsNotElementType();
@@ -802,7 +803,7 @@ namespace PmSoft.Optimization.DrawingProduction
                     Doc.Delete(pipeTagId);
                 }
                 //删除存储的关联
-                var storageCollection = PipeAnnotationContext.GetCollection(Doc);
+                var storageCollection = PAContext.GetCollection(Doc);
                 storageCollection.RemoveAll(c => c.ViewId == View.Id.IntegerValue);
                 storageCollection.Save(Doc);
                 var creator = new AnnotationCreater();
@@ -951,20 +952,20 @@ namespace PmSoft.Optimization.DrawingProduction
                     var verticalVector = LocationHelper.GetVerticalVectorForPlaneXYZ(parallelVector, LocationHelper.XYZAxle.Z);
                     verticalVector = LocationHelper.GetVectorByQuadrantForPlaneXYZ(verticalVector, QuadrantType.OneAndTwo,LocationHelper.XYZAxle.Z);
                     verticalVector = LocationHelper.ToUnitVector(verticalVector);
-                    return midPoint + (LengthFromLine_Inch + PipeAnnotationContext.TextHeight / 2 + pipe.GetParameters("外径").First().AsDouble() / 2) * verticalVector;
+                    return midPoint + (LengthFromLine_Inch + PAContext.TextHeight / 2 + pipe.GetParameters("外径").First().AsDouble() / 2) * verticalVector;
                 default:
                     throw new NotImplementedException("暂未支持该类型的定位计算:" + Location.ToString());
             }
         }
     }
-    /// <summary>
-    /// 多管直径标注 位置类型
-    /// </summary>
-    public enum MultiPipeTagLocation
-    {
-        OnLineEdge,
-        OnLine,
-    }
+    ///// <summary>
+    ///// 多管直径标注 位置类型
+    ///// </summary>
+    //public enum MultiPipeTagLocation
+    //{
+    //    OnLineEdge,
+    //    OnLine,
+    //}
     /// <summary>
     /// 多管直径标注 参数
     /// </summary>

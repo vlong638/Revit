@@ -21,7 +21,7 @@ namespace MyRevit.MyTests.PAA
         #region Storage
         public static bool IsEditing;
         private static PAAModelCollection Collection;
-        private static CollectionStorageEntity CStorageEntity = new CollectionStorageEntity();
+        private static PAAStorageEntity CStorageEntity = new PAAStorageEntity();
         /// <summary>
         /// 取数据Collection
         /// </summary>
@@ -29,8 +29,6 @@ namespace MyRevit.MyTests.PAA
         /// <returns></returns>
         public static PAAModelCollection GetCollection(Document doc)
         {
-            //if (Collection != null)
-            //    return Collection;
             Collection = DelegateHelper.DelegateTryCatch(
                 () =>
                 {

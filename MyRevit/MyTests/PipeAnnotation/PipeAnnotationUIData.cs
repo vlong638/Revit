@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using PmSoft.Optimization.DrawingProduction.Utils;
 using MyRevit.Utilities;
+using MyRevit.MyTests.PipeAnnotation;
+using MyRevit.MyTests.PipeAnnotationTest;
 
 namespace PmSoft.Optimization.DrawingProduction
 {
@@ -32,7 +34,7 @@ namespace PmSoft.Optimization.DrawingProduction
         {
             IsSuccess = DelegateHelper.DelegateTransaction(doc, "标注族加载", () =>
             {
-                return PipeAnnotationContext.LoadFamilySymbols(doc);
+                return PAContext.LoadFamilySymbols(doc);
             });// && PipeAnnotationContext.LoadParameterOfSymbols(doc);
             if (!IsSuccess)
             {
@@ -45,7 +47,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 SettingForSingle = new SinglePipeAnnotationSettings(this);
                 SettingForMultiple = new MultiPipeAnnotationSettings(this);
                 SettingForCommon = new CommonAnnotationSettings();
-                var data = PipeAnnotationContext.GetSetting(doc);
+                var data = PAContext.GetSetting(doc);
                 var values = data.Split(Splitter.ToCharArray().First());
                 if (values.Count() >= 7)
                 {
@@ -85,7 +87,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 //0728长度过滤
                 values.Add(SettingForCommon.MinLength_Milimeter.ToString());
                 values.Add(SettingForCommon.FilterVertical.ToString());
-                PipeAnnotationContext.SaveSetting(doc, string.Join(Splitter, values));
+                PAContext.SaveSetting(doc, string.Join(Splitter, values));
                 return true;
             }));
         }

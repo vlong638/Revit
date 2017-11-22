@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MyRevit.MyTests.PipeAnnotation;
 using MyRevit.Utilities;
 using PmSoft.Optimization.DrawingProduction;
 using System;
@@ -31,10 +32,10 @@ namespace MyRevit.Entities
             //TODO0817 增加功能面板启动时获取字体高度
             TransactionHelper.DelegateTransaction(doc, "获取字体高度", () =>
             {
-                PipeAnnotationContext.LoadFamilySymbols(doc);
+                PAContext.LoadFamilySymbols(doc);
                 return true;
             });
-            PipeAnnotationContext.LoadTextHeight(doc);
+            PAContext.LoadTextHeight(doc);
 
             PipeAnnotationForm form = new PipeAnnotationForm(new PipeAnnotationCmd(uiApp));
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.Retry;

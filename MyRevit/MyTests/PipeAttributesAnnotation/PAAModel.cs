@@ -3,12 +3,13 @@ using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI.Selection;
-using MyRevit.MyTests.PipeAttributesAnnotation;
 using MyRevit.MyTests.Utilities;
 using MyRevit.MyTests.VLBase;
 using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace MyRevit.MyTests.PAA
 {
@@ -179,33 +180,41 @@ namespace MyRevit.MyTests.PAA
         /// <returns></returns>
         public static XYZ GetTextLocation(this PAATextType textType, double currentFontHeight, double verticalFix, XYZ verticalVector, XYZ start, XYZ end)
         {
-            return textType == PAATextType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + 0) * verticalVector;//verticalFix
+            switch (textType)
+            {
+                case PAATextType.OnLine:
+                    return  start + (currentFontHeight / 2) * verticalVector; //+ verticalFix) * verticalVector;
+                case PAATextType.OnEdge:
+                    return end;
+                default:
+                    throw new NotImplementedException("未支持系类定位方案");
+            }
+            //return textType == PAATextType.OnEdge ? end + (currentFontHeight / 2 + verticalFix) * verticalVector : start + (currentFontHeight + verticalFix) * verticalVector;
         }
     }
 
     public class PAAModelForSingle : VLModel
     {
-        public PAATargetType TargetType { set; get; }//标注对象
+        #region 需要存储
         public PAAAnnotationType AnnotationType { set; get; }//标记样式
+        public string AnnotationPrefix { set; get; }//离地模式前缀
         public PAALocationType LocationType { set; get; }//离地模式
         public PAATextType TextType { set; get; }//文字方式
-        public ElementId TargetId { set; get; }//标记的目标对象
         public List<ElementId> LineIds { get; set; }//线对象
+        public ElementId GroupId { get; set; }//线组对象
         public XYZ BodyEndPoint { get; set; }//干线终点
         public XYZ BodyStartPoint { get; set; }//干线起点
         public XYZ LeafEndPoint { set; get; }//支线终点
-        public XYZ TextLocation { set; get; }//文本位置
-
-
-
+        public XYZ TextLocation { set; get; }//文本定位坐标
         public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
         public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
         public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
+        #endregion
+
+        public PAATargetType TargetType { set; get; }//标注对象
+        public ElementId TargetId { set; get; }//标记的目标对象
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
-
-
-
 
         public void UpdateVectors(Line locationCurve)
         {
@@ -233,37 +242,47 @@ namespace MyRevit.MyTests.PAA
         {
             if (string.IsNullOrEmpty(data))
                 return false;
-            //try
-            //{
-            //    StringReader sr = new StringReader(data);
-            //    TargetId = sr.ReadFormatStringAsElementId();
-            //    LineIds = sr.ReadFormatStringAsElementIds();
-            //    TextNoteIds = sr.ReadFormatStringAsElementIds();
-            //    TextNoteTypeElementId = sr.ReadFormatStringAsElementId();
-            //    CSALocationType = sr.ReadFormatStringAsEnum<CSALocationType>();
-            //    TextLocations = sr.ReadFormatStringAsXYZs();
-            //    Texts = sr.ReadFormatStringAsStrings();
-            //    return true;
-            //}
-            //catch (Exception ex)
-            //{
-            //    //TODO log
-            //    return false;
-            //}
-            return true;
+            try
+            {
+                StringReader sr = new StringReader(data);
+                AnnotationType = sr.ReadFormatStringAsEnum<PAAAnnotationType>();
+                AnnotationPrefix = sr.ReadFormatString();
+                LocationType = sr.ReadFormatStringAsEnum<PAALocationType>();
+                TextType = sr.ReadFormatStringAsEnum<PAATextType>();
+                LineIds = sr.ReadFormatStringAsElementIds();
+                GroupId = sr.ReadFormatStringAsElementId();
+                BodyEndPoint = sr.ReadFormatStringAsXYZ();
+                BodyStartPoint = sr.ReadFormatStringAsXYZ();
+                LeafEndPoint = sr.ReadFormatStringAsXYZ();
+                TextLocation = sr.ReadFormatStringAsXYZ();
+                CurrentFontSizeScale = sr.ReadFormatStringAsDouble();
+                CurrentFontHeight = sr.ReadFormatStringAsDouble();
+                CurrentFontWidthScale = sr.ReadFormatStringAsDouble();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                //TODO log
+                return false;
+            }
         }
         public override string ToData()
         {
-            return "";
-            //StringBuilder sb = new StringBuilder();
-            //sb.AppendItem(TargetId);
-            //sb.AppendItem(LineIds);
-            //sb.AppendItem(TextNoteIds);
-            //sb.AppendItem(TextNoteTypeElementId);
-            //sb.AppendItem(CSALocationType);
-            //sb.AppendItem(TextLocations);
-            //sb.AppendItem(Texts);
-            //return sb.ToData();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendItem(AnnotationType);
+            sb.AppendItem(AnnotationPrefix);
+            sb.AppendItem(LocationType);
+            sb.AppendItem(TextType);
+            sb.AppendItem(LineIds);
+            sb.AppendItem(GroupId);
+            sb.AppendItem(BodyEndPoint);
+            sb.AppendItem(BodyStartPoint);
+            sb.AppendItem(LeafEndPoint);
+            sb.AppendItem(TextLocation);
+            sb.AppendItem(CurrentFontSizeScale);
+            sb.AppendItem(CurrentFontHeight);
+            sb.AppendItem(CurrentFontWidthScale);
+            return sb.ToData();
         }
         public ISelectionFilter GetFilter()
         {
@@ -310,7 +329,7 @@ namespace MyRevit.MyTests.PAA
             LeafEndPoint= BodyEndPoint + widthFoot * ParallelVector;
             //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
             //高度,宽度 取决于文本 
-            TextLocation =TextType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, BodyEndPoint, LeafEndPoint);
+            TextLocation = TextType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, BodyEndPoint, LeafEndPoint);
         }
     }
 }

@@ -24,21 +24,25 @@ namespace MyRevit.MyTests.VLBase
         public static char InnerSplitterForXYZ_Char = ',';
 
         #region SetData
-        public static void AppendItem(this StringBuilder sb, Enum e)
+        public static void AppendItem(this StringBuilder sb, Enum item)
         {
-            sb.AppendItem(e.ToString());
+            sb.AppendItem(item.ToString());
         }
-        public static void AppendItem(this StringBuilder sb, ElementId elementId)
+        public static void AppendItem(this StringBuilder sb, double item)
         {
-            sb.AppendItem(elementId.IntegerValue.ToString());
+            sb.AppendItem(item.ToString());
         }
-        public static void AppendItem(this StringBuilder sb, int i)
+        public static void AppendItem(this StringBuilder sb, ElementId item)
         {
-            sb.AppendItem(i.ToString());
+            sb.AppendItem(item.IntegerValue.ToString());
         }
-        public static void AppendItem(this StringBuilder sb, string str)
+        public static void AppendItem(this StringBuilder sb, int item)
         {
-            sb.Append(GetFormatStr(str));
+            sb.AppendItem(item.ToString());
+        }
+        public static void AppendItem(this StringBuilder sb, string item)
+        {
+            sb.Append(GetFormatStr(item));
         }
         public static void AppendItem(this StringBuilder sb, IEnumerable<ElementId> items)
         {
@@ -108,6 +112,10 @@ namespace MyRevit.MyTests.VLBase
                 str = ReadFormatString(subSR);
             }
             return ids;
+        }
+        public static double ReadFormatStringAsDouble(this StringReader sr)
+        {
+            return Convert.ToDouble(ReadFormatString(sr));
         }
         public static List<int> ReadFormatStringAsInt32s(this StringReader sr)
         {

@@ -24,9 +24,11 @@ namespace MyRevit.MyTests.PAA
                 var lineElement = doc.Create.NewDetailCurve(doc.ActiveView,line);
                 model.LineIds.Add(lineElement.Id);
             }
+            var group = doc.Create.NewGroup(model.LineIds);
+            model.GroupId = group.Id;
             //文本生成
             var tagSymbol = model.AnnotationType.GetTagFamily(doc);//获取线标注类型 
-            IndependentTag subTag = doc.Create.NewTag(doc.ActiveView, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, new XYZ(0,0,0));
+            IndependentTag subTag = doc.Create.NewTag(doc.ActiveView, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, model.TextLocation);
             subTag.TagHeadPosition = model.TextLocation;
             subTag.ChangeTypeId(tagSymbol.Id);
         }

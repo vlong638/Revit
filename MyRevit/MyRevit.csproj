@@ -134,6 +134,7 @@
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAModel.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAModelCollection.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAASet.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\PAAStorageEntity.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAViewModel.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml.cs">
       <DependentUpon>PAAWindow.xaml</DependentUpon>
@@ -144,6 +145,7 @@
     <Compile Include="MyTests\Template\Creator.cs" />
     <Compile Include="MyTests\Template\Model.cs" />
     <Compile Include="MyTests\Template\ModelCollection.cs" />
+    <Compile Include="MyTests\Template\StorageEntity.cs" />
     <Compile Include="MyTests\Template\Set.cs" />
     <Compile Include="MyTests\Template\ViewModel.cs" />
     <Compile Include="MyTests\Template\Window.xaml.cs">
