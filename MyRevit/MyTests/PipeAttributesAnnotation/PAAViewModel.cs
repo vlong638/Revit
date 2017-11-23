@@ -66,6 +66,7 @@ namespace MyRevit.MyTests.PAA
                         {
                             Model.TargetId = obj.ElementId;
                             ViewType = PAAViewType.PickSinglePipe_Location;
+                            Model.BodyStartPoint = obj.GlobalPoint;
                         }
                     }))
                         ViewType = PAAViewType.Idle;
@@ -74,14 +75,15 @@ namespace MyRevit.MyTests.PAA
                 case PAAViewType.PickSinglePipe_Location:
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
+                        //var target = Document.GetElement(Model.TargetId);
+                        //var targetLocation = target.Location as LocationCurve;
+                        //var p0 = targetLocation.Curve.GetEndPoint(0);
+                        //var p1 = targetLocation.Curve.GetEndPoint(1);
+                        //var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
+                        //Model.BodyStartPoint = pStart;
+
                         //业务逻辑处理
-                        var target = Document.GetElement(Model.TargetId);
-                        var targetLocation = target.Location as LocationCurve;
-                        var p0 = targetLocation.Curve.GetEndPoint(0);
-                        var p1 = targetLocation.Curve.GetEndPoint(1);
-                        var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, pStart).ToSameZ(pStart);
-                        Model.BodyStartPoint = pStart;
+                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, Model.BodyStartPoint).ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
                         if (pEnd == null)
                             ViewType = PAAViewType.Idle;

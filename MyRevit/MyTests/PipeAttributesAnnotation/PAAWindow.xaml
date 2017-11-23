@@ -33,7 +33,7 @@
                 <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe}"/>
                 <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct}"/>
                 <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray}"/>
-                <RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit}"/>
+                <!--<RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit}"/>-->
             </StackPanel>
         </GroupBox>
         <GroupBox Header="标记样式" Grid.Row="1">

@@ -39,9 +39,11 @@ namespace MyRevit.MyTests.PAA
         }
         public void Regenerate(Document doc, PAAModelForSingle model, Element target, XYZ offset)
         {
-            ////不是选取的文本类型 以Text的文本类型为准
-            //if (model.TextNoteTypeElementId == null)
-            //    model.TextNoteTypeElementId = (doc.GetElement(model.TextNoteIds[0]) as TextNote).TextNoteType.Id;
+            //TODO_PAA
+            //model.BodyStartPoint =;
+            //model.BodyEndPoint =;
+            //model.LeafEndPoint=;
+            //Clear(doc, model);
             //Generate(doc, model, target, offset);
         }
         public void Clear(Document doc, PAAModelForSingle model)

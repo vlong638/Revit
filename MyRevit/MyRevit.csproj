@@ -128,6 +128,8 @@
     <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
     <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdater_Edit.cs" />
+    <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdaterCommand.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAACommand.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAContext.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\PAACreator.cs" />
@@ -444,11 +446,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddIns\EarthWork.addin" />
-    <Content Include="AddIns\MyExternalApplications.addin" />
+    <Content Include="AddIns\MyExternalApplications.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\MyTestCommand.addin">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="AddIns\MyExternalCommands.addin" />
+    <Content Include="AddIns\MyExternalCommands.addin">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
     <Content Include="MyTests\EarthWork\Images\AddElement.png" />

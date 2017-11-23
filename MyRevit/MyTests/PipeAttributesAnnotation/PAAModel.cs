@@ -200,8 +200,10 @@ namespace MyRevit.MyTests.PAA
         public string AnnotationPrefix { set; get; }//离地模式前缀
         public PAALocationType LocationType { set; get; }//离地模式
         public PAATextType TextType { set; get; }//文字方式
+        public ElementId TargetId { set; get; }//目标对象
         public List<ElementId> LineIds { get; set; }//线对象
         public ElementId GroupId { get; set; }//线组对象
+        public ElementId AnnotationId { set; get; }//标注
         public XYZ BodyEndPoint { get; set; }//干线终点
         public XYZ BodyStartPoint { get; set; }//干线起点
         public XYZ LeafEndPoint { set; get; }//支线终点
@@ -212,7 +214,6 @@ namespace MyRevit.MyTests.PAA
         #endregion
 
         public PAATargetType TargetType { set; get; }//标注对象
-        public ElementId TargetId { set; get; }//标记的目标对象
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
 
@@ -249,8 +250,10 @@ namespace MyRevit.MyTests.PAA
                 AnnotationPrefix = sr.ReadFormatString();
                 LocationType = sr.ReadFormatStringAsEnum<PAALocationType>();
                 TextType = sr.ReadFormatStringAsEnum<PAATextType>();
+                TargetId = sr.ReadFormatStringAsElementId();
                 LineIds = sr.ReadFormatStringAsElementIds();
                 GroupId = sr.ReadFormatStringAsElementId();
+                AnnotationId = sr.ReadFormatStringAsElementId();
                 BodyEndPoint = sr.ReadFormatStringAsXYZ();
                 BodyStartPoint = sr.ReadFormatStringAsXYZ();
                 LeafEndPoint = sr.ReadFormatStringAsXYZ();
@@ -273,8 +276,10 @@ namespace MyRevit.MyTests.PAA
             sb.AppendItem(AnnotationPrefix);
             sb.AppendItem(LocationType);
             sb.AppendItem(TextType);
+            sb.AppendItem(TargetId);
             sb.AppendItem(LineIds);
             sb.AppendItem(GroupId);
+            sb.AppendItem(AnnotationId);
             sb.AppendItem(BodyEndPoint);
             sb.AppendItem(BodyStartPoint);
             sb.AppendItem(LeafEndPoint);
