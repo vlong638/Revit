@@ -191,8 +191,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
             catch (Exception ex)
             {
-                var logger = new TextLogger("PmLogger.txt", ApplicationPath.GetParentPathOfCurrent + @"\SysData");
-                logger.Error(ex.ToString());
+                LogHelper.Error(ex);
             }
         }
         #endregion

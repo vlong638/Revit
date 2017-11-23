@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.PAA;
 using MyRevit.Utilities;
 using System;
 using System.Linq;
@@ -8,15 +9,15 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// 梁,线,标注 位置处理 IUpdater
     /// </summary>
-    public class CompoundStructureAnnotationUpdater_Delete : IUpdater
+    public class PAAUpdater_Delete : IUpdater
     {
         static AddInId AddInId;
         static UpdaterId UpdaterId;
 
-        public CompoundStructureAnnotationUpdater_Delete(AddInId addinID)
+        public PAAUpdater_Delete(AddInId addinID)
         {
             AddInId = addinID;
-            UpdaterId = new UpdaterId(AddInId, new Guid("D56BB276-0FEE-4F0A-A5B4-3474B56654B3"));
+            UpdaterId = new UpdaterId(AddInId, new Guid("74E88A96-F15C-4A20-8E61-93A71CF50233"));
         }
 
         #region MyTestContext.GetCollection方案
@@ -26,7 +27,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             {
                 var doc = updateData.GetDocument();
                 var deletes = updateData.GetDeletedElementIds();
-                var collection = CSAContext.GetCollection(doc);
+                var collection = PAAContext.GetCollection(doc);
                 if (deletes.Count == 0)
                     return;
                 bool isDeleted = false;
@@ -34,13 +35,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 {
                     var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == deleteId.IntegerValue);
                     if (itemToDelete == null)
-                        itemToDelete = collection.Data.FirstOrDefault(c => c.LineId.IntegerValue == deleteId.IntegerValue);
-                    if (itemToDelete == null)
-                        itemToDelete = collection.Data.FirstOrDefault(c => c.TextNoteIds.FirstOrDefault(p => p.IntegerValue == deleteId.IntegerValue) != null);
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationId.IntegerValue == deleteId.IntegerValue);
                     if (itemToDelete != null)
                     {
                         collection.Data.Remove(itemToDelete);
-                        var creater = CSAContext.Creator;
+                        var creater = PAAContext.Creator;
                         creater.Clear(doc, itemToDelete);
                         isDeleted = true;
                     }
@@ -69,7 +68,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         }
         public string GetUpdaterName()
         {
-            return "CompoundStructureAnnotationUpdater_Delete";
+            return "PAAUpdater_Delete";
         }
     }
 }

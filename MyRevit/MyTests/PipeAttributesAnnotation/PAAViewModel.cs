@@ -7,6 +7,7 @@ using System.Linq;
 using Autodesk.Revit.DB;
 using MyRevit.MyTests.PipeAttributesAnnotation;
 using System.Collections.Generic;
+using PmSoft.Common.RevitClass.Utils;
 
 namespace MyRevit.MyTests.PAA
 {
@@ -38,6 +39,7 @@ namespace MyRevit.MyTests.PAA
         {
             Model = new PAAModelForSingle("");
             View = new PAAWindow(this);
+            AnnotationType = PAAAnnotationType.SPL;
         }
 
         public override bool IsIdling { get { return ViewType == PAAViewType.Idle; } }
@@ -94,11 +96,13 @@ namespace MyRevit.MyTests.PAA
                     Execute();
                     break;
                 case PAAViewType.GenerateSinglePipe:
+                    //更新必要参数
+                    UpdateModelAnnotationPrefix();
                     //获取族
                     Family family = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                     {
-                        family = Model.AnnotationType.GetTagFamily(Document).Family;
+                        family = Model.AnnotationType.GetAnnotationFamily(Document).Family;
                         return true;
                     })))
                     //TODO SHOW 加载族内信息失败
@@ -117,14 +121,27 @@ namespace MyRevit.MyTests.PAA
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
                             var element = Document.GetElement(Model.TargetId);
+
+                            #region 共享参数设置
+                            if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
+                            {
+                                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
+                                var parameterHelper = new ShareParameter(shareFilePath);
+                                parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
+                            }
+                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
+                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            #endregion
+
                             var Collection = PAAContext.GetCollection(Document);
-                            var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue==Model.TargetId.IntegerValue);//避免重复生成
+                            var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue).ToList();//避免重复生成
                             if (existedModels != null)
                             {
-                                foreach (var existedModel in existedModels)
+                                for (int i = existedModels.Count() - 1; i >= 0; i--)
                                 {
-                                    Collection.Data.Remove(existedModel);
-                                    PAAContext.Creator.Clear(Document, existedModel);
+                                    Collection.Data.Remove(existedModels[i]);
+                                    PAAContext.Creator.Clear(Document, existedModels[i]);
                                 }
                             }
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
@@ -191,7 +208,6 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 Model.AnnotationType = value;
-                UpdateModelAnnotationPrefix();
                 RaisePropertyChanged("AnnotationType_SPL");
                 RaisePropertyChanged("AnnotationType_SL");
                 RaisePropertyChanged("AnnotationType_PL");
@@ -278,7 +294,6 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 centerPrefix = value;
-                UpdateModelAnnotationPrefix();
                 RaisePropertyChanged("SPLPreview");
                 RaisePropertyChanged("SLPreview");
             }
@@ -305,7 +320,6 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 topPrefix = value;
-                UpdateModelAnnotationPrefix();
                 RaisePropertyChanged("SPLPreview");
                 RaisePropertyChanged("SLPreview");
             }
@@ -322,7 +336,6 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 bottomPrefix = value;
-                UpdateModelAnnotationPrefix();
                 RaisePropertyChanged("SPLPreview");
                 RaisePropertyChanged("SLPreview");
             }

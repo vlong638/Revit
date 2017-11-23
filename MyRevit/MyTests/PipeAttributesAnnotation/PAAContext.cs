@@ -1,7 +1,5 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.Utilities;
-using PmSoft.Optimization.DrawingProduction;
-using System.Drawing;
 
 namespace MyRevit.MyTests.PAA
 {
@@ -105,5 +103,12 @@ namespace MyRevit.MyTests.PAA
 
         //字体
         public static FontManagement FontManagement = new FontManagement();
+
+        //共享参数
+        public static string SharedParameterGroupName = "管道特性标注";
+        public static string SharedParameterPL = "管道离地高度";
+        public static string SharedParameterOffset = "偏移量";
+        public static string SharedParameterSystem = "系统缩写";
+        public static string SharedParameterDiameter= "直径";
     }
 }

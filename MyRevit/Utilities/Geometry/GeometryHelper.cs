@@ -1,9 +1,10 @@
 ﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.BeamAlignToFloor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyRevit.MyTests.BeamAlignToFloor
+namespace MyRevit.MyTests.Utilities
 {
     /// <summary>
     /// 几何处理帮助类
@@ -29,12 +30,12 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <summary>
         /// 线段相交判断,首先是矩形重叠判断,在重叠时进行跨立判断(相互跨立)
         /// </summary>
-        public static bool VL_IsIntersect(this Line line1, Line line2)
+        public static bool VL_IsIntersect(this Line boundLine1, Line boundLine2)
         {
-            var p1_0 = line1.GetEndPoint(0);
-            var p1_1 = line1.GetEndPoint(1);
-            var p2_0 = line2.GetEndPoint(0);
-            var p2_1 = line2.GetEndPoint(1);
+            var p1_0 = boundLine1.GetEndPoint(0);
+            var p1_1 = boundLine1.GetEndPoint(1);
+            var p2_0 = boundLine2.GetEndPoint(0);
+            var p2_1 = boundLine2.GetEndPoint(1);
             //先矩形相交
             if (!VL_IsRectangleCrossed(p1_0, p1_1, p2_0, p2_1))
                 return false;

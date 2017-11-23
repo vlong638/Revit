@@ -2,7 +2,7 @@
 <RevitAddIns>
   <AddIn Type="Application">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
-    <AddInId>B593F2C4-F38C-41D7-AE2C-369BB0149D90</AddInId>
+    <AddInId>7B89781C-4AC0-4BD3-B18D-CB731DA85E0F</AddInId>
     <Name>VLApplication</Name>
     <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfCSAUpdater_Edit</FullClassName>
     <VendorId>VL</VendorId>

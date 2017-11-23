@@ -9,6 +9,7 @@ using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace MyRevit.MyTests.PAA
@@ -108,9 +109,9 @@ namespace MyRevit.MyTests.PAA
     static class PAAAnnotationTypeEx
     {
         /// <summary>
-        /// 获取
+        /// 获取 标注对应的族
         /// </summary>
-        public static FamilySymbol GetTagFamily(this PAAAnnotationType type,Document doc)
+        public static FamilySymbol GetAnnotationFamily(this PAAAnnotationType type,Document doc)
         {
             switch (type)
             {
@@ -124,6 +125,23 @@ namespace MyRevit.MyTests.PAA
                     throw new NotImplementedException("暂不支持该类型");
             }
         }
+        ///// <summary>
+        ///// 获取 标注文本
+        ///// </summary>
+        //public static string GetAnnotationText(this PAAAnnotationType type,string s,string p,string l)
+        //{
+        //    switch (type)
+        //    {
+        //        case PAAAnnotationType.SPL:
+        //            return string.Format("{0} {1} {2}", s, p, l );
+        //        case PAAAnnotationType.SL:
+        //            return string.Format("{0} {1}", s, l );
+        //        case PAAAnnotationType.PL:
+        //            return string.Format("{0} {1}", p, l);
+        //        default:
+        //            throw new NotImplementedException("暂不支持该类型");
+        //    }
+        //}
     }
     /// <summary>
     /// 离地模式
@@ -142,6 +160,26 @@ namespace MyRevit.MyTests.PAA
         /// 底部离地
         /// </summary>
         Bottom,
+    }
+    static class PAALocationTypeEx
+    {
+        /// <summary>
+        /// 获取 标注的离地高度
+        /// </summary>
+        public static double GetLocationValue(this PAALocationType type, double offset,double diameter)
+        {
+            switch (type)
+            {
+                case PAALocationType.Center:
+                    return offset + diameter / 2;
+                case PAALocationType.Top:
+                    return offset;
+                case PAALocationType.Bottom:
+                    return offset - diameter / 2;
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
     }
     /// <summary>
     /// 文字方式
@@ -202,12 +240,13 @@ namespace MyRevit.MyTests.PAA
         public PAATextType TextType { set; get; }//文字方式
         public ElementId TargetId { set; get; }//目标对象
         public List<ElementId> LineIds { get; set; }//线对象
-        public ElementId GroupId { get; set; }//线组对象
+        //public ElementId GroupId { get; set; }//线组对象
         public ElementId AnnotationId { set; get; }//标注
+        public XYZ TargetLocation { get; set; }//目标定位,以中点为准
         public XYZ BodyEndPoint { get; set; }//干线终点
         public XYZ BodyStartPoint { get; set; }//干线起点
         public XYZ LeafEndPoint { set; get; }//支线终点
-        public XYZ TextLocation { set; get; }//文本定位坐标
+        public XYZ AnnotationLocation { set; get; }//文本定位坐标
         public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
         public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
         public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
@@ -252,12 +291,13 @@ namespace MyRevit.MyTests.PAA
                 TextType = sr.ReadFormatStringAsEnum<PAATextType>();
                 TargetId = sr.ReadFormatStringAsElementId();
                 LineIds = sr.ReadFormatStringAsElementIds();
-                GroupId = sr.ReadFormatStringAsElementId();
+                //GroupId = sr.ReadFormatStringAsElementId();
                 AnnotationId = sr.ReadFormatStringAsElementId();
+                TargetLocation = sr.ReadFormatStringAsXYZ();
                 BodyEndPoint = sr.ReadFormatStringAsXYZ();
                 BodyStartPoint = sr.ReadFormatStringAsXYZ();
                 LeafEndPoint = sr.ReadFormatStringAsXYZ();
-                TextLocation = sr.ReadFormatStringAsXYZ();
+                AnnotationLocation = sr.ReadFormatStringAsXYZ();
                 CurrentFontSizeScale = sr.ReadFormatStringAsDouble();
                 CurrentFontHeight = sr.ReadFormatStringAsDouble();
                 CurrentFontWidthScale = sr.ReadFormatStringAsDouble();
@@ -278,12 +318,13 @@ namespace MyRevit.MyTests.PAA
             sb.AppendItem(TextType);
             sb.AppendItem(TargetId);
             sb.AppendItem(LineIds);
-            sb.AppendItem(GroupId);
+            //sb.AppendItem(GroupId);
             sb.AppendItem(AnnotationId);
+            sb.AppendItem(TargetLocation);
             sb.AppendItem(BodyEndPoint);
             sb.AppendItem(BodyStartPoint);
             sb.AppendItem(LeafEndPoint);
-            sb.AppendItem(TextLocation);
+            sb.AppendItem(AnnotationLocation);
             sb.AppendItem(CurrentFontSizeScale);
             sb.AppendItem(CurrentFontHeight);
             sb.AppendItem(CurrentFontWidthScale);
@@ -317,24 +358,32 @@ namespace MyRevit.MyTests.PAA
             var locationCurve = TargetType.GetLine(element);
             UpdateVectors(locationCurve);
             //干线起始点 
-            if (BodyStartPoint!=null)
+            var lineBound = Line.CreateBound(BodyStartPoint, BodyEndPoint);
+            if (lineBound.VL_IsIntersect(locationCurve))
             {
-                var line = Line.CreateUnbound(BodyStartPoint, BodyEndPoint);
-                IntersectionResultArray result;
-                var setResult = line.Intersect(locationCurve,out result);
-                if (result.Size > 0)//相交
-                {
-                    BodyStartPoint = result.get_Item(0).XYZPoint;
-                }
-                else { } //否则不改变原始坐标,仅重置
+                var intersectionPoints = lineBound.VL_GetIntersectedOrContainedPoints(locationCurve);
+                if (intersectionPoints.Count == 1)
+                    BodyStartPoint = intersectionPoints.FirstOrDefault().ToSameZ(BodyStartPoint);
             }
-            else
-                BodyStartPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
+            else { } //否则不改变原始坐标,仅重置
+            //if (BodyStartPoint!=null)
+            //{
+            //    var lineBound = Line.CreateBound(BodyStartPoint, BodyEndPoint);
+            //    if (lineBound.VL_IsIntersect(locationCurve))
+            //    {
+            //        var intersectionPoints = lineBound.VL_GetIntersectedOrContainedPoints(locationCurve);
+            //        if (intersectionPoints.Count == 1)
+            //            BodyStartPoint = intersectionPoints.FirstOrDefault();
+            //    }
+            //    else { } //否则不改变原始坐标,仅重置
+            //}
+            //else
+            //    BodyStartPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
             //支线终点
             LeafEndPoint= BodyEndPoint + widthFoot * ParallelVector;
             //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
             //高度,宽度 取决于文本 
-            TextLocation = TextType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, BodyEndPoint, LeafEndPoint);
+            AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, BodyEndPoint, LeafEndPoint);
         }
     }
 }
