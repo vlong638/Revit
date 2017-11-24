@@ -111,7 +111,7 @@ namespace MyRevit.MyTests.PAA
         /// <summary>
         /// 获取 标注对应的族
         /// </summary>
-        public static FamilySymbol GetAnnotationFamily(this PAAAnnotationType type,Document doc)
+        public static FamilySymbol GetAnnotationFamilySymbol(this PAAAnnotationType type,Document doc)
         {
             switch (type)
             {
@@ -125,23 +125,22 @@ namespace MyRevit.MyTests.PAA
                     throw new NotImplementedException("暂不支持该类型");
             }
         }
-        ///// <summary>
-        ///// 获取 标注文本
-        ///// </summary>
-        //public static string GetAnnotationText(this PAAAnnotationType type,string s,string p,string l)
-        //{
-        //    switch (type)
-        //    {
-        //        case PAAAnnotationType.SPL:
-        //            return string.Format("{0} {1} {2}", s, p, l );
-        //        case PAAAnnotationType.SL:
-        //            return string.Format("{0} {1}", s, l );
-        //        case PAAAnnotationType.PL:
-        //            return string.Format("{0} {1}", p, l);
-        //        default:
-        //            throw new NotImplementedException("暂不支持该类型");
-        //    }
-        //}
+
+        /// <summary>
+        /// 获取 标注对应的族
+        /// </summary>
+        public static FamilySymbol GetLineFamily(this PAATextType type, Document doc)
+        {
+            switch (type)
+            {
+                case PAATextType.OnLine:
+                    return PAAContext.Get_MultipleLineOnLine(doc);
+                case PAATextType.OnEdge:
+                    return PAAContext.Get_MultipleLineOnEdge(doc);
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
     }
     /// <summary>
     /// 离地模式
@@ -231,22 +230,34 @@ namespace MyRevit.MyTests.PAA
         }
     }
 
-    public class PAAModelForSingle : VLModel
+    public enum ModelType
+    {
+        Single,
+        Multiple,
+    }
+
+    public class PAAModel : VLModel
     {
         #region 需要存储
-        public PAAAnnotationType AnnotationType { set; get; }//标记样式
-        public string AnnotationPrefix { set; get; }//离地模式前缀
-        public PAALocationType LocationType { set; get; }//离地模式
-        public PAATextType TextType { set; get; }//文字方式
+        public ModelType ModelType { set; get; }
+        //Single
         public ElementId TargetId { set; get; }//目标对象
         public List<ElementId> LineIds { get; set; }//线对象
-        //public ElementId GroupId { get; set; }//线组对象
         public ElementId AnnotationId { set; get; }//标注
-        public XYZ TargetLocation { get; set; }//目标定位,以中点为准
+        //Multiple
+        public List<ElementId> TargetIds { set; get; }//目标对象
+        public ElementId LineId { get; set; }//线对象
+        public List<ElementId> AnnotationIds { set; get; }//标注
         public XYZ BodyEndPoint { get; set; }//干线终点
         public XYZ BodyStartPoint { get; set; }//干线起点
         public XYZ LeafEndPoint { set; get; }//支线终点
         public XYZ AnnotationLocation { set; get; }//文本定位坐标
+        //Common
+        public PAAAnnotationType AnnotationType { set; get; }//标记样式
+        public string AnnotationPrefix { set; get; }//离地模式前缀
+        public PAALocationType LocationType { set; get; }//离地模式
+        public PAATextType TextType { set; get; }//文字方式
+        public XYZ TargetLocation { get; set; }//目标定位, 单管以中点为准 多管以最上管道的中点为准
         public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
         public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
         public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
@@ -255,6 +266,22 @@ namespace MyRevit.MyTests.PAA
         public PAATargetType TargetType { set; get; }//标注对象
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
+        public FamilySymbol AnnotationFamily { set; get; }//标注族
+        public FamilySymbol LineFamily { set; get; }//线族
+
+
+        internal bool CheckParallel(Document document)
+        {
+            var curves = TargetIds.Select(c => (document.GetElement(c).Location as LocationCurve).Curve as Line);
+            XYZ verticalVector = curves.First().Direction;
+            foreach (var curve in curves)
+            {
+                var crossProduct = curve.Direction.CrossProduct(verticalVector);
+                if (!crossProduct.X.IsMiniValue() || !crossProduct.Y.IsMiniValue())
+                    return false;
+            }
+            return true;
+        }
 
         public void UpdateVectors(Line locationCurve)
         {
@@ -271,10 +298,10 @@ namespace MyRevit.MyTests.PAA
             ParallelVector = parallelVector;
         }
 
-        public PAAModelForSingle() : base("")
+        public PAAModel() : base("")
         {
         }
-        public PAAModelForSingle(string data) : base(data)
+        public PAAModel(string data) : base(data)
         {
         }
 
@@ -285,19 +312,29 @@ namespace MyRevit.MyTests.PAA
             try
             {
                 StringReader sr = new StringReader(data);
+                ModelType = sr.ReadFormatStringAsEnum<ModelType>();
+                switch (ModelType)
+                {
+                    case ModelType.Single:
+                        TargetId = sr.ReadFormatStringAsElementId();
+                        LineIds = sr.ReadFormatStringAsElementIds();
+                        AnnotationId = sr.ReadFormatStringAsElementId();
+                        break;
+                    case ModelType.Multiple:
+                        TargetIds = sr.ReadFormatStringAsElementIds();
+                        LineId = sr.ReadFormatStringAsElementId();
+                        AnnotationIds= sr.ReadFormatStringAsElementIds();
+                        BodyEndPoint = sr.ReadFormatStringAsXYZ();
+                        BodyStartPoint = sr.ReadFormatStringAsXYZ();
+                        LeafEndPoint = sr.ReadFormatStringAsXYZ();
+                        AnnotationLocation = sr.ReadFormatStringAsXYZ();
+                        break;
+                }
                 AnnotationType = sr.ReadFormatStringAsEnum<PAAAnnotationType>();
                 AnnotationPrefix = sr.ReadFormatString();
                 LocationType = sr.ReadFormatStringAsEnum<PAALocationType>();
                 TextType = sr.ReadFormatStringAsEnum<PAATextType>();
-                TargetId = sr.ReadFormatStringAsElementId();
-                LineIds = sr.ReadFormatStringAsElementIds();
-                //GroupId = sr.ReadFormatStringAsElementId();
-                AnnotationId = sr.ReadFormatStringAsElementId();
                 TargetLocation = sr.ReadFormatStringAsXYZ();
-                BodyEndPoint = sr.ReadFormatStringAsXYZ();
-                BodyStartPoint = sr.ReadFormatStringAsXYZ();
-                LeafEndPoint = sr.ReadFormatStringAsXYZ();
-                AnnotationLocation = sr.ReadFormatStringAsXYZ();
                 CurrentFontSizeScale = sr.ReadFormatStringAsDouble();
                 CurrentFontHeight = sr.ReadFormatStringAsDouble();
                 CurrentFontWidthScale = sr.ReadFormatStringAsDouble();
@@ -312,19 +349,29 @@ namespace MyRevit.MyTests.PAA
         public override string ToData()
         {
             StringBuilder sb = new StringBuilder();
+            sb.AppendItem(ModelType);
+            switch (ModelType)
+            {
+                case ModelType.Single:
+                    sb.AppendItem(TargetId);
+                    sb.AppendItem(LineIds);
+                    sb.AppendItem(AnnotationId);
+                    break;
+                case ModelType.Multiple:
+                    sb.AppendItem(TargetIds);
+                    sb.AppendItem(LineId);
+                    sb.AppendItem(AnnotationIds);
+                    sb.AppendItem(BodyEndPoint);
+                    sb.AppendItem(BodyStartPoint);
+                    sb.AppendItem(LeafEndPoint);
+                    sb.AppendItem(AnnotationLocation);
+                    break;
+            }
             sb.AppendItem(AnnotationType);
             sb.AppendItem(AnnotationPrefix);
             sb.AppendItem(LocationType);
             sb.AppendItem(TextType);
-            sb.AppendItem(TargetId);
-            sb.AppendItem(LineIds);
-            //sb.AppendItem(GroupId);
-            sb.AppendItem(AnnotationId);
             sb.AppendItem(TargetLocation);
-            sb.AppendItem(BodyEndPoint);
-            sb.AppendItem(BodyStartPoint);
-            sb.AppendItem(LeafEndPoint);
-            sb.AppendItem(AnnotationLocation);
             sb.AppendItem(CurrentFontSizeScale);
             sb.AppendItem(CurrentFontHeight);
             sb.AppendItem(CurrentFontWidthScale);
@@ -366,19 +413,6 @@ namespace MyRevit.MyTests.PAA
                     BodyStartPoint = intersectionPoints.FirstOrDefault().ToSameZ(BodyStartPoint);
             }
             else { } //否则不改变原始坐标,仅重置
-            //if (BodyStartPoint!=null)
-            //{
-            //    var lineBound = Line.CreateBound(BodyStartPoint, BodyEndPoint);
-            //    if (lineBound.VL_IsIntersect(locationCurve))
-            //    {
-            //        var intersectionPoints = lineBound.VL_GetIntersectedOrContainedPoints(locationCurve);
-            //        if (intersectionPoints.Count == 1)
-            //            BodyStartPoint = intersectionPoints.FirstOrDefault();
-            //    }
-            //    else { } //否则不改变原始坐标,仅重置
-            //}
-            //else
-            //    BodyStartPoint = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
             //支线终点
             LeafEndPoint= BodyEndPoint + widthFoot * ParallelVector;
             //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽

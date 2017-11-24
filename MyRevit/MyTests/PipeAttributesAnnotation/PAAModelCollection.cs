@@ -7,7 +7,7 @@ namespace MyRevit.MyTests.PAA
     /// <summary>
     /// Model数据集合
     /// </summary>
-    public class PAAModelCollection : VLModelCollectionBase<PAAModelForSingle>
+    public class PAAModelCollection : VLModelCollectionBase<PAAModel>
     {
         public PAAModelCollection(string data) : base(data)
         {

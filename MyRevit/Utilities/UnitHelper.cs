@@ -75,4 +75,15 @@ namespace MyRevit.Utilities
         }
         #endregion
     }
+
+    public static class UnitHelperEx
+    {
+        #region Double
+        public static double MiniValueForXYZ = 0.001;
+        public static bool IsMiniValue(this double value)
+        {
+            return Math.Abs(value) < MiniValueForXYZ;
+        } 
+        #endregion
+    }
 }

@@ -33,11 +33,11 @@ namespace MyRevit.MyTests.PAA
         PickMultiplePipes,//选择多管
     }
 
-    public class PAAViewModel : VLViewModel<PAAModelForSingle, PAAWindow, PAAViewType>
+    public class PAAViewModel : VLViewModel<PAAModel, PAAWindow, PAAViewType>
     {
         public PAAViewModel(UIApplication app) : base(app)
         {
-            Model = new PAAModelForSingle("");
+            Model = new PAAModel("");
             View = new PAAWindow(this);
             AnnotationType = PAAAnnotationType.SPL;
         }
@@ -77,13 +77,6 @@ namespace MyRevit.MyTests.PAA
                 case PAAViewType.PickSinglePipe_Location:
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
-                        //var target = Document.GetElement(Model.TargetId);
-                        //var targetLocation = target.Location as LocationCurve;
-                        //var p0 = targetLocation.Curve.GetEndPoint(0);
-                        //var p1 = targetLocation.Curve.GetEndPoint(1);
-                        //var pStart = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
-                        //Model.BodyStartPoint = pStart;
-
                         //业务逻辑处理
                         var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, Model.BodyStartPoint).ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
@@ -99,41 +92,31 @@ namespace MyRevit.MyTests.PAA
                     //更新必要参数
                     UpdateModelAnnotationPrefix();
                     //获取族
-                    Family family = null;
+                    FamilySymbol annotationFamily = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                     {
-                        family = Model.AnnotationType.GetAnnotationFamily(Document).Family;
+                        annotationFamily = Model.AnnotationType.GetAnnotationFamilySymbol(Document);
+                        Model.AnnotationFamily = annotationFamily;
                         return true;
                     })))
-                    //TODO SHOW 加载族内信息失败
                     {
+                        ShowMessage("加载功能所需的族失败");
                         ViewType = PAAViewType.Idle;
                         Execute();
+                        return;
                     }
                     //准备族内参数
                     if (!PAAContext.FontManagement.IsCurrentFontSettled)
                     {
-                        var familyDoc = Document.EditFamily(family);
+                        var familyDoc = Document.EditFamily(annotationFamily.Family);
                         var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
                         var textElementType = textElement.Symbol as TextElementType;
                         PAAContext.FontManagement.SetCurrentFont(textElementType);
                     }
+                    //生成处理
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
-                            var element = Document.GetElement(Model.TargetId);
-
-                            #region 共享参数设置
-                            if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
-                            {
-                                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
-                                var parameterHelper = new ShareParameter(shareFilePath);
-                                parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
-                            }
-                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
-                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
-                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
-                            #endregion
-
+                            #region 生成处理
                             var Collection = PAAContext.GetCollection(Document);
                             var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue).ToList();//避免重复生成
                             if (existedModels != null)
@@ -147,9 +130,24 @@ namespace MyRevit.MyTests.PAA
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
                             Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                             Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
-                            PAAContext.Creator.Generate(Document, Model, element);
+                            if (!PAAContext.Creator.Generate(Document, Model))
+                                return false;
                             Collection.Data.Add(Model);
-                            Collection.Save(Document);
+                            Collection.Save(Document); 
+                            #endregion
+
+                            #region 共享参数设置
+                            var element = Document.GetElement(Model.TargetId);
+                            if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
+                            {
+                                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
+                                var parameterHelper = new ShareParameter(shareFilePath);
+                                parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
+                            }
+                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
+                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            #endregion
                             return true;
                         })))
                         ViewType = PAAViewType.PickSinglePipe_Pipe;
@@ -157,9 +155,115 @@ namespace MyRevit.MyTests.PAA
                         ViewType = PAAViewType.Idle;
                     Execute();
                     break;
+                case PAAViewType.PickMultiplePipes:
+                    View.Close();
+                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    {
+                        //业务逻辑处理
+                        //选择符合类型的过滤
+                        var targetType = Model.GetFilter();
+                        var targetElementIds = UIDocument.Selection.PickObjects(ObjectType.Element, targetType, "请选择需要标注的管道").Select(c => c.ElementId);
+                        if (targetElementIds != null && targetElementIds.Count() > 0)
+                        {
+                            if (targetElementIds.Count() < 2)
+                            {
+                                ShowMessage("多管直径标注需选择两个以上的管道");
+                                ViewType = PAAViewType.Idle;
+                                Execute();
+                                return;
+                            }
+                            Model.TargetIds = new List<ElementId>();
+                            Model.TargetIds.AddRange(targetElementIds);
+                        }
+                    }))
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    //平行检测
+                    if (!Model.CheckParallel(Document))
+                    {
+                        ShowMessage("多管的管道需为平行的");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    //更新必要参数
+                    UpdateModelAnnotationPrefix();
+                    //获取族
+                    annotationFamily = null;
+                    if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
+                    {
+                        annotationFamily = Model.AnnotationType.GetAnnotationFamilySymbol(Document);
+                        Model.AnnotationFamily = annotationFamily;
+                        Model.LineFamily = Model.TextType.GetLineFamily(Document);
+                        return true;
+                    })))
+                    {
+                        ShowMessage("加载功能所需的族失败");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    //准备族内参数
+                    if (!PAAContext.FontManagement.IsCurrentFontSettled)
+                    {
+                        var familyDoc = Document.EditFamily(annotationFamily.Family);
+                        var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                        var textElementType = textElement.Symbol as TextElementType;
+                        PAAContext.FontManagement.SetCurrentFont(textElementType);
+                    }
+                    //生成处理
+                    if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
+                    {
+                        #region 生成处理
+                        var Collection = PAAContext.GetCollection(Document);
+                        var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue).ToList();//避免重复生成
+                        if (existedModels != null)
+                        {
+                            for (int i = existedModels.Count() - 1; i >= 0; i--)
+                            {
+                                Collection.Data.Remove(existedModels[i]);
+                                PAAContext.Creator.Clear(Document, existedModels[i]);
+                            }
+                        }
+                        Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
+                        Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
+                        Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
+                        PAAContext.Creator.Generate(Document, Model);
+                        Collection.Data.Add(Model);
+                        Collection.Save(Document); 
+                        #endregion
+
+                        #region 共享参数设置
+                        foreach (var TargetId in Model.TargetIds)
+                        {
+                            var element = Document.GetElement(TargetId);
+                            if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
+                            {
+                                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
+                                var parameterHelper = new ShareParameter(shareFilePath);
+                                parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
+                            }
+                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
+                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                        }
+                        #endregion
+                        return true;
+                    })))
+                        ViewType = PAAViewType.Idle;
+                    Execute();
+                    break;
                 default:
                     throw new NotImplementedException("功能未实现");
             }
+        }
+
+        private static void ShowMessage(string msg)
+        {
+            throw new NotImplementedException("");
         }
 
         #region RatioButtons

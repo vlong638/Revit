@@ -19,11 +19,6 @@ namespace PmSoft.Optimization.DrawingProduction
         public static VLUnitType UnitType = VLUnitType.millimeter;
 
         public static double MiniValueForXYZ = 0.001;
-        /// <summary>
-        /// 检测是否是极小值,XYZ经常出现(0,0,0) 其中0可能是某些小于0.001的极小值
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         public static bool IsMiniValue(double value)
         {
             return Math.Abs(value) < MiniValueForXYZ;

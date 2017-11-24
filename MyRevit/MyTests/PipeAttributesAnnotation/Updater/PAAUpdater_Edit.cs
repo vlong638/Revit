@@ -38,7 +38,7 @@ namespace MyRevit.MyTests.PAA
                 List<int> movedEntities = new List<int>();
                 foreach (var changeId in edits)
                 {
-                    PAAModelForSingle model = null;
+                    PAAModel model = null;
                     //if (VLConstraintsForCSA.Doc == null)
                     //    VLConstraintsForCSA.Doc = document;
 
@@ -64,7 +64,7 @@ namespace MyRevit.MyTests.PAA
                         model.BodyStartPoint += offset;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
-                        PAAContext.Creator.Regenerate(document, model, target);
+                        PAAContext.Creator.RegenerateSingle(document, model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                     }
@@ -88,7 +88,7 @@ namespace MyRevit.MyTests.PAA
                         var offset = annotation.TagHeadPosition - model.AnnotationLocation;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
-                        PAAContext.Creator.Regenerate(document, model, target);
+                        PAAContext.Creator.RegenerateSingle(document, model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                     }

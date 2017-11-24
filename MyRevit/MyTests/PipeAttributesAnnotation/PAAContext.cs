@@ -99,6 +99,22 @@ namespace MyRevit.MyTests.PAA
                 _SLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+离地).rfa", "管道尺寸标记(系统+离地)", "管道尺寸标记");
             return _SLTag;
         }
+
+        private static FamilySymbol _MultipleLineOnEdge = null;
+        public static FamilySymbol Get_MultipleLineOnEdge(Document doc)
+        {
+            if (_MultipleLineOnEdge == null || !_MultipleLineOnEdge.IsValidObject)
+                _MultipleLineOnEdge = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在右端");
+            return _MultipleLineOnEdge;
+        }
+
+        private static FamilySymbol _MultipleLineOnLine = null;
+        public static FamilySymbol Get_MultipleLineOnLine(Document doc)
+        {
+            if (_MultipleLineOnLine == null || !_MultipleLineOnLine.IsValidObject)
+                _MultipleLineOnLine = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在线上");
+            return _MultipleLineOnLine;
+        }
         #endregion
 
         //字体
