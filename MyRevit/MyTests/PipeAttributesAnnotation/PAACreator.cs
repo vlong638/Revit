@@ -230,25 +230,26 @@ namespace MyRevit.MyTests.PAA
         }
         #endregion
 
-        public bool Generate(PAAModel model, XYZ offset = null)
+        public bool Generate(PAAModel model)
         {
             switch (model.ModelType)
             {
                 case ModelType.Single:
-                    return GenerateSingle(model, offset);
+                    return GenerateSingle(model);
                 case ModelType.Multiple:
-                    return GenerateMultiple(model, offset);
+                    return GenerateMultiple(model);
                 default:
                     return false;
             }
         }
 
-        private bool GenerateMultiple(PAAModel model, XYZ offset)
+        private bool GenerateMultiple(PAAModel model)
         {
             Document doc = model.Document;
             View view = doc.ActiveView;
-            var isRegenerate = offset != null;
-            model.CalculateLocations(offset);
+            model.CalculateLocations();
+            if (model.IsRegenerate)
+                model.Clear();
             XYZ parallelVector = model.ParallelVector;
             XYZ verticalVector = model.VerticalVector;
             var pipeAndNodePoints = model.PipeAndNodePoints;
@@ -256,8 +257,9 @@ namespace MyRevit.MyTests.PAA
             FamilyInstance line = doc.Create.NewFamilyInstance(model.TargetLocation, model.GetLineFamily(doc), view);
             //线 旋转处理
             LocationPoint locationPoint = line.Location as LocationPoint;
-            if (locationPoint != null)
-                locationPoint.RotateByXY(model.TargetLocation, verticalVector.X.IsMiniValue() ? new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z) : verticalVector);
+            locationPoint.RotateByXY(model.TargetLocation, model.VerticalVector);
+            //if (locationPoint != null)
+            //    locationPoint.RotateByXY(model.TargetLocation, verticalVector.X.IsMiniValue() ? new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z) : verticalVector);
             model.LineId = line.Id;
             UpdateLineParameters(model, pipeAndNodePoints, line, verticalVector);
             //标注 创建
@@ -273,7 +275,7 @@ namespace MyRevit.MyTests.PAA
             return true;
         }
 
-        private static bool GenerateSingle(PAAModel model, XYZ offset)
+        private static bool GenerateSingle(PAAModel model)
         {
             Document doc = model.Document;
             //主体
@@ -285,7 +287,7 @@ namespace MyRevit.MyTests.PAA
             model.TargetLocation = pMiddle;
             //线生成
             List<Line> lines = new List<Line>();
-            model.CalculateLocations(offset);//计算内容定位
+            model.CalculateLocations();//计算内容定位
             lines.Add(Line.CreateBound(model.BodyStartPoint, model.BodyEndPoint));//竖干线
             lines.Add(Line.CreateBound(model.BodyEndPoint, model.LeafEndPoint));//斜支线
             model.LineIds = new List<ElementId>();
@@ -308,37 +310,11 @@ namespace MyRevit.MyTests.PAA
         //    //PAAContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         //}
 
-        public void RegenerateSingle(PAAModel model)
+        public void Regenerate(PAAModel model)
         {
-            Clear(model);
+            if (model.ModelType == ModelType.Single)
+                model.Clear();
             Generate(model);
-        }
-        public void Clear(PAAModel model)
-        {
-            Document doc = model.Document;
-            switch (model.ModelType)
-            {
-                case ModelType.Single:
-                    //删除线
-                    foreach (var item in model.LineIds)
-                        if (doc.GetElement(item) != null)
-                            doc.Delete(item);
-                    //删除标注
-                    if (doc.GetElement(model.AnnotationId) != null)
-                        doc.Delete(model.AnnotationId);
-                    break;
-                case ModelType.Multiple:
-                    //清理线族
-                    if (doc.GetElement(model.LineId) != null)
-                        doc.Delete(model.LineId);
-                    //清理标注
-                    foreach (var item in model.AnnotationIds)
-                        if (doc.GetElement(item) != null)
-                            doc.Delete(item);
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

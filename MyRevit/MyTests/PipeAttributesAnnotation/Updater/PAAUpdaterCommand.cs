@@ -32,6 +32,7 @@ namespace MyRevit.MyTests.PAA
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管道
                     new ElementCategoryFilter(BuiltInCategory.OST_DuctCurves),//风管
                     new ElementCategoryFilter(BuiltInCategory.OST_CableTray),//桥架
+                    new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线族
                     //new ElementCategoryFilter(BuiltInCategory.OST_IOSDetailGroups),//线组
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
                     new ElementCategoryFilter(BuiltInCategory.OST_DuctTags),//标注
@@ -47,6 +48,7 @@ namespace MyRevit.MyTests.PAA
                    new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管道
                     new ElementCategoryFilter(BuiltInCategory.OST_DuctCurves),//风管
                     new ElementCategoryFilter(BuiltInCategory.OST_CableTray),//桥架
+                    new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线族
                     //new ElementCategoryFilter(BuiltInCategory.OST_IOSDetailGroups),//线组
                     new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
                     new ElementCategoryFilter(BuiltInCategory.OST_DuctTags),//标注

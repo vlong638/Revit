@@ -18,6 +18,7 @@ namespace MyRevit.MyTests.PAA
 
         #region Storage
         public static bool IsEditing;
+        public static bool IsDeleting;
         private static PAAModelCollection Collection;
         private static PAAStorageEntity CStorageEntity = new PAAStorageEntity();
         /// <summary>

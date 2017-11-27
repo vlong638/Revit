@@ -95,8 +95,8 @@ namespace MyRevit.MyTests.PAA
                     FamilySymbol annotationFamily = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                     {
-                        var family = Model.GetAnnotationFamily(Document);
-                        return family != null;
+                        annotationFamily = Model.GetAnnotationFamily(Document);
+                        return annotationFamily != null;
                     })))
                     {
                         ShowMessage("加载功能所需的族失败");
@@ -125,7 +125,7 @@ namespace MyRevit.MyTests.PAA
                                 {
                                     existedModels[i].Document = Document;
                                     Collection.Data.Remove(existedModels[i]);
-                                    PAAContext.Creator.Clear(existedModels[i]);
+                                    existedModels[i].Clear();
                                 }
                             }
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
@@ -227,7 +227,7 @@ namespace MyRevit.MyTests.PAA
                             {
                                 Collection.Data.Remove(existedModels[i]);
                                 existedModels[i].Document = Document;
-                                PAAContext.Creator.Clear(existedModels[i]);
+                                existedModels[i].Clear();
                             }
                         }
                         Model.Document = Document;
@@ -255,6 +255,7 @@ namespace MyRevit.MyTests.PAA
                             element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
                         }
                         #endregion
+                        PAAContext.IsEditing = true;
                         return true;
                     })))
                         ViewType = PAAViewType.Idle;

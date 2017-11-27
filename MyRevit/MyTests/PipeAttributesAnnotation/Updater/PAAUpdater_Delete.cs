@@ -25,6 +25,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             try
             {
+                if (PAAContext.IsDeleting == true)
+                {
+                    PAAContext.IsDeleting = false;
+                    return;
+                }
                 var doc = updateData.GetDocument();
                 var deletes = updateData.GetDeletedElementIds();
                 var collection = PAAContext.GetCollection(doc);
@@ -36,13 +41,58 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId == deleteId);
                     if (itemToDelete == null)
                         itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationId == deleteId);
+                    if (itemToDelete == null)
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.LineId == deleteId);
                     if (itemToDelete != null)
                     {
                         itemToDelete.Document = doc;
                         collection.Data.Remove(itemToDelete);
-                        var creater = PAAContext.Creator;
-                        creater.Clear(itemToDelete);
+                        itemToDelete.Clear();
                         isDeleted = true;
+                    }
+                    else
+                    {
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.TargetIds != null && c.TargetIds.Contains(deleteId));
+                        if (itemToDelete != null)
+                        {
+                            var index = itemToDelete.TargetIds.IndexOf(deleteId);
+                            itemToDelete.AnnotationIds.RemoveAt(index);
+                            itemToDelete.TargetIds.RemoveAt(index);
+                            if (itemToDelete.TargetIds.Count > 1)
+                            {
+                                itemToDelete.Document = doc;
+                                itemToDelete.IsRegenerate = true;
+                                PAAContext.Creator.Regenerate(itemToDelete);
+                            }
+                            else
+                            {
+                                itemToDelete.Document = doc;
+                                collection.Data.Remove(itemToDelete);
+                                itemToDelete.Clear();
+                            }
+                        }
+                        else
+                        {
+                            itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationIds != null && c.AnnotationIds.Contains(deleteId));
+                            if (itemToDelete != null)
+                            {
+                                var index = itemToDelete.AnnotationIds.IndexOf(deleteId);
+                                itemToDelete.AnnotationIds.RemoveAt(index);
+                                itemToDelete.TargetIds.RemoveAt(index);
+                                if (itemToDelete.TargetIds.Count > 1)
+                                {
+                                    itemToDelete.Document = doc;
+                                    itemToDelete.IsRegenerate = true;
+                                    PAAContext.Creator.Regenerate(itemToDelete);
+                                }
+                                else
+                                {
+                                    itemToDelete.Document = doc;
+                                    collection.Data.Remove(itemToDelete);
+                                    itemToDelete.Clear();
+                                }
+                            }
+                        }
                     }
                 }
                 if (isDeleted)

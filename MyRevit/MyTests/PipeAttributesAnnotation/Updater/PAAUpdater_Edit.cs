@@ -27,22 +27,20 @@ namespace MyRevit.MyTests.PAA
         {
             try
             {
-                var document = updateData.GetDocument();
-                var edits = updateData.GetModifiedElementIds();
-                var collection = PAAContext.GetCollection(document);
                 if (PAAContext.IsEditing == true)
                 {
                     PAAContext.IsEditing = false;
                     return;
                 }
+                var document = updateData.GetDocument();
+                var edits = updateData.GetModifiedElementIds();
+                var collection = PAAContext.GetCollection(document);
                 List<int> movedEntities = new List<int>();
                 foreach (var changeId in edits)
                 {
                     PAAModel model = null;
-                    //if (VLConstraintsForCSA.Doc == null)
-                    //    VLConstraintsForCSA.Doc = document;
 
-                    #region 根据 主体 重新生成
+                    #region 单管 主体 重新生成
                     var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId == changeId);
                     if (targetMoved != null)
                     {
@@ -51,11 +49,6 @@ namespace MyRevit.MyTests.PAA
                             continue;
                         var creater = PAAContext.Creator;
                         var target = document.GetElement(model.TargetId);//标注主体失效时删除
-                        if (target == null)
-                        {
-                            collection.Data.Remove(model);
-                            continue;
-                        }
                         var targetLocation = target.Location as LocationCurve;
                         var p0 = targetLocation.Curve.GetEndPoint(0);
                         var p1 = targetLocation.Curve.GetEndPoint(1);
@@ -66,11 +59,30 @@ namespace MyRevit.MyTests.PAA
                         model.LeafEndPoint += offset;
                         //必要族
                         model.Document = document;
-                        PAAContext.Creator.RegenerateSingle(model);
+                        PAAContext.Creator.Regenerate(model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
+                        continue;
                     }
                     #endregion
+
+                    #region 多管 主体 重新生成
+                    targetMoved = collection.Data.FirstOrDefault(c => c.TargetIds != null && c.TargetIds.Contains(changeId));
+                    if (targetMoved != null)
+                    {
+                        model = targetMoved;
+                        if (movedEntities.Contains(changeId.IntegerValue))
+                            continue;
+                        model.Document = document;
+                        model.IsRegenerate = true;
+                        model.RegenerateType = RegenerateType.ByMultipleTarget;
+                        PAAContext.Creator.Regenerate(model);
+                        movedEntities.AddRange(model.TargetIds.Select(c => c.IntegerValue));
+                        //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
+                        continue;
+                    }
+                    #endregion
+
 
                     #region 根据 标注 重新生成
                     var textMoved = collection.Data.FirstOrDefault(c => c.AnnotationId== changeId);
@@ -80,43 +92,48 @@ namespace MyRevit.MyTests.PAA
                         if (movedEntities.Contains(model.TargetId.IntegerValue))
                             continue;
                         var creater = PAAContext.Creator;
-                        var target = document.GetElement(model.TargetId);//标注主体失效时删除
-                        if (target == null)
-                        {
-                            collection.Data.Remove(model);
-                            continue;
-                        }
                         var annotation = document.GetElement(changeId) as IndependentTag;
                         var offset = annotation.TagHeadPosition - model.AnnotationLocation;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
                         model.Document = document;
-                        PAAContext.Creator.RegenerateSingle( model);
+                        PAAContext.Creator.Regenerate( model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
+                        continue;
                     }
                     #endregion
 
                     #region 根据Line重新生成
-                    //var lineMoved = collection.Data.FirstOrDefault(c => c.GroupId.IntegerValue == changeId.IntegerValue);
-                    //if (lineMoved != null)
-                    //{
-                    //    model = lineMoved;
-                    //    if (movedEntities.Contains(model.TargetId.IntegerValue))
-                    //        continue;
-                    //    var creater = PAAContext.Creator;
-                    //    var target = document.GetElement(model.TargetId);
-                    //    if (target == null)
-                    //    {
-                    //        collection.Data.Remove(model);
-                    //        continue;
-                    //    }
-                    //    var line0 = document.GetElement(model.LineIds[0]);
-                    //    var pStart = (line0.Location as LocationCurve).Curve.GetEndPoint(0);
-                    //    PAAContext.Creator.Regenerate(document, model, target, pStart - model.BodyStartPoint);
-                    //    movedEntities.Add(model.TargetId.IntegerValue);
-                    //    //CSAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
-                    //}
+                    var lineMoved = collection.Data.FirstOrDefault(c => c.LineId == changeId);
+                    if (lineMoved != null)
+                    {
+                        model = lineMoved;
+                        bool isExisted = false;
+                        foreach (var TargetId in model.TargetIds)
+                        {
+                            if (movedEntities.Contains(TargetId.IntegerValue))
+                            {
+                                isExisted = true;
+                                break;
+                            }
+                        }
+                        if (isExisted)
+                            continue;
+                        model.Document = document;
+                        model.IsRegenerate = true;
+                        model.RegenerateType = RegenerateType.ByMultipleLine;
+                        PAAContext.Creator.Regenerate(model);
+                        PAAContext.IsEditing = true;
+                        PAAContext.IsDeleting= true;
+                        movedEntities.AddRange(model.TargetIds.Select(c => c.IntegerValue));
+                        //var line0 = document.GetElement(model.LineIds[0]);
+                        //var pStart = (line0.Location as LocationCurve).Curve.GetEndPoint(0);
+                        //PAAContext.Creator.Regenerate(document, model, target, pStart - model.BodyStartPoint);
+                        //movedEntities.Add(model.TargetId.IntegerValue);
+                        ////CSAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
+                        continue;
+                    }
                     #endregion
                 }
                 PAAContext.Save(document);

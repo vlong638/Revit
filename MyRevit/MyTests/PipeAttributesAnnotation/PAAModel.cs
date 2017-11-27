@@ -236,11 +236,18 @@ namespace MyRevit.MyTests.PAA
         Single,
         Multiple,
     }
+    public enum RegenerateType
+    {
+        BySingle,
+        ByMultipleTarget,
+        ByMultipleLine,
+    }
 
     public class PAAModel : VLModel
     {
         #region 需要存储
         public ModelType ModelType { set; get; }
+        public RegenerateType RegenerateType { set; get; }
 
         #region Single
         /// <summary>
@@ -327,6 +334,7 @@ namespace MyRevit.MyTests.PAA
         #endregion
 
         #region 非留存数据
+        public bool IsRegenerate { set; get; }
         public Document Document { get; internal set; }
         /// <summary>
         /// 线宽
@@ -481,7 +489,7 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        public bool CalculateLocations(XYZ offset)
+        public bool CalculateLocations()
         {
             switch (ModelType)
             {
@@ -513,9 +521,8 @@ namespace MyRevit.MyTests.PAA
                     #endregion
                 case ModelType.Multiple:
                     #region multiple
-                    var isRegenerate = offset != null;
                     PipeAndNodePoints = new List<ElementAndNodePoint>();
-                    if (isRegenerate)
+                    if (IsRegenerate)
                     {
                         for (int i = 0; i < TargetIds.Count; i++)
                         {
@@ -537,13 +544,16 @@ namespace MyRevit.MyTests.PAA
                     XYZ startPoint = TargetLocation;
                     List<XYZ> lefts = new List<XYZ>();
                     List<XYZ> rights = new List<XYZ>();
-                    if (!isRegenerate)
+                    if (!IsRegenerate)
                     {
                         bool usingX = GetLeftsAndRights(PipeAndNodePoints, lefts, rights);
                         rightOfLefts = usingX ? lefts.First(c => c.X == lefts.Max(p => p.X)) : lefts.First(c => c.Y == lefts.Max(p => p.Y));
                         leftOfRights = usingX ? rights.First(c => c.X == rights.Min(p => p.X)) : rights.First(c => c.Y == rights.Min(p => p.Y));
                         if ((usingX && rightOfLefts.X > leftOfRights.X) || (!usingX && rightOfLefts.Y > leftOfRights.Y))
+                        {
+                            //TODO 提示无重叠区间
                             return false;
+                        }
                     }
                     else
                     {
@@ -551,7 +561,7 @@ namespace MyRevit.MyTests.PAA
                     }
                     //节点计算
                     XYZ firstNode;
-                    if (!isRegenerate)
+                    if (!IsRegenerate)
                     {
                         firstNode = (rightOfLefts + leftOfRights) / 2;
                     }
@@ -573,15 +583,20 @@ namespace MyRevit.MyTests.PAA
                             PipeAndNodePoints = PipeAndNodePoints.OrderByDescending(c => c.NodePoint.Y).ToList();
                     }
                     //标注定位计算
-                    TargetLocation = PipeAndNodePoints.First().NodePoint;
+                    XYZ offset = GetOffSet();
                     bool overMoved = false;//位移是否超过的最低限制
-                    double verticalSkew = 0;
-                    if (isRegenerate)// && regenerateType != RegenerateType.RegenerateByPipe)
+                    double parallelSkew = offset.GetLengthBySide(ParallelVector);
+                    foreach (var PipeAndNodePoint in PipeAndNodePoints)
+                    {
+                        PipeAndNodePoint.NodePoint += parallelSkew * ParallelVector;
+                    }
+                    TargetLocation = PipeAndNodePoints.First().NodePoint;
+                    if (IsRegenerate)// && regenerateType != RegenerateType.RegenerateByPipe)
                     {
                         //原始线高度+偏移数据
                         var line = Document.GetElement(LineId);
-                        var orientLineHeight = isRegenerate ? line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() : 0;
-                        verticalSkew = LocationHelper.GetLengthBySide(offset, VerticalVector);
+                        var orientLineHeight = IsRegenerate ? line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() : 0;
+                        var verticalSkew = RegenerateType == RegenerateType.ByMultipleTarget ? 0 : LocationHelper.GetLengthBySide(offset, VerticalVector);
                         if (Math.Abs(VerticalVector.X) > 1 - UnitHelper.MiniValueForXYZ)
                             verticalSkew = -verticalSkew;
                         var nodesHeight = UnitHelper.ConvertToFoot((PipeAndNodePoints.Count() - 1) * CurrentFontHeight, VLUnitType.millimeter);
@@ -615,6 +630,22 @@ namespace MyRevit.MyTests.PAA
                     throw new NotImplementedException("未支持该类型的生成");
             }
         }
+
+        private XYZ GetOffSet()
+        {
+            switch (RegenerateType)
+            {
+                case RegenerateType.ByMultipleTarget:
+                    return IsRegenerate? PipeAndNodePoints.First().NodePoint-TargetLocation : new XYZ(0, 0, 0);
+                case RegenerateType.ByMultipleLine:
+                    return IsRegenerate ? (Document.GetElement(LineId).Location as LocationPoint).Point - TargetLocation : new XYZ(0, 0, 0);
+                case RegenerateType.BySingle:
+                    return new XYZ(0, 0, 0);
+                default:
+                    throw new NotImplementedException("未实现该类型");
+            }
+        }
+
         public static bool GetLeftsAndRights(List<ElementAndNodePoint> pipes, List<XYZ> lefts, List<XYZ> rights)
         {
             bool usingX = Math.Abs(pipes[0].Line.GetEndPoint(0).X - (pipes[0].Line.GetEndPoint(1).X)) > 0.01;
@@ -662,6 +693,34 @@ namespace MyRevit.MyTests.PAA
                 }
             }
             return usingX;
+        }
+
+        public void Clear()
+        {
+            Document doc = Document;
+            switch (ModelType)
+            {
+                case ModelType.Single:
+                    //删除线
+                    foreach (var item in LineIds)
+                        if (doc.GetElement(item) != null)
+                            doc.Delete(item);
+                    //删除标注
+                    if (doc.GetElement(AnnotationId) != null)
+                        doc.Delete(AnnotationId);
+                    break;
+                case ModelType.Multiple:
+                    //清理线族
+                    if (doc.GetElement(LineId) != null)
+                        doc.Delete(LineId);
+                    //清理标注
+                    foreach (var item in AnnotationIds)
+                        if (doc.GetElement(item) != null)
+                            doc.Delete(item);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
