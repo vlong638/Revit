@@ -16,6 +16,8 @@ namespace MyRevit.Utilities
     /// </summary>
     public class UnitHelper
     {
+        public static double MiniValueForXYZ = 0.001;
+
         #region Foot,英尺
         /// <summary>
         /// Foot Revit中的double数值,是绘图长度的基本单位
@@ -79,10 +81,9 @@ namespace MyRevit.Utilities
     public static class UnitHelperEx
     {
         #region Double
-        public static double MiniValueForXYZ = 0.001;
         public static bool IsMiniValue(this double value)
         {
-            return Math.Abs(value) < MiniValueForXYZ;
+            return Math.Abs(value) < UnitHelper.MiniValueForXYZ;
         } 
         #endregion
     }

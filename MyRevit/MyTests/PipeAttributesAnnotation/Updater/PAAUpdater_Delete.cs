@@ -33,19 +33,20 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 bool isDeleted = false;
                 foreach (var deleteId in deletes)
                 {
-                    var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == deleteId.IntegerValue);
+                    var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId == deleteId);
                     if (itemToDelete == null)
-                        itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationId.IntegerValue == deleteId.IntegerValue);
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationId == deleteId);
                     if (itemToDelete != null)
                     {
+                        itemToDelete.Document = doc;
                         collection.Data.Remove(itemToDelete);
                         var creater = PAAContext.Creator;
-                        creater.Clear(doc, itemToDelete);
+                        creater.Clear(itemToDelete);
                         isDeleted = true;
                     }
                 }
                 if (isDeleted)
-                    CSAContext.Save(doc);
+                    PAAContext.Save(doc);
             }
             catch (Exception ex)
             {

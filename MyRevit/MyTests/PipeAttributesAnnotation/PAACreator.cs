@@ -9,61 +9,118 @@ namespace MyRevit.MyTests.PAA
 
     public class ElementAndNodePoint
     {
-        private Element element;
-
-        public ElementAndNodePoint(Line line, IndependentTag tag)
+        public ElementAndNodePoint(Element target, IndependentTag tag)
         {
-            Line = line;
+            Target = target;
+            Line = (target.Location as LocationCurve).Curve as Line;
             Tag = tag;
         }
 
-        public ElementAndNodePoint(Line line)
+        public ElementAndNodePoint(Element target)
         {
-            Line = line;
+            Target = target;
+            Line = (target.Location as LocationCurve).Curve as Line;
         }
 
+        public Element Target { set; get; }
         public Line Line { set; get; }
         public IndependentTag Tag { set; get; }
+        /// <summary>
+        /// 节点位置
+        /// </summary>
         public XYZ NodePoint { set; get; }
+        /// <summary>
+        /// 标注位置
+        /// </summary>
+        public XYZ AnnotationPoint { set; get; }
     }
 
     public class PAACreator
     {
         #region 多管节点计算
-        static bool GetNodePoints(List<ElementAndNodePoint> elementNodePairs, out XYZ rightOfLefts, out XYZ leftOfRights, XYZ startPoint = null)
+        /// <summary>
+        /// 节点位置计算
+        /// </summary>
+        /// <param name="elementNodePairs"></param>
+        /// <param name="rightOfLefts"></param>
+        /// <param name="leftOfRights"></param>
+        /// <param name="startPoint"></param>
+        /// <returns></returns>
+        static bool CalculateLocations(Document doc, PAAModel model, List<ElementAndNodePoint> elementNodePairs, XYZ offset)
         {
-            bool isRegenerate = startPoint != null;
-            //重叠区间
-            List<XYZ> lefts = new List<XYZ>();
-            List<XYZ> rights = new List<XYZ>();
-            if (!isRegenerate)
-            {
-                bool usingX = GetLeftsAndRights(elementNodePairs, lefts, rights);
-                rightOfLefts = usingX ? lefts.First(c => c.X == lefts.Max(p => p.X)) : lefts.First(c => c.Y == lefts.Max(p => p.Y));
-                leftOfRights = usingX ? rights.First(c => c.X == rights.Min(p => p.X)) : rights.First(c => c.Y == rights.Min(p => p.Y));
-                if ((usingX && rightOfLefts.X > leftOfRights.X) || (!usingX && rightOfLefts.Y > leftOfRights.Y))
-                    return false;
-            }
-            else
-            {
-                rightOfLefts = leftOfRights = null;
-            }
-            //节点计算
-            XYZ firstNode;
-            if (!isRegenerate)
-            {
-                firstNode = (rightOfLefts + leftOfRights) / 2;
-            }
-            else
-            {
-                var locationCurve = elementNodePairs[0].Line;
-                firstNode = locationCurve.Project(startPoint).XYZPoint;
-            }
-            elementNodePairs[0].NodePoint = firstNode;
-            for (int i = 1; i < elementNodePairs.Count(); i++)
-            {
-                elementNodePairs[i].NodePoint = elementNodePairs[i].Line.Project(elementNodePairs[0].NodePoint).XYZPoint;
-            }
+            //XYZ rightOfLefts;
+            //XYZ leftOfRights;
+            //XYZ startPoint = model.TargetLocation;
+            //bool isRegenerate = startPoint != null;
+            ////重叠区间
+            //List<XYZ> lefts = new List<XYZ>();
+            //List<XYZ> rights = new List<XYZ>();
+            //if (!isRegenerate)
+            //{
+            //    bool usingX = GetLeftsAndRights(elementNodePairs, lefts, rights);
+            //    rightOfLefts = usingX ? lefts.First(c => c.X == lefts.Max(p => p.X)) : lefts.First(c => c.Y == lefts.Max(p => p.Y));
+            //    leftOfRights = usingX ? rights.First(c => c.X == rights.Min(p => p.X)) : rights.First(c => c.Y == rights.Min(p => p.Y));
+            //    if ((usingX && rightOfLefts.X > leftOfRights.X) || (!usingX && rightOfLefts.Y > leftOfRights.Y))
+            //        return false;
+            //}
+            //else
+            //{
+            //    rightOfLefts = leftOfRights = null;
+            //}
+            ////节点计算
+            //XYZ firstNode;
+            //if (!isRegenerate)
+            //{
+            //    firstNode = (rightOfLefts + leftOfRights) / 2;
+            //}
+            //else
+            //{
+            //    var locationCurve = elementNodePairs[0].Line;
+            //    firstNode = locationCurve.Project(startPoint).XYZPoint;
+            //}
+            //elementNodePairs[0].NodePoint = firstNode;
+            ////节点位置
+            //for (int i = 1; i < elementNodePairs.Count(); i++)
+            //    elementNodePairs[i].NodePoint = elementNodePairs[i].Line.Project(elementNodePairs[0].NodePoint).XYZPoint;
+            ////排序
+            //if (elementNodePairs.Count() > 1)
+            //{
+            //    if (Math.Abs(elementNodePairs[0].NodePoint.Y - elementNodePairs[1].NodePoint.Y) < 0.01)
+            //        elementNodePairs = elementNodePairs.OrderBy(c => c.NodePoint.X).ToList();
+            //    else
+            //        elementNodePairs = elementNodePairs.OrderByDescending(c => c.NodePoint.Y).ToList();
+            //}
+            ////标注定位计算
+            //model.TargetLocation = elementNodePairs.First().NodePoint;
+            //bool overMoved = false;//位移是否超过的最低限制
+            //double verticalSkew = 0;
+            //if (isRegenerate)// && regenerateType != RegenerateType.RegenerateByPipe)
+            //{
+            //    //原始线高度+偏移数据
+            //    var line = doc.GetElement(model.LineId);
+            //    var orientLineHeight = isRegenerate ? line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() : 0;
+            //    verticalSkew = LocationHelper.GetLengthBySide(offset, model.VerticalVector);
+            //    if (Math.Abs(model.VerticalVector.X) > 1 - UnitHelper.MiniValueForXYZ)
+            //        verticalSkew = -verticalSkew;
+            //    var nodesHeight = UnitHelper.ConvertToFoot((elementNodePairs.Count() - 1) * model.CurrentFontHeight, VLUnitType.millimeter);
+            //    overMoved = orientLineHeight + verticalSkew < nodesHeight;
+            //    var lineHeight = orientLineHeight + verticalSkew;
+            //    if (overMoved)
+            //    {
+            //        lineHeight = nodesHeight;
+            //        verticalSkew = nodesHeight - orientLineHeight;
+            //    }
+            //    model.LineHeight = lineHeight;
+            //}
+            //var scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * model.CurrentFontSizeScale;
+            //var width = model.TextType.GetLineWidth() * scale;
+            ////标注位置
+            //for (int i = 0; i < elementNodePairs.Count(); i++)
+            //{
+            //    var start = model.TargetLocation + (model.LineHeight + i * model.LineSpace) * model.VerticalVector;
+            //    var end = start + model.LineWidth * model.ParallelVector;
+            //    elementNodePairs[i].AnnotationPoint = model.TextType.GetTextLocation(model.CurrentFontHeight, 0, model.VerticalVector, start, end);
+            //}
             return true;
         }
         public static bool GetLeftsAndRights(List<ElementAndNodePoint> pipes, List<XYZ> lefts, List<XYZ> rights)
@@ -71,7 +128,7 @@ namespace MyRevit.MyTests.PAA
             bool usingX = Math.Abs(pipes[0].Line.GetEndPoint(0).X - (pipes[0].Line.GetEndPoint(1).X)) > 0.01;
             var firstCurve = pipes.First().Line;
             firstCurve.MakeUnbound();
-            for (int i = 0; i < pipes.Count(); i++)
+            for (int i = 1; i < pipes.Count(); i++)
             {
                 var line = pipes[i].Line;
                 double p1Location, p2Location;
@@ -114,88 +171,111 @@ namespace MyRevit.MyTests.PAA
             }
             return usingX;
         }
+        /// <summary>
+        /// 多管直径标注的属性
+        /// </summary>
+        public enum TagProperty
+        {
+            线宽度,
+            线下探长度,
+            线高度1,
+            线高度2,
+            节点2距离,
+            节点3距离,
+            节点4距离,
+            节点5距离,
+            节点6距离,
+            节点7距离,
+            节点8距离,
+            间距,//文本间距
+            节点2可见性,
+            节点3可见性,
+            节点4可见性,
+            节点5可见性,
+            节点6可见性,
+            节点7可见性,
+            节点8可见性,
+            文字行数,
+        }
+        /// <summary>
+        /// 线 参数设置
+        /// </summary>
+        /// <param name="nodePoints"></param>
+        /// <param name="line"></param>
+        private void UpdateLineParameters(PAAModel model, List<ElementAndNodePoint> nodePoints, FamilyInstance line, XYZ verticalVector)
+        {
+            double deepLength = Math.Abs((nodePoints.Last().NodePoint - nodePoints.First().NodePoint).DotProduct(verticalVector));
+            var scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * model.CurrentFontSizeScale;
+            var width = model.TextType.GetLineWidth() * scale;
+            line.GetParameters(TagProperty.线高度1.ToString()).First().Set(model.LineHeight);
+            line.GetParameters(TagProperty.线宽度.ToString()).First().Set(model.LineWidth);
+            line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
+            line.GetParameters(TagProperty.间距.ToString()).First().Set(model.CurrentFontHeight);
+            line.GetParameters(TagProperty.文字行数.ToString()).First().Set(nodePoints.Count());
+            for (int i = 2; i <= 8; i++)
+            {
+                var first = nodePoints.First();
+                if (nodePoints.Count() >= i)
+                {
+                    var cur = nodePoints[i - 1];
+                    //line.GetParameters(string.Format("节点{0}可见性", i)).First().Set(1);
+                    line.GetParameters(string.Format("节点{0}距离", i)).First().Set(Math.Abs((cur.NodePoint - first.NodePoint).DotProduct(verticalVector)));
+                }
+                else
+                {
+                    //line.GetParameters(string.Format("节点{0}可见性", i)).First().Set(0);
+                    line.GetParameters(string.Format("节点{0}距离", i)).First().Set(0);
+                }
+            }
+        }
         #endregion
 
-
-        //public void Generate(Document doc, PAAModel model)
-        //{
-        //    Generate(doc, model, element, null);
-        //}
-        public bool Generate(Document doc, PAAModel model, XYZ offset=null)
+        public bool Generate(PAAModel model, XYZ offset = null)
         {
             switch (model.ModelType)
             {
                 case ModelType.Single:
-                    return GenerateSingle(doc, model, offset);
+                    return GenerateSingle(model, offset);
                 case ModelType.Multiple:
-                    return  GenerateMultiple(doc, model, offset);
+                    return GenerateMultiple(model, offset);
                 default:
                     return false;
             }
         }
 
-        private bool GenerateMultiple(Document doc, PAAModel model, XYZ offset)
+        private bool GenerateMultiple(PAAModel model, XYZ offset)
         {
+            Document doc = model.Document;
             View view = doc.ActiveView;
             var isRegenerate = offset != null;
-            List<ElementAndNodePoint> pipeAndNodePoints = new List<ElementAndNodePoint>();
-            if (isRegenerate)
+            model.CalculateLocations(offset);
+            XYZ parallelVector = model.ParallelVector;
+            XYZ verticalVector = model.VerticalVector;
+            var pipeAndNodePoints = model.PipeAndNodePoints;
+            //线 创建
+            FamilyInstance line = doc.Create.NewFamilyInstance(model.TargetLocation, model.GetLineFamily(doc), view);
+            //线 旋转处理
+            LocationPoint locationPoint = line.Location as LocationPoint;
+            if (locationPoint != null)
+                locationPoint.RotateByXY(model.TargetLocation, verticalVector.X.IsMiniValue() ? new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z) : verticalVector);
+            model.LineId = line.Id;
+            UpdateLineParameters(model, pipeAndNodePoints, line, verticalVector);
+            //标注 创建
+            model.AnnotationIds = new List<ElementId>();
+            for (int i = 0; i < pipeAndNodePoints.Count(); i++)
             {
-                for (int i = 0; i < model.TargetIds.Count; i++)
-                {
-                    var target = doc.GetElement(model.TargetIds[i]);
-                    var tagId = model.AnnotationIds[i];
-                    pipeAndNodePoints.Add(new ElementAndNodePoint((target.Location as LocationCurve).Curve as Line, doc.GetElement(tagId) as IndependentTag));
-                }
-            }
-            else
-            {
-                foreach (var selectedId in model.TargetIds)
-                    pipeAndNodePoints.Add(new ElementAndNodePoint((doc.GetElement(selectedId).Location as LocationCurve).Curve as Line));
-            }
-            //平行,垂直 向量
-            XYZ parallelVector = null;
-            XYZ verticalVector = null;
-            parallelVector = pipeAndNodePoints.First().Line.Direction;
-            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-            //节点计算
-            XYZ rightOfLefts;//左侧点的右边界
-            XYZ leftOfRights;//右侧点的左边界
-            if (!GetNodePoints(pipeAndNodePoints, out rightOfLefts, out leftOfRights, model.TargetLocation) && !isRegenerate)
-            {
-                return false;
-            }
-            if (pipeAndNodePoints.Count() > 1)
-            {
-                if (Math.Abs(pipeAndNodePoints[0].NodePoint.Y - pipeAndNodePoints[1].NodePoint.Y) < 0.01)
-                {
-                    pipeAndNodePoints = pipeAndNodePoints.OrderBy(c => c.NodePoint.X).ToList();
-                }
-                else
-                {
-                    pipeAndNodePoints = pipeAndNodePoints.OrderByDescending(c => c.NodePoint.Y).ToList();
-                }
-            }
-            var orderedNodePoints = pipeAndNodePoints.Select(c => c.NodePoint).ToList();
-            XYZ startPoint = orderedNodePoints.First();
-            FamilyInstance line = null;
-            if (isRegenerate)
-                (line.Location as LocationPoint).Point = startPoint;
-            else
-            {
-                line = doc.Create.NewFamilyInstance(startPoint, model.LineFamily, view);
-                //线 旋转处理
-                LocationPoint locationPoint = line.Location as LocationPoint;
-                if (locationPoint != null)
-                    locationPoint.RotateByXY(startPoint, verticalVector.X .IsMiniValue()? new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z) : verticalVector);
+                var subTag = doc.Create.NewTag(view, pipeAndNodePoints[i].Target, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, pipeAndNodePoints[i].AnnotationPoint);
+                model.AnnotationIds.Add(subTag.Id);
+
+                //var subTag = isRegenerate ? pipeAndNodePoints[i].Tag : doc.Create.NewTag(view, pipeAndNodePoints[i].Target, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, pipeAndNodePoints[i].AnnotationPoint);
+                //model.AnnotationIds.Add(subTag.Id);
             }
             return true;
         }
 
-        private static bool GenerateSingle(Document doc, PAAModel model, XYZ offset)
+        private static bool GenerateSingle(PAAModel model, XYZ offset)
         {
+            Document doc = model.Document;
             //主体
             var target = doc.GetElement(model.TargetId);
             var targetLocation = target.Location as LocationCurve;
@@ -205,7 +285,7 @@ namespace MyRevit.MyTests.PAA
             model.TargetLocation = pMiddle;
             //线生成
             List<Line> lines = new List<Line>();
-            model.CalculateLocations(doc.GetElement(model.TargetId), offset);//计算内容定位
+            model.CalculateLocations(offset);//计算内容定位
             lines.Add(Line.CreateBound(model.BodyStartPoint, model.BodyEndPoint));//竖干线
             lines.Add(Line.CreateBound(model.BodyEndPoint, model.LeafEndPoint));//斜支线
             model.LineIds = new List<ElementId>();
@@ -218,7 +298,7 @@ namespace MyRevit.MyTests.PAA
             IndependentTag subTag = doc.Create.NewTag(doc.ActiveView, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, model.AnnotationLocation);
             model.AnnotationId = subTag.Id;
             subTag.TagHeadPosition = model.AnnotationLocation;
-            subTag.ChangeTypeId(model.AnnotationFamily.Id);
+            subTag.ChangeTypeId(model.GetAnnotationFamily(doc).Id);
             return true;
         }
 
@@ -228,20 +308,37 @@ namespace MyRevit.MyTests.PAA
         //    //PAAContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         //}
 
-        public void RegenerateSingle(Document doc, PAAModel model)
+        public void RegenerateSingle(PAAModel model)
         {
-            Clear(doc, model);
-            Generate(doc, model);
+            Clear(model);
+            Generate(model);
         }
-        public void Clear(Document doc, PAAModel model)
+        public void Clear(PAAModel model)
         {
-            //删除线
-            foreach (var item in model.LineIds)
-                if (doc.GetElement(item) != null)
-                    doc.Delete(item);
-            //删除标注
-            if (doc.GetElement(model.AnnotationId) != null)
-                doc.Delete(model.AnnotationId);
+            Document doc = model.Document;
+            switch (model.ModelType)
+            {
+                case ModelType.Single:
+                    //删除线
+                    foreach (var item in model.LineIds)
+                        if (doc.GetElement(item) != null)
+                            doc.Delete(item);
+                    //删除标注
+                    if (doc.GetElement(model.AnnotationId) != null)
+                        doc.Delete(model.AnnotationId);
+                    break;
+                case ModelType.Multiple:
+                    //清理线族
+                    if (doc.GetElement(model.LineId) != null)
+                        doc.Delete(model.LineId);
+                    //清理标注
+                    foreach (var item in model.AnnotationIds)
+                        if (doc.GetElement(item) != null)
+                            doc.Delete(item);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

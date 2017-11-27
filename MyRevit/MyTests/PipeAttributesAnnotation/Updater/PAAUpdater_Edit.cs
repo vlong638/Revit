@@ -43,7 +43,7 @@ namespace MyRevit.MyTests.PAA
                     //    VLConstraintsForCSA.Doc = document;
 
                     #region 根据 主体 重新生成
-                    var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId.IntegerValue == changeId.IntegerValue);
+                    var targetMoved = collection.Data.FirstOrDefault(c => c.TargetId == changeId);
                     if (targetMoved != null)
                     {
                         model = targetMoved;
@@ -64,14 +64,16 @@ namespace MyRevit.MyTests.PAA
                         model.BodyStartPoint += offset;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
-                        PAAContext.Creator.RegenerateSingle(document, model);
+                        //必要族
+                        model.Document = document;
+                        PAAContext.Creator.RegenerateSingle(model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                     }
                     #endregion
 
                     #region 根据 标注 重新生成
-                    var textMoved = collection.Data.FirstOrDefault(c => c.AnnotationId.IntegerValue== changeId.IntegerValue);
+                    var textMoved = collection.Data.FirstOrDefault(c => c.AnnotationId== changeId);
                     if (textMoved != null)
                     {
                         model = textMoved;
@@ -88,7 +90,8 @@ namespace MyRevit.MyTests.PAA
                         var offset = annotation.TagHeadPosition - model.AnnotationLocation;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
-                        PAAContext.Creator.RegenerateSingle(document, model);
+                        model.Document = document;
+                        PAAContext.Creator.RegenerateSingle( model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                     }

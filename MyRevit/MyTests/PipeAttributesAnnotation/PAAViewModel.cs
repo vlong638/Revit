@@ -15,7 +15,7 @@ namespace MyRevit.MyTests.PAA
     {
         public bool Equals(ElementId t1, ElementId t2)
         {
-            return (t1.IntegerValue == t2.IntegerValue);
+            return t1 == t2;
         }
         public int GetHashCode(ElementId t)
         {
@@ -95,9 +95,8 @@ namespace MyRevit.MyTests.PAA
                     FamilySymbol annotationFamily = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                     {
-                        annotationFamily = Model.AnnotationType.GetAnnotationFamilySymbol(Document);
-                        Model.AnnotationFamily = annotationFamily;
-                        return true;
+                        var family = Model.GetAnnotationFamily(Document);
+                        return family != null;
                     })))
                     {
                         ShowMessage("加载功能所需的族失败");
@@ -116,21 +115,24 @@ namespace MyRevit.MyTests.PAA
                     //生成处理
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
+                            Model.Document = Document;
                             #region 生成处理
                             var Collection = PAAContext.GetCollection(Document);
-                            var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue).ToList();//避免重复生成
+                            var existedModels = Collection.Data.Where(c => Model.TargetId==c.TargetId).ToList();//避免重复生成
                             if (existedModels != null)
                             {
                                 for (int i = existedModels.Count() - 1; i >= 0; i--)
                                 {
+                                    existedModels[i].Document = Document;
                                     Collection.Data.Remove(existedModels[i]);
-                                    PAAContext.Creator.Clear(Document, existedModels[i]);
+                                    PAAContext.Creator.Clear(existedModels[i]);
                                 }
                             }
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
                             Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                             Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
-                            if (!PAAContext.Creator.Generate(Document, Model))
+                            Model.ModelType = ModelType.Single;
+                            if (!PAAContext.Creator.Generate( Model))
                                 return false;
                             Collection.Data.Add(Model);
                             Collection.Save(Document); 
@@ -195,10 +197,9 @@ namespace MyRevit.MyTests.PAA
                     annotationFamily = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
                     {
-                        annotationFamily = Model.AnnotationType.GetAnnotationFamilySymbol(Document);
-                        Model.AnnotationFamily = annotationFamily;
-                        Model.LineFamily = Model.TextType.GetLineFamily(Document);
-                        return true;
+                        annotationFamily = Model.GetAnnotationFamily(Document);
+                        var lineFamily = Model.GetLineFamily(Document);
+                        return annotationFamily != null && lineFamily != null;
                     })))
                     {
                         ShowMessage("加载功能所需的族失败");
@@ -219,19 +220,22 @@ namespace MyRevit.MyTests.PAA
                     {
                         #region 生成处理
                         var Collection = PAAContext.GetCollection(Document);
-                        var existedModels = Collection.Data.Where(c => c.TargetId.IntegerValue == Model.TargetId.IntegerValue).ToList();//避免重复生成
+                        var existedModels = Collection.Data.Where(c => c.TargetIds != null && Model.TargetIds.Intersect(c.TargetIds, new ElementIdComparer()).Count() > 0).ToList();//避免重复生成
                         if (existedModels != null)
                         {
                             for (int i = existedModels.Count() - 1; i >= 0; i--)
                             {
                                 Collection.Data.Remove(existedModels[i]);
-                                PAAContext.Creator.Clear(Document, existedModels[i]);
+                                existedModels[i].Document = Document;
+                                PAAContext.Creator.Clear(existedModels[i]);
                             }
                         }
+                        Model.Document = Document;
                         Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
                         Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                         Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
-                        PAAContext.Creator.Generate(Document, Model);
+                        Model.ModelType = ModelType.Multiple;
+                        PAAContext.Creator.Generate(Model);
                         Collection.Data.Add(Model);
                         Collection.Save(Document); 
                         #endregion
