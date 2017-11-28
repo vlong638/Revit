@@ -732,10 +732,17 @@ namespace MyRevit.MyTests.PAA
                 case PAAAnnotationType.SL:
                     return string.Format("{0} {1}", system, AnnotationPrefix + offset);
                 case PAAAnnotationType.PL:
-                    return string.Format("{0} {1}", diameter, AnnotationPrefix + offset);
+                    return string.Format("DN{0} {1}", diameter, AnnotationPrefix + offset);
                 default:
                     throw new NotImplementedException("不支持该类型的处理");
             }
+        }
+        internal string GetFull_L(Element target)
+        {
+            //var target = Document.GetElement(TargetId);
+            var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+            var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
+            return AnnotationPrefix + offset;
         }
     }
 }

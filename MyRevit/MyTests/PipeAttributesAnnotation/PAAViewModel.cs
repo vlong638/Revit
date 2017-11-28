@@ -175,9 +175,7 @@ namespace MyRevit.MyTests.PAA
                                 var parameterHelper = new ShareParameter(shareFilePath);
                                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
                             }
-                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
-                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
-                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.GetFull_L(element));
                             //PAAContext.IsEditing = true;
                             #endregion
                             return true;
@@ -280,9 +278,7 @@ namespace MyRevit.MyTests.PAA
                                 var parameterHelper = new ShareParameter(shareFilePath);
                                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
                             }
-                            var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
-                            var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
-                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.AnnotationPrefix + UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.GetFull_L(element));
                         }
                         #endregion
                         PAAContext.IsEditing = true;
