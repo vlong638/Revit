@@ -13,7 +13,7 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
         /// <param name="uiApp"></param>
         /// <param name="startPoint"></param>
         /// <returns></returns>
-        public XYZ PickPointWithLinePreview(UIApplication uiApp,XYZ startPoint)
+        public XYZ PickPointWithLinePreview(UIApplication uiApp,XYZ startPoint,XYZ endPoint)
         {
             XYZ result = null;
             Document doc = uiApp.ActiveUIDocument.Document;
@@ -23,6 +23,7 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
             var view = new DrawAreaView(uiApp);
             view.Show();
             view.StartPoint = new System.Windows.Point(startPoint.X, startPoint.Y);
+            view.EndPoint = new System.Windows.Point(endPoint.X, endPoint.Y);
             //开启定时器 实时绘图
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 6;

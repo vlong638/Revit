@@ -80,7 +80,7 @@ namespace MyRevit.MyTests.PAA
         private static FamilySymbol _SPLTag = null;
         public static FamilySymbol GetSPLTag(Document doc)
         {
-            if (_SPLTag == null)
+            if (_SPLTag == null|| !_SPLTag.IsValidObject)
                 _SPLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+直径+离地).rfa", "管道尺寸标记(系统+直径+离地)", "管道尺寸标记");
             if (!_SPLTag.IsActive)
                 _SPLTag.Activate();
@@ -90,7 +90,7 @@ namespace MyRevit.MyTests.PAA
         private static FamilySymbol _PLTag = null;
         public static FamilySymbol GetPLTag(Document doc)
         {
-            if (_PLTag == null)
+            if (_PLTag == null || !_PLTag.IsValidObject)
                 _PLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(直径+离地).rfa", "管道尺寸标记(直径+离地)", "管道尺寸标记");
             if (!_PLTag.IsActive)
                 _PLTag.Activate();
@@ -100,7 +100,7 @@ namespace MyRevit.MyTests.PAA
         private static FamilySymbol _SLTag = null;
         public static FamilySymbol GetSLTag(Document doc)
         {
-            if (_SLTag == null || !_SLTag.IsActive)
+            if (_SLTag == null || !_SLTag.IsValidObject)
                 _SLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+离地).rfa", "管道尺寸标记(系统+离地)", "管道尺寸标记");
             if (!_SLTag.IsActive)
                 _SLTag.Activate();
@@ -110,7 +110,7 @@ namespace MyRevit.MyTests.PAA
         private static FamilySymbol _MultipleLineOnEdge = null;
         public static FamilySymbol Get_MultipleLineOnEdge(Document doc)
         {
-            if (_MultipleLineOnEdge == null)
+            if (_MultipleLineOnEdge == null || !_MultipleLineOnEdge.IsValidObject)
                 _MultipleLineOnEdge = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在右端");
             if (!_MultipleLineOnEdge.IsActive)
                 _MultipleLineOnEdge.Activate();
@@ -120,7 +120,7 @@ namespace MyRevit.MyTests.PAA
         private static FamilySymbol _MultipleLineOnLine = null;
         public static FamilySymbol Get_MultipleLineOnLine(Document doc)
         {
-            if (_MultipleLineOnLine == null)
+            if (_MultipleLineOnLine == null || !_MultipleLineOnLine.IsValidObject)
                 _MultipleLineOnLine = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在线上");//引线标注_文字在线上 取出来总是未激活IsActive
             if (!_MultipleLineOnLine.IsActive)
                 _MultipleLineOnLine.Activate();

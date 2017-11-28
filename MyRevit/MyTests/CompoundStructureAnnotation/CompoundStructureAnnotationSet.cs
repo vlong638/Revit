@@ -59,11 +59,10 @@ namespace PmSoft.Optimization.DrawingProduction
             try
             {
                 CompoundStructureAnnotationWindow window = new CompoundStructureAnnotationWindow(ViewModel);
-                ViewModel.Execute();
-                //while (ViewModel.ViewType != CSAViewType.Close)
-                //{
-                //    ViewModel.Execute(window, this, uiDoc);
-                //}
+                while (ViewModel.ViewType != CSAViewType.Close)
+                {
+                    ViewModel.Execute();
+                }
                 return true;
             }
             catch (Exception ex)

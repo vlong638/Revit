@@ -205,8 +205,7 @@ namespace MyRevit.MyTests.PAA
         private void UpdateLineParameters(PAAModel model, List<ElementAndNodePoint> nodePoints, FamilyInstance line, XYZ verticalVector)
         {
             double deepLength = Math.Abs((nodePoints.Last().NodePoint - nodePoints.First().NodePoint).DotProduct(verticalVector));
-            var scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * model.CurrentFontSizeScale;
-            var width = model.TextType.GetLineWidth() * scale;
+            var width = model.TextType.GetLineWidth() * PAAContext.FontManagement.OrientWidthSize;
             line.GetParameters(TagProperty.线高度1.ToString()).First().Set(model.LineHeight);
             line.GetParameters(TagProperty.线宽度.ToString()).First().Set(model.LineWidth);
             line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);

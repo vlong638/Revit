@@ -8,6 +8,7 @@ using Autodesk.Revit.DB;
 using MyRevit.MyTests.PipeAttributesAnnotation;
 using System.Collections.Generic;
 using PmSoft.Common.RevitClass.Utils;
+using System.Windows.Forms;
 
 namespace MyRevit.MyTests.PAA
 {
@@ -42,6 +43,40 @@ namespace MyRevit.MyTests.PAA
             AnnotationType = PAAAnnotationType.SPL;
         }
 
+        public bool Prepare()
+        {
+            try
+            {
+                //获取族
+                FamilySymbol annotationFamily = null;
+                if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                {
+                    annotationFamily = Model.GetAnnotationFamily(Document);
+                    return annotationFamily != null;
+                })))
+                {
+                    ShowMessage("加载功能所需的族失败");
+                    ViewType = PAAViewType.Idle;
+                    Execute();
+                    return false;
+                }
+                //准备族内参数
+                if (!PAAContext.FontManagement.IsCurrentFontSettled)
+                {
+                    var familyDoc = Document.EditFamily(annotationFamily.Family);
+                    var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                    var textElementType = textElement.Symbol as TextElementType;
+                    PAAContext.FontManagement.SetCurrentFont(textElementType);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("准备必要的内容时出现异常");
+                return false;
+            }
+            return true;
+        }
+
         public override bool IsIdling { get { return ViewType == PAAViewType.Idle; } }
         public override void Close() { ViewType = PAAViewType.Close; }
 
@@ -57,6 +92,9 @@ namespace MyRevit.MyTests.PAA
                     View.Close();
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
+                    Model.Document = Document;
+                    //更新必要参数
+                    UpdateModelAnnotationPrefix();
                     View.Close();
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
@@ -75,10 +113,25 @@ namespace MyRevit.MyTests.PAA
                     Execute();
                     break;
                 case PAAViewType.PickSinglePipe_Location:
+                    //业务逻辑处理
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
-                        //业务逻辑处理
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, Model.BodyStartPoint).ToSameZ(Model.BodyStartPoint);
+                        var target = Document.GetElement(Model.TargetId);
+                        var locationCurve = TargetType.GetLine(target);
+                        Model.UpdateVectors(locationCurve);
+                        switch (Model.TextType)
+                        {
+                            case PAATextType.OnLine:
+                                string text = Model.GetFullText();
+                                var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
+                                var revitWdith = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
+                                Model.LineWidth = revitWdith;
+                                break;
+                            case PAATextType.OnEdge:
+                                Model.LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
+                                break;
+                        }
+                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, Model.BodyStartPoint, Model.BodyStartPoint + Model.LineWidth*1.02 * Model.ParallelVector).ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
                         if (pEnd == null)
                             ViewType = PAAViewType.Idle;
@@ -89,36 +142,12 @@ namespace MyRevit.MyTests.PAA
                     Execute();
                     break;
                 case PAAViewType.GenerateSinglePipe:
-                    //更新必要参数
-                    UpdateModelAnnotationPrefix();
-                    //获取族
-                    FamilySymbol annotationFamily = null;
-                    if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
-                    {
-                        annotationFamily = Model.GetAnnotationFamily(Document);
-                        return annotationFamily != null;
-                    })))
-                    {
-                        ShowMessage("加载功能所需的族失败");
-                        ViewType = PAAViewType.Idle;
-                        Execute();
-                        return;
-                    }
-                    //准备族内参数
-                    if (!PAAContext.FontManagement.IsCurrentFontSettled)
-                    {
-                        var familyDoc = Document.EditFamily(annotationFamily.Family);
-                        var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
-                        var textElementType = textElement.Symbol as TextElementType;
-                        PAAContext.FontManagement.SetCurrentFont(textElementType);
-                    }
                     //生成处理
                     if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
-                            Model.Document = Document;
                             #region 生成处理
                             var Collection = PAAContext.GetCollection(Document);
-                            var existedModels = Collection.Data.Where(c => Model.TargetId==c.TargetId).ToList();//避免重复生成
+                            var existedModels = Collection.Data.Where(c => Model.TargetId == c.TargetId).ToList();//避免重复生成
                             if (existedModels != null)
                             {
                                 for (int i = existedModels.Count() - 1; i >= 0; i--)
@@ -128,14 +157,14 @@ namespace MyRevit.MyTests.PAA
                                     existedModels[i].Clear();
                                 }
                             }
-                            Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
+                            Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                             Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
-                            Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
+                            Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthSize;
                             Model.ModelType = ModelType.Single;
-                            if (!PAAContext.Creator.Generate( Model))
+                            if (!PAAContext.Creator.Generate(Model))
                                 return false;
                             Collection.Data.Add(Model);
-                            Collection.Save(Document); 
+                            Collection.Save(Document);
                             #endregion
 
                             #region 共享参数设置
@@ -149,6 +178,7 @@ namespace MyRevit.MyTests.PAA
                             var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
                             var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
                             element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            //PAAContext.IsEditing = true;
                             #endregion
                             return true;
                         })))
@@ -194,7 +224,7 @@ namespace MyRevit.MyTests.PAA
                     //更新必要参数
                     UpdateModelAnnotationPrefix();
                     //获取族
-                    annotationFamily = null;
+                    FamilySymbol annotationFamily = null;
                     if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
                     {
                         annotationFamily = Model.GetAnnotationFamily(Document);
@@ -231,13 +261,13 @@ namespace MyRevit.MyTests.PAA
                             }
                         }
                         Model.Document = Document;
-                        Model.CurrentFontHeight = PAAContext.FontManagement.CurrentFontHeight;
+                        Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                         Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
-                        Model.CurrentFontWidthScale = PAAContext.FontManagement.CurrentFontWidthScale;
+                        Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
                         Model.ModelType = ModelType.Multiple;
                         PAAContext.Creator.Generate(Model);
                         Collection.Data.Add(Model);
-                        Collection.Save(Document); 
+                        Collection.Save(Document);
                         #endregion
 
                         #region 共享参数设置
@@ -252,7 +282,7 @@ namespace MyRevit.MyTests.PAA
                             }
                             var offset = element.GetParameters(PAAContext.SharedParameterOffset).FirstOrDefault().AsDouble();
                             var diameter = element.GetParameters(PAAContext.SharedParameterDiameter).FirstOrDefault().AsDouble();
-                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
+                            element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.AnnotationPrefix + UnitHelper.ConvertFromFootTo(Model.LocationType.GetLocationValue(offset, diameter), VLUnitType.millimeter).ToString());
                         }
                         #endregion
                         PAAContext.IsEditing = true;
@@ -268,7 +298,7 @@ namespace MyRevit.MyTests.PAA
 
         private static void ShowMessage(string msg)
         {
-            throw new NotImplementedException("");
+            //throw new NotImplementedException("");
         }
 
         #region RatioButtons
@@ -450,9 +480,9 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); }  }
+        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); } }
         public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
-        public string PLPreview { get { return "如:ZP DN100"; } }
+        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } }
         #endregion
     }
 }

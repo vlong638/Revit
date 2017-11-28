@@ -59,6 +59,8 @@ namespace MyRevit.MyTests.PAA
                         model.LeafEndPoint += offset;
                         //必要族
                         model.Document = document;
+                        model.IsRegenerate = true;
+                        model.RegenerateType = RegenerateType.BySingle;
                         PAAContext.Creator.Regenerate(model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
@@ -83,7 +85,6 @@ namespace MyRevit.MyTests.PAA
                     }
                     #endregion
 
-
                     #region 根据 标注 重新生成
                     var textMoved = collection.Data.FirstOrDefault(c => c.AnnotationId== changeId);
                     if (textMoved != null)
@@ -97,6 +98,8 @@ namespace MyRevit.MyTests.PAA
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
                         model.Document = document;
+                        model.IsRegenerate = true;
+                        model.RegenerateType = RegenerateType.BySingle;
                         PAAContext.Creator.Regenerate( model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发

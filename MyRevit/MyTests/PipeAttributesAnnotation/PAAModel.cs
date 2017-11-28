@@ -221,7 +221,7 @@ namespace MyRevit.MyTests.PAA
             switch (textType)
             {
                 case PAATextType.OnLine:
-                    return  start + (currentFontHeight / 2) * verticalVector; //+ verticalFix) * verticalVector;
+                    return  start + (currentFontHeight / 1.8) * verticalVector; //+ verticalFix) * verticalVector;
                 case PAATextType.OnEdge:
                     return end;
                 default:
@@ -328,7 +328,7 @@ namespace MyRevit.MyTests.PAA
         /// <summary>
         /// 当前文本 Revit中的宽度缩放比例 
         /// </summary>
-        public double CurrentFontWidthScale { set; get; }
+        public double CurrentFontWidthSize { set; get; }
         #endregion
 
         #endregion
@@ -339,7 +339,7 @@ namespace MyRevit.MyTests.PAA
         /// <summary>
         /// 线宽
         /// </summary>
-        public double LineWidth { get; private set; }
+        public double LineWidth { get; set; }
         /// <summary>
         /// 间距
         /// </summary>
@@ -432,7 +432,7 @@ namespace MyRevit.MyTests.PAA
                 TargetLocation = sr.ReadFormatStringAsXYZ();
                 CurrentFontSizeScale = sr.ReadFormatStringAsDouble();
                 CurrentFontHeight = sr.ReadFormatStringAsDouble();
-                CurrentFontWidthScale = sr.ReadFormatStringAsDouble();
+                CurrentFontWidthSize = sr.ReadFormatStringAsDouble();
                 return true;
             }
             catch (Exception ex)
@@ -469,7 +469,7 @@ namespace MyRevit.MyTests.PAA
             sb.AppendItem(TargetLocation);
             sb.AppendItem(CurrentFontSizeScale);
             sb.AppendItem(CurrentFontHeight);
-            sb.AppendItem(CurrentFontWidthScale);
+            sb.AppendItem(CurrentFontWidthSize);
             return sb.ToData();
         }
         public ISelectionFilter GetFilter()
@@ -496,11 +496,6 @@ namespace MyRevit.MyTests.PAA
                 case ModelType.Single:
                     #region single
                     var target = Document.GetElement(TargetId);
-                    var scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
-                    var width = TextType.GetLineWidth() * scale;
-                    var height = 400 * scale;
-                    var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
-                    var heightFoot = UnitHelper.ConvertToFoot(height, VLUnitType.millimeter);
                     var locationCurve = TargetType.GetLine(target);
                     UpdateVectors(locationCurve);
                     //干线起始点 
@@ -513,7 +508,8 @@ namespace MyRevit.MyTests.PAA
                     }
                     else { } //否则不改变原始坐标,仅重置
                              //支线终点
-                    LeafEndPoint = BodyEndPoint + widthFoot * ParallelVector;
+                    if (!IsRegenerate)
+                        LeafEndPoint = BodyEndPoint + LineWidth * ParallelVector;
                     //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
                     //高度,宽度 取决于文本 
                     AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, VerticalVector, BodyEndPoint, LeafEndPoint);
@@ -613,10 +609,10 @@ namespace MyRevit.MyTests.PAA
                     {
                         LineHeight = CurrentFontHeight;
                     }
-                    LineWidth = UnitHelper.ConvertToFoot(TextType.GetLineWidth() * CurrentFontWidthScale, VLUnitType.millimeter);
+                    LineWidth = UnitHelper.ConvertToFoot(TextType.GetLineWidth() * CurrentFontWidthSize, VLUnitType.millimeter);
                     LineSpace = CurrentFontHeight;
-                    scale = 1 / PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
-                    width = TextType.GetLineWidth() * scale;
+                    //var width = TextType.GetLineWidth()* PAAContext.FontManagement.CurrentFontWidthSize;
+                    //var width = TextType.GetLineWidth() * PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
                     //标注位置
                     for (int i = 0; i < PipeAndNodePoints.Count(); i++)
                     {
@@ -720,6 +716,25 @@ namespace MyRevit.MyTests.PAA
                     break;
                 default:
                     break;
+            }
+        }
+
+        internal string GetFullText()
+        {
+            var target=Document.GetElement(TargetId);
+            var system = target.GetParameters(PAAContext.SharedParameterSystem).First().AsString();
+            var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+            var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
+            switch (AnnotationType)
+            {
+                case PAAAnnotationType.SPL:
+                    return string.Format("{0} DN{1} {2}", system, diameter, AnnotationPrefix + offset);
+                case PAAAnnotationType.SL:
+                    return string.Format("{0} {1}", system, AnnotationPrefix + offset);
+                case PAAAnnotationType.PL:
+                    return string.Format("{0} {1}", diameter, AnnotationPrefix + offset);
+                default:
+                    throw new NotImplementedException("不支持该类型的处理");
             }
         }
     }
