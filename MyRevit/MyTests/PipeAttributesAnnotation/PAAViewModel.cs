@@ -47,26 +47,37 @@ namespace MyRevit.MyTests.PAA
         {
             try
             {
-                //获取族
+                if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                {
+                    //添加共享参数
+                    string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
+                    var parameterHelper = new ShareParameter(shareFilePath);
+                    parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_PipeCurves), true, BuiltInParameterGroup.PG_TEXT);
+                    parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_DuctCurves), true, BuiltInParameterGroup.PG_TEXT);
+                    parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_CableTray), true, BuiltInParameterGroup.PG_TEXT);
+                    //parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_Conduit), true, BuiltInParameterGroup.PG_TEXT);
+                    return true;
+                })))
+                {
+                    ShowMessage("加载功能所需的共享参数失败");
+                    ViewType = PAAViewType.Idle;
+                    Execute();
+                    return false;
+                }
                 FamilySymbol annotationFamily = null;
                 if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                 {
-                    annotationFamily = Model.GetAnnotationFamily(Document);
-                    return annotationFamily != null;
+                    //获取族
+                    PAAContext.GetSPLTag(Document);
+                    PAAContext.GetSLTag(Document);
+                    PAAContext.GetPLTag(Document);
+                    return true;
                 })))
                 {
                     ShowMessage("加载功能所需的族失败");
                     ViewType = PAAViewType.Idle;
                     Execute();
                     return false;
-                }
-                //准备族内参数
-                if (!PAAContext.FontManagement.IsCurrentFontSettled)
-                {
-                    var familyDoc = Document.EditFamily(annotationFamily.Family);
-                    var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
-                    var textElementType = textElement.Symbol as TextElementType;
-                    PAAContext.FontManagement.SetCurrentFont(textElementType);
                 }
             }
             catch (Exception ex)
@@ -93,6 +104,14 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
                     Model.Document = Document;
+                    //获取族内参数信息
+                    if (!GetTextInfo())
+                    {
+                        ShowMessage("加载族文字信息失败");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
                     //更新必要参数
                     UpdateModelAnnotationPrefix();
                     View.Close();
@@ -169,15 +188,9 @@ namespace MyRevit.MyTests.PAA
 
                             #region 共享参数设置
                             var element = Document.GetElement(Model.TargetId);
-                            if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
-                            {
-                                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
-                                var parameterHelper = new ShareParameter(shareFilePath);
-                                parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
-                            }
                             element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.GetFull_L(element));
-                            //PAAContext.IsEditing = true;
                             #endregion
+
                             return true;
                         })))
                         ViewType = PAAViewType.PickSinglePipe_Pipe;
@@ -221,27 +234,13 @@ namespace MyRevit.MyTests.PAA
                     }
                     //更新必要参数
                     UpdateModelAnnotationPrefix();
-                    //获取族
-                    FamilySymbol annotationFamily = null;
-                    if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
+                    //获取族内参数信息
+                    if (!GetTextInfo())
                     {
-                        annotationFamily = Model.GetAnnotationFamily(Document);
-                        var lineFamily = Model.GetLineFamily(Document);
-                        return annotationFamily != null && lineFamily != null;
-                    })))
-                    {
-                        ShowMessage("加载功能所需的族失败");
+                        ShowMessage("加载族文字信息失败");
                         ViewType = PAAViewType.Idle;
                         Execute();
                         return;
-                    }
-                    //准备族内参数
-                    if (!PAAContext.FontManagement.IsCurrentFontSettled)
-                    {
-                        var familyDoc = Document.EditFamily(annotationFamily.Family);
-                        var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
-                        var textElementType = textElement.Symbol as TextElementType;
-                        PAAContext.FontManagement.SetCurrentFont(textElementType);
                     }
                     //生成处理
                     if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
@@ -292,12 +291,38 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
+        private bool GetTextInfo()
+        {
+            FamilySymbol annotationFamily = null;
+            if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+            {
+                annotationFamily = Model.GetAnnotationFamily(Document);
+                return annotationFamily != null;
+            })))
+            {
+                ShowMessage("加载功能所需的族失败");
+                ViewType = PAAViewType.Idle;
+                Execute();
+            }
+            if (!PAAContext.FontManagement.IsCurrentFontSettled)
+            {
+                var familyDoc = Document.EditFamily(annotationFamily.Family);
+                var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                var textElementType = textElement.Symbol as TextElementType;
+                PAAContext.FontManagement.SetCurrentFont(textElementType);
+            }
+
+            return annotationFamily != null;
+        }
+
         private static void ShowMessage(string msg)
         {
             //throw new NotImplementedException("");
         }
 
         #region RatioButtons
+
+        #region PAATargetType
         PAATargetType TargetType
         {
             get
@@ -333,7 +358,9 @@ namespace MyRevit.MyTests.PAA
             get { return TargetType == PAATargetType.Conduit; }
             set { if (value) TargetType = PAATargetType.Conduit; }
         }
+        #endregion
 
+        #region AnnotationType
         PAAAnnotationType AnnotationType
         {
             get
@@ -363,7 +390,9 @@ namespace MyRevit.MyTests.PAA
             get { return AnnotationType == PAAAnnotationType.PL; }
             set { if (value) AnnotationType = PAAAnnotationType.PL; }
         }
+        #endregion
 
+        #region PAALocationType
         PAALocationType LocationType
         {
             get
@@ -393,7 +422,9 @@ namespace MyRevit.MyTests.PAA
             get { return LocationType == PAALocationType.Bottom; }
             set { if (value) LocationType = PAALocationType.Bottom; }
         }
+        #endregion
 
+        #region PAATextType
         PAATextType TextType
         {
             get
@@ -417,7 +448,9 @@ namespace MyRevit.MyTests.PAA
             get { return TextType == PAATextType.OnEdge; }
             set { if (value) TextType = PAATextType.OnEdge; }
         }
+        #endregion
 
+        #region Texts
         private string centerPrefix = "CL+";
         public string CenterPrefix
         {
@@ -431,6 +464,7 @@ namespace MyRevit.MyTests.PAA
                 centerPrefix = value;
                 RaisePropertyChanged("SPLPreview");
                 RaisePropertyChanged("SLPreview");
+                RaisePropertyChanged("PLPreview");
             }
         }
 
@@ -478,7 +512,9 @@ namespace MyRevit.MyTests.PAA
 
         public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); } }
         public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
-        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } }
+        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } } 
+        #endregion
+
         #endregion
     }
 }
