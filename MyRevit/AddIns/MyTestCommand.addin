@@ -29,6 +29,13 @@
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
+    <Name>命令_风管特性标注</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>00F35B4B-1E97-48E0-A462-BD44B1D252A4</ClientId>
+    <FullClassName>MyRevit.MyTests.DAA.DAACommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
     <Name>CurrentTestCommand</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>BBC4E9C2-AD73-4F13-9D70-6CAFAFAE3501</ClientId>

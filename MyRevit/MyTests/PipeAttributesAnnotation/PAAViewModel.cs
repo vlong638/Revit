@@ -105,7 +105,7 @@ namespace MyRevit.MyTests.PAA
                 case PAAViewType.PickSinglePipe_Pipe:
                     Model.Document = Document;
                     //获取族内参数信息
-                    if (!GetTextInfo())
+                    if (!GetFamilySymbolInfo())
                     {
                         ShowMessage("加载族文字信息失败");
                         ViewType = PAAViewType.Idle;
@@ -235,7 +235,7 @@ namespace MyRevit.MyTests.PAA
                     //更新必要参数
                     UpdateModelAnnotationPrefix();
                     //获取族内参数信息
-                    if (!GetTextInfo())
+                    if (!GetFamilySymbolInfo())
                     {
                         ShowMessage("加载族文字信息失败");
                         ViewType = PAAViewType.Idle;
@@ -289,6 +289,27 @@ namespace MyRevit.MyTests.PAA
                 default:
                     throw new NotImplementedException("功能未实现");
             }
+        }
+
+        private bool GetFamilySymbolInfo()
+        {
+            FamilySymbol annotationFamily = null;
+            if (!TransactionHelper.DelegateTransaction(Document, "GetFamilySymbolInfo", (Func<bool>)(() =>
+            {
+                annotationFamily = Model.GetAnnotationFamily(Document);
+                var lineFamily = Model.GetLineFamily(Document);
+                return annotationFamily != null && lineFamily != null;
+            })))
+                return false;
+            //准备族内参数
+            if (!PAAContext.FontManagement.IsCurrentFontSettled)
+            {
+                var familyDoc = Document.EditFamily(annotationFamily.Family);
+                var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
+                var textElementType = textElement.Symbol as TextElementType;
+                PAAContext.FontManagement.SetCurrentFont(textElementType);
+            }
+            return true;
         }
 
         private bool GetTextInfo()
