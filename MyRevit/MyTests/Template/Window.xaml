@@ -30,10 +30,10 @@
                         <Setter Property="Width" Value="40"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe}"/>
-                <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct}"/>
-                <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray}"/>
-                <RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit}"/>
+                <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="标记样式" Grid.Row="1">
@@ -47,12 +47,12 @@
                         <Setter Property="Foreground" Value="Brown"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL}"/>
-                <TextBlock Text="  如:ZP DN100 CL+2600"/>
-                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL}"/>
-                <TextBlock Text="  如:ZP CL+2600"/>
-                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL}"/>
-                <TextBlock Text="  如:ZP DN100"/>
+                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <TextBlock Text="{Binding SPLPreview}"/>
+                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <TextBlock Text="{Binding SLPreview}"/>
+                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <TextBlock Text="{Binding PLPreview}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="离地模式选择" Grid.Row="2">
@@ -75,11 +75,11 @@
                     <ColumnDefinition Width="80"></ColumnDefinition>
                     <ColumnDefinition Width="120"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <RadioButton Content="中心离地" IsChecked="{Binding LocationType_Center}" Grid.Row="0"/>
+                <RadioButton Content="中心离地" IsChecked="{Binding LocationType_Center, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="0"/>
                 <TextBox Text="CL+" Grid.Row="0" Grid.Column="1"></TextBox>
-                <RadioButton Content="顶部离地" IsChecked="{Binding LocationType_Top}" Grid.Row="1"/>
+                <RadioButton Content="顶部离地" IsChecked="{Binding LocationType_Top, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="1"/>
                 <TextBox Text="TL+" Grid.Row="1" Grid.Column="1"></TextBox>
-                <RadioButton Content="底部离地" IsChecked="{Binding LocationType_Bottom}" Grid.Row="2"/>
+                <RadioButton Content="底部离地" IsChecked="{Binding LocationType_Bottom, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}" Grid.Row="2"/>
                 <TextBox Text="BL+" Grid.Row="2" Grid.Column="1"></TextBox>
             </Grid>
         </GroupBox>
@@ -91,8 +91,8 @@
                         <Setter Property="Width" Value="80"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine}"/>
-                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge}"/>
+                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
             </StackPanel>
         </GroupBox>
         <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">

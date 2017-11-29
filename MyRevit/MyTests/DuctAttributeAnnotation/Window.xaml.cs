@@ -25,12 +25,9 @@ namespace MyRevit.MyTests.DAA
             ViewModel.Execute();
         }
 
-        private void Btn_Multiple_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void Btn_Cancel_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (!ViewModel.IsIdling)
-                return;
-
-            ViewModel.ViewType = DAAViewType.PickMultiplePipes;
+            ViewModel.ViewType = DAAViewType.Close;
             ViewModel.Execute();
         }
     }

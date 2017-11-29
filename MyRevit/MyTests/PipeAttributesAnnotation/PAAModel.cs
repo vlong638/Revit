@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using static MyRevit.MyTests.PAA.PAACreator;
 
 namespace MyRevit.MyTests.PAA
@@ -46,8 +47,8 @@ namespace MyRevit.MyTests.PAA
             {
                 case PAATargetType.Pipe:
                 case PAATargetType.Duct:
-                    return (element.Location as LocationCurve).Curve as Line;
                 case PAATargetType.CableTray:
+                    return (element.Location as LocationCurve).Curve as Line;
                 case PAATargetType.Conduit:
                 default:
                     throw new NotImplementedException("该类型暂不支持");
@@ -109,24 +110,6 @@ namespace MyRevit.MyTests.PAA
     }
     static class PAAAnnotationTypeEx
     {
-        /// <summary>
-        /// 获取 标注对应的族
-        /// </summary>
-        public static FamilySymbol GetAnnotationFamilySymbol(this PAAAnnotationType type,Document doc)
-        {
-            switch (type)
-            {
-                case PAAAnnotationType.SPL:
-                    return PAAContext.GetSPLTag(doc);
-                case PAAAnnotationType.SL:
-                    return PAAContext.GetSLTag(doc);
-                case PAAAnnotationType.PL:
-                    return PAAContext.GetPLTag(doc);
-                default:
-                    throw new NotImplementedException("暂不支持该类型");
-            }
-        }
-
         /// <summary>
         /// 获取 线族
         /// </summary>
@@ -221,7 +204,7 @@ namespace MyRevit.MyTests.PAA
             switch (textType)
             {
                 case PAATextType.OnLine:
-                    return  start + (currentFontHeight / 1.8) * verticalVector; //+ verticalFix) * verticalVector;
+                    return  start + (currentFontHeight / 3) * verticalVector; //+ verticalFix) * verticalVector;
                 case PAATextType.OnEdge:
                     return end;
                 default:
@@ -231,7 +214,7 @@ namespace MyRevit.MyTests.PAA
         }
     }
 
-    public enum ModelType
+    public enum PAAModelType
     {
         Single,
         Multiple,
@@ -246,7 +229,7 @@ namespace MyRevit.MyTests.PAA
     public class PAAModel : VLModel
     {
         #region 需要存储
-        public ModelType ModelType { set; get; }
+        public PAAModelType ModelType { set; get; }
         public RegenerateType RegenerateType { set; get; }
 
         #region Single
@@ -296,6 +279,10 @@ namespace MyRevit.MyTests.PAA
         #endregion
 
         #region 通用属性
+        /// <summary>
+        /// 标注对象
+        /// </summary>
+        public PAATargetType TargetType { set; get; }
         /// <summary>
         /// 标记样式
         /// </summary>
@@ -349,14 +336,68 @@ namespace MyRevit.MyTests.PAA
         /// </summary>
         public double LineHeight { set; get; }
 
-        public PAATargetType TargetType { set; get; }//标注对象
 
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
-        public FamilySymbol GetAnnotationFamily(Document doc)
+        public FamilySymbol GetAnnotationFamily(Document doc,ElementId targetId)
         {
-            return AnnotationType.GetAnnotationFamilySymbol(doc);
+            switch (AnnotationType)
+            {
+                case PAAAnnotationType.SPL:
+                    switch (TargetType)
+                    {
+                        case PAATargetType.Pipe:
+                            return PAAContext.GetSPLTag_Pipe(doc);
+                        case PAATargetType.Duct:
+                            if (IsRoundDuct(doc.GetElement(targetId)))
+                                return PAAContext.GetSPLTag_Duct_Round(doc);
+                            else
+                                return PAAContext.GetSPLTag_Duct_Rectangle(doc);
+                        case PAATargetType.CableTray:
+                            return PAAContext.GetSPLTag_CableTray(doc);
+                        case PAATargetType.Conduit:
+                        default:
+                            throw new NotImplementedException("暂不支持");
+                    }
+                case PAAAnnotationType.SL:
+                    switch (TargetType)
+                    {
+                        case PAATargetType.Pipe:
+                            return PAAContext.GetSLTag_Pipe(doc);
+                        case PAATargetType.Duct:
+                            return PAAContext.GetSLTag_Duct(doc);
+                        case PAATargetType.CableTray:
+                            return PAAContext.GetSLTag_CableTray(doc);
+                        case PAATargetType.Conduit:
+                        default:
+                            throw new NotImplementedException("暂不支持");
+                    }
+                case PAAAnnotationType.PL:
+                    switch (TargetType)
+                    {
+                        case PAATargetType.Pipe:
+                            return PAAContext.GetPLTag_Pipe(doc);
+                        case PAATargetType.Duct:
+                            if (IsRoundDuct(doc.GetElement(targetId)))
+                                return PAAContext.GetPLTag_Duct_Round(doc);
+                            else
+                                return PAAContext.GetPLTag_Duct_Rectangle(doc);
+                        case PAATargetType.CableTray:
+                            return PAAContext.GetPLTag_CableTray(doc);
+                        case PAATargetType.Conduit:
+                        default:
+                            throw new NotImplementedException("暂不支持");
+                    }
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
         }
+
+        private static bool IsRoundDuct(Element element)
+        {
+            return element.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString() == "圆形风管";
+        }
+
         public FamilySymbol GetLineFamily(Document doc)
         {
             return TextType.GetLineFamily(doc);
@@ -407,10 +448,11 @@ namespace MyRevit.MyTests.PAA
             try
             {
                 StringReader sr = new StringReader(data);
-                ModelType = sr.ReadFormatStringAsEnum<ModelType>();
+                TargetType = sr.ReadFormatStringAsEnum<PAATargetType>();
+                ModelType = sr.ReadFormatStringAsEnum<PAAModelType>();
                 switch (ModelType)
                 {
-                    case ModelType.Single:
+                    case PAAModelType.Single:
                         TargetId = sr.ReadFormatStringAsElementId();
                         LineIds = sr.ReadFormatStringAsElementIds();
                         AnnotationId = sr.ReadFormatStringAsElementId();
@@ -419,7 +461,7 @@ namespace MyRevit.MyTests.PAA
                         LeafEndPoint = sr.ReadFormatStringAsXYZ();
                         AnnotationLocation = sr.ReadFormatStringAsXYZ();
                         break;
-                    case ModelType.Multiple:
+                    case PAAModelType.Multiple:
                         TargetIds = sr.ReadFormatStringAsElementIds();
                         LineId = sr.ReadFormatStringAsElementId();
                         AnnotationIds = sr.ReadFormatStringAsElementIds();
@@ -444,10 +486,11 @@ namespace MyRevit.MyTests.PAA
         public override string ToData()
         {
             StringBuilder sb = new StringBuilder();
+            sb.AppendItem(TargetType);
             sb.AppendItem(ModelType);
             switch (ModelType)
             {
-                case ModelType.Single:
+                case PAAModelType.Single:
                     sb.AppendItem(TargetId);
                     sb.AppendItem(LineIds);
                     sb.AppendItem(AnnotationId);
@@ -456,7 +499,7 @@ namespace MyRevit.MyTests.PAA
                     sb.AppendItem(LeafEndPoint);
                     sb.AppendItem(AnnotationLocation);
                     break;
-                case ModelType.Multiple:
+                case PAAModelType.Multiple:
                     sb.AppendItem(TargetIds);
                     sb.AppendItem(LineId);
                     sb.AppendItem(AnnotationIds);
@@ -493,7 +536,7 @@ namespace MyRevit.MyTests.PAA
         {
             switch (ModelType)
             {
-                case ModelType.Single:
+                case PAAModelType.Single:
                     #region single
                     var target = Document.GetElement(TargetId);
                     var locationCurve = TargetType.GetLine(target);
@@ -515,7 +558,7 @@ namespace MyRevit.MyTests.PAA
                     AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, VerticalVector, BodyEndPoint, LeafEndPoint);
                     return true;
                     #endregion
-                case ModelType.Multiple:
+                case PAAModelType.Multiple:
                     #region multiple
                     PipeAndNodePoints = new List<ElementAndNodePoint>();
                     if (IsRegenerate)
@@ -609,8 +652,8 @@ namespace MyRevit.MyTests.PAA
                     {
                         LineHeight = CurrentFontHeight;
                     }
-                    LineWidth = UnitHelper.ConvertToFoot(TextType.GetLineWidth() * CurrentFontWidthSize, VLUnitType.millimeter);
                     LineSpace = CurrentFontHeight;
+                    //LineWidth = UnitHelper.ConvertToFoot(TextType.GetLineWidth() * CurrentFontWidthSize, VLUnitType.millimeter);
                     //var width = TextType.GetLineWidth()* PAAContext.FontManagement.CurrentFontWidthSize;
                     //var width = TextType.GetLineWidth() * PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
                     //标注位置
@@ -696,7 +739,7 @@ namespace MyRevit.MyTests.PAA
             Document doc = Document;
             switch (ModelType)
             {
-                case ModelType.Single:
+                case PAAModelType.Single:
                     //删除线
                     foreach (var item in LineIds)
                         if (doc.GetElement(item) != null)
@@ -705,7 +748,7 @@ namespace MyRevit.MyTests.PAA
                     if (doc.GetElement(AnnotationId) != null)
                         doc.Delete(AnnotationId);
                     break;
-                case ModelType.Multiple:
+                case PAAModelType.Multiple:
                     //清理线族
                     if (doc.GetElement(LineId) != null)
                         doc.Delete(LineId);
@@ -719,30 +762,89 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        internal string GetFullText()
+        internal string GetFullText(Element target)
         {
-            var target=Document.GetElement(TargetId);
-            var system = target.GetParameters(PAAContext.SharedParameterSystem).First().AsString();
-            var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
             var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
             switch (AnnotationType)
             {
                 case PAAAnnotationType.SPL:
-                    return string.Format("{0} DN{1} {2}", system, diameter, AnnotationPrefix + offset);
+                    string prefix = GetPrefix(target);
+                    double DN = GetDN(target);
+                    return string.Format("{0} DN{1} {2}", prefix, DN, AnnotationPrefix + offset);
                 case PAAAnnotationType.SL:
-                    return string.Format("{0} {1}", system, AnnotationPrefix + offset);
+                    prefix = GetPrefix(target);
+                    return string.Format("{0} {1}", prefix, AnnotationPrefix + offset);
                 case PAAAnnotationType.PL:
-                    return string.Format("DN{0} {1}", diameter, AnnotationPrefix + offset);
+                    DN = GetDN(target);
+                    return string.Format("DN{0} {1}", DN, AnnotationPrefix + offset);
                 default:
                     throw new NotImplementedException("不支持该类型的处理");
             }
         }
+
+        private string GetPrefix(Element target)
+        {
+            switch (TargetType)
+            {
+                case PAATargetType.Pipe:
+                case PAATargetType.Duct:
+                    return target.GetParameters(PAAContext.SharedParameterSystemAbbreviation).First().AsString();
+                case PAATargetType.CableTray:
+                    return target.GetParameters(PAAContext.SharedParameterTypeName).First().AsString();
+                case PAATargetType.Conduit:
+                default:
+                    throw new NotImplementedException("暂未支持该类型");
+            }
+        }
+
+        private double GetDN(Element target)
+        {
+            double DN;
+            switch (TargetType)
+            {
+                case PAATargetType.Pipe:
+                    DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                    break;
+                case PAATargetType.Duct:
+                    if (IsRoundDuct(target))
+                        DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                    else
+                        DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
+                    break;
+                case PAATargetType.CableTray:
+                    DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
+                    break;
+                case PAATargetType.Conduit:
+                default:
+                    throw new NotImplementedException("暂未支持该类型");
+            }
+
+            return DN;
+        }
+
         internal string GetFull_L(Element target)
         {
             //var target = Document.GetElement(TargetId);
-            var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+            //double DN = GetDN(target);
+            //var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
             var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
             return AnnotationPrefix + offset;
+        }
+
+        internal void UpdateLineWidth(Element target)
+        {
+            switch (TextType)
+            {
+                case PAATextType.OnLine:
+                    string text = GetFullText(target);
+                    var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
+                    var revitWdith = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
+                    LineWidth = revitWdith;
+                    break;
+                case PAATextType.OnEdge:
+                    LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
+                    break;
+            }
         }
     }
 }

@@ -38,6 +38,9 @@ namespace MyRevit.MyTests.Template
         {
             Model = new TemplateModel("");
             View = new TemplateWindow(this);
+            //用以打开时更新页面
+            AnnotationType = TemplateAnnotationType.SPL;
+            LocationType = TemplateLocationType.Center;
         }
 
         public override bool IsIdling { get { return ViewType == TemplateViewType.Idle; } }
@@ -117,6 +120,8 @@ namespace MyRevit.MyTests.Template
         }
 
         #region RatioButtons
+
+        #region TemplateTargetType
         TemplateTargetType TargetType
         {
             get
@@ -152,7 +157,9 @@ namespace MyRevit.MyTests.Template
             get { return TargetType == TemplateTargetType.Conduit; }
             set { if (value) TargetType = TemplateTargetType.Conduit; }
         }
+        #endregion
 
+        #region TemplateAnnotationType
         TemplateAnnotationType AnnotationType
         {
             get
@@ -165,6 +172,7 @@ namespace MyRevit.MyTests.Template
                 RaisePropertyChanged("AnnotationType_SPL");
                 RaisePropertyChanged("AnnotationType_SL");
                 RaisePropertyChanged("AnnotationType_PL");
+                UpdateModelAnnotationPrefix();
             }
         }
         public bool AnnotationType_SPL
@@ -182,7 +190,9 @@ namespace MyRevit.MyTests.Template
             get { return AnnotationType == TemplateAnnotationType.PL; }
             set { if (value) AnnotationType = TemplateAnnotationType.PL; }
         }
+        #endregion
 
+        #region TemplateLocationType
         TemplateLocationType LocationType
         {
             get
@@ -195,6 +205,7 @@ namespace MyRevit.MyTests.Template
                 RaisePropertyChanged("LocationType_Center");
                 RaisePropertyChanged("LocationType_Top");
                 RaisePropertyChanged("LocationType_Bottom");
+                UpdateModelAnnotationPrefix();
             }
         }
         public bool LocationType_Center
@@ -212,7 +223,9 @@ namespace MyRevit.MyTests.Template
             get { return LocationType == TemplateLocationType.Bottom; }
             set { if (value) LocationType = TemplateLocationType.Bottom; }
         }
+        #endregion
 
+        #region TemplateTextType
         TemplateTextType TextType
         {
             get
@@ -236,6 +249,73 @@ namespace MyRevit.MyTests.Template
             get { return TextType == TemplateTextType.OnEdge; }
             set { if (value) TextType = TemplateTextType.OnEdge; }
         }
+        #endregion
+
+        #region Texts
+        private string centerPrefix = "CL+";
+        public string CenterPrefix
+        {
+            get
+            {
+                return centerPrefix;
+            }
+
+            set
+            {
+                centerPrefix = value;
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+                RaisePropertyChanged("PLPreview");
+            }
+        }
+
+        private void UpdateModelAnnotationPrefix()
+        {
+            if (Model.LocationType == TemplateLocationType.Center)
+                Model.AnnotationPrefix = CenterPrefix;
+            else if (Model.LocationType == TemplateLocationType.Top)
+                Model.AnnotationPrefix = TopPrefix;
+            else if (Model.LocationType == TemplateLocationType.Bottom)
+                Model.AnnotationPrefix = BottomPrefix;
+        }
+
+        private string topPrefix = "TL+";
+        public string TopPrefix
+        {
+            get
+            {
+                return topPrefix;
+            }
+
+            set
+            {
+                topPrefix = value;
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+            }
+        }
+
+        private string bottomPrefix = "BL+";
+        public string BottomPrefix
+        {
+            get
+            {
+                return bottomPrefix;
+            }
+
+            set
+            {
+                bottomPrefix = value;
+                RaisePropertyChanged("SPLPreview");
+                RaisePropertyChanged("SLPreview");
+            }
+        }
+
+        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); } }
+        public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
+        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } }
+        #endregion
+
         #endregion
 
     }

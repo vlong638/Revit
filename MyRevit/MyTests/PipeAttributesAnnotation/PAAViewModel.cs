@@ -40,7 +40,9 @@ namespace MyRevit.MyTests.PAA
         {
             Model = new PAAModel("");
             View = new PAAWindow(this);
+            //用以打开时更新页面
             AnnotationType = PAAAnnotationType.SPL;
+            LocationType = PAALocationType.Center;
         }
 
         public bool Prepare()
@@ -64,21 +66,22 @@ namespace MyRevit.MyTests.PAA
                     Execute();
                     return false;
                 }
-                FamilySymbol annotationFamily = null;
-                if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
-                {
-                    //获取族
-                    PAAContext.GetSPLTag(Document);
-                    PAAContext.GetSLTag(Document);
-                    PAAContext.GetPLTag(Document);
-                    return true;
-                })))
-                {
-                    ShowMessage("加载功能所需的族失败");
-                    ViewType = PAAViewType.Idle;
-                    Execute();
-                    return false;
-                }
+                //if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                //{
+                //    //获取族
+                //    PAAContext.GetSPLTag_Pipe(Document);
+                //    PAAContext.GetSLTag(Document);
+                //    PAAContext.GetPLTag(Document);
+                //    PAAContext.Get_MultipleLineOnEdge(Document);
+                //    PAAContext.Get_MultipleLineOnLine(Document);
+                //    return true;
+                //})))
+                //{
+                //    ShowMessage("加载功能所需的族失败");
+                //    ViewType = PAAViewType.Idle;
+                //    Execute();
+                //    return false;
+                //}
             }
             catch (Exception ex)
             {
@@ -104,16 +107,6 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
                     Model.Document = Document;
-                    //获取族内参数信息
-                    if (!GetFamilySymbolInfo())
-                    {
-                        ShowMessage("加载族文字信息失败");
-                        ViewType = PAAViewType.Idle;
-                        Execute();
-                        return;
-                    }
-                    //更新必要参数
-                    UpdateModelAnnotationPrefix();
                     View.Close();
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
@@ -129,6 +122,14 @@ namespace MyRevit.MyTests.PAA
                         }
                     }))
                         ViewType = PAAViewType.Idle;
+                    //获取族内参数信息
+                    if (!GetFamilySymbolInfo(Model.TargetId))
+                    {
+                        ShowMessage("加载族文字信息失败");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
                     Execute();
                     break;
                 case PAAViewType.PickSinglePipe_Location:
@@ -138,19 +139,10 @@ namespace MyRevit.MyTests.PAA
                         var target = Document.GetElement(Model.TargetId);
                         var locationCurve = TargetType.GetLine(target);
                         Model.UpdateVectors(locationCurve);
-                        switch (Model.TextType)
-                        {
-                            case PAATextType.OnLine:
-                                string text = Model.GetFullText();
-                                var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
-                                var revitWdith = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
-                                Model.LineWidth = revitWdith;
-                                break;
-                            case PAATextType.OnEdge:
-                                Model.LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
-                                break;
-                        }
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, Model.BodyStartPoint, Model.BodyStartPoint + Model.LineWidth*1.02 * Model.ParallelVector).ToSameZ(Model.BodyStartPoint);
+                        Model.UpdateLineWidth(target);
+                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, 
+                            Model.BodyStartPoint, Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector)
+                            .ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
                         if (pEnd == null)
                             ViewType = PAAViewType.Idle;
@@ -179,7 +171,7 @@ namespace MyRevit.MyTests.PAA
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                             Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                             Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthSize;
-                            Model.ModelType = ModelType.Single;
+                            Model.ModelType = PAAModelType.Single;
                             if (!PAAContext.Creator.Generate(Model))
                                 return false;
                             Collection.Data.Add(Model);
@@ -205,7 +197,7 @@ namespace MyRevit.MyTests.PAA
                         //业务逻辑处理
                         //选择符合类型的过滤
                         var targetType = Model.GetFilter();
-                        var targetElementIds = UIDocument.Selection.PickObjects(ObjectType.Element, targetType, "请选择需要标注的管道").Select(c => c.ElementId);
+                        var targetElementIds = UIDocument.Selection.PickObjects(ObjectType.Element, targetType, "请选择需要标注的对象").Select(c => c.ElementId);
                         if (targetElementIds != null && targetElementIds.Count() > 0)
                         {
                             if (targetElementIds.Count() < 2)
@@ -232,16 +224,15 @@ namespace MyRevit.MyTests.PAA
                         Execute();
                         return;
                     }
-                    //更新必要参数
-                    UpdateModelAnnotationPrefix();
                     //获取族内参数信息
-                    if (!GetFamilySymbolInfo())
+                    if (!GetFamilySymbolInfo(Model.TargetIds.First()))
                     {
                         ShowMessage("加载族文字信息失败");
                         ViewType = PAAViewType.Idle;
                         Execute();
                         return;
                     }
+                    Model.UpdateLineWidth(Document.GetElement(Model.TargetIds.First()));
                     //生成处理
                     if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
                     {
@@ -261,7 +252,7 @@ namespace MyRevit.MyTests.PAA
                         Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                         Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                         Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
-                        Model.ModelType = ModelType.Multiple;
+                        Model.ModelType = PAAModelType.Multiple;
                         PAAContext.Creator.Generate(Model);
                         Collection.Data.Add(Model);
                         Collection.Save(Document);
@@ -291,12 +282,12 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        private bool GetFamilySymbolInfo()
+        private bool GetFamilySymbolInfo(ElementId targetId)
         {
             FamilySymbol annotationFamily = null;
             if (!TransactionHelper.DelegateTransaction(Document, "GetFamilySymbolInfo", (Func<bool>)(() =>
             {
-                annotationFamily = Model.GetAnnotationFamily(Document);
+                annotationFamily = Model.GetAnnotationFamily(Document,targetId);
                 var lineFamily = Model.GetLineFamily(Document);
                 return annotationFamily != null && lineFamily != null;
             })))
@@ -311,36 +302,6 @@ namespace MyRevit.MyTests.PAA
             }
             return true;
         }
-
-        private bool GetTextInfo()
-        {
-            FamilySymbol annotationFamily = null;
-            if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
-            {
-                annotationFamily = Model.GetAnnotationFamily(Document);
-                return annotationFamily != null;
-            })))
-            {
-                ShowMessage("加载功能所需的族失败");
-                ViewType = PAAViewType.Idle;
-                Execute();
-            }
-            if (!PAAContext.FontManagement.IsCurrentFontSettled)
-            {
-                var familyDoc = Document.EditFamily(annotationFamily.Family);
-                var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "2.5") as TextElement;
-                var textElementType = textElement.Symbol as TextElementType;
-                PAAContext.FontManagement.SetCurrentFont(textElementType);
-            }
-
-            return annotationFamily != null;
-        }
-
-        private static void ShowMessage(string msg)
-        {
-            //throw new NotImplementedException("");
-        }
-
         #region RatioButtons
 
         #region PAATargetType
@@ -381,7 +342,7 @@ namespace MyRevit.MyTests.PAA
         }
         #endregion
 
-        #region AnnotationType
+        #region PAAAnnotationType
         PAAAnnotationType AnnotationType
         {
             get
@@ -426,6 +387,7 @@ namespace MyRevit.MyTests.PAA
                 RaisePropertyChanged("LocationType_Center");
                 RaisePropertyChanged("LocationType_Top");
                 RaisePropertyChanged("LocationType_Bottom");
+                UpdateModelAnnotationPrefix();
             }
         }
         public bool LocationType_Center
@@ -472,6 +434,19 @@ namespace MyRevit.MyTests.PAA
         #endregion
 
         #region Texts
+        private void UpdateModelAnnotationPrefix()
+        {
+            if (Model.LocationType == PAALocationType.Center)
+                Model.AnnotationPrefix = CenterPrefix;
+            else if (Model.LocationType == PAALocationType.Top)
+                Model.AnnotationPrefix = TopPrefix;
+            else if (Model.LocationType == PAALocationType.Bottom)
+                Model.AnnotationPrefix = BottomPrefix;
+            RaisePropertyChanged("SPLPreview");
+            RaisePropertyChanged("SLPreview");
+            RaisePropertyChanged("PLPreview");
+        }
+
         private string centerPrefix = "CL+";
         public string CenterPrefix
         {
@@ -483,20 +458,8 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 centerPrefix = value;
-                RaisePropertyChanged("SPLPreview");
-                RaisePropertyChanged("SLPreview");
-                RaisePropertyChanged("PLPreview");
+                UpdateModelAnnotationPrefix();
             }
-        }
-
-        private void UpdateModelAnnotationPrefix()
-        {
-            if (Model.LocationType == PAALocationType.Center)
-                Model.AnnotationPrefix = CenterPrefix;
-            else if (Model.LocationType == PAALocationType.Top)
-                Model.AnnotationPrefix = TopPrefix;
-            else if (Model.LocationType == PAALocationType.Bottom)
-                Model.AnnotationPrefix = BottomPrefix;
         }
 
         private string topPrefix = "TL+";
@@ -510,8 +473,7 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 topPrefix = value;
-                RaisePropertyChanged("SPLPreview");
-                RaisePropertyChanged("SLPreview");
+                UpdateModelAnnotationPrefix();
             }
         }
 
@@ -526,14 +488,13 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 bottomPrefix = value;
-                RaisePropertyChanged("SPLPreview");
-                RaisePropertyChanged("SLPreview");
+                UpdateModelAnnotationPrefix();
             }
         }
 
-        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); } }
-        public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
-        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } } 
+        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", Model.AnnotationPrefix); } }
+        public string SLPreview { get { return string.Format("如:ZP {0}2600", Model.AnnotationPrefix); } }
+        public string PLPreview { get { return string.Format("如:DN100 {0}2600", Model.AnnotationPrefix); } } 
         #endregion
 
         #endregion

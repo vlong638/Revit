@@ -143,18 +143,6 @@
       <DependentUpon>PAAWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="MyTests\PipeAttributesAnnotation\VLPointPicker.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Command.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Context.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Creator.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Model.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\ModelCollection.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Set.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\StorageEntity.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\ViewModel.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\VLPointPicker.cs" />
-    <Compile Include="MyTests\DuctAttributeAnnotation\Window.xaml.cs">
-      <DependentUpon>Window.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MyTests\Template\Command.cs" />
     <Compile Include="MyTests\Template\Context.cs" />
     <Compile Include="MyTests\Template\Creator.cs" />
@@ -443,14 +431,6 @@
     <Page Include="MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MyTests\DuctAttributeAnnotation\ResourceDictionary.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MyTests\DuctAttributeAnnotation\Window.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="MyTests\Template\Window.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -91,6 +91,7 @@ namespace MyRevit.MyTests.Template
         public TemplateTextType TextType { set; get; }//文字方式
 
         public List<ElementId> TargetIds { set; get; }//标记的目标对象
+        public string AnnotationPrefix { get; internal set; }//标注前缀
 
         public TemplateModel() : base("")
         {

@@ -4,6 +4,22 @@ using System.Linq;
 
 namespace MyRevit.Utilities
 {
+    public class PmFamilyLoadOptions : IFamilyLoadOptions
+    {
+        bool IFamilyLoadOptions.OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
+        {
+            overwriteParameterValues = false;
+            return true;
+        }
+
+        bool IFamilyLoadOptions.OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+        {
+            overwriteParameterValues = false;
+            source = FamilySource.Family;
+            return true;
+        }
+    }
+
     public class FamilySymbolHelper
     {
         /// <summary>
@@ -16,7 +32,7 @@ namespace MyRevit.Utilities
             FamilySymbol symbol = null;
             var symbolFile = familyFilePath;
             Family family;
-            if (doc.LoadFamily(symbolFile, out family))
+            if (doc.LoadFamily(symbolFile, new PmFamilyLoadOptions(), out family))
             {
                 //获取族类型集合Id
                 var familySymbolIds = family.GetFamilySymbolIds();

@@ -233,9 +233,9 @@ namespace MyRevit.MyTests.PAA
         {
             switch (model.ModelType)
             {
-                case ModelType.Single:
+                case PAAModelType.Single:
                     return GenerateSingle(model);
-                case ModelType.Multiple:
+                case PAAModelType.Multiple:
                     return GenerateMultiple(model);
                 default:
                     return false;
@@ -299,7 +299,7 @@ namespace MyRevit.MyTests.PAA
             IndependentTag subTag = doc.Create.NewTag(doc.ActiveView, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, model.AnnotationLocation);
             model.AnnotationId = subTag.Id;
             subTag.TagHeadPosition = model.AnnotationLocation;
-            subTag.ChangeTypeId(model.GetAnnotationFamily(doc).Id);
+            subTag.ChangeTypeId(model.GetAnnotationFamily(doc,model.TargetId).Id);
             return true;
         }
 
@@ -311,7 +311,7 @@ namespace MyRevit.MyTests.PAA
 
         public void Regenerate(PAAModel model)
         {
-            if (model.ModelType == ModelType.Single)
+            if (model.ModelType == PAAModelType.Single)
                 model.Clear();
             Generate(model);
         }

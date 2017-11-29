@@ -5,6 +5,7 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI.Selection;
 using MyRevit.MyTests.Utilities;
 using MyRevit.MyTests.VLBase;
+using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -54,10 +55,32 @@ namespace MyRevit.MyTests.DAA
         /// </summary>
         SP,
     }
-    /// <summary>
-    /// 离地模式
-    /// </summary>
-    public enum DAALocationType
+    static class DAAAnnotationTypeEx
+    {
+        /// <summary>
+        /// 获取 标注对应的族
+        /// </summary>
+        public static FamilySymbol GetAnnotationFamilySymbol(this DAAAnnotationType type, Document doc)
+        {
+            switch (type)
+            {
+                case DAAAnnotationType.SPL:
+                    return DAAContext.GetSPLTagForRectangle(doc);
+                case DAAAnnotationType.SL:
+                    return DAAContext.GetSLTagForRectangle(doc);
+                case DAAAnnotationType.PL:
+                    return DAAContext.GetPLTagForRectangle(doc);
+                case DAAAnnotationType.SP:
+                    return DAAContext.GetSPTagForRectangle(doc);
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
+    }
+        /// <summary>
+        /// 离地模式
+        /// </summary>
+        public enum DAALocationType
     {
         /// <summary>
         /// 中心离地
@@ -80,15 +103,20 @@ namespace MyRevit.MyTests.DAA
         /// <summary>
         /// 文字在线上
         /// </summary>
-        OnLine,
+        Middle,
         /// <summary>
         /// 文字在线端
         /// </summary>
-        OnEdge,
+        Above,
     }
 
     public class DAAModel : VLModel
     {
+        public ElementId TargetId { get; set; }
+
+
+
+
         public DAATargetType TargetType { set; get; }//标注对象
         public DAAAnnotationType AnnotationType { set; get; }//标记样式
         public DAALocationType LocationType { set; get; }//离地模式
@@ -101,7 +129,9 @@ namespace MyRevit.MyTests.DAA
         /// <summary>
         /// 离地模式前缀
         /// </summary>
-        public string AnnotationPrefix { set; get; } 
+        public string AnnotationPrefix { set; get; }
+        public XYZ VerticalVector { get; private set; }
+        public XYZ ParallelVector { get; private set; }
         #endregion
 
         public DAAModel() : base("")
@@ -109,6 +139,26 @@ namespace MyRevit.MyTests.DAA
         }
         public DAAModel(string data) : base(data)
         {
+        }
+
+        public void UpdateVectors(Line locationCurve)
+        {
+            XYZ parallelVector = null;
+            XYZ verticalVector = null;
+            parallelVector = locationCurve.Direction;
+            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            double xyzTolarance = 0.01;
+            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
+                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
+            VerticalVector = verticalVector;
+            ParallelVector = parallelVector;
+        }
+
+        internal object GetAnnotationFamily(Document document)
+        {
+            return AnnotationType.GetAnnotationFamilySymbol(document);
         }
 
         public override bool LoadData(string data)

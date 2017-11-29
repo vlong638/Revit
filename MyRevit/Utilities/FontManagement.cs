@@ -17,7 +17,7 @@ namespace MyRevit.Utilities
         /// </summary>
         public double OrientFontSizeScale = 4.23;
         public double OrientWidthSize = 25.4;
-        public double OrientHeight = 338.4;//针对4.23毫米的字体的高度
+        public double OrientHeight = 609;//338.4//针对4.23毫米的字体的高度
         #endregion
 
         #region Current

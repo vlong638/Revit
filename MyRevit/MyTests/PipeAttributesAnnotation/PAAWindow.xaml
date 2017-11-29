@@ -30,9 +30,9 @@
                         <Setter Property="Width" Value="40"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe}"/>
-                <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct}"/>
-                <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray}"/>
+                <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <!--<RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit}"/>-->
             </StackPanel>
         </GroupBox>
@@ -47,11 +47,11 @@
                         <Setter Property="Foreground" Value="Brown"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL}"/>
+                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding SPLPreview}"/>
-                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL}"/>
+                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding SLPreview}"/>
-                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL}"/>
+                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding PLPreview}"/>
             </StackPanel>
         </GroupBox>
@@ -91,8 +91,8 @@
                         <Setter Property="Width" Value="80"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine}"/>
-                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge}"/>
+                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
             </StackPanel>
         </GroupBox>
         <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">

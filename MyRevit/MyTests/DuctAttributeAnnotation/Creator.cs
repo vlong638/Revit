@@ -5,9 +5,9 @@ namespace MyRevit.MyTests.DAA
 {
     public class DAACreator
     {
-        public void Generate(Document doc, DAAModel model, Element element)
+        public void Generate(Document doc, DAAModel model)
         {
-            Generate(doc, model, element, null);
+            Generate(doc, model);
         }
         public void Generate(Document doc, DAAModel model, Element element, XYZ offset)
         {
@@ -58,28 +58,6 @@ namespace MyRevit.MyTests.DAA
             //    //测试用
             //    //GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\1023结构做法标注.png", lines, Model.TextLocations);
             //}
-        }
-        public void Regenerate(Document doc, DAAModel model, Element target)
-        {
-            //FamilyInstance line = doc.GetElement(model.LineId) as FamilyInstance;
-            //DAAContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
-        }
-        public void Regenerate(Document doc, DAAModel model, Element target, XYZ offset)
-        {
-            ////不是选取的文本类型 以Text的文本类型为准
-            //if (model.TextNoteTypeElementId == null)
-            //    model.TextNoteTypeElementId = (doc.GetElement(model.TextNoteIds[0]) as TextNote).TextNoteType.Id;
-            //Generate(doc, model, target, offset);
-        }
-        public void Clear(Document doc, DAAModel model)
-        {
-            ////删除线
-            //if (model.LineId != null && doc.GetElement(model.LineId) != null)
-            //    doc.Delete(model.LineId);
-            ////删除标注
-            //foreach (var item in model.TextNoteIds)
-            //    if (doc.GetElement(item) != null)
-            //        doc.Delete(item);
         }
     }
 }

@@ -77,41 +77,128 @@ namespace MyRevit.MyTests.PAA
         //管道尺寸标记(系统+离地) SL
         //-管道尺寸标记
 
-        private static FamilySymbol _SPLTag = null;
-        public static FamilySymbol GetSPLTag(Document doc)
+        #region SPL
+        private static FamilySymbol _SPLTag_Pipe = null;
+        public static FamilySymbol GetSPLTag_Pipe(Document doc)
         {
-            if (_SPLTag == null|| !_SPLTag.IsValidObject)
-                _SPLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+直径+离地).rfa", "管道尺寸标记(系统+直径+离地)", "管道尺寸标记");
-            if (!_SPLTag.IsActive)
-                _SPLTag.Activate();
-            return _SPLTag;
+            if (_SPLTag_Pipe == null || !_SPLTag_Pipe.IsValidObject)
+                _SPLTag_Pipe = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+直径+离地).rfa", "管道尺寸标记(系统+直径+离地)", "管道尺寸标记");
+            if (!_SPLTag_Pipe.IsActive)
+                _SPLTag_Pipe.Activate();
+            return _SPLTag_Pipe;
         }
 
-        private static FamilySymbol _PLTag = null;
-        public static FamilySymbol GetPLTag(Document doc)
+        private static FamilySymbol _SPLTag_Duct_Rectangle = null;
+        public static FamilySymbol GetSPLTag_Duct_Rectangle(Document doc)
         {
-            if (_PLTag == null || !_PLTag.IsValidObject)
-                _PLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(直径+离地).rfa", "管道尺寸标记(直径+离地)", "管道尺寸标记");
-            if (!_PLTag.IsActive)
-                _PLTag.Activate();
-            return _PLTag;
+            if (_SPLTag_Duct_Rectangle == null || !_SPLTag_Duct_Rectangle.IsValidObject)
+                _SPLTag_Duct_Rectangle = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（系统+尺寸+离地）.rfa", "风管尺寸标记（系统+尺寸+离地）", "风管尺寸标记");
+            if (!_SPLTag_Duct_Rectangle.IsActive)
+                _SPLTag_Duct_Rectangle.Activate();
+            return _SPLTag_Duct_Rectangle;
         }
 
-        private static FamilySymbol _SLTag = null;
-        public static FamilySymbol GetSLTag(Document doc)
+        private static FamilySymbol _SPLTag_Duct_Round = null;
+        public static FamilySymbol GetSPLTag_Duct_Round(Document doc)
         {
-            if (_SLTag == null || !_SLTag.IsValidObject)
-                _SLTag = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+离地).rfa", "管道尺寸标记(系统+离地)", "管道尺寸标记");
-            if (!_SLTag.IsActive)
-                _SLTag.Activate();
-            return _SLTag;
+            if (_SPLTag_Duct_Round == null || !_SPLTag_Duct_Round.IsValidObject)
+                _SPLTag_Duct_Round = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（系统+直径+离地）.rfa", "风管尺寸标记（系统+直径+离地）", "风管尺寸标记");
+            if (!_SPLTag_Duct_Round.IsActive)
+                _SPLTag_Duct_Round.Activate();
+            return _SPLTag_Duct_Round;
         }
 
+        private static FamilySymbol _SPLTag_CableTray = null;
+        public static FamilySymbol GetSPLTag_CableTray(Document doc)
+        {
+            if (_SPLTag_CableTray == null || !_SPLTag_CableTray.IsValidObject)
+                _SPLTag_CableTray = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\05.桥架特性标注\电缆桥架尺寸标记（类型+尺寸+离地）.rfa", "电缆桥架尺寸标记（类型+尺寸+离地）", "电缆桥架尺寸标记");
+            if (!_SPLTag_CableTray.IsActive)
+                _SPLTag_CableTray.Activate();
+            return _SPLTag_CableTray;
+        }
+        #endregion
+
+        #region PL
+        private static FamilySymbol _PLTag_Pipe = null;
+        public static FamilySymbol GetPLTag_Pipe(Document doc)
+        {
+            if (_PLTag_Pipe == null || !_PLTag_Pipe.IsValidObject)
+                _PLTag_Pipe = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(直径+离地).rfa", "管道尺寸标记(直径+离地)", "管道尺寸标记");
+            if (!_PLTag_Pipe.IsActive)
+                _PLTag_Pipe.Activate();
+            return _PLTag_Pipe;
+        }
+
+        private static FamilySymbol _PLTag_Duct_Rectangle = null;
+        public static FamilySymbol GetPLTag_Duct_Rectangle(Document doc)
+        {
+            if (_PLTag_Duct_Rectangle == null || !_PLTag_Duct_Rectangle.IsValidObject)
+                _PLTag_Duct_Rectangle = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（尺寸+离地）.rfa", "风管尺寸标记（尺寸+离地）", "风管尺寸标记");
+            if (!_PLTag_Duct_Rectangle.IsActive)
+                _PLTag_Duct_Rectangle.Activate();
+            return _PLTag_Duct_Rectangle;
+        }
+
+        private static FamilySymbol _PLTag_Duct_Round = null;
+        public static FamilySymbol GetPLTag_Duct_Round(Document doc)
+        {
+            if (_PLTag_Duct_Round == null || !_PLTag_Duct_Round.IsValidObject)
+                _PLTag_Duct_Round = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（直径+离地）.rfa", "风管尺寸标记（直径+离地）", "风管尺寸标记");
+            if (!_PLTag_Duct_Round.IsActive)
+                _PLTag_Duct_Round.Activate();
+            return _PLTag_Duct_Round;
+        }
+
+        private static FamilySymbol _PLTag_CableTray = null;
+        public static FamilySymbol GetPLTag_CableTray(Document doc)
+        {
+            if (_PLTag_CableTray == null || !_PLTag_CableTray.IsValidObject)
+                _PLTag_CableTray = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\05.桥架特性标注\电缆桥架尺寸标记（尺寸+离地）.rfa", "电缆桥架尺寸标记（尺寸+离地）", "电缆桥架尺寸标记");
+            if (!_PLTag_CableTray.IsActive)
+                _PLTag_CableTray.Activate();
+            return _PLTag_CableTray;
+        }
+        #endregion
+
+        #region SL
+        private static FamilySymbol _SLTag_Pipe = null;
+        public static FamilySymbol GetSLTag_Pipe(Document doc)
+        {
+            if (_SLTag_Pipe == null || !_SLTag_Pipe.IsValidObject)
+                _SLTag_Pipe = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记(系统+离地).rfa", "管道尺寸标记(系统+离地)", "管道尺寸标记");
+            if (!_SLTag_Pipe.IsActive)
+                _SLTag_Pipe.Activate();
+            return _SLTag_Pipe;
+        }
+
+        private static FamilySymbol _SLTag_Duct = null;
+        public static FamilySymbol GetSLTag_Duct(Document doc)
+        {
+            if (_SLTag_Duct == null || !_SLTag_Duct.IsValidObject)
+                _SLTag_Duct = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（系统+离地）.rfa", "风管尺寸标记（系统+离地）", "风管尺寸标记");
+            if (!_SLTag_Duct.IsActive)
+                _SLTag_Duct.Activate();
+            return _SLTag_Duct;
+        }
+
+        private static FamilySymbol _SLTag_CableTray = null;
+        public static FamilySymbol GetSLTag_CableTray(Document doc)
+        {
+            if (_SLTag_CableTray == null || !_SLTag_CableTray.IsValidObject)
+                _SLTag_CableTray = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\05.桥架特性标注\电缆桥架尺寸标记（类型+离地）.rfa", "电缆桥架尺寸标记（类型+离地）", "电缆桥架尺寸标记");
+            if (!_SLTag_CableTray.IsActive)
+                _SLTag_CableTray.Activate();
+            return _SLTag_CableTray;
+        }
+        #endregion
+
+        #region Line
         private static FamilySymbol _MultipleLineOnEdge = null;
         public static FamilySymbol Get_MultipleLineOnEdge(Document doc)
         {
             if (_MultipleLineOnEdge == null || !_MultipleLineOnEdge.IsValidObject)
-                _MultipleLineOnEdge = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在右端");
+                _MultipleLineOnEdge = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\尺寸标记线族.rfa", "尺寸标记线族", "引线标注_文字在右端");
             if (!_MultipleLineOnEdge.IsActive)
                 _MultipleLineOnEdge.Activate();
             return _MultipleLineOnEdge;
@@ -121,11 +208,13 @@ namespace MyRevit.MyTests.PAA
         public static FamilySymbol Get_MultipleLineOnLine(Document doc)
         {
             if (_MultipleLineOnLine == null || !_MultipleLineOnLine.IsValidObject)
-                _MultipleLineOnLine = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\管道尺寸标记线族.rfa", "管道尺寸标记线族", "引线标注_文字在线上");//引线标注_文字在线上 取出来总是未激活IsActive
+                _MultipleLineOnLine = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\03.管道特性标注\尺寸标记线族.rfa", "尺寸标记线族", "引线标注_文字在线上");
             if (!_MultipleLineOnLine.IsActive)
                 _MultipleLineOnLine.Activate();
             return _MultipleLineOnLine;
-        }
+        } 
+        #endregion
+
         #endregion
 
         //字体
@@ -135,7 +224,9 @@ namespace MyRevit.MyTests.PAA
         public static string SharedParameterGroupName = "管道特性标注";
         public static string SharedParameterPL = "管道离地高度";
         public static string SharedParameterOffset = "偏移量";
-        public static string SharedParameterSystem = "系统缩写";
+        public static string SharedParameterSystemAbbreviation = "系统缩写";
+        public static string SharedParameterTypeName = "类型名称";
         public static string SharedParameterDiameter= "直径";
+        public static string SharedParameterHeight= "高度";
     }
 }

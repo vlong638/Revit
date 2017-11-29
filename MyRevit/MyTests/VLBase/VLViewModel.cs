@@ -19,6 +19,11 @@ namespace MyRevit.MyTests.VLBase
         public TView View { set; get; }
         //ViewType
         public TViewType ViewType { set; get; }
+
+        public void ShowMessage(string msg)
+        {
+            TaskDialog.Show("品茗Revit", msg);
+        }
     }
 
     public abstract class VLViewModel: DependencyObject, INotifyPropertyChanged
