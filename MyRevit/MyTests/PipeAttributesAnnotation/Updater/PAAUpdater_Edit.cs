@@ -61,7 +61,8 @@ namespace MyRevit.MyTests.PAA
                         model.Document = document;
                         model.IsRegenerate = true;
                         model.RegenerateType = RegenerateType.BySingle;
-                        PAAContext.Creator.Regenerate(model);
+                        if (!PAAContext.Creator.Regenerate(model))
+                            collection.Data.Remove(model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                         continue;
@@ -78,7 +79,8 @@ namespace MyRevit.MyTests.PAA
                         model.Document = document;
                         model.IsRegenerate = true;
                         model.RegenerateType = RegenerateType.ByMultipleTarget;
-                        PAAContext.Creator.Regenerate(model);
+                        if (!PAAContext.Creator.Regenerate(model))
+                            collection.Data.Remove(model);
                         movedEntities.AddRange(model.TargetIds.Select(c => c.IntegerValue));
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                         continue;
@@ -100,7 +102,8 @@ namespace MyRevit.MyTests.PAA
                         model.Document = document;
                         model.IsRegenerate = true;
                         model.RegenerateType = RegenerateType.BySingle;
-                        PAAContext.Creator.Regenerate( model);
+                        if (!PAAContext.Creator.Regenerate(model))
+                            collection.Data.Remove(model);
                         movedEntities.Add(model.TargetId.IntegerValue);
                         //PAAContext.IsEditing = true;//重新生成无需避免移动导致的重复触发
                         continue;
@@ -126,9 +129,15 @@ namespace MyRevit.MyTests.PAA
                         model.Document = document;
                         model.IsRegenerate = true;
                         model.RegenerateType = RegenerateType.ByMultipleLine;
-                        PAAContext.Creator.Regenerate(model);
-                        PAAContext.IsEditing = true;
-                        PAAContext.IsDeleting= true;
+                        if (PAAContext.Creator.Regenerate(model))
+                        {
+                            PAAContext.IsEditing = true;
+                            PAAContext.IsDeleting = true;
+                        }
+                        else
+                        {
+                            collection.Data.Remove(model);
+                        }
                         movedEntities.AddRange(model.TargetIds.Select(c => c.IntegerValue));
                         //var line0 = document.GetElement(model.LineIds[0]);
                         //var pStart = (line0.Location as LocationCurve).Curve.GetEndPoint(0);

@@ -62,7 +62,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             {
                                 itemToDelete.Document = doc;
                                 itemToDelete.IsRegenerate = true;
-                                PAAContext.Creator.Regenerate(itemToDelete);
+                                if (!PAAContext.Creator.Regenerate(itemToDelete))
+                                    collection.Data.Remove(itemToDelete);
                             }
                             else
                             {
@@ -83,7 +84,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                                 {
                                     itemToDelete.Document = doc;
                                     itemToDelete.IsRegenerate = true;
-                                    PAAContext.Creator.Regenerate(itemToDelete);
+                                    if (!PAAContext.Creator.Regenerate(itemToDelete))
+                                        collection.Data.Remove(itemToDelete);
                                 }
                                 else
                                 {

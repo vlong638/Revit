@@ -158,7 +158,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\IntfIFCAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PipeAttributesAnnotation\PAAWindow.baml
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\DuctAttributeAnnotation\Window.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\Window.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\Utilities\DrawAreaView.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.baml
@@ -177,3 +176,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\DuctAttributeAnnotation\Window.baml

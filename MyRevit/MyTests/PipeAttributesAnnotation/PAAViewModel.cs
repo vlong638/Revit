@@ -41,8 +41,7 @@ namespace MyRevit.MyTests.PAA
             Model = new PAAModel("");
             View = new PAAWindow(this);
             //用以打开时更新页面
-            AnnotationType = PAAAnnotationType.SPL;
-            LocationType = PAALocationType.Center;
+            TargetType = PAATargetType.Pipe;
         }
 
         public bool Prepare()
@@ -107,6 +106,7 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
                     Model.Document = Document;
+                    Model.ViewId = Document.ActiveView.Id;
                     View.Close();
                     if (!MouseHookHelper.DelegateMouseHook(() =>
                     {
@@ -140,7 +140,7 @@ namespace MyRevit.MyTests.PAA
                         var locationCurve = TargetType.GetLine(target);
                         Model.UpdateVectors(locationCurve);
                         Model.UpdateLineWidth(target);
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication, 
+                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication,
                             Model.BodyStartPoint, Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector)
                             .ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
@@ -158,7 +158,7 @@ namespace MyRevit.MyTests.PAA
                         {
                             #region 生成处理
                             var Collection = PAAContext.GetCollection(Document);
-                            var existedModels = Collection.Data.Where(c => Model.TargetId == c.TargetId).ToList();//避免重复生成
+                            var existedModels = Collection.Data.Where(c => Model.TargetId == c.TargetId || (c.TargetIds != null && c.TargetIds.Contains(Model.TargetId))).ToList();//避免重复生成
                             if (existedModels != null)
                             {
                                 for (int i = existedModels.Count() - 1; i >= 0; i--)
@@ -238,7 +238,7 @@ namespace MyRevit.MyTests.PAA
                     {
                         #region 生成处理
                         var Collection = PAAContext.GetCollection(Document);
-                        var existedModels = Collection.Data.Where(c => c.TargetIds != null && Model.TargetIds.Intersect(c.TargetIds, new ElementIdComparer()).Count() > 0).ToList();//避免重复生成
+                        var existedModels = Collection.Data.Where(c => Model.TargetIds.Contains(c.TargetId) || (c.TargetIds != null && Model.TargetIds.Intersect(c.TargetIds, new ElementIdComparer()).Count() > 0)).ToList();//避免重复生成
                         if (existedModels != null)
                         {
                             for (int i = existedModels.Count() - 1; i >= 0; i--)
@@ -249,6 +249,7 @@ namespace MyRevit.MyTests.PAA
                             }
                         }
                         Model.Document = Document;
+                        Model.ViewId = Document.ActiveView.Id;
                         Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                         Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                         Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
@@ -271,7 +272,6 @@ namespace MyRevit.MyTests.PAA
                             element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.GetFull_L(element));
                         }
                         #endregion
-                        PAAContext.IsEditing = true;
                         return true;
                     })))
                         ViewType = PAAViewType.Idle;
@@ -287,7 +287,7 @@ namespace MyRevit.MyTests.PAA
             FamilySymbol annotationFamily = null;
             if (!TransactionHelper.DelegateTransaction(Document, "GetFamilySymbolInfo", (Func<bool>)(() =>
             {
-                annotationFamily = Model.GetAnnotationFamily(Document,targetId);
+                annotationFamily = Model.GetAnnotationFamily(Document, targetId);
                 var lineFamily = Model.GetLineFamily(Document);
                 return annotationFamily != null && lineFamily != null;
             })))
@@ -314,31 +314,50 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 Model.TargetType = value;
+                switch (value)
+                {
+                    case PAATargetType.Pipe:
+                        LocationType = PAALocationType.Center;
+                        break;
+                    case PAATargetType.Duct:
+                        LocationType = PAALocationType.Center;
+                        break;
+                    case PAATargetType.CableTray:
+                        LocationType = PAALocationType.Bottom;
+                        break;
+                    case PAATargetType.Conduit:
+                    default:
+                        break;
+                }
+
                 RaisePropertyChanged("TargetType_Pipe");
                 RaisePropertyChanged("TargetType_Duct");
                 RaisePropertyChanged("TargetType_CableTray");
                 RaisePropertyChanged("TargetType_Conduit");
+                RowHeight_AnnotationType = TargetType == PAATargetType.Pipe ? 170 : 210;
+                RaisePropertyChanged("WindowHeight_AnnotationType");
+                RaisePropertyChanged("RowHeight_AnnotationType");
             }
         }
         public bool TargetType_Pipe
         {
             get { return TargetType == PAATargetType.Pipe; }
-            set { if (value) TargetType = PAATargetType.Pipe; }
+            set { if (value) { TargetType = PAATargetType.Pipe; } }
         }
         public bool TargetType_Duct
         {
             get { return TargetType == PAATargetType.Duct; }
-            set { if (value) TargetType = PAATargetType.Duct; }
+            set { if (value) { TargetType = PAATargetType.Duct; } }
         }
         public bool TargetType_CableTray
         {
             get { return TargetType == PAATargetType.CableTray; }
-            set { if (value) TargetType = PAATargetType.CableTray; }
+            set { if (value) { TargetType = PAATargetType.CableTray; } }
         }
         public bool TargetType_Conduit
         {
             get { return TargetType == PAATargetType.Conduit; }
-            set { if (value) TargetType = PAATargetType.Conduit; }
+            set { if (value) { TargetType = PAATargetType.Conduit; } }
         }
         #endregion
 
@@ -433,7 +452,11 @@ namespace MyRevit.MyTests.PAA
         }
         #endregion
 
-        #region Texts
+        #region Texts and Size
+        public int WindowHeight_AnnotationType { set; get; }
+        public int RowHeight_AnnotationType { set; get; }
+
+
         private void UpdateModelAnnotationPrefix()
         {
             if (Model.LocationType == PAALocationType.Center)
@@ -445,6 +468,11 @@ namespace MyRevit.MyTests.PAA
             RaisePropertyChanged("SPLPreview");
             RaisePropertyChanged("SLPreview");
             RaisePropertyChanged("PLPreview");
+            RaisePropertyChanged("SPPreview");
+            RaisePropertyChanged("rbtn_SPL");
+            RaisePropertyChanged("rbtn_SL");
+            RaisePropertyChanged("rbtn_PL");
+            RaisePropertyChanged("rbtn_SP");
         }
 
         private string centerPrefix = "CL+";
@@ -492,9 +520,15 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", Model.AnnotationPrefix); } }
-        public string SLPreview { get { return string.Format("如:ZP {0}2600", Model.AnnotationPrefix); } }
-        public string PLPreview { get { return string.Format("如:DN100 {0}2600", Model.AnnotationPrefix); } } 
+        public string SPLPreview { get { return Model.GetPreview(PAAAnnotationType.SPL); } }
+        public string SLPreview { get { return Model.GetPreview(PAAAnnotationType.SL); } }
+        public string PLPreview { get { return Model.GetPreview(PAAAnnotationType.PL); } }
+        public string SPPreview { get { return Model.GetPreview(PAAAnnotationType.SP); } }
+
+        public string rbtn_SPL { get { return Model.GetTitle(PAAAnnotationType.SPL); } }
+        public string rbtn_SL { get { return Model.GetTitle(PAAAnnotationType.SL); } }
+        public string rbtn_PL { get { return Model.GetTitle(PAAAnnotationType.PL); } }
+        public string rbtn_SP { get { return Model.GetTitle(PAAAnnotationType.SP); } }
         #endregion
 
         #endregion

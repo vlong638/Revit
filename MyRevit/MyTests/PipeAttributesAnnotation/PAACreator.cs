@@ -205,7 +205,6 @@ namespace MyRevit.MyTests.PAA
         private void UpdateLineParameters(PAAModel model, List<ElementAndNodePoint> nodePoints, FamilyInstance line, XYZ verticalVector)
         {
             double deepLength = Math.Abs((nodePoints.Last().NodePoint - nodePoints.First().NodePoint).DotProduct(verticalVector));
-            var width = model.TextType.GetLineWidth() * PAAContext.FontManagement.OrientWidthSize;
             line.GetParameters(TagProperty.线高度1.ToString()).First().Set(model.LineHeight);
             line.GetParameters(TagProperty.线宽度.ToString()).First().Set(model.LineWidth);
             line.GetParameters(TagProperty.线下探长度.ToString()).First().Set(deepLength);
@@ -245,7 +244,9 @@ namespace MyRevit.MyTests.PAA
         private bool GenerateMultiple(PAAModel model)
         {
             Document doc = model.Document;
-            View view = doc.ActiveView;
+            View view = doc.GetElement(model.ViewId) as View;
+            if (view == null)
+                return false;
             model.CalculateLocations();
             if (model.IsRegenerate)
                 model.Clear();
@@ -277,6 +278,9 @@ namespace MyRevit.MyTests.PAA
         private static bool GenerateSingle(PAAModel model)
         {
             Document doc = model.Document;
+            View view = doc.GetElement(model.ViewId) as View;
+            if (view == null)
+                return false;
             //主体
             var target = doc.GetElement(model.TargetId);
             var targetLocation = target.Location as LocationCurve;
@@ -292,11 +296,11 @@ namespace MyRevit.MyTests.PAA
             model.LineIds = new List<ElementId>();
             foreach (var line in lines)
             {
-                var lineElement = doc.Create.NewDetailCurve(doc.ActiveView, line);
+                var lineElement = doc.Create.NewDetailCurve(view, line);
                 model.LineIds.Add(lineElement.Id);
             }
             //文本生成
-            IndependentTag subTag = doc.Create.NewTag(doc.ActiveView, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, model.AnnotationLocation);
+            IndependentTag subTag = doc.Create.NewTag(view, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, model.AnnotationLocation);
             model.AnnotationId = subTag.Id;
             subTag.TagHeadPosition = model.AnnotationLocation;
             subTag.ChangeTypeId(model.GetAnnotationFamily(doc,model.TargetId).Id);
@@ -309,11 +313,11 @@ namespace MyRevit.MyTests.PAA
         //    //PAAContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         //}
 
-        public void Regenerate(PAAModel model)
+        public bool Regenerate(PAAModel model)
         {
             if (model.ModelType == PAAModelType.Single)
                 model.Clear();
-            Generate(model);
+            return Generate(model);
         }
     }
 }

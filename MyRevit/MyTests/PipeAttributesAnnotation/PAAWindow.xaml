@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:MyRevit.MyTests.VLBase"
              mc:Ignorable="d" Title="管线特性标注"
              d:DesignHeight="260" d:DesignWidth="480"
-             Width="260" Height="480">
+             Width="260" SizeToContent="Height" ResizeMode="NoResize"
+             x:Name="vlWindow"><!--480 520-->
     <local:VLWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,7 +18,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="170"></RowDefinition>
+            <RowDefinition Height="{Binding RowHeight_AnnotationType,UpdateSourceTrigger=PropertyChanged ,Mode=OneWay}"></RowDefinition>
+            <!--170 210-->
             <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="60"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
@@ -47,12 +49,14 @@
                         <Setter Property="Foreground" Value="Brown"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton x:Name="rbtn_SPL" Content="{Binding rbtn_SPL}" IsChecked="{Binding AnnotationType_SPL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding SPLPreview}"/>
-                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton x:Name="rbtn_SL" Content="{Binding rbtn_SL}" IsChecked="{Binding AnnotationType_SL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding SLPreview}"/>
-                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton x:Name="rbtn_PL" Content="{Binding rbtn_PL}" IsChecked="{Binding AnnotationType_PL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
                 <TextBlock Text="{Binding PLPreview}"/>
+                <RadioButton x:Name="rbtn_SP" Content="{Binding rbtn_SP}" IsChecked="{Binding AnnotationType_SP, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <TextBlock Text="{Binding SPPreview}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="离地模式选择" Grid.Row="2">

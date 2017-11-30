@@ -311,9 +311,9 @@ namespace MyRevit.MyTests.Template
             }
         }
 
-        public string SPLPreview { get { return string.Format("如:ZP DN100 {0}2600", CenterPrefix); } }
-        public string SLPreview { get { return string.Format("如:ZP {0}2600", TopPrefix); } }
-        public string PLPreview { get { return string.Format("如:DN100 {0}2600", TopPrefix); } }
+        public string SPLPreview { get { return Model.GetPreview(); } }
+        public string SLPreview { get { return Model.GetPreview(); } }
+        public string PLPreview { get { return Model.GetPreview(); } }
         #endregion
 
         #endregion

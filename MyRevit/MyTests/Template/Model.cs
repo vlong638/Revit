@@ -174,5 +174,51 @@ namespace MyRevit.MyTests.Template
                     throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());
             }
         }
+
+        internal string GetPreview()
+        {
+            switch (TargetType)
+            {
+                case TemplateTargetType.Pipe:
+                    switch (AnnotationType)
+                    {
+                        case TemplateAnnotationType.SPL:
+                            return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.SL:
+                            return string.Format("如:ZP {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.PL:
+                            return string.Format("如:DN100 {0}2600", AnnotationPrefix);
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case TemplateTargetType.Duct:
+                    switch (AnnotationType)
+                    {
+                        case TemplateAnnotationType.SPL:
+                            return string.Format("如:SF 400mmx400mm {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.SL:
+                            return string.Format("如:SF {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.PL:
+                            return string.Format("如:400mmx400mm {0}2600", AnnotationPrefix);
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case TemplateTargetType.CableTray:
+                    switch (AnnotationType)
+                    {
+                        case TemplateAnnotationType.SPL:
+                            return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.SL:
+                            return string.Format("如:ZP {0}2600", AnnotationPrefix);
+                        case TemplateAnnotationType.PL:
+                            return string.Format("如:DN100 {0}2600", AnnotationPrefix);
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case TemplateTargetType.Conduit:
+                default:
+                    throw new NotImplementedException("未支持该类型的");
+            }
+        }
     }
 }

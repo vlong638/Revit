@@ -13,27 +13,28 @@ namespace MyRevit.Utilities
 
     public static class LogHelper
     {
-        static Log4netLogger Logger;
 
         static LogHelper()
         {
-            Logger = new Log4netLogger();
-            Logger.SetupLog(LogType.Debug.ToString());
         }
 
         public static void Info(LogData locator)
         {
-            Logger.Info(locator);
         }
         public static void Error(LogData locator)
         {
-            Logger.Error(locator);
+            Error(locator.ToString());
         }
 
         internal static void Error(Exception ex)
         {
+            Error(ex.ToString());
+        }
+
+        private static void Error(string msg)
+        {
             var logger = new TextLogger("PmLogger.txt", @"D:\");
-            logger.Error(ex.ToString());
+            logger.Error(msg);
         }
     }
 

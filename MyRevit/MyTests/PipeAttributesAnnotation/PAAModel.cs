@@ -91,22 +91,37 @@ namespace MyRevit.MyTests.PAA
         }
     }
     /// <summary>
-    /// 标记样式
+    /// 标记样式  System/Size/Location
     /// </summary>
     public enum PAAAnnotationType
     {
         /// <summary>
-        /// 系统缩写 管道尺寸 离地高度
+        /// System/Size/Location
+        /// Pipe:系统缩写 管道尺寸 离地高度
+        /// Duct:系统缩写 截面尺寸 离地高度
+        /// CableTray:类型名称 宽x高 离地高度
         /// </summary>
         SPL,
         /// <summary>
-        /// 系统缩写 离地高度
+        /// System/Location
+        /// Pipe:系统缩写 离地高度
+        /// Duct:系统缩写 离地高度
+        /// CableTray:类型名称 离地高度
         /// </summary>
         SL,
         /// <summary>
-        /// 管道尺寸 离地高度
+        /// Size/Location
+        /// Pipe:管道尺寸 离地高度
+        /// Duct:截面尺寸 离地高度
+        /// CableTray:宽x高 离地高度
         /// </summary>
         PL,
+        /// <summary>
+        /// System/Size
+        /// Duct:系统缩写 截面尺寸
+        /// CableTray:类型名称 宽x高
+        /// </summary>
+        SP,
     }
     static class PAAAnnotationTypeEx
     {
@@ -231,6 +246,7 @@ namespace MyRevit.MyTests.PAA
         #region 需要存储
         public PAAModelType ModelType { set; get; }
         public RegenerateType RegenerateType { set; get; }
+        public ElementId ViewId { set; get; }
 
         #region Single
         /// <summary>
@@ -450,6 +466,7 @@ namespace MyRevit.MyTests.PAA
                 StringReader sr = new StringReader(data);
                 TargetType = sr.ReadFormatStringAsEnum<PAATargetType>();
                 ModelType = sr.ReadFormatStringAsEnum<PAAModelType>();
+                ViewId = sr.ReadFormatStringAsElementId();
                 switch (ModelType)
                 {
                     case PAAModelType.Single:
@@ -488,6 +505,7 @@ namespace MyRevit.MyTests.PAA
             StringBuilder sb = new StringBuilder();
             sb.AppendItem(TargetType);
             sb.AppendItem(ModelType);
+            sb.AppendItem(ViewId);
             switch (ModelType)
             {
                 case PAAModelType.Single:
@@ -653,9 +671,9 @@ namespace MyRevit.MyTests.PAA
                         LineHeight = CurrentFontHeight;
                     }
                     LineSpace = CurrentFontHeight;
-                    //LineWidth = UnitHelper.ConvertToFoot(TextType.GetLineWidth() * CurrentFontWidthSize, VLUnitType.millimeter);
-                    //var width = TextType.GetLineWidth()* PAAContext.FontManagement.CurrentFontWidthSize;
-                    //var width = TextType.GetLineWidth() * PAAContext.FontManagement.OrientFontSizeScale * CurrentFontSizeScale;
+                    string text = GetFullTextForLine(Document.GetElement(TargetIds.First()));
+                    var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
+                    LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
                     //标注位置
                     for (int i = 0; i < PipeAndNodePoints.Count(); i++)
                     {
@@ -762,27 +780,28 @@ namespace MyRevit.MyTests.PAA
             }
         }
 
-        internal string GetFullText(Element target)
+        internal string GetFullTextForLine(Element target)
         {
-            var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
+            string system = GetSystem(target);
+            string size = GetSize(target);
+            string location = target.GetParameters(PAAContext.SharedParameterPL).First().AsString();
+            //double location = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
             switch (AnnotationType)
             {
                 case PAAAnnotationType.SPL:
-                    string prefix = GetPrefix(target);
-                    double DN = GetDN(target);
-                    return string.Format("{0} DN{1} {2}", prefix, DN, AnnotationPrefix + offset);
+                    return string.Format("{0} {1} {2}", system, size, location);
                 case PAAAnnotationType.SL:
-                    prefix = GetPrefix(target);
-                    return string.Format("{0} {1}", prefix, AnnotationPrefix + offset);
+                    return string.Format("{0} {1}", system, location);
                 case PAAAnnotationType.PL:
-                    DN = GetDN(target);
-                    return string.Format("DN{0} {1}", DN, AnnotationPrefix + offset);
+                    return string.Format("{0} {1}", size, location);
+                case PAAAnnotationType.SP:
+                    return string.Format("{0} {1}", system, size);
                 default:
                     throw new NotImplementedException("不支持该类型的处理");
             }
         }
 
-        private string GetPrefix(Element target)
+        private string GetSystem(Element target)
         {
             switch (TargetType)
             {
@@ -790,36 +809,37 @@ namespace MyRevit.MyTests.PAA
                 case PAATargetType.Duct:
                     return target.GetParameters(PAAContext.SharedParameterSystemAbbreviation).First().AsString();
                 case PAATargetType.CableTray:
-                    return target.GetParameters(PAAContext.SharedParameterTypeName).First().AsString();
+                    return target.Name;
+                    //return target.GetParameters(PAAContext.SharedParameterTypeName).First().AsString();
                 case PAATargetType.Conduit:
                 default:
                     throw new NotImplementedException("暂未支持该类型");
             }
         }
 
-        private double GetDN(Element target)
+        private string GetSize(Element target)
         {
-            double DN;
+            double size;
             switch (TargetType)
             {
                 case PAATargetType.Pipe:
-                    DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                    size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
                     break;
                 case PAATargetType.Duct:
                     if (IsRoundDuct(target))
-                        DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                        size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
                     else
-                        DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
+                        size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
                     break;
                 case PAATargetType.CableTray:
-                    DN = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
+                    size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
                     break;
                 case PAATargetType.Conduit:
                 default:
                     throw new NotImplementedException("暂未支持该类型");
             }
 
-            return DN;
+            return "DN" + size;
         }
 
         internal string GetFull_L(Element target)
@@ -836,14 +856,117 @@ namespace MyRevit.MyTests.PAA
             switch (TextType)
             {
                 case PAATextType.OnLine:
-                    string text = GetFullText(target);
+                    string text = GetFullTextForLine(target);
                     var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
-                    var revitWdith = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
-                    LineWidth = revitWdith;
+                    LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
                     break;
                 case PAATextType.OnEdge:
                     LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
                     break;
+            }
+        }
+
+        internal string GetPreview(PAAAnnotationType annotationType)
+        {
+            switch (TargetType)
+            {
+                case PAATargetType.Pipe:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SL:
+                            return string.Format("如:ZP {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.PL:
+                            return string.Format("如:DN100 {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SP:
+                            return "管道无该类型选项";
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.Duct:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return string.Format("如:SF 400mmx400mm {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SL:
+                            return string.Format("如:SF {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.PL:
+                            return string.Format("如:400mmx400mm {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SP:
+                            return string.Format("如:SF 400mmx400mm");
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.CableTray:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return string.Format("如:槽式桥架 400x400 {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SL:
+                            return string.Format("如:槽式桥架 {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.PL:
+                            return string.Format("如:400x400 {0}2600", AnnotationPrefix);
+                        case PAAAnnotationType.SP:
+                            return string.Format("如:槽式桥架 400x400");
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.Conduit:
+                default:
+                    throw new NotImplementedException("未支持该类型的");
+            }
+        }
+       
+        internal string GetTitle(PAAAnnotationType annotationType)
+        {
+            switch (TargetType)
+            {
+                case PAATargetType.Pipe:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return "系统缩写 管道尺寸 离地高度";
+                        case PAAAnnotationType.SL:
+                            return "类型名称 宽x高 离地高度";
+                        case PAAAnnotationType.PL:
+                            return "管道尺寸 离地高度";
+                        case PAAAnnotationType.SP:
+                            return "管道无该类型选项";
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.Duct:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return "系统缩写 截面尺寸 离地高度";
+                        case PAAAnnotationType.SL:
+                            return "系统缩写 离地高度";
+                        case PAAAnnotationType.PL:
+                            return "截面尺寸 离地高度";
+                        case PAAAnnotationType.SP:
+                            return "系统缩写 截面尺寸";
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.CableTray:
+                    switch (annotationType)
+                    {
+                        case PAAAnnotationType.SPL:
+                            return "类型名称 宽x高 离地高度";
+                        case PAAAnnotationType.SL:
+                            return "类型名称 离地高度";
+                        case PAAAnnotationType.PL:
+                            return "宽x高 离地高度";
+                        case PAAAnnotationType.SP:
+                            return "类型名称 宽x高";
+                        default:
+                            throw new NotImplementedException("未支持该类型的");
+                    }
+                case PAATargetType.Conduit:
+                default:
+                    throw new NotImplementedException("未支持该类型的");
             }
         }
     }
