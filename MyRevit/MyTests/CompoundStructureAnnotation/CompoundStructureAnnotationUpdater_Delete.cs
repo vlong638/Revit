@@ -50,7 +50,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             }
             catch (Exception ex)
             {
-                LogHelper.Error(ex);
+                VLLogHelper.Error(ex);
             }
         }
         #endregion

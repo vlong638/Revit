@@ -11,12 +11,8 @@ namespace MyRevit.Utilities
         Release,
     }
 
-    public static class LogHelper
+    public class VLLogHelper
     {
-
-        static LogHelper()
-        {
-        }
 
         public static void Info(LogData locator)
         {

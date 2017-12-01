@@ -79,7 +79,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
 
             //MessageHelper.TaskDialogShow("开始选择板");
             //业务逻辑处理
-            TransactionHelper.DelegateTransaction(doc, "梁齐板", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "梁齐板", () =>
             {
                 Document linkDocument = null;
                 IEnumerable<ElementId> floorIds = null;

@@ -54,6 +54,7 @@ namespace MyRevit.MyTests.PAA
                         var p1 = targetLocation.Curve.GetEndPoint(1);
                         var pMiddle = new XYZ((p0.X + p1.X) / 2, (p0.Y + p1.Y) / 2, (p0.Z + p1.Z) / 2);
                         var offset = pMiddle - model.TargetLocation;
+                        offset.ToSameZ(new XYZ(0, 0, 0));
                         model.BodyStartPoint += offset;
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
@@ -97,6 +98,7 @@ namespace MyRevit.MyTests.PAA
                         var creater = PAAContext.Creator;
                         var annotation = document.GetElement(changeId) as IndependentTag;
                         var offset = annotation.TagHeadPosition - model.AnnotationLocation;
+                        offset.ToSameZ(new XYZ(0, 0, 0));
                         model.BodyEndPoint += offset;
                         model.LeafEndPoint += offset;
                         model.Document = document;
@@ -152,7 +154,7 @@ namespace MyRevit.MyTests.PAA
             }
             catch (Exception ex)
             {
-                LogHelper.Error(ex);
+                VLLogHelper.Error(ex);
             }
         }
         #endregion

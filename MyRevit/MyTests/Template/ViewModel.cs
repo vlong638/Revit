@@ -59,7 +59,7 @@ namespace MyRevit.MyTests.Template
                     break;
                 case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
-                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -72,7 +72,7 @@ namespace MyRevit.MyTests.Template
                     Execute();
                     break;
                 case TemplateViewType.PickSinglePipe_Location:
-                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         var target = Document.GetElement(Model.TargetIds.First());
@@ -90,7 +90,7 @@ namespace MyRevit.MyTests.Template
                     Execute();
                     break;
                 case TemplateViewType.GenerateSinglePipe:
-                    if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                    if (VLTransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
                             var element = Document.GetElement(Model.TargetIds.First());
                             var Collection = TemplateContext.GetCollection(Document);

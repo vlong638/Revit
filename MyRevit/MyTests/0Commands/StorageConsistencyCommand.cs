@@ -278,7 +278,7 @@ namespace MyRevit.Entities
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
             var view = doc.ActiveView;
-            TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
                 var storageEntity = new TestStorageEntity();
                 var data = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
@@ -310,14 +310,14 @@ namespace MyRevit.Entities
             var view = doc.ActiveView;
             var storageEntity = new TestStorageEntity();
             var d1 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
-            TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
                 ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, "666");
                 var element = doc.Delete(new ElementId(197387));
                 return true;
             });
             var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
-            TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
                 ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, "777");
                 return true;
@@ -356,7 +356,7 @@ namespace MyRevit.Entities
             //    ExtensibleStorageHelperV2.SetData(doc, storageEntity, storageEntity.FieldStr, s);
             //    return true;
             //});
-            TransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "扩展存储", () =>
             {
                 //var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldStr);
                 //var d2 = ExtensibleStorageHelperV2.GetData(doc, storageEntity, storageEntity.FieldNames2, storageEntity.FieldStr);

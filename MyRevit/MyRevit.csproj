@@ -193,7 +193,7 @@
     <Compile Include="MyTests\VLBase\VLSerializable.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\VLConstraintsForCSA.cs" />
     <Compile Include="MyTests\VLBase\VLModel.cs" />
-    <Compile Include="MyTests\CompoundStructureAnnotation\VLModelCollectionBase.cs" />
+    <Compile Include="MyTests\VLBase\VLModelCollection.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\VLViewModelBase.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_关联更新类型结构属性.cs" />
     <Compile Include="MyTests\CompoundStructureAnnotation\调研_获取类型结构属性.cs" />
@@ -356,7 +356,7 @@
     <Compile Include="Utilities\LocationHelper.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />
-    <Compile Include="Utilities\MouseHookHelper.cs" />
+    <Compile Include="Utilities\VLMouseHookHelper.cs" />
     <Compile Include="Utilities\PMSoftHelper.cs" />
     <Compile Include="Utilities\Revit_Helper.cs" />
     <Compile Include="Utilities\Revit_UIDocument_Helper.cs" />
@@ -364,7 +364,7 @@
     <Compile Include="Utilities\SaveKeyHelper.cs" />
     <Compile Include="Utilities\SQLiteHelper.cs" />
     <Compile Include="Utilities\Revit_Document_Helper.cs" />
-    <Compile Include="Utilities\TransactionHelper.cs" />
+    <Compile Include="Utilities\VLTransactionHelper.cs" />
     <Compile Include="Utilities\UnitTransUtils.cs" />
     <EmbeddedResource Include="MyTests\EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>

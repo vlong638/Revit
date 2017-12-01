@@ -6,7 +6,7 @@ using VL.Logger;
 
 namespace MyRevit.Utilities
 {
-    public class TransactionHelper
+    public class VLTransactionHelper
     {
         public static bool DelegateTransaction(Document doc, string transactionName, Func<bool> function)
         {
@@ -31,7 +31,7 @@ namespace MyRevit.Utilities
                     transaction.RollBack();
                     if (ex.Message.Contains("10 miles"))
                         Autodesk.Revit.UI.TaskDialog.Show("警告", "绘点区域超出了Revit的距离原点距离的限制");
-                    LogHelper.Error(ex);
+                    VLLogHelper.Error(ex);
                     return false;
                 }
             }

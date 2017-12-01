@@ -3,7 +3,7 @@ using System;
 
 namespace MyRevit.Utilities
 {
-    class MouseHookHelper
+    class VLMouseHookHelper
     {
         /// <summary>
         ///  Try Catch 流程模板

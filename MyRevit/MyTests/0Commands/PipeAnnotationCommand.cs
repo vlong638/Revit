@@ -30,7 +30,7 @@ namespace MyRevit.Entities
                 return Result.Cancelled;
             }
             //TODO0817 增加功能面板启动时获取字体高度
-            TransactionHelper.DelegateTransaction(doc, "获取字体高度", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "获取字体高度", () =>
             {
                 PAContext.LoadFamilySymbols(doc);
                 return true;

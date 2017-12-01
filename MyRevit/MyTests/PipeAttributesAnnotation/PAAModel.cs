@@ -404,6 +404,22 @@ namespace MyRevit.MyTests.PAA
                         default:
                             throw new NotImplementedException("暂不支持");
                     }
+                case PAAAnnotationType.SP:
+                    switch (TargetType)
+                    {
+                        case PAATargetType.Pipe:
+                            throw new NotImplementedException("管道无该类型");
+                        case PAATargetType.Duct:
+                            if (IsRoundDuct(doc.GetElement(targetId)))
+                                return PAAContext.GetSPTag_Duct_Round(doc);
+                            else
+                                return PAAContext.GetSPTag_Duct_Rectangle(doc);
+                        case PAATargetType.CableTray:
+                            return PAAContext.GetSPTag_CableTray(doc);
+                        case PAATargetType.Conduit:
+                        default:
+                            throw new NotImplementedException("暂不支持");
+                    }
                 default:
                     throw new NotImplementedException("暂不支持该类型");
             }
@@ -671,9 +687,10 @@ namespace MyRevit.MyTests.PAA
                         LineHeight = CurrentFontHeight;
                     }
                     LineSpace = CurrentFontHeight;
-                    string text = GetFullTextForLine(Document.GetElement(TargetIds.First()));
-                    var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
-                    LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
+                    UpdateLineWidth(Document.GetElement(TargetIds.First()));
+                    //string text = GetFullTextForLine(Document.GetElement(TargetIds.First()));
+                    //var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
+                    //LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
                     //标注位置
                     for (int i = 0; i < PipeAndNodePoints.Count(); i++)
                     {
@@ -819,34 +836,34 @@ namespace MyRevit.MyTests.PAA
 
         private string GetSize(Element target)
         {
-            double size;
             switch (TargetType)
             {
                 case PAATargetType.Pipe:
-                    size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
-                    break;
+                    var size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                    return "DN" + size;
                 case PAATargetType.Duct:
                     if (IsRoundDuct(target))
+                    {
                         size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
+                        return size + "mmx" + size + "mm";
+                    }
                     else
-                        size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
-                    break;
+                    {
+                        var height = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
+                        var width = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterWidth).First().AsDouble(), VLUnitType.millimeter);
+                        return width + "mmx" + height + "mm";
+                    }
                 case PAATargetType.CableTray:
                     size = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterHeight).First().AsDouble(), VLUnitType.millimeter);
-                    break;
+                    return size + "x" + size;
                 case PAATargetType.Conduit:
                 default:
                     throw new NotImplementedException("暂未支持该类型");
             }
-
-            return "DN" + size;
         }
 
         internal string GetFull_L(Element target)
         {
-            //var target = Document.GetElement(TargetId);
-            //double DN = GetDN(target);
-            //var diameter = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterDiameter).First().AsDouble(), VLUnitType.millimeter);
             var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PAAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
             return AnnotationPrefix + offset;
         }
@@ -928,7 +945,7 @@ namespace MyRevit.MyTests.PAA
                         case PAAAnnotationType.SPL:
                             return "系统缩写 管道尺寸 离地高度";
                         case PAAAnnotationType.SL:
-                            return "类型名称 宽x高 离地高度";
+                            return "系统缩写 离地高度";
                         case PAAAnnotationType.PL:
                             return "管道尺寸 离地高度";
                         case PAAAnnotationType.SP:

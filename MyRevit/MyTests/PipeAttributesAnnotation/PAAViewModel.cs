@@ -48,7 +48,7 @@ namespace MyRevit.MyTests.PAA
         {
             try
             {
-                if (!TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                if (!VLTransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                 {
                     //添加共享参数
                     string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";//GetShareFilePath();
@@ -108,7 +108,7 @@ namespace MyRevit.MyTests.PAA
                     Model.Document = Document;
                     Model.ViewId = Document.ActiveView.Id;
                     View.Close();
-                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -134,7 +134,7 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickSinglePipe_Location:
                     //业务逻辑处理
-                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
                     {
                         var target = Document.GetElement(Model.TargetId);
                         var locationCurve = TargetType.GetLine(target);
@@ -154,7 +154,7 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.GenerateSinglePipe:
                     //生成处理
-                    if (TransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
+                    if (VLTransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
                         {
                             #region 生成处理
                             var Collection = PAAContext.GetCollection(Document);
@@ -192,7 +192,7 @@ namespace MyRevit.MyTests.PAA
                     break;
                 case PAAViewType.PickMultiplePipes:
                     View.Close();
-                    if (!MouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -234,7 +234,7 @@ namespace MyRevit.MyTests.PAA
                     }
                     Model.UpdateLineWidth(Document.GetElement(Model.TargetIds.First()));
                     //生成处理
-                    if (!TransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
+                    if (!VLTransactionHelper.DelegateTransaction(Document, "PickMultiplePipes", (Func<bool>)(() =>
                     {
                         #region 生成处理
                         var Collection = PAAContext.GetCollection(Document);
@@ -285,7 +285,7 @@ namespace MyRevit.MyTests.PAA
         private bool GetFamilySymbolInfo(ElementId targetId)
         {
             FamilySymbol annotationFamily = null;
-            if (!TransactionHelper.DelegateTransaction(Document, "GetFamilySymbolInfo", (Func<bool>)(() =>
+            if (!VLTransactionHelper.DelegateTransaction(Document, "GetFamilySymbolInfo", (Func<bool>)(() =>
             {
                 annotationFamily = Model.GetAnnotationFamily(Document, targetId);
                 var lineFamily = Model.GetLineFamily(Document);
@@ -317,12 +317,15 @@ namespace MyRevit.MyTests.PAA
                 switch (value)
                 {
                     case PAATargetType.Pipe:
+                        AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Center;
                         break;
                     case PAATargetType.Duct:
+                        AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Center;
                         break;
                     case PAATargetType.CableTray:
+                        AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Bottom;
                         break;
                     case PAATargetType.Conduit:
@@ -374,6 +377,7 @@ namespace MyRevit.MyTests.PAA
                 RaisePropertyChanged("AnnotationType_SPL");
                 RaisePropertyChanged("AnnotationType_SL");
                 RaisePropertyChanged("AnnotationType_PL");
+                RaisePropertyChanged("AnnotationType_SP");
             }
         }
         public bool AnnotationType_SPL
@@ -390,6 +394,11 @@ namespace MyRevit.MyTests.PAA
         {
             get { return AnnotationType == PAAAnnotationType.PL; }
             set { if (value) AnnotationType = PAAAnnotationType.PL; }
+        }
+        public bool AnnotationType_SP
+        {
+            get { return AnnotationType == PAAAnnotationType.SP; }
+            set { if (value) AnnotationType = PAAAnnotationType.SP; }
         }
         #endregion
 

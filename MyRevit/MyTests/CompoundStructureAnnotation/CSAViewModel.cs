@@ -108,7 +108,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     break;
                 case CSAViewType.Generate:
                     var doc = UIDocument.Document;
-                    if (TransactionHelper.DelegateTransaction(doc, "生成结构标注", (Func<bool>)(() =>
+                    if (VLTransactionHelper.DelegateTransaction(doc, "生成结构标注", (Func<bool>)(() =>
                     {
                         var element = doc.GetElement(Model.TargetId);
                         var Collection = CSAContext.GetCollection(doc);

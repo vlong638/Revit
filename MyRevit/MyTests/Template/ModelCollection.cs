@@ -7,7 +7,7 @@ namespace MyRevit.MyTests.Template
     /// <summary>
     /// Model数据集合
     /// </summary>
-    public class TemplateModelCollection : VLModelCollectionBase<TemplateModel>
+    public class TemplateModelCollection : VLModelCollection<TemplateModel>
     {
         public TemplateModelCollection(string data) : base(data)
         {

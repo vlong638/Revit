@@ -51,7 +51,7 @@ namespace MyRevit.Entities
             {
                 var selectedId = uiDoc.Selection.PickObject(ObjectType.Element, new PipeFilter()).ElementId;
                 FamilySymbol tagSymbol = null;
-                TransactionHelper.DelegateTransaction(doc, "加载族", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "加载族", () =>
                 {
                     //查找族类型
                     string tagName = "管道尺寸标记";
@@ -89,12 +89,12 @@ namespace MyRevit.Entities
                 });
                 if (tagSymbol == null)
                     return Result.Failed;
-                TransactionHelper.DelegateTransaction(doc, "选择使用的标注", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "选择使用的标注", () =>
                 {
                     //TODO
                     return true;
                 });
-                TransactionHelper.DelegateTransaction(doc, "文字位于管道", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "文字位于管道", () =>
                 {
                     var pipe = doc.GetElement(selectedId);
                     var locationCurve = (pipe.Location as LocationCurve).Curve;
@@ -102,7 +102,7 @@ namespace MyRevit.Entities
                     var tag = doc.Create.NewTag(view, pipe, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint);
                     return true;
                 });
-                TransactionHelper.DelegateTransaction(doc, "文字位于管道上方", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "文字位于管道上方", () =>
                 {
                     double length = 8;
                     var pipe = doc.GetElement(selectedId);
@@ -115,7 +115,7 @@ namespace MyRevit.Entities
                     var tag = doc.Create.NewTag(view, pipe, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + length * verticalVector);
                     return true;
                 });
-                TransactionHelper.DelegateTransaction(doc, "引线", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "引线", () =>
                 {
                     double length = 5;
                     bool needLeader = true;
@@ -129,7 +129,7 @@ namespace MyRevit.Entities
                     var tag = doc.Create.NewTag(view, pipe, needLeader, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, midPoint + length * verticalVector);
                     return true;
                 });
-                TransactionHelper.DelegateTransaction(doc, "标记距离管道边缘5mm", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "标记距离管道边缘5mm", () =>
                 {
                     double length = 5;
                     bool needLeader = false;
@@ -147,7 +147,7 @@ namespace MyRevit.Entities
 
             if (false)
             {
-                TransactionHelper.DelegateTransaction(doc, "一键标注", () =>
+                VLTransactionHelper.DelegateTransaction(doc, "一键标注", () =>
                 {
                     //可以通过Tag的TaggedLocalElelemtId获取其对应的对象
                     //Tag是属于某View的
@@ -175,7 +175,7 @@ namespace MyRevit.Entities
             var result = builder.LoadFamilySymbols(doc, true);
             if (result)
             {
-                result = TransactionHelper.DelegateTransaction(doc, "多管标注生成", () =>
+                result = VLTransactionHelper.DelegateTransaction(doc, "多管标注生成", () =>
                 {
                     switch (builder.GenerateMultipleTagSymbol(doc, selectedIds.Select(c=>c.ElementId), generateOnLineEdge ? MultiPipeTagLocation.OnLine : MultiPipeTagLocation.OnLineEdge))
                     {
@@ -206,19 +206,19 @@ namespace MyRevit.Entities
             //        }
             //    }
             //}
-            TransactionHelper.DelegateTransaction(doc, "多管-一键标注", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "多管-一键标注", () =>
             {
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "多管-包括链接进来的管道", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "多管-包括链接进来的管道", () =>
             {
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "多管-标注自动避让", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "多管-标注自动避让", () =>
             {
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "修改标高的基面", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "修改标高的基面", () =>
                 {
                     return true;
                 });

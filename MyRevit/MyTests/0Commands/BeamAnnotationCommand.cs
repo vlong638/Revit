@@ -254,7 +254,7 @@ namespace MyRevit.Entities
                 selectedId = uiDoc.Selection.PickObject(ObjectType.Element, new BeamFramingFilter()).ElementId;
             string tagName = "梁平法_集中标_左对齐";
             FamilySymbol tagSymbol = null;
-            TransactionHelper.DelegateTransaction(doc, "加载族", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "加载族", () =>
             {
                 #region 加载族
                 //查找族类型

@@ -193,6 +193,38 @@ namespace MyRevit.MyTests.PAA
         }
         #endregion
 
+        #region SP
+        private static FamilySymbol _SPTag_Duct_Rectangle = null;
+        public static FamilySymbol GetSPTag_Duct_Rectangle(Document doc)
+        {
+            if (_SPTag_Duct_Rectangle == null || !_SPTag_Duct_Rectangle.IsValidObject)
+                _SPTag_Duct_Rectangle = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（系统+尺寸）.rfa", "风管尺寸标记（系统+尺寸）", "风管尺寸标记");
+            if (!_SPTag_Duct_Rectangle.IsActive)
+                _SPTag_Duct_Rectangle.Activate();
+            return _SPTag_Duct_Rectangle;
+        }
+
+        private static FamilySymbol _SPTag_Duct_Round = null;
+        public static FamilySymbol GetSPTag_Duct_Round(Document doc)
+        {
+            if (_SPTag_Duct_Round == null || !_SPTag_Duct_Round.IsValidObject)
+                _SPTag_Duct_Round = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\04.风管特性标注\风管尺寸标记（系统+圆直径）.rfa", "风管尺寸标记（系统+圆直径）", "风管尺寸标记");
+            if (!_SPTag_Duct_Round.IsActive)
+                _SPTag_Duct_Round.Activate();
+            return _SPTag_Duct_Round;
+        }
+
+        private static FamilySymbol _SPTag_CableTray = null;
+        public static FamilySymbol GetSPTag_CableTray(Document doc)
+        {
+            if (_SPTag_CableTray == null || !_SPTag_CableTray.IsValidObject)
+                _SPTag_CableTray = FamilySymbolHelper.LoadFamilySymbol(doc, @"E:\WorkingSpace\Tasks\0.族\05.桥架特性标注\电缆桥架尺寸标记（类型+尺寸）.rfa", "电缆桥架尺寸标记（类型+尺寸）", "电缆桥架尺寸标记");
+            if (!_SPTag_CableTray.IsActive)
+                _SPTag_CableTray.Activate();
+            return _SPTag_CableTray;
+        }
+        #endregion
+
         #region Line
         private static FamilySymbol _MultipleLineOnEdge = null;
         public static FamilySymbol Get_MultipleLineOnEdge(Document doc)
@@ -228,5 +260,6 @@ namespace MyRevit.MyTests.PAA
         public static string SharedParameterTypeName = "类型名称";
         public static string SharedParameterDiameter= "直径";
         public static string SharedParameterHeight= "高度";
+        public static string SharedParameterWidth= "宽度";
     }
 }

@@ -103,7 +103,7 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素移动
-            TransactionHelper.DelegateTransaction(doc, "创建一根柱子", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "创建一根柱子", () =>
             {
                 //Revit文档的创建句柄
                 Autodesk.Revit.Creation.Document creator = doc.Create;
@@ -130,7 +130,7 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素旋转
-            TransactionHelper.DelegateTransaction(doc, "ElementTransformUtils旋转方法", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "ElementTransformUtils旋转方法", () =>
             {
                 LocationCurve wallLine = wall.Location as LocationCurve;
                 XYZ p1 = wallLine.Curve.GetEndPoint(0);
@@ -139,7 +139,7 @@ namespace MyRevit.Entities
                 ElementTransformUtils.RotateElement(doc, wall.Id, axis, Math.PI / 3);//逆时针60°
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "LocationCurve,LocationPoint,自带的旋转方法", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "LocationCurve,LocationPoint,自带的旋转方法", () =>
             {
                 LocationCurve locationCurve = wall.Location as LocationCurve;//线性坐标自带线
                 if (locationCurve != null)
@@ -161,7 +161,7 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素镜像
-            TransactionHelper.DelegateTransaction(doc, "元素镜像", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "元素镜像", () =>
             {
                 Plane plane = new Plane(XYZ.BasisX, XYZ.Zero);
                 if (ElementTransformUtils.CanMirrorElement(doc, wall.Id))
@@ -175,7 +175,7 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素组合
-            TransactionHelper.DelegateTransaction(doc, "元素组合", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "元素组合", () =>
             {
                 List<ElementId> elementIds = new List<ElementId>()
                 {
@@ -189,7 +189,7 @@ namespace MyRevit.Entities
             #endregion
 
             #region 元素编辑
-            TransactionHelper.DelegateTransaction(doc, "创建参照平面", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "创建参照平面", () =>
             {
                 XYZ bubbleEnd = new XYZ(0, 5, 5);
                 XYZ freeEnd = new XYZ(5, 5, 5);
@@ -199,14 +199,14 @@ namespace MyRevit.Entities
                 referencePlane.Name = "MyReferencePlane";
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "创建参照线,由模型线-转>参照线", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "创建参照线,由模型线-转>参照线", () =>
             {
                 ModelCurve modelCurve = doc.GetElement(new ElementId(1000)) as ModelCurve;//ModelCurve模型线
                 modelCurve.ChangeToReferenceLine();
                 //modelCurve.IsReferenceLine;
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "通过标高创建草图平面,然后在草图平面创建模型线",() =>
+            VLTransactionHelper.DelegateTransaction(doc, "通过标高创建草图平面,然后在草图平面创建模型线",() =>
             {
                 Level level = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Levels).FirstOrDefault() as Level;
                 Line line = Line.CreateBound(XYZ.Zero, new XYZ(10, 10, 0));
@@ -214,7 +214,7 @@ namespace MyRevit.Entities
                 ModelCurve modelLine = doc.FamilyCreate.NewModelCurve(line, sketchPlane);
                 return true;
             });
-            TransactionHelper.DelegateTransaction(doc, "使用拉身体获取相应的草图平面", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "使用拉身体获取相应的草图平面", () =>
             {
                 Extrusion extrusion = doc.GetElement(new ElementId(11212)) as Extrusion;
                 SketchPlane sketchPlane = extrusion.Sketch.SketchPlane;
@@ -264,7 +264,7 @@ namespace MyRevit.Entities
 
             #region 建筑建模
 
-            TransactionHelper.DelegateTransaction(doc, "修改标高的基面", () =>
+            VLTransactionHelper.DelegateTransaction(doc, "修改标高的基面", () =>
             {
                 var levelId = 111;
                 Level level = doc.GetElement(new ElementId(levelId)) as Level;

@@ -5,7 +5,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// 存储对象集合
     /// </summary>
-    public class CSAModelCollection : VLModelCollectionBase<CSAModel>
+    public class CSAModelCollection : VLModelCollection<CSAModel>
     {
         public CSAModelCollection(string data) : base(data)
         {

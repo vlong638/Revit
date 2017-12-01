@@ -109,7 +109,6 @@ G:\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SkewBackM
 G:\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.SubsidenceMonitorForm.resources
 G:\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor.UI.WarnSettingsForm.resources
 G:\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\CompoundStructureAnnotation\MyResourceDictionary.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PipeAttributesAnnotation\ResourceDictionary.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Template\ResourceDictionary.baml
@@ -176,4 +175,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.SubsidenceMonitor
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateResource.Cache
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\DuctAttributeAnnotation\Window.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
