@@ -161,8 +161,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
             XYZ verticalVector = null;
             parallelVector = ((pipes.First().Location as LocationCurve).Curve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             //平行检测
             if (!CheckParallel(pipes, verticalVector))
             {
@@ -261,8 +261,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
             XYZ verticalVector = null;
             parallelVector = ((pipes.First().Location as LocationCurve).Curve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             //原始线高度
             var orientLineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble();
             ////原始对象清理
@@ -296,8 +296,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
             //        locationPoint.RotateByXY(startPoint, verticalVector);
             //}
             //偏移计算
-            var verticalSkew = LocationHelper.GetLengthBySide(skewVector, verticalVector);
-            var parallelSkew = LocationHelper.GetLengthBySide(skewVector, parallelVector);
+            var verticalSkew = VLLocationHelper.GetLengthBySide(skewVector, verticalVector);
+            var parallelSkew = VLLocationHelper.GetLengthBySide(skewVector, parallelVector);
             //线参数
             UpdateLineParameters(nodePoints, line);
             //标注 创建

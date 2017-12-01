@@ -239,15 +239,15 @@ namespace MyRevit.MyTests.Template
                 RaisePropertyChanged("TextType_OnEdge");
             }
         }
-        public bool TextType_OnLine
+        public bool TextType_OnLineOrOnLeft
         {
-            get { return TextType == TemplateTextType.OnLine; }
-            set { if (value) TextType = TemplateTextType.OnLine; }
+            get { return TextType == TemplateTextType.TextType_OnLineOrOnLeft; }
+            set { if (value) TextType = TemplateTextType.TextType_OnLineOrOnLeft; }
         }
-        public bool TextType_OnEdge
+        public bool TextType_OnEdgeOrOnMiddle
         {
-            get { return TextType == TemplateTextType.OnEdge; }
-            set { if (value) TextType = TemplateTextType.OnEdge; }
+            get { return TextType == TemplateTextType.TextType_OnEdgeOrOnMiddle; }
+            set { if (value) TextType = TemplateTextType.TextType_OnEdgeOrOnMiddle; }
         }
         #endregion
 

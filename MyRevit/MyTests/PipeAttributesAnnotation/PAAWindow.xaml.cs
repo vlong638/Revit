@@ -21,7 +21,7 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PAAViewType.PickSinglePipe_Pipe;
+            ViewModel.UpdateViewType(true);
             ViewModel.Execute();
         }
 
@@ -30,7 +30,7 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PAAViewType.PickMultiplePipes;
+            ViewModel.UpdateViewType(false);
             ViewModel.Execute();
         }
     }

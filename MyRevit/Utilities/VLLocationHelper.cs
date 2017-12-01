@@ -13,7 +13,7 @@ namespace MyRevit.Utilities
         OneAndTwo,
     }
 
-    public static class LocationHelper
+    public static class VLLocationHelper
     {
         /// <summary>
         /// 获取垂直向量

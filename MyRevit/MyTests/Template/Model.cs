@@ -76,11 +76,11 @@ namespace MyRevit.MyTests.Template
         /// <summary>
         /// 文字在线上
         /// </summary>
-        OnLine,
+        TextType_OnLineOrOnLeft,
         /// <summary>
         /// 文字在线端
         /// </summary>
-        OnEdge,
+        TextType_OnEdgeOrOnMiddle,
     }
 
     public class TemplateModel : VLModel

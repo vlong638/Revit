@@ -232,16 +232,52 @@ namespace MyRevit.MyTests.PAA
         {
             switch (model.ModelType)
             {
-                case PAAModelType.Single:
-                    return GenerateSingle(model);
-                case PAAModelType.Multiple:
-                    return GenerateMultiple(model);
+                case PAAModelType.SinglePipe:
+                    return GenerateSinglePipe(model);
+                case PAAModelType.MultiplePipe:
+                    return GenerateMultiplePipe(model);
+                case PAAModelType.SingleDuct:
+                case PAAModelType.SingleCableTray:
+                    return GenerateSingle_LeftOrMiddle(model);
                 default:
                     return false;
             }
         }
 
-        private bool GenerateMultiple(PAAModel model)
+        private static bool GenerateSingle_LeftOrMiddle(PAAModel model)
+        {
+            Document doc = model.Document;
+            View view = doc.ActiveView;
+            var target = doc.GetElement(model.TargetId);
+            var line = (target.Location as LocationCurve).Curve as Line;
+            model.UpdateVectors(line);
+            var p0 = line.GetEndPoint(0);
+            var p1 = line.GetEndPoint(1);
+            switch (model.TextType)
+            {
+                case PAATextType.Option1:
+                    var location = (p0 + p1) / 2;
+                    model.UpdateLineWidth(target);
+                    location = location - model.LineWidth / 2 * model.ParallelVector;
+                    IndependentTag subTag = doc.Create.NewTag(view, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, location);
+                    subTag.ChangeTypeId(model.GetAnnotationFamily(doc, model.TargetId).Id);
+                    break;
+                case PAATextType.Option2:
+                    //location = p0.GetLengthBySide(model.ParallelVector) > p1.GetLengthBySide(model.ParallelVector) ? p1 : p0;//左上角
+                    location = (p0 + p1) / 2;
+                    model.UpdateLineWidth(target);
+                    location = location - model.LineWidth / 2 * model.ParallelVector;
+                    location += model.CurrentFontHeight * model.VerticalVector;
+                    subTag = doc.Create.NewTag(view, doc.GetElement(model.TargetId), false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, location);
+                    subTag.ChangeTypeId(model.GetAnnotationFamily(doc, model.TargetId).Id);
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+
+        private bool GenerateMultiplePipe(PAAModel model)
         {
             Document doc = model.Document;
             View view = doc.GetElement(model.ViewId) as View;
@@ -258,8 +294,6 @@ namespace MyRevit.MyTests.PAA
             //线 旋转处理
             LocationPoint locationPoint = line.Location as LocationPoint;
             locationPoint.RotateByXY(model.TargetLocation, model.VerticalVector);
-            //if (locationPoint != null)
-            //    locationPoint.RotateByXY(model.TargetLocation, verticalVector.X.IsMiniValue() ? new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z) : verticalVector);
             model.LineId = line.Id;
             UpdateLineParameters(model, pipeAndNodePoints, line, verticalVector);
             //标注 创建
@@ -268,14 +302,11 @@ namespace MyRevit.MyTests.PAA
             {
                 var subTag = doc.Create.NewTag(view, pipeAndNodePoints[i].Target, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, pipeAndNodePoints[i].AnnotationPoint);
                 model.AnnotationIds.Add(subTag.Id);
-
-                //var subTag = isRegenerate ? pipeAndNodePoints[i].Tag : doc.Create.NewTag(view, pipeAndNodePoints[i].Target, false, TagMode.TM_ADDBY_CATEGORY, TagOrientation.Horizontal, pipeAndNodePoints[i].AnnotationPoint);
-                //model.AnnotationIds.Add(subTag.Id);
             }
             return true;
         }
 
-        private static bool GenerateSingle(PAAModel model)
+        private static bool GenerateSinglePipe(PAAModel model)
         {
             Document doc = model.Document;
             View view = doc.GetElement(model.ViewId) as View;
@@ -315,7 +346,7 @@ namespace MyRevit.MyTests.PAA
 
         public bool Regenerate(PAAModel model)
         {
-            if (model.ModelType == PAAModelType.Single)
+            if (model.ModelType == PAAModelType.SinglePipe)
                 model.Clear();
             return Generate(model);
         }

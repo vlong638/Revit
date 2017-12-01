@@ -244,8 +244,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ verticalVector = null;
             parallelVector = (locationCurve.Curve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
             {

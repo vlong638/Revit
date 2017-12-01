@@ -132,9 +132,9 @@ namespace MyRevit.MyTests.PAA
         {
             switch (type)
             {
-                case PAATextType.OnLine:
+                case PAATextType.Option1:
                     return PAAContext.Get_MultipleLineOnLine(doc);
-                case PAATextType.OnEdge:
+                case PAATextType.Option2:
                     return PAAContext.Get_MultipleLineOnEdge(doc);
                 default:
                     throw new NotImplementedException("暂不支持该类型");
@@ -185,13 +185,13 @@ namespace MyRevit.MyTests.PAA
     public enum PAATextType
     {
         /// <summary>
-        /// 文字在线上
+        /// 文字在线上|位于风管中心|位于桥架中心
         /// </summary>
-        OnLine,
+        Option1,
         /// <summary>
-        /// 文字在线端
+        /// 文字在线端|位于风管上方|位于桥架上方
         /// </summary>
-        OnEdge,
+        Option2,
     }
     static class PAATextTypeEx
     {
@@ -202,7 +202,7 @@ namespace MyRevit.MyTests.PAA
         /// <returns></returns>
         public static double GetLineWidth(this PAATextType textType)
         {
-            return textType == PAATextType.OnEdge ? 200 : 1000;
+            return textType == PAATextType.Option2 ? 200 : 1000;
         }
         /// <summary>
         /// 获取文本的定位
@@ -218,9 +218,9 @@ namespace MyRevit.MyTests.PAA
         {
             switch (textType)
             {
-                case PAATextType.OnLine:
+                case PAATextType.Option1:
                     return  start + (currentFontHeight / 3) * verticalVector; //+ verticalFix) * verticalVector;
-                case PAATextType.OnEdge:
+                case PAATextType.Option2:
                     return end;
                 default:
                     throw new NotImplementedException("未支持系类定位方案");
@@ -231,8 +231,10 @@ namespace MyRevit.MyTests.PAA
 
     public enum PAAModelType
     {
-        Single,
-        Multiple,
+        SinglePipe,
+        MultiplePipe,
+        SingleDuct,
+        SingleCableTray,
     }
     public enum RegenerateType
     {
@@ -338,7 +340,7 @@ namespace MyRevit.MyTests.PAA
 
         #region 非留存数据
         public bool IsRegenerate { set; get; }
-        public Document Document { get; internal set; }
+        public Document Document { get; set; }
         /// <summary>
         /// 线宽
         /// </summary>
@@ -457,8 +459,8 @@ namespace MyRevit.MyTests.PAA
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
                 verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
@@ -485,7 +487,7 @@ namespace MyRevit.MyTests.PAA
                 ViewId = sr.ReadFormatStringAsElementId();
                 switch (ModelType)
                 {
-                    case PAAModelType.Single:
+                    case PAAModelType.SinglePipe:
                         TargetId = sr.ReadFormatStringAsElementId();
                         LineIds = sr.ReadFormatStringAsElementIds();
                         AnnotationId = sr.ReadFormatStringAsElementId();
@@ -494,7 +496,7 @@ namespace MyRevit.MyTests.PAA
                         LeafEndPoint = sr.ReadFormatStringAsXYZ();
                         AnnotationLocation = sr.ReadFormatStringAsXYZ();
                         break;
-                    case PAAModelType.Multiple:
+                    case PAAModelType.MultiplePipe:
                         TargetIds = sr.ReadFormatStringAsElementIds();
                         LineId = sr.ReadFormatStringAsElementId();
                         AnnotationIds = sr.ReadFormatStringAsElementIds();
@@ -524,7 +526,7 @@ namespace MyRevit.MyTests.PAA
             sb.AppendItem(ViewId);
             switch (ModelType)
             {
-                case PAAModelType.Single:
+                case PAAModelType.SinglePipe:
                     sb.AppendItem(TargetId);
                     sb.AppendItem(LineIds);
                     sb.AppendItem(AnnotationId);
@@ -533,7 +535,7 @@ namespace MyRevit.MyTests.PAA
                     sb.AppendItem(LeafEndPoint);
                     sb.AppendItem(AnnotationLocation);
                     break;
-                case PAAModelType.Multiple:
+                case PAAModelType.MultiplePipe:
                     sb.AppendItem(TargetIds);
                     sb.AppendItem(LineId);
                     sb.AppendItem(AnnotationIds);
@@ -570,7 +572,7 @@ namespace MyRevit.MyTests.PAA
         {
             switch (ModelType)
             {
-                case PAAModelType.Single:
+                case PAAModelType.SinglePipe:
                     #region single
                     var target = Document.GetElement(TargetId);
                     var locationCurve = TargetType.GetLine(target);
@@ -592,7 +594,7 @@ namespace MyRevit.MyTests.PAA
                     AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, VerticalVector, BodyEndPoint, LeafEndPoint);
                     return true;
                     #endregion
-                case PAAModelType.Multiple:
+                case PAAModelType.MultiplePipe:
                     #region multiple
                     PipeAndNodePoints = new List<ElementAndNodePoint>();
                     if (IsRegenerate)
@@ -669,7 +671,7 @@ namespace MyRevit.MyTests.PAA
                         //原始线高度+偏移数据
                         var line = Document.GetElement(LineId);
                         var orientLineHeight = IsRegenerate ? line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() : 0;
-                        var verticalSkew = RegenerateType == RegenerateType.ByMultipleTarget ? 0 : LocationHelper.GetLengthBySide(offset, VerticalVector);
+                        var verticalSkew = RegenerateType == RegenerateType.ByMultipleTarget ? 0 : VLLocationHelper.GetLengthBySide(offset, VerticalVector);
                         if (Math.Abs(VerticalVector.X) > 1 - UnitHelper.MiniValueForXYZ)
                             verticalSkew = -verticalSkew;
                         var nodesHeight = UnitHelper.ConvertToFoot((PipeAndNodePoints.Count() - 1) * CurrentFontHeight, VLUnitType.millimeter);
@@ -774,7 +776,7 @@ namespace MyRevit.MyTests.PAA
             Document doc = Document;
             switch (ModelType)
             {
-                case PAAModelType.Single:
+                case PAAModelType.SinglePipe:
                     //删除线
                     foreach (var item in LineIds)
                         if (doc.GetElement(item) != null)
@@ -783,7 +785,7 @@ namespace MyRevit.MyTests.PAA
                     if (doc.GetElement(AnnotationId) != null)
                         doc.Delete(AnnotationId);
                     break;
-                case PAAModelType.Multiple:
+                case PAAModelType.MultiplePipe:
                     //清理线族
                     if (doc.GetElement(LineId) != null)
                         doc.Delete(LineId);
@@ -872,12 +874,12 @@ namespace MyRevit.MyTests.PAA
         {
             switch (TextType)
             {
-                case PAATextType.OnLine:
+                case PAATextType.Option1:
                     string text = GetFullTextForLine(target);
                     var textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
                     LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
                     break;
-                case PAATextType.OnEdge:
+                case PAATextType.Option2:
                     LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
                     break;
             }

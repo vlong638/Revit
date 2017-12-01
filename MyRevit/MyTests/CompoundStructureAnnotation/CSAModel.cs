@@ -217,8 +217,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
             {
@@ -484,8 +484,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
             {
@@ -541,8 +541,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ verticalVector = null;
             parallelVector = (locationCurve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             //计算线的定位位置
             bool isRegenerate = offset != null;
             if (!isRegenerate)
@@ -554,7 +554,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             else
             {
                 LineLocation = locationCurve.Project(LineLocation + offset).XYZPoint;
-                LineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() + LocationHelper.GetLengthBySide(offset, verticalVector);
+                LineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() + VLLocationHelper.GetLengthBySide(offset, verticalVector);
                 LineHeight = LineHeight > fontHeight ? LineHeight : fontHeight;//确保最短长度有一个文字高度
             }
             double xyzTolarance = 0.01;

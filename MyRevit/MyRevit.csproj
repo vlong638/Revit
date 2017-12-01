@@ -353,7 +353,7 @@
     <Compile Include="Utilities\ExtendPropertyFromPmSoft.cs" />
     <Compile Include="Utilities\ExtensibleStorageHelper.cs" />
     <Compile Include="Utilities\GraphsDisplayer.cs" />
-    <Compile Include="Utilities\LocationHelper.cs" />
+    <Compile Include="Utilities\VLLocationHelper.cs" />
     <Compile Include="Utilities\LogHelper.cs" />
     <Compile Include="Utilities\MessageHelper.cs" />
     <Compile Include="Utilities\VLMouseHookHelper.cs" />

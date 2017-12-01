@@ -92,17 +92,17 @@
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type RadioButton}">
                         <Setter Property="Margin" Value="10"/>
-                        <Setter Property="Width" Value="80"/>
+                        <Setter Property="Width" Value="90"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="{Binding TextType_Option1_Title}" IsChecked="{Binding TextType_Option1, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <RadioButton Content="{Binding TextType_Option2_Title}" IsChecked="{Binding TextType_Option2, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
             </StackPanel>
         </GroupBox>
         <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
             <!--FlowDirection="RightToLeft"-->
-            <Button x:Name="Btn_Single" Content="单管标注" Click="Btn_Single_Click"/>
-            <Button x:Name="Btn_Multiple" Content="多管标注" Click="Btn_Multiple_Click"/>
+            <Button x:Name="Btn_Left" Content="{Binding Btn_Left_Title}" Click="Btn_Single_Click"/>
+            <Button x:Name="Btn_Right" Content="{Binding Btn_Right_Title}" Click="Btn_Multiple_Click"/>
         </StackPanel>
     </Grid>
 </local:VLWindow>

@@ -32,6 +32,8 @@ namespace MyRevit.MyTests.PAA
         PickSinglePipe_Location,//选择单管 定位
         GenerateSinglePipe,//单管标注生成
         PickMultiplePipes,//选择多管
+        PickSingleDuct,//选择风管
+        PickSingleCableTray,//选择桥架
     }
 
     public class PAAViewModel : VLViewModel<PAAModel, PAAWindow, PAAViewType>
@@ -95,6 +97,7 @@ namespace MyRevit.MyTests.PAA
 
         public override void Execute()
         {
+            Model.Document = Document;
             switch (ViewType)
             {
                 case PAAViewType.Idle:
@@ -105,7 +108,6 @@ namespace MyRevit.MyTests.PAA
                     View.Close();
                     break;
                 case PAAViewType.PickSinglePipe_Pipe:
-                    Model.Document = Document;
                     Model.ViewId = Document.ActiveView.Id;
                     View.Close();
                     if (!VLMouseHookHelper.DelegateMouseHook(() =>
@@ -171,7 +173,7 @@ namespace MyRevit.MyTests.PAA
                             Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                             Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                             Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthSize;
-                            Model.ModelType = PAAModelType.Single;
+                            Model.ModelType = PAAModelType.SinglePipe;
                             if (!PAAContext.Creator.Generate(Model))
                                 return false;
                             Collection.Data.Add(Model);
@@ -248,12 +250,11 @@ namespace MyRevit.MyTests.PAA
                                 existedModels[i].Clear();
                             }
                         }
-                        Model.Document = Document;
                         Model.ViewId = Document.ActiveView.Id;
                         Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
                         Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
                         Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
-                        Model.ModelType = PAAModelType.Multiple;
+                        Model.ModelType = PAAModelType.MultiplePipe;
                         PAAContext.Creator.Generate(Model);
                         Collection.Data.Add(Model);
                         Collection.Save(Document);
@@ -275,6 +276,97 @@ namespace MyRevit.MyTests.PAA
                         return true;
                     })))
                         ViewType = PAAViewType.Idle;
+                    Execute();
+                    break;
+                //TODO
+                case PAAViewType.PickSingleDuct:
+                    View.Close();
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    {
+                        //业务逻辑处理
+                        //选择符合类型的过滤
+                        var targetType = Model.GetFilter();
+                        var targetElementId = UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择需要标注的对象");
+                        if (targetElementId != null )
+                        {
+                            Model.TargetId = targetElementId.ElementId;
+                        }
+                    }))
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    //获取族内参数信息
+                    if (!GetFamilySymbolInfo(Model.TargetId))
+                    {
+                        ShowMessage("加载族文字信息失败");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    else
+                    {
+                        Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
+                        Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
+                        Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
+                    }
+                    if (!VLTransactionHelper.DelegateTransaction(Document, "PickSingleDuct", (Func<bool>)(() =>
+                    {
+                        Model.ModelType = PAAModelType.SingleDuct;
+                        PAAContext.Creator.Generate(Model);
+                        return true;
+                    })))
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    Execute();
+                    break;
+                case PAAViewType.PickSingleCableTray:
+                    View.Close();
+                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    {
+                        //业务逻辑处理
+                        //选择符合类型的过滤
+                        var targetType = Model.GetFilter();
+                        var targetElementId = UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择需要标注的对象");
+                        if (targetElementId != null)
+                        {
+                            Model.TargetId = targetElementId.ElementId;
+                        }
+                    }))
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    //获取族内参数信息
+                    if (!GetFamilySymbolInfo(Model.TargetId))
+                    {
+                        ShowMessage("加载族文字信息失败");
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
+                    else
+                    {
+                        Model.CurrentFontHeight = PAAContext.FontManagement.CurrentHeight;
+                        Model.CurrentFontSizeScale = PAAContext.FontManagement.CurrentFontSizeScale;
+                        Model.CurrentFontWidthSize = PAAContext.FontManagement.CurrentFontWidthScale;
+                    }
+                    if (!VLTransactionHelper.DelegateTransaction(Document, "SingleCableTray", (Func<bool>)(() =>
+                    {
+                        Model.ModelType = PAAModelType.SingleCableTray;
+                        PAAContext.Creator.Generate(Model);
+                        return true;
+                    })))
+                    {
+                        ViewType = PAAViewType.Idle;
+                        Execute();
+                        return;
+                    }
                     Execute();
                     break;
                 default:
@@ -319,20 +411,35 @@ namespace MyRevit.MyTests.PAA
                     case PAATargetType.Pipe:
                         AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Center;
+                        TextType_Option1_Title = "文字在线上";
+                        TextType_Option2_Title = "文字在线端";
+                        Btn_Left_Title = "单管标注";
+                        Btn_Right_Title = "多管标注";
                         break;
                     case PAATargetType.Duct:
                         AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Center;
+                        TextType_Option1_Title = "位于风管中心";
+                        TextType_Option2_Title = "位于风管上方";
+                        Btn_Left_Title = "选管标注";
+                        Btn_Right_Title = "取消";
                         break;
                     case PAATargetType.CableTray:
                         AnnotationType = PAAAnnotationType.SPL;
                         LocationType = PAALocationType.Bottom;
+                        TextType_Option1_Title = "位于桥架中心";
+                        TextType_Option2_Title = "位于桥架上方";
+                        Btn_Left_Title = "选择桥架";
+                        Btn_Right_Title = "取消";
                         break;
                     case PAATargetType.Conduit:
                     default:
                         break;
                 }
-
+                RaisePropertyChanged("TextType_Option1_Title");
+                RaisePropertyChanged("TextType_Option2_Title");
+                RaisePropertyChanged("Btn_Left_Title");
+                RaisePropertyChanged("Btn_Right_Title");
                 RaisePropertyChanged("TargetType_Pipe");
                 RaisePropertyChanged("TargetType_Duct");
                 RaisePropertyChanged("TargetType_CableTray");
@@ -445,20 +552,22 @@ namespace MyRevit.MyTests.PAA
             set
             {
                 Model.TextType = value;
-                RaisePropertyChanged("TextType_OnLine");
-                RaisePropertyChanged("TextType_OnEdge");
+                RaisePropertyChanged("TextType_Option1");
+                RaisePropertyChanged("TextType_Option2");
             }
         }
-        public bool TextType_OnLine
+        public bool TextType_Option1
         {
-            get { return TextType == PAATextType.OnLine; }
-            set { if (value) TextType = PAATextType.OnLine; }
+            get { return TextType == PAATextType.Option1; }
+            set { if (value) TextType = PAATextType.Option1; }
         }
-        public bool TextType_OnEdge
+        public bool TextType_Option2
         {
-            get { return TextType == PAATextType.OnEdge; }
-            set { if (value) TextType = PAATextType.OnEdge; }
+            get { return TextType == PAATextType.Option2; }
+            set { if (value) TextType = PAATextType.Option2; }
         }
+        public string TextType_Option1_Title { set; get; }
+        public string TextType_Option2_Title { set; get; }
         #endregion
 
         #region Texts and Size
@@ -482,6 +591,34 @@ namespace MyRevit.MyTests.PAA
             RaisePropertyChanged("rbtn_SL");
             RaisePropertyChanged("rbtn_PL");
             RaisePropertyChanged("rbtn_SP");
+        }
+
+        internal void UpdateViewType(bool isLeft)
+        {
+            switch (TargetType)
+            {
+                case PAATargetType.Pipe:
+                    if (isLeft)
+                        ViewType = PAAViewType.PickSinglePipe_Pipe;
+                    else
+                        ViewType = PAAViewType.PickMultiplePipes;
+                    break;
+                case PAATargetType.Duct:
+                    if (isLeft)
+                        ViewType = PAAViewType.PickSingleDuct;
+                    else
+                        ViewType = PAAViewType.Close;
+                    break;
+                case PAATargetType.CableTray:
+                    if (isLeft)
+                        ViewType = PAAViewType.PickSingleCableTray;
+                    else
+                        ViewType = PAAViewType.Close;
+                    break;
+                case PAATargetType.Conduit:
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private string centerPrefix = "CL+";
@@ -538,6 +675,9 @@ namespace MyRevit.MyTests.PAA
         public string rbtn_SL { get { return Model.GetTitle(PAAAnnotationType.SL); } }
         public string rbtn_PL { get { return Model.GetTitle(PAAAnnotationType.PL); } }
         public string rbtn_SP { get { return Model.GetTitle(PAAAnnotationType.SP); } }
+
+        public string Btn_Left_Title { get; set; }
+        public string Btn_Right_Title { get; set; }
         #endregion
 
         #endregion
