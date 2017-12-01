@@ -880,7 +880,21 @@ namespace MyRevit.MyTests.PAA
                     LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
                     break;
                 case PAATextType.Option2:
-                    LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
+                    switch (TargetType)
+                    {
+                        case PAATargetType.Pipe:
+                            LineWidth = 10 * PAAContext.FontManagement.CurrentFontWidthSize;
+                            break;
+                        case PAATargetType.Duct:
+                        case PAATargetType.CableTray:
+                            text = GetFullTextForLine(target);
+                            textWidth = TextRenderer.MeasureText(text, PAAContext.FontManagement.OrientFont).Width;
+                            LineWidth = textWidth * PAAContext.FontManagement.CurrentFontWidthSize;
+                            break;
+                        case PAATargetType.Conduit:
+                        default:
+                            throw new NotImplementedException();
+                    }
                     break;
             }
         }
