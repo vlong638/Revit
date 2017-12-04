@@ -1,8 +1,6 @@
 ﻿using Autodesk.Revit.UI.Selection;
 using Autodesk.Revit.DB;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MyRevit.MyTests.Utilities
 {
@@ -15,11 +13,14 @@ namespace MyRevit.MyTests.Utilities
         Type TargetType { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
+        Func<Element,bool> IsExconditionFit { set; get; }
 
-        public ClassFilter(Type targetType, bool isLinkInstance = false)
+
+        public ClassFilter(Type targetType, bool isLinkInstance = false, Func<Element,bool> isExconditionFit =null)
         {
             TargetType = targetType;
             IsLinkInstance = isLinkInstance;
+            IsExconditionFit = isExconditionFit;
         }
 
         public bool AllowElement(Element element)
@@ -31,7 +32,14 @@ namespace MyRevit.MyTests.Utilities
             }
             else
             {
-                return TargetType == element.GetType();
+                if (IsExconditionFit == null)
+                {
+                    return TargetType == element.GetType();
+                }
+                else
+                {
+                    return TargetType == element.GetType() && IsExconditionFit(element);
+                }
             }
         }
 
@@ -42,7 +50,14 @@ namespace MyRevit.MyTests.Utilities
 
             Document linkedDoc = LinkInstance.GetLinkDocument();
             Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            return TargetType == element.GetType();
+            if (IsExconditionFit==null)
+            {
+                return TargetType == element.GetType();
+            }
+            else
+            {
+                return TargetType == element.GetType() && IsExconditionFit(element);
+            }
         }
     }
 }

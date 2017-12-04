@@ -142,8 +142,37 @@ namespace MyRevit.MyTests.PAA
                         var locationCurve = TargetType.GetLine(target);
                         Model.UpdateVectors(locationCurve);
                         Model.UpdateLineWidth(target);
-                        var pEnd = new VLPointPicker().PickPointWithLinePreview(UIApplication,
-                            Model.BodyStartPoint, Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector)
+                        var startPoint = Model.BodyStartPoint.ToWindowsPoint();
+                        var endPoint= (Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector).ToWindowsPoint();
+                        var pEnd = new VLPointPicker().PickPointWithPreview(UIApplication,(view)=> {
+                                var mousePosition = System.Windows.Forms.Control.MousePosition;
+                                //已在初始化处理 为何重复?
+                                var rect = view.UIView.GetWindowRectangle();
+                                var Left = rect.Left;
+                                var Top = rect.Top;
+                                var Width = rect.Right - rect.Left;
+                                var Height = rect.Bottom - rect.Top;
+
+                                var startDrawP = view.ConvertToDrawPointFromViewPoint(startPoint);//起点
+                                var endP = view.ConvertToDrawPointFromViewPoint(endPoint);//终点
+                                var midDrawP = new System.Windows.Point(mousePosition.X - rect.Left, mousePosition.Y - rect.Top);//中间选择点
+                                var height = midDrawP - startDrawP;
+                                midDrawP -= height / 50;
+                                var endDrawP = endP + height;
+                                if (Math.Abs(startDrawP.X - midDrawP.X) < 2 && Math.Abs(startDrawP.Y - midDrawP.Y) < 2)
+                                    return;
+
+                                var canvas = view.canvas;
+                                midDrawP.X = midDrawP.X > startDrawP.X ? midDrawP.X - 1 : midDrawP.X + 1;
+                                midDrawP.Y = midDrawP.Y > startDrawP.Y ? midDrawP.Y - 1 : midDrawP.Y + 1;
+                                canvas.Children.RemoveRange(0, canvas.Children.Count);
+                                var line = new System.Windows.Shapes.Line() { X1 = startDrawP.X, Y1 = startDrawP.Y, X2 = midDrawP.X, Y2 = midDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                var line2 = new System.Windows.Shapes.Line() { X1 = midDrawP.X, Y1 = midDrawP.Y, X2 = endDrawP.X, Y2 = endDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line2, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                canvas.Children.Add(line);
+                                canvas.Children.Add(line2);
+                            })
                             .ToSameZ(Model.BodyStartPoint);
                         Model.BodyEndPoint = pEnd;
                         if (pEnd == null)

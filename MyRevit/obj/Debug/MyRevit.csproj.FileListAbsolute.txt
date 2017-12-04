@@ -176,3 +176,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csproj.GenerateRe
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PunchAndBranchPipeAnnotation\ResourceDictionary.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PunchAndBranchPipeAnnotation\Window.g.cs
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PunchAndBranchPipeAnnotation\Window.baml

@@ -2,9 +2,18 @@
 using Autodesk.Revit.UI;
 using MyRevit.Utilities;
 using PmSoft.Common.RevitClass;
+using System;
 
 namespace MyRevit.MyTests.PipeAttributesAnnotation
 {
+    public static class VLPointPickerEx
+    {
+        public static System.Windows.Point ToWindowsPoint(this XYZ xyz)
+        {
+            return new System.Windows.Point(xyz.X, xyz.Y);
+        }
+    }
+
     public class VLPointPicker
     {
         /// <summary>
@@ -13,7 +22,7 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
         /// <param name="uiApp"></param>
         /// <param name="startPoint"></param>
         /// <returns></returns>
-        public XYZ PickPointWithLinePreview(UIApplication uiApp,XYZ startPoint,XYZ endPoint)
+        public XYZ PickPointWithPreview(UIApplication uiApp, Action<DrawAreaView> preview=null)
         {
             XYZ result = null;
             Document doc = uiApp.ActiveUIDocument.Document;
@@ -22,14 +31,13 @@ namespace MyRevit.MyTests.PipeAttributesAnnotation
             System.Windows.Forms.Timer timer = null;
             var view = new DrawAreaView(uiApp);
             view.Show();
-            view.StartPoint = new System.Windows.Point(startPoint.X, startPoint.Y);
-            view.EndPoint = new System.Windows.Point(endPoint.X, endPoint.Y);
             //开启定时器 实时绘图
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 6;
             timer.Tick += (sender, e) =>
             {
-                view.PreviewLine(System.Windows.Forms.Control.MousePosition);
+                if (preview != null)
+                    preview(view);
             };
             timer.Start();
             //选点

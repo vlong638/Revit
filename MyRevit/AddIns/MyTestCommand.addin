@@ -1,6 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <RevitAddIns>
   <AddIn Type="Command">
+    <Name>基础_Test_PickObject</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>88D0D13B-46D2-4D5B-8AD7-9200D2B90FB4</ClientId>
+    <FullClassName>MyRevit.MyTests.基础.Test_PickObject</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
     <Name>调研_获取类型结构属性</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>61969ECA-BB23-46C0-BBE3-D055F117E206</ClientId>
