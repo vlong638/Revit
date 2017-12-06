@@ -16,21 +16,23 @@ namespace MyRevit.MyTests.PBPA
             ViewModel = viewModel;
         }
 
-        private void Btn_Single_Click(object sender, System.Windows.RoutedEventArgs e)
+        //一键引注
+        private void Btn_1_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PBPAViewType.PickSinglePipe_Pipe;
+            ViewModel.ViewType = PBPAViewType.PickSingle_Target;
             ViewModel.Execute();
         }
 
-        private void Btn_Multiple_Click(object sender, System.Windows.RoutedEventArgs e)
+        //选择引注
+        private void Btn_2_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PBPAViewType.PickMultiplePipes;
+            ViewModel.ViewType = PBPAViewType.Close;
             ViewModel.Execute();
         }
     }

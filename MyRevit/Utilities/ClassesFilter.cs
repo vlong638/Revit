@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyRevit.Utilities
+namespace MyRevit.MyTests.Utilities
 {
     /// <summary>
     /// multiple class 选择过滤器
@@ -15,12 +15,26 @@ namespace MyRevit.Utilities
         List<Type> TargetTypes { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
+        List<ClassFilter> ClassFilters { set; get; }
+
 
         public ClassesFilter(bool isLinkInstance, params Type[] types)
         {
             TargetTypes = types.ToList();
             IsLinkInstance = isLinkInstance;
         }
+
+        public ClassesFilter(bool isLinkInstance, params ClassFilter[] classFilters)
+        {
+            IsLinkInstance = isLinkInstance;
+            ClassFilters = classFilters.ToList();
+        }
+        public ClassesFilter(bool isLinkInstance, List<ClassFilter> classFilters)
+        {
+            IsLinkInstance = isLinkInstance;
+            ClassFilters = classFilters;
+        }
+
 
         public bool AllowElement(Element element)
         {
@@ -31,7 +45,19 @@ namespace MyRevit.Utilities
             }
             else
             {
-                return TargetTypes.Contains(element.GetType());
+                if (ClassFilters == null)
+                {
+                    return TargetTypes.Contains(element.GetType());
+                }
+                else
+                {
+                    foreach (var ClassFilter in ClassFilters)
+                    {
+                        if (ClassFilter.AllowElement(element))
+                            return true;
+                    }
+                    return false;
+                }
             }
         }
 
@@ -40,9 +66,21 @@ namespace MyRevit.Utilities
             if (LinkInstance == null)
                 return false;
 
-            Document linkedDoc = LinkInstance.GetLinkDocument();
-            Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            return TargetTypes.Contains(element.GetType());
+            if (ClassFilters == null)
+            {
+                Document linkedDoc = LinkInstance.GetLinkDocument();
+                Element element = linkedDoc.GetElement(reference.LinkedElementId);
+                return TargetTypes.Contains(element.GetType());
+            }
+            else
+            {
+                foreach (var ClassFilter in ClassFilters)
+                {
+                    if (ClassFilter.AllowReference(reference, position))
+                        return true;
+                }
+                return false;
+            }
         }
     }
 }

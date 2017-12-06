@@ -4,9 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MyRevit.MyTests.VLBase"
-             mc:Ignorable="d" Title="管线特性标注"
+             mc:Ignorable="d" Title="开洞、套管引注"
              d:DesignHeight="260" d:DesignWidth="480"
-             Width="260" Height="480">
+             Width="260" Height="380"
+             SizeToContent="WidthAndHeight" ResizeMode="NoResize">
     <local:VLWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,42 +18,32 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="170"></RowDefinition>
+            <RowDefinition Height="80"></RowDefinition>
             <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="60"></RowDefinition>
-            <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
         <GroupBox Header="标注对象" Grid.Row="0">
             <StackPanel Orientation="Horizontal">
                 <StackPanel.Resources>
-                    <Style TargetType="{x:Type RadioButton}">
+                    <Style TargetType="{x:Type CheckBox}">
                         <Setter Property="Margin" Value="10"/>
-                        <Setter Property="Width" Value="40"/>
+                        <Setter Property="Width" Value="80"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="管道" IsChecked="{Binding TargetType_Pipe, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <RadioButton Content="风管" IsChecked="{Binding TargetType_Duct, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <RadioButton Content="桥架" IsChecked="{Binding TargetType_CableTray, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <RadioButton Content="线管" IsChecked="{Binding TargetType_Conduit, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+                <CheckBox Content="开洞标记"  IsChecked="{Binding TargetType_Punch}"/>
+                <CheckBox Content="套管标记"  IsChecked="{Binding TargetType_BranchPipe}"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="标记样式" Grid.Row="1">
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type RadioButton}">
-                        <Setter Property="Margin" Value="0,10,0,0"/>
-                    </Style>
-                    <Style TargetType="{x:Type TextBlock}">
-                        <Setter Property="Margin" Value="0,5,0,0"/>
-                        <Setter Property="Foreground" Value="Brown"/>
+                        <Setter Property="Margin" Value="10,10,0,0"/>
+                        <Setter Property="Height" Value="50"/>
                     </Style>
                 </StackPanel.Resources>
-                <RadioButton Content="系统缩写 管道尺寸 离地高度" IsChecked="{Binding AnnotationType_SPL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <TextBlock Text="{Binding SPLPreview}"/>
-                <RadioButton Content="系统缩写 离地高度" IsChecked="{Binding AnnotationType_SL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <TextBlock Text="{Binding SLPreview}"/>
-                <RadioButton Content="管道尺寸 离地高度" IsChecked="{Binding AnnotationType_PL, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <TextBlock Text="{Binding PLPreview}"/>
+                <RadioButton IsChecked="{Binding AnnotationType_TwoLine}" Content="  名称标记&#x000A;-------------&#x000A;  离地高度"/>
+                <RadioButton IsChecked="{Binding AnnotationType_OneLine}" Content="名称标记 离地高度"/>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="离地模式选择" Grid.Row="2">
@@ -83,22 +74,9 @@
                 <TextBox Text="BL+" Grid.Row="2" Grid.Column="1"></TextBox>
             </Grid>
         </GroupBox>
-        <GroupBox Header="文字方式" Grid.Row="3">
-            <StackPanel Orientation="Horizontal">
-                <StackPanel.Resources>
-                    <Style TargetType="{x:Type RadioButton}">
-                        <Setter Property="Margin" Value="10"/>
-                        <Setter Property="Width" Value="80"/>
-                    </Style>
-                </StackPanel.Resources>
-                <RadioButton Content="文字在线上" IsChecked="{Binding TextType_OnLine, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-                <RadioButton Content="文字在线端" IsChecked="{Binding TextType_OnEdge, UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
-            </StackPanel>
-        </GroupBox>
-        <StackPanel  Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
-            <!--FlowDirection="RightToLeft"-->
-            <Button x:Name="Btn_Single" Content="单管标注" Click="Btn_Single_Click"/>
-            <Button x:Name="Btn_Multiple" Content="多管标注" Click="Btn_Multiple_Click"/>
+        <StackPanel  Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button x:Name="Btn_1" Content="选择标注" Click="Btn_1_Click"/>
+            <Button x:Name="Btn_2" Content="取消" Click="Btn_2_Click"/>
         </StackPanel>
     </Grid>
 </local:VLWindow>

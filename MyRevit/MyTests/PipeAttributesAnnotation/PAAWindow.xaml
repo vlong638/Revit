@@ -6,8 +6,10 @@
              xmlns:local="clr-namespace:MyRevit.MyTests.VLBase"
              mc:Ignorable="d" Title="管线特性标注"
              d:DesignHeight="260" d:DesignWidth="480"
-             Width="260" SizeToContent="Height" ResizeMode="NoResize"
-             x:Name="vlWindow"><!--480 520-->
+              SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+             x:Name="vlWindow">
+    <!--480 520-->
+    <!--Width="260"-->
     <local:VLWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -91,6 +91,7 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="RevitAPI">
       <HintPath>..\..\..\..\Revit2016\Revit 2016\RevitAPI.dll</HintPath>
       <Private>True</Private>
@@ -142,7 +143,10 @@
     <Compile Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml.cs">
       <DependentUpon>PAAWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyTests\PipeAttributesAnnotation\VLPointPicker.cs" />
+    <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\UpdaterCommand.cs" />
+    <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Delete.cs" />
+    <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Edit.cs" />
+    <Compile Include="Utilities\VLPointPicker.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Command.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Context.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Creator.cs" />

@@ -6,13 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyRevit.MyTests.PAA
+namespace MyRevit.MyTests.PBPA
 {
     /// <summary>
     /// 编辑Updater
     /// </summary>
     [Transaction(TransactionMode.Manual)]
-    public class PAAUpdaterCommand : IExternalApplication
+    public class PBPAUpdaterCommand : IExternalApplication
     {
         public Result OnShutdown(UIControlledApplication application)
         {
@@ -23,7 +23,7 @@ namespace MyRevit.MyTests.PAA
         {
             var uiApp = application;
             var app = uiApp.ControlledApplication;
-            var editUpdater = new PAAUpdater_Edit(new AddInId(new Guid("7B89781C-4AC0-4BD3-B18D-CB731DA85E0F")));
+            var editUpdater = new PBPAUpdater_Edit(new AddInId(new Guid("4DF1BD0D-4F1D-49BD-8FC3-ED3CC253C714")));
             var updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == editUpdater.GetUpdaterName());
             if (updaterInfo != null)
                 try
@@ -35,17 +35,11 @@ namespace MyRevit.MyTests.PAA
                 }
             UpdaterRegistry.RegisterUpdater(editUpdater, true);
             UpdaterRegistry.AddTrigger(editUpdater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
-                    new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管道
-                    new ElementCategoryFilter(BuiltInCategory.OST_DuctCurves),//风管
-                    new ElementCategoryFilter(BuiltInCategory.OST_CableTray),//桥架
-                    new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线族
-                    //new ElementCategoryFilter(BuiltInCategory.OST_IOSDetailGroups),//线组
-                    new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
-                    new ElementCategoryFilter(BuiltInCategory.OST_DuctTags),//标注
-                    new ElementCategoryFilter(BuiltInCategory.OST_CableTrayTags),//标注
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeAccessory),//开洞 套管
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeAccessoryTags),//开洞 套管标注
                 })
             , Element.GetChangeTypeAny());
-            var deleteUpdater = new PAAUpdater_Delete(new AddInId(new Guid("7B89781C-4AC0-4BD3-B18D-CB731DA85E0F")));
+            var deleteUpdater = new PBPAUpdater_Delete(new AddInId(new Guid("4DF1BD0D-4F1D-49BD-8FC3-ED3CC253C714")));
             updaterInfo = UpdaterRegistry.GetRegisteredUpdaterInfos().FirstOrDefault(c => c.UpdaterName == deleteUpdater.GetUpdaterName());
             if (updaterInfo != null)
                 try
@@ -57,14 +51,8 @@ namespace MyRevit.MyTests.PAA
                 }
             UpdaterRegistry.RegisterUpdater(deleteUpdater, true);
             UpdaterRegistry.AddTrigger(deleteUpdater.GetUpdaterId(), new LogicalOrFilter(new List<ElementFilter>() {
-                   new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves),//管道
-                    new ElementCategoryFilter(BuiltInCategory.OST_DuctCurves),//风管
-                    new ElementCategoryFilter(BuiltInCategory.OST_CableTray),//桥架
-                    new ElementCategoryFilter(BuiltInCategory.OST_DetailComponents),//线族
-                    //new ElementCategoryFilter(BuiltInCategory.OST_IOSDetailGroups),//线组
-                    new ElementCategoryFilter(BuiltInCategory.OST_PipeTags),//标注
-                    new ElementCategoryFilter(BuiltInCategory.OST_DuctTags),//标注
-                    new ElementCategoryFilter(BuiltInCategory.OST_CableTrayTags),//标注
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeAccessory),//开洞 套管
+                    new ElementCategoryFilter(BuiltInCategory.OST_PipeAccessoryTags),//开洞 套管标注
                 })
             , Element.GetChangeTypeElementDeletion());
             return Result.Succeeded;

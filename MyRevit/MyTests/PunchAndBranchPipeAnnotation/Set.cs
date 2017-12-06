@@ -37,6 +37,9 @@ namespace MyRevit.MyTests.PBPA
 
         protected override bool DoUI()
         {
+            if (!ViewModel.Prepare())
+                return false;
+
             var uiApp = UIApplication;
             var app = UIApplication.Application;
             var uiDoc = UIApplication.ActiveUIDocument;

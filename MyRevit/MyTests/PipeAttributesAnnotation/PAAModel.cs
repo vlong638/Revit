@@ -357,6 +357,7 @@ namespace MyRevit.MyTests.PAA
 
         public XYZ ParallelVector = null;//坐标定位,平行于标注对象
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
+
         public FamilySymbol GetAnnotationFamily(Document doc,ElementId targetId)
         {
             switch (AnnotationType)
@@ -459,8 +460,8 @@ namespace MyRevit.MyTests.PAA
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
             double xyzTolarance = 0.01;
             if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
                 verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);

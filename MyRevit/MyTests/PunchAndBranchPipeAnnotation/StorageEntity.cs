@@ -15,8 +15,7 @@ namespace MyRevit.MyTests.PBPA
         {
             get
             {
-                throw new NotImplementedException("项目更改SchemaId需要更换");
-                //return new Guid("4A622209-267D-4BA7-BFFD-55C3CDA0F809");
+                return new Guid("72C9F88D-D84D-4F90-B4D8-A0016E1E30E7");
             }
         }
         public string StorageName { get { return "PBPA_Schema"; } }

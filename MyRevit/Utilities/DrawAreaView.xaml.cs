@@ -7,16 +7,19 @@ using System.Windows.Shapes;
 
 namespace MyRevit.Utilities
 {
+
     /// <summary>
     /// DrawAreaView.xaml 的交互逻辑
     /// </summary>
     public partial class DrawAreaView : Window
     {
         public UIView UIView { set; get; }
+        CoordinateType CoordinateType { set; get; }
 
-        public DrawAreaView(UIApplication uiApp)
+        public DrawAreaView(UIApplication uiApp, CoordinateType coordinateType=CoordinateType.XY)
         {
             UIView = uiApp.ActiveUIDocument.GetOpenUIViews().FirstOrDefault(p => p.ViewId == uiApp.ActiveUIDocument.ActiveGraphicalView.Id);
+            CoordinateType = coordinateType;
 
             InitializeComponent();
 
@@ -76,7 +79,17 @@ namespace MyRevit.Utilities
         {
             var rect = UIView.GetWindowRectangle();
             var xyzs = UIView.GetZoomCorners();
-            return new Point((p.X - xyzs.First().X) * (rect.Right - rect.Left) / (xyzs.Last().X - xyzs.First().X), (p.Y - xyzs.Last().Y) * (rect.Bottom - rect.Top) / (-xyzs.Last().Y + xyzs.First().Y));
+            switch (CoordinateType)
+            {
+                case CoordinateType.XY:
+                    return new Point((p.X - xyzs.First().X) * (rect.Right - rect.Left) / (xyzs.Last().X - xyzs.First().X), (p.Y - xyzs.Last().Y) * (rect.Bottom - rect.Top) / (-xyzs.Last().Y + xyzs.First().Y));
+                case CoordinateType.YZ:
+                    return new Point((p.X - xyzs.First().Y) * (rect.Right - rect.Left) / (xyzs.Last().Y - xyzs.First().Y), (p.Y - xyzs.Last().Z) * (rect.Bottom - rect.Top) / (-xyzs.Last().Z + xyzs.First().Z));
+                case CoordinateType.XZ:
+                    return new Point((p.X - xyzs.First().X) * (rect.Right - rect.Left) / (xyzs.Last().X - xyzs.First().X), (p.Y - xyzs.Last().Z) * (rect.Bottom - rect.Top) / (-xyzs.Last().Z + xyzs.First().Z));
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
     }

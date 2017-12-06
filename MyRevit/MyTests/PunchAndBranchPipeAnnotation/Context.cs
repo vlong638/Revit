@@ -16,6 +16,8 @@ namespace MyRevit.MyTests.PBPA
                 return _Creator ?? (_Creator = new PBPACreator());
             }
         }
+
+        public static bool IsDeleting { get; internal set; }
         #endregion
 
         #region Storage
@@ -68,5 +70,40 @@ namespace MyRevit.MyTests.PBPA
         }
         #endregion
 
+        #region Family
+
+        private static FamilySymbol _OneLine_Annotation = null;
+        public static FamilySymbol GetOneLine_Annotation(Document doc)
+        {
+            if (_OneLine_Annotation == null || !_OneLine_Annotation.IsValidObject)
+                _OneLine_Annotation = FamilySymbolHelper.LoadFamilySymbol(doc,
+                    @"E:\WorkingSpace\Tasks\0.族\06.开洞套管引注\管道附件标记（单行）.rfa",
+                    "管道附件标记（单行）", "管道附件标记（单行）");
+            if (!_OneLine_Annotation.IsActive)
+                _OneLine_Annotation.Activate();
+            return _OneLine_Annotation;
+        }
+
+        private static FamilySymbol _TwoLine_Annotation = null;
+        public static FamilySymbol GetTwoLine_Annotation(Document doc)
+        {
+            if (_TwoLine_Annotation == null || !_TwoLine_Annotation.IsValidObject)
+                _TwoLine_Annotation = FamilySymbolHelper.LoadFamilySymbol(doc,
+                    @"E:\WorkingSpace\Tasks\0.族\06.开洞套管引注\管道附件标记（两行）.rfa",
+                    "管道附件标记（两行）", "管道附件标记（两行）");
+            if (!_TwoLine_Annotation.IsActive)
+                _TwoLine_Annotation.Activate();
+            return _TwoLine_Annotation;
+        }
+
+        #endregion
+
+        //字体
+        public static FontManagement FontManagement = new FontManagement();
+
+        //共享参数
+        public static string SharedParameterGroupName = "出图深化";
+        public static string SharedParameterPL = "开洞或套管高度";
+        public static string SharedParameterOffset = "偏移量";
     }
 }

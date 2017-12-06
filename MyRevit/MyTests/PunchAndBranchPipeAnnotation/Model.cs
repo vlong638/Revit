@@ -5,32 +5,31 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI.Selection;
 using MyRevit.MyTests.Utilities;
 using MyRevit.MyTests.VLBase;
+using MyRevit.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 
 namespace MyRevit.MyTests.PBPA
 {
     /// <summary>
     /// 标注对象
     /// </summary>
+    [Flags]
     public enum PBPATargetType
     {
+        None = 0,
         /// <summary>
-        /// 管道
+        /// 开洞
         /// </summary>
-        Pipe,
+        Punch = 1,
         /// <summary>
-        /// 风管
+        /// 套管
         /// </summary>
-        Duct,
-        /// <summary>
-        /// 桥架
-        /// </summary>
-        CableTray,
-        /// <summary>
-        /// 线管
-        /// </summary>
-        Conduit,
+        BranchPipe = 2,
     }
     /// <summary>
     /// 标记样式
@@ -38,17 +37,13 @@ namespace MyRevit.MyTests.PBPA
     public enum PBPAAnnotationType
     {
         /// <summary>
-        /// 系统缩写 管道尺寸 离地高度
+        /// 双行式
         /// </summary>
-        SPL,
+        TwoLine,
         /// <summary>
-        /// 系统缩写 离地高度
+        /// 单行式
         /// </summary>
-        SL,
-        /// <summary>
-        /// 管道尺寸 离地高度
-        /// </summary>
-        PL,
+        OneLine,
     }
     /// <summary>
     /// 离地模式
@@ -68,29 +63,74 @@ namespace MyRevit.MyTests.PBPA
         /// </summary>
         Bottom,
     }
-    /// <summary>
-    /// 文字方式
-    /// </summary>
-    public enum PBPATextType
-    {
-        /// <summary>
-        /// 文字在线上
-        /// </summary>
-        TextType_OnLineOrOnLeft,
-        /// <summary>
-        /// 文字在线端
-        /// </summary>
-        TextType_OnEdgeOrOnMiddle,
-    }
+
+
 
     public class PBPAModel : VLModel
     {
-        public PBPATargetType TargetType { set; get; }//标注对象
-        public PBPAAnnotationType AnnotationType { set; get; }//标记样式
-        public PBPALocationType LocationType { set; get; }//离地模式
-        public PBPATextType TextType { set; get; }//文字方式
+        public Document Document { set; get;}
 
-        public List<ElementId> TargetIds { set; get; }//标记的目标对象
+        #region 留存数据
+        public ElementId ViewId { get; internal set; }
+        /// <summary>
+        /// 标记样式
+        /// </summary>
+        public PBPAAnnotationType AnnotationType { set; get; }
+        /// <summary>
+        /// 单一标注 目标对象
+        /// </summary>
+        public ElementId TargetId { set; get; }
+        /// <summary>
+        /// 单一标注 线对象
+        /// </summary>
+        public List<ElementId> LineIds { get; set; }
+        /// <summary>
+        /// 单一标注 标注
+        /// </summary>
+        public ElementId AnnotationId { set; get; }
+        /// <summary>
+        /// 单一标注 干线终点
+        /// </summary>
+        public XYZ BodyEndPoint { get; set; }
+        /// <summary>
+        /// 单一标注 干线起点
+        /// </summary>
+        public XYZ BodyStartPoint { get; set; }
+        /// <summary>
+        /// 单一标注 支线终点
+        /// </summary>
+        public XYZ LeafEndPoint { set; get; }
+        /// <summary>
+        /// 目标定位, 单管以中点为准 多管以最上管道的中点为准
+        /// </summary>
+        public XYZ TargetLocation { get; set; }
+        /// <summary>
+        /// 单一标注 文本定位坐标
+        /// </summary>
+        public XYZ AnnotationLocation { set; get; }
+        /// <summary>
+        /// 当前文本 Revit中的宽度缩放比例 
+        /// </summary>
+        public double CurrentFontWidthSize { set; get; }
+        #endregion
+
+
+        #region 非留存数据
+        public CoordinateType CoordinateType { set; get; }
+        public bool IsRegenerate { set; get; }
+        /// <summary>
+        /// 线宽
+        /// </summary>
+        public double LineWidth { get; set; }
+        public XYZ ParallelVector = null;//坐标定位,平行于标注对象
+        public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
+
+        #endregion
+
+
+        public PBPATargetType TargetType { set; get; }//标注对象
+        public PBPALocationType LocationType { set; get; }//离地模式
+
         public string AnnotationPrefix { get; internal set; }//标注前缀
 
         public PBPAModel() : base("")
@@ -104,121 +144,164 @@ namespace MyRevit.MyTests.PBPA
         {
             if (string.IsNullOrEmpty(data))
                 return false;
-            //try
-            //{
-            //    StringReader sr = new StringReader(data);
-            //    TargetId = sr.ReadFormatStringAsElementId();
-            //    LineIds = sr.ReadFormatStringAsElementIds();
-            //    TextNoteIds = sr.ReadFormatStringAsElementIds();
-            //    TextNoteTypeElementId = sr.ReadFormatStringAsElementId();
-            //    CSALocationType = sr.ReadFormatStringAsEnum<CSALocationType>();
-            //    TextLocations = sr.ReadFormatStringAsXYZs();
-            //    Texts = sr.ReadFormatStringAsStrings();
-            //    return true;
-            //}
-            //catch (Exception ex)
-            //{
-            //    //TODO log
-            //    return false;
-            //}
-            return true;
+            try
+            {
+                StringReader sr = new StringReader(data);
+                ViewId = sr.ReadFormatStringAsElementId();
+                AnnotationType = sr.ReadFormatStringAsEnum<PBPAAnnotationType>();
+                TargetId = sr.ReadFormatStringAsElementId();
+                LineIds = sr.ReadFormatStringAsElementIds();
+                AnnotationId = sr.ReadFormatStringAsElementId();
+                BodyEndPoint = sr.ReadFormatStringAsXYZ();
+                BodyStartPoint = sr.ReadFormatStringAsXYZ();
+                LeafEndPoint = sr.ReadFormatStringAsXYZ();
+                TargetLocation = sr.ReadFormatStringAsXYZ();
+                AnnotationLocation = sr.ReadFormatStringAsXYZ();
+                CurrentFontWidthSize = sr.ReadFormatStringAsDouble();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public override string ToData()
         {
-            //public PAAAnnotationType AnnotationType { set; get; }//标记样式
-            //public string AnnotationPrefix { set; get; }//离地模式前缀
-            //public PAALocationType LocationType { set; get; }//离地模式
-            //public PAATextType TextType { set; get; }//文字方式
-            //public List<ElementId> LineIds { get; set; }//线对象
-            //public ElementId GroupId { get; set; }//线组对象
-            //public XYZ BodyEndPoint { get; set; }//干线终点
-            //public XYZ BodyStartPoint { get; set; }//干线起点
-            //public XYZ LeafEndPoint { set; get; }//支线终点
-            //public XYZ TextLocation { set; get; }//文本定位坐标
-            //public double CurrentFontSizeScale { set; get; }//当前文本大小比例 以毫米表示
-            //public double CurrentFontHeight { set; get; }//当前文本高度 double, foot
-            //public double CurrentFontWidthScale { set; get; }//当前文本 Revit中的宽度缩放比例
-
-
-            //public ([\w<>]+) (\w+) .+
-            //=>
-            //sb.AppendItem($2);
-
-
-            return "";
-            //StringBuilder sb = new StringBuilder();
-            //sb.AppendItem(TargetId);
-            //sb.AppendItem(LineIds);
-            //sb.AppendItem(TextNoteIds);
-            //sb.AppendItem(TextNoteTypeElementId);
-            //sb.AppendItem(CSALocationType);
-            //sb.AppendItem(TextLocations);
-            //sb.AppendItem(Texts);
-            //return sb.ToData();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendItem(ViewId);
+            sb.AppendItem(AnnotationType);
+            sb.AppendItem(TargetId);
+            sb.AppendItem(LineIds);
+            sb.AppendItem(AnnotationId);
+            sb.AppendItem(BodyEndPoint);
+            sb.AppendItem(BodyStartPoint);
+            sb.AppendItem(LeafEndPoint);
+            sb.AppendItem(TargetLocation);
+            sb.AppendItem(AnnotationLocation);
+            sb.AppendItem(CurrentFontWidthSize);
+            return sb.ToData();
         }
 
         public ISelectionFilter GetFilter()
         {
-            switch (TargetType)
+            List<ClassFilter> ClassFilters = new List<ClassFilter>();
+            if ((int)(TargetType & PBPATargetType.BranchPipe) >0)
             {
-                case PBPATargetType.Pipe:
-                    return new ClassFilter(typeof(Pipe));
-                case PBPATargetType.Duct:
-                    return new ClassFilter(typeof(Duct));
-                case PBPATargetType.CableTray:
-                    return new ClassFilter(typeof(CableTray));
-                case PBPATargetType.Conduit:
-                    return new ClassFilter(typeof(Conduit));
+                ClassFilters.Add(new ClassFilter(typeof(FamilyInstance), false, (element) =>
+                {
+                    var familySymbol = Document.GetElement(element.GetTypeId()) as FamilySymbol;
+                    if (familySymbol == null)
+                        return false;
+                    return new List<string>() { "圆形套管", "椭圆形套管", "矩形套管" }.Contains(familySymbol.Family.Name);
+                }));
+            }
+            if ((int)(TargetType & PBPATargetType.Punch) > 0)
+            {
+                ClassFilters.Add(new ClassFilter(typeof(FamilyInstance), false, (element) =>
+                {
+                    var familySymbol = Document.GetElement(element.GetTypeId()) as FamilySymbol;
+                    if (familySymbol == null)
+                        return false;
+                    return new List<string>() { "圆形洞口", "椭圆形洞口", "矩形洞口" }.Contains(familySymbol.Family.Name);
+                }));
+            }
+            return new ClassesFilter(false, ClassFilters);
+        }
+
+        internal void UpdateLineWidth(Element target)
+        {
+            switch (AnnotationType)
+            {
+                case PBPAAnnotationType.TwoLine:
+                    string symbolName = (Document.GetElement(target.GetTypeId()) as FamilySymbol).Name;
+                    string pl = target.GetParameters(PBPAContext.SharedParameterPL).First().AsString();
+                    var textWidth = Math.Max(TextRenderer.MeasureText(symbolName, PBPAContext.FontManagement.OrientFont).Width, TextRenderer.MeasureText(pl, PBPAContext.FontManagement.OrientFont).Width);
+                    LineWidth = textWidth * CurrentFontWidthSize;
+                    break;
+                case PBPAAnnotationType.OneLine:
+                    LineWidth = 10 * CurrentFontWidthSize;
+                    break;
                 default:
-                    throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());
+                    break;
             }
         }
 
-        internal string GetPreview()
+        public FamilySymbol GetAnnotationFamily(Document doc)
         {
-            switch (TargetType)
+            switch (AnnotationType)
             {
-                case PBPATargetType.Pipe:
-                    switch (AnnotationType)
-                    {
-                        case PBPAAnnotationType.SPL:
-                            return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.SL:
-                            return string.Format("如:ZP {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.PL:
-                            return string.Format("如:DN100 {0}2600", AnnotationPrefix);
-                        default:
-                            throw new NotImplementedException("未支持该类型的");
-                    }
-                case PBPATargetType.Duct:
-                    switch (AnnotationType)
-                    {
-                        case PBPAAnnotationType.SPL:
-                            return string.Format("如:SF 400mmx400mm {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.SL:
-                            return string.Format("如:SF {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.PL:
-                            return string.Format("如:400mmx400mm {0}2600", AnnotationPrefix);
-                        default:
-                            throw new NotImplementedException("未支持该类型的");
-                    }
-                case PBPATargetType.CableTray:
-                    switch (AnnotationType)
-                    {
-                        case PBPAAnnotationType.SPL:
-                            return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.SL:
-                            return string.Format("如:ZP {0}2600", AnnotationPrefix);
-                        case PBPAAnnotationType.PL:
-                            return string.Format("如:DN100 {0}2600", AnnotationPrefix);
-                        default:
-                            throw new NotImplementedException("未支持该类型的");
-                    }
-                case PBPATargetType.Conduit:
+                case PBPAAnnotationType.TwoLine:
+                    return PBPAContext.GetTwoLine_Annotation(doc);
+                case PBPAAnnotationType.OneLine:
+                    return PBPAContext.GetOneLine_Annotation(doc);
                 default:
-                    throw new NotImplementedException("未支持该类型的");
+                    throw new NotImplementedException("暂不支持该类型");
             }
+        }
+
+        internal void Clear()
+        {
+            foreach (var lineId in LineIds)
+                if (Document.GetElement(lineId) != null)
+                    Document.Delete(lineId);
+            if (Document.GetElement(AnnotationId) != null)
+                Document.Delete(AnnotationId);
+            return;
+        }
+
+        internal string GetFull_L(Element target)
+        {
+            var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PBPAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
+            return AnnotationPrefix + offset;
+        }
+
+        public FamilySymbol GetAnnotationFamily(Document doc, ElementId targetId)
+        {
+            switch (AnnotationType)
+            {
+                case PBPAAnnotationType.TwoLine:
+                    return PBPAContext.GetTwoLine_Annotation(Document);
+                case PBPAAnnotationType.OneLine:
+                    return PBPAContext.GetOneLine_Annotation(Document);
+                default:
+                    throw new NotImplementedException("暂不支持该类型");
+            }
+        }
+
+        public bool CalculateLocations()
+        {
+            CoordinateType coordinateType = CoordinateType.XY;
+            UpdateVector(coordinateType);
+
+            var target = Document.GetElement(TargetId);
+            var locationCurve =(target.Location as LocationCurve).Curve as Line;
+            //干线起始点 
+            var lineBound = Line.CreateBound(BodyStartPoint, BodyEndPoint);
+            if (lineBound.VL_IsIntersect(locationCurve))
+            {
+                var intersectionPoints = lineBound.VL_GetIntersectedOrContainedPoints(locationCurve);
+                if (intersectionPoints.Count == 1)
+                    BodyStartPoint = intersectionPoints.FirstOrDefault().ToSameZ(BodyStartPoint);
+            }
+            else { } //否则不改变原始坐标,仅重置
+                     //支线终点
+            if (!IsRegenerate)
+                LeafEndPoint = BodyEndPoint + LineWidth * ParallelVector;
+            //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
+            //高度,宽度 取决于文本 
+            AnnotationLocation = BodyEndPoint;
+            return true;
+        }
+
+        public void UpdateVector(CoordinateType coordinateType)
+        {
+            var pVector = coordinateType.GetParallelVector();
+            pVector = VLLocationHelper.GetVectorByQuadrant(pVector, QuadrantType.OneAndFour, coordinateType);
+            var vVector = VLLocationHelper.GetVerticalVector(pVector);
+            vVector = VLLocationHelper.GetVectorByQuadrant(vVector, QuadrantType.OneAndFour, coordinateType);
+            VerticalVector = vVector;
+            ParallelVector = pVector;
         }
     }
 }

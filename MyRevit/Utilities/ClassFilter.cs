@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.UI.Selection;
 using Autodesk.Revit.DB;
 using System;
+using System.Windows;
 
 namespace MyRevit.MyTests.Utilities
 {
@@ -13,10 +14,10 @@ namespace MyRevit.MyTests.Utilities
         Type TargetType { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
-        Func<Element,bool> IsExconditionFit { set; get; }
+        Func<Element, bool> IsExconditionFit { set; get; }
 
 
-        public ClassFilter(Type targetType, bool isLinkInstance = false, Func<Element,bool> isExconditionFit =null)
+        public ClassFilter(Type targetType, bool isLinkInstance = false, Func<Element, bool> isExconditionFit = null)
         {
             TargetType = targetType;
             IsLinkInstance = isLinkInstance;
@@ -50,7 +51,7 @@ namespace MyRevit.MyTests.Utilities
 
             Document linkedDoc = LinkInstance.GetLinkDocument();
             Element element = linkedDoc.GetElement(reference.LinkedElementId);
-            if (IsExconditionFit==null)
+            if (IsExconditionFit == null)
             {
                 return TargetType == element.GetType();
             }
@@ -58,6 +59,10 @@ namespace MyRevit.MyTests.Utilities
             {
                 return TargetType == element.GetType() && IsExconditionFit(element);
             }
+        }
+        public static ClassesFilter operator |(ClassFilter c1, ClassFilter c2)
+        {
+            return new ClassesFilter(c1.IsLinkInstance, c1, c2);
         }
     }
 }

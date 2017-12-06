@@ -22,6 +22,21 @@
     <VendorId>VL</VendorId>
   </AddIn>
   <AddIn Type="Command">
+    <Name>命令_开洞套管标注</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>911E1DF6-6B1A-4B4C-A7E2-76CD4EE3322C</ClientId>
+    <FullClassName>MyRevit.MyTests.PBPA.PBPACommand</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>关联更新_开洞套管标注</Name>
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>4DF1BD0D-4F1D-49BD-8FC3-ED3CC253C714</ClientId>
+    <FullClassName>MyRevit.Entities.PipeUpdaterCommand</FullClassName>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Command">
     <Name>命令_结构做法标注</Name>
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>4A718227-CA66-41F9-A0FD-BFA5D93C03AE</ClientId>

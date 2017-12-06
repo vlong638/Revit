@@ -161,8 +161,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
             XYZ verticalVector = null;
             parallelVector = ((pipes.First().Location as LocationCurve).Curve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
             //平行检测
             if (!CheckParallel(pipes, verticalVector))
             {
@@ -261,8 +261,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
             XYZ verticalVector = null;
             parallelVector = ((pipes.First().Location as LocationCurve).Curve as Line).Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
             //原始线高度
             var orientLineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble();
             ////原始对象清理

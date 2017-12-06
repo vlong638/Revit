@@ -5,7 +5,6 @@ using MyRevit.Utilities;
 using Autodesk.Revit.UI.Selection;
 using System.Linq;
 using Autodesk.Revit.DB;
-using MyRevit.MyTests.PipeAttributesAnnotation;
 using System.Collections.Generic;
 
 namespace MyRevit.MyTests.Template
@@ -64,7 +63,7 @@ namespace MyRevit.MyTests.Template
                         //业务逻辑处理
                         //选择符合类型的过滤
                         var targetType = Model.GetFilter();
-                        Model.TargetIds = new System.Collections.Generic.List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
+                        Model.TargetIds = new List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
                         if (Model.TargetIds.Count > 0)
                             ViewType = TemplateViewType.PickSinglePipe_Location;
                     }))
