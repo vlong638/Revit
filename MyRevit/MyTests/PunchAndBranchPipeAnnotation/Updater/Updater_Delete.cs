@@ -25,11 +25,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             try
             {
-                if (PBPAContext.IsDeleting == true)
-                {
-                    PBPAContext.IsDeleting = false;
-                    return;
-                }
+                //if (PBPAContext.IsDeleting == true)
+                //{
+                //    PBPAContext.IsDeleting = false;
+                //    return;
+                //}
                 var doc = updateData.GetDocument();
                 var deletes = updateData.GetDeletedElementIds();
                 var collection = PBPAContext.GetCollection(doc);

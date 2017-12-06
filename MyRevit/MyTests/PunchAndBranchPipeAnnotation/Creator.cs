@@ -40,11 +40,6 @@ namespace MyRevit.MyTests.PBPA
             return true;
         }
 
-        public void Generate(Document doc, PBPAModel model, Element element)
-        {
-            Generate(doc, model, element);
-        }
-
         internal bool Regenerate(PBPAModel model)
         {
             model.Clear();

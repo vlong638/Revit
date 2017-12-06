@@ -151,13 +151,13 @@ namespace MyRevit.MyTests.Template
             switch (TargetType)
             {
                 case TemplateTargetType.Pipe:
-                    return new ClassFilter(typeof(Pipe));
+                    return new VLClassFilter(typeof(Pipe));
                 case TemplateTargetType.Duct:
-                    return new ClassFilter(typeof(Duct));
+                    return new VLClassFilter(typeof(Duct));
                 case TemplateTargetType.CableTray:
-                    return new ClassFilter(typeof(CableTray));
+                    return new VLClassFilter(typeof(CableTray));
                 case TemplateTargetType.Conduit:
-                    return new ClassFilter(typeof(Conduit));
+                    return new VLClassFilter(typeof(Conduit));
                 default:
                     throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());
             }

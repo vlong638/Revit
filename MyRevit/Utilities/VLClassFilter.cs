@@ -9,7 +9,7 @@ namespace MyRevit.MyTests.Utilities
     /// class 选择过滤器
     /// 支持文档及链接文档内的选择
     /// </summary>
-    public class ClassFilter : ISelectionFilter
+    public class VLClassFilter : ISelectionFilter
     {
         Type TargetType { set; get; }
         bool IsLinkInstance { set; get; }
@@ -17,7 +17,7 @@ namespace MyRevit.MyTests.Utilities
         Func<Element, bool> IsExconditionFit { set; get; }
 
 
-        public ClassFilter(Type targetType, bool isLinkInstance = false, Func<Element, bool> isExconditionFit = null)
+        public VLClassFilter(Type targetType, bool isLinkInstance = false, Func<Element, bool> isExconditionFit = null)
         {
             TargetType = targetType;
             IsLinkInstance = isLinkInstance;
@@ -60,9 +60,9 @@ namespace MyRevit.MyTests.Utilities
                 return TargetType == element.GetType() && IsExconditionFit(element);
             }
         }
-        public static ClassesFilter operator |(ClassFilter c1, ClassFilter c2)
+        public static VLClassesFilter operator |(VLClassFilter c1, VLClassFilter c2)
         {
-            return new ClassesFilter(c1.IsLinkInstance, c1, c2);
+            return new VLClassesFilter(c1.IsLinkInstance, c1, c2);
         }
     }
 }

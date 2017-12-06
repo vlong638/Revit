@@ -17,7 +17,7 @@ namespace MyRevit.MyTests.PBPA
             }
         }
 
-        public static bool IsDeleting { get; internal set; }
+        public static bool IsDeleting { get; set; }
         #endregion
 
         #region Storage

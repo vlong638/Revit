@@ -16,14 +16,14 @@ namespace MyRevit.MyTests.基础
             var app = commandData.Application.Application;
             var uiDoc = commandData.Application.ActiveUIDocument;
             var doc = commandData.Application.ActiveUIDocument.Document;
-            var filterOfBranchPipe = new ClassFilter(typeof(FamilyInstance), false, (element) =>
+            var filterOfBranchPipe = new VLClassFilter(typeof(FamilyInstance), false, (element) =>
               {
                   var familySymbol = doc.GetElement(element.GetTypeId()) as FamilySymbol;
                   if (familySymbol == null)
                       return false;
                   return new List<string>() { "圆形套管", "椭圆形套管", "矩形套管" }.Contains(familySymbol.Family.Name);
               });
-            var filterOfPunch = new ClassFilter(typeof(FamilyInstance), false, (element) =>
+            var filterOfPunch = new VLClassFilter(typeof(FamilyInstance), false, (element) =>
             {
                 var familySymbol = doc.GetElement(element.GetTypeId()) as FamilySymbol;
                 if (familySymbol == null)

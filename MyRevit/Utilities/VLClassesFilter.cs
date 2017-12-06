@@ -10,26 +10,26 @@ namespace MyRevit.MyTests.Utilities
     /// multiple class 选择过滤器
     /// 支持文档及链接文档内的选择
     /// </summary>
-    public class ClassesFilter : ISelectionFilter
+    public class VLClassesFilter : ISelectionFilter
     {
         List<Type> TargetTypes { set; get; }
         bool IsLinkInstance { set; get; }
         RevitLinkInstance LinkInstance { set; get; }
-        List<ClassFilter> ClassFilters { set; get; }
+        List<VLClassFilter> ClassFilters { set; get; }
 
 
-        public ClassesFilter(bool isLinkInstance, params Type[] types)
+        public VLClassesFilter(bool isLinkInstance, params Type[] types)
         {
             TargetTypes = types.ToList();
             IsLinkInstance = isLinkInstance;
         }
 
-        public ClassesFilter(bool isLinkInstance, params ClassFilter[] classFilters)
+        public VLClassesFilter(bool isLinkInstance, params VLClassFilter[] classFilters)
         {
             IsLinkInstance = isLinkInstance;
             ClassFilters = classFilters.ToList();
         }
-        public ClassesFilter(bool isLinkInstance, List<ClassFilter> classFilters)
+        public VLClassesFilter(bool isLinkInstance, List<VLClassFilter> classFilters)
         {
             IsLinkInstance = isLinkInstance;
             ClassFilters = classFilters;

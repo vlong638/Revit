@@ -27,11 +27,11 @@ namespace MyRevit.MyTests.PBPA
         {
             try
             {
-                if (PBPAContext.IsEditing == true)
-                {
-                    PBPAContext.IsEditing = false;
-                    return;
-                }
+                //if (PBPAContext.IsEditing == true)
+                //{
+                //    PBPAContext.IsEditing = false;
+                //    return;
+                //}
                 var document = updateData.GetDocument();
                 var edits = updateData.GetModifiedElementIds();
                 var collection = PBPAContext.GetCollection(document);

@@ -236,8 +236,8 @@
     </Compile>
     <Compile Include="MyTests\PipeAnnotation\PipeAnnotationUIData.cs" />
     <Compile Include="MyTests\PipeAnnotation\UnitHelper.cs" />
-    <Compile Include="Utilities\ClassesFilter.cs" />
-    <Compile Include="Utilities\ClassFilter.cs" />
+    <Compile Include="Utilities\VLClassesFilter.cs" />
+    <Compile Include="Utilities\VLClassFilter.cs" />
     <Compile Include="Utilities\CategoryFilter.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\CommandOfBeamAlignToFloor.cs" />
     <Compile Include="MyTests\基础\UpdaterTestCommand.cs" />

@@ -557,13 +557,13 @@ namespace MyRevit.MyTests.PAA
             switch (TargetType)
             {
                 case PAATargetType.Pipe:
-                    return new ClassFilter(typeof(Pipe));
+                    return new VLClassFilter(typeof(Pipe));
                 case PAATargetType.Duct:
-                    return new ClassFilter(typeof(Duct));
+                    return new VLClassFilter(typeof(Duct));
                 case PAATargetType.CableTray:
-                    return new ClassFilter(typeof(CableTray));
+                    return new VLClassFilter(typeof(CableTray));
                 case PAATargetType.Conduit:
-                    return new ClassFilter(typeof(Conduit));
+                    return new VLClassFilter(typeof(Conduit));
                 default:
                     throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());
             }

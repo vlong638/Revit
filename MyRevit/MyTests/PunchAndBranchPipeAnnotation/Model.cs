@@ -185,10 +185,10 @@ namespace MyRevit.MyTests.PBPA
 
         public ISelectionFilter GetFilter()
         {
-            List<ClassFilter> ClassFilters = new List<ClassFilter>();
+            List<VLClassFilter> ClassFilters = new List<VLClassFilter>();
             if ((int)(TargetType & PBPATargetType.BranchPipe) >0)
             {
-                ClassFilters.Add(new ClassFilter(typeof(FamilyInstance), false, (element) =>
+                ClassFilters.Add(new VLClassFilter(typeof(FamilyInstance), false, (element) =>
                 {
                     var familySymbol = Document.GetElement(element.GetTypeId()) as FamilySymbol;
                     if (familySymbol == null)
@@ -198,7 +198,7 @@ namespace MyRevit.MyTests.PBPA
             }
             if ((int)(TargetType & PBPATargetType.Punch) > 0)
             {
-                ClassFilters.Add(new ClassFilter(typeof(FamilyInstance), false, (element) =>
+                ClassFilters.Add(new VLClassFilter(typeof(FamilyInstance), false, (element) =>
                 {
                     var familySymbol = Document.GetElement(element.GetTypeId()) as FamilySymbol;
                     if (familySymbol == null)
@@ -206,7 +206,7 @@ namespace MyRevit.MyTests.PBPA
                     return new List<string>() { "圆形洞口", "椭圆形洞口", "矩形洞口" }.Contains(familySymbol.Family.Name);
                 }));
             }
-            return new ClassesFilter(false, ClassFilters);
+            return new VLClassesFilter(false, ClassFilters);
         }
 
         internal void UpdateLineWidth(Element target)
@@ -240,7 +240,7 @@ namespace MyRevit.MyTests.PBPA
             }
         }
 
-        internal void Clear()
+        public void Clear()
         {
             foreach (var lineId in LineIds)
                 if (Document.GetElement(lineId) != null)

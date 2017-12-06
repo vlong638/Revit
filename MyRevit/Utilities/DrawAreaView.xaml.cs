@@ -16,7 +16,7 @@ namespace MyRevit.Utilities
         public UIView UIView { set; get; }
         CoordinateType CoordinateType { set; get; }
 
-        public DrawAreaView(UIApplication uiApp, CoordinateType coordinateType=CoordinateType.XY)
+        public DrawAreaView(UIApplication uiApp, CoordinateType coordinateType)
         {
             UIView = uiApp.ActiveUIDocument.GetOpenUIViews().FirstOrDefault(p => p.ViewId == uiApp.ActiveUIDocument.ActiveGraphicalView.Id);
             CoordinateType = coordinateType;

@@ -95,7 +95,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                         try
                         {
                             Model.TargetId = UIDocument.Selection.PickObject(ObjectType.Element
-                                , new ClassesFilter(false, typeof(Wall), typeof(Floor), typeof(ExtrusionRoof), typeof(FootPrintRoof))).ElementId;
+                                , new VLClassesFilter(false, typeof(Wall), typeof(Floor), typeof(ExtrusionRoof), typeof(FootPrintRoof))).ElementId;
                             MouseHook.UninstallHook();
                             ViewType = CSAViewType.Generate;
                         }
