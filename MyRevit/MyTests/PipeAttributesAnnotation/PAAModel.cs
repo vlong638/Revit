@@ -550,7 +550,7 @@ namespace MyRevit.MyTests.PAA
             sb.AppendItem(CurrentFontSizeScale);
             sb.AppendItem(CurrentFontHeight);
             sb.AppendItem(CurrentFontWidthSize);
-            return sb.ToData();
+            return sb.ToCollection();
         }
         public ISelectionFilter GetFilter()
         {

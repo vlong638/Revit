@@ -125,7 +125,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             sb.AppendItem(CSALocationType);
             sb.AppendItem(TextLocations);
             sb.AppendItem(Texts);
-            return sb.ToData();
+            return sb.ToCollection();
 
             ////string str = TargetId.IntegerValue.ToString();
             ////sb.Append(str.Length + PropertyInnerSplitter + str);
@@ -420,7 +420,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             sb.AppendItem(CSALocationType);
             sb.AppendItem(LineLocation);
             sb.AppendItem(Texts);
-            return sb.ToData();
+            return sb.ToCollection();
         }
         #endregion
 

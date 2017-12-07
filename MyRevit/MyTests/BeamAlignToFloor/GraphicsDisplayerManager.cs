@@ -1,5 +1,4 @@
-﻿using MyRevit.Utilities;
-using PmSoft.Optimization.DrawingProduction.Utils;
+﻿using PmSoft.Optimization.DrawingProduction.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,7 +19,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var minY = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.Y)));
             var offSetX = -minX;
             var offSetY = -minY;
-            GraphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            GraphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             foreach (var levelOutLines in outLinesCollection)
                 foreach (var outLine in levelOutLines.OutLines)
                     Display(outLine);
@@ -55,7 +54,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var minY = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.Y)));
             var offSetX = -minX;
             var offSetY = -minY;
-            GraphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            GraphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             foreach (var levelOutLines in outLinesCollection)
                 foreach (var outLine in levelOutLines.OutLines)
                     Display(outLine);
@@ -85,7 +84,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var minY = (int)outLinesCollection.Min(c => c.OutLines.Min(v => v.Points.Min(b => b.Y)));
             var offSetX = -minX;
             var offSetY = -minY;
-            GraphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            GraphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             foreach (var levelOutLines in outLinesCollection)
                 foreach (var outLine in levelOutLines.OutLines)
                     Display(outLine);

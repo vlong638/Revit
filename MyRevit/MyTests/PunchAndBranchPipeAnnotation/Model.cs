@@ -180,7 +180,7 @@ namespace MyRevit.MyTests.PBPA
             sb.AppendItem(TargetLocation);
             sb.AppendItem(AnnotationLocation);
             sb.AppendItem(CurrentFontWidthSize);
-            return sb.ToData();
+            return sb.ToCollection();
         }
 
         public ISelectionFilter GetFilter()

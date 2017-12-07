@@ -126,6 +126,15 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyTests\Analysis\Command.cs" />
+    <Compile Include="MyTests\Analysis\Context.cs" />
+    <Compile Include="MyTests\Analysis\Model.cs" />
+    <Compile Include="MyTests\Analysis\Set.cs" />
+    <Compile Include="MyTests\Analysis\StorageEntity.cs" />
+    <Compile Include="MyTests\Analysis\ViewModel.cs" />
+    <Compile Include="MyTests\Analysis\Window.xaml.cs">
+      <DependentUpon>Window.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
     <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
@@ -146,6 +155,7 @@
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\UpdaterCommand.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Delete.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Edit.cs" />
+    <Compile Include="Utilities\VLElementIdComparer.cs" />
     <Compile Include="Utilities\VLPointPicker.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Command.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Context.cs" />
@@ -189,6 +199,10 @@
     <Compile Include="MyTests\BeamAlignToFloor\OutLineManager0802.cs" />
     <Compile Include="Utilities\Geometry\Triangle.cs" />
     <Compile Include="MyTests\BeamAlignToFloor\ValidFaces.cs" />
+    <Page Include="MyTests\Analysis\Window.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

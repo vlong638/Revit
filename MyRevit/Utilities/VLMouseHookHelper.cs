@@ -38,14 +38,14 @@ namespace MyRevit.Utilities
         /// <param name="func"></param>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public static T DelegateMouseHook<T>(Func<T> func, Func<T> onError)
+        public static T DelegateMouseHook<T>(Func<T> func, Func<T> onError = null)
         {
             using (PmSoft.Common.RevitClass.PickObjectsMouseHook MouseHook = new PmSoft.Common.RevitClass.PickObjectsMouseHook())
             {
                 MouseHook.InstallHook(PmSoft.Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
                 try
                 {
-                    var result=  func();
+                    var result = func();
                     MouseHook.UninstallHook();
                     return result;
                 }
@@ -53,7 +53,7 @@ namespace MyRevit.Utilities
                 {
                     //Log(ex);
                     MouseHook.UninstallHook();
-                    onError();
+                    onError?.Invoke();
                 }
             }
             return default(T);

@@ -27,7 +27,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             var minY = (int)pipeLines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.Y));
             var offSetX = -minX;
             var offSetY = -minY;
-            var graphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            var graphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             int displayLength = 10;
             graphicsDisplayer.DisplayLines(pipeLines.Where(c => c.Length >= displayLength).ToList(), uncross, false, true);
             graphicsDisplayer.DisplayLines(pipeLines.Where(c => c.Length < displayLength).ToList(), uncross, false, false);
@@ -51,7 +51,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             };
         }
 
-        internal static void Display(string path,List<Face> faces)
+        internal static void Display(string path, List<Face> faces)
         {
             List<Line> lines = new List<Line>();
             List<Edge> edges = new List<Edge>();
@@ -78,7 +78,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             var minY = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.Y));
             var offSetX = -minX;
             var offSetY = -minY;
-            var graphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            var graphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             graphicsDisplayer.DisplayLines(lines, uncross, false, true);
             graphicsDisplayer.SaveTo(path);
         }
@@ -203,7 +203,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         #endregion
 
         #region 结构做法标注
-        public static void Display(string path,  List<Line> lines, List<XYZ> textLocations)
+        public static void Display(string path, List<Line> lines, List<XYZ> textLocations)
         {
             if (lines.Count() == 0)
                 return;
@@ -221,7 +221,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             maxY++;
             var offSetX = -minX;
             var offSetY = -minY;
-            var graphicsDisplayer = new GraphicsDisplayer(maxX - minX, maxY - minY, offSetX, offSetY);
+            var graphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
             graphicsDisplayer.DisplayLines(lines, uncross, true, true);
             graphicsDisplayer.DisplayPoints(textLocations, Pens.Red, true);
             graphicsDisplayer.SaveTo(path);
@@ -240,14 +240,21 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         int Height;
         int Width;
 
-        public GraphicsDisplayer(int width, int height, int offsetX = 0, int offsetY = 0)
+        public GraphicsDisplayer(int xMin, int xMax, int yMin, int yMax)
         {
-            OffsetX = offsetX;
-            OffsetY = offsetY;
-            Scale = Math.Min(4000 / width, 4000 / height);
-            Width = Scale * width;
-            Height = Scale * height;
-            CurrentImage = new Bitmap(width * Scale + 2 * PaddingX, height * Scale + 2 * PaddingY);
+            Init(xMin, xMax, yMin, yMax);
+        }
+
+        private void Init(int xMin, int xMax, int yMin, int yMax)
+        {
+            Width = xMax - xMin;
+            Height = yMax - yMin;
+            OffsetX = -xMin;
+            OffsetY = -yMin;
+            Scale = Math.Min(4000 / Width, 4000 / Height);
+            Width = Scale * Width;
+            Height = Scale * Height;
+            CurrentImage = new Bitmap(Width * Scale + 2 * PaddingX, Height * Scale + 2 * PaddingY);
             CurrentGraphics = Graphics.FromImage(CurrentImage);
             CurrentGraphics.Clear(System.Drawing.Color.White);
         }
@@ -275,9 +282,9 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 {
                     var brush = pen.Brush;
                     var point = line.GetEndPoint(0);
-                    CurrentGraphics.DrawString($"{(int)point.X },{(int)point.Y }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                    CurrentGraphics.DrawString($"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
                     point = line.GetEndPoint(1);
-                    CurrentGraphics.DrawString($"{(int)point.X },{(int)point.Y }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                    CurrentGraphics.DrawString($"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
                 }
             }
         }
@@ -365,129 +372,161 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             CurrentImage.Save(path);
         }
     }
+
+    public class GraphicsDisplayerV2
+    {
+        static Graphics CurrentGraphics;
+        static Image CurrentImage;
+        static int OffsetX;
+        static int OffsetY;
+        static int PaddingX;
+        static int PaddingY;
+        static int Height;
+        static int Width;
+        static int Scale;
+
+        public static Brush DefaultBrush = Brushes.DarkGray;
+        public static Pen DefaultPen = new Pen(Brushes.Black);
+        public static Font DefaultFont = new Font("宋体", 12, FontStyle.Regular);
+
+        private static bool Init(double xMin, double xMax, double yMin, double yMax, int size = 1000)
+        {
+            var width = xMax - xMin;
+            var height = yMax - yMin;
+            if (width == 0 || height == 0)
+                return false;
+            Scale = (int)Math.Min(size / width, size / height);
+            OffsetX = -(int)xMin;
+            OffsetY = -(int)yMin;
+            Width = (int)(Scale * width);
+            Height = (int)(Scale * height);
+            PaddingY = PaddingX = Math.Min(Width, Height) / 5;
+            CurrentImage = new Bitmap(Width + 2 * PaddingX, Height + 2 * PaddingY);
+            CurrentGraphics = Graphics.FromImage(CurrentImage);
+            CurrentGraphics.Clear(System.Drawing.Color.White);
+            return true;
+        }
+
+        public static void Display(double xMin, double xMax, double yMin, double yMax, string path, Action display)
+        {
+            if (!Init(xMin, xMax, yMin, yMax))
+                return;
+            display();
+            SaveTo(path);
+        }
+
+        public static void DisplayLines(List<List<XYZ>> lineLoops, Pen pen, bool needPoint = false, bool needText = false)
+        {
+            foreach (var linePoints in lineLoops)
+            {
+                int pointDensity = linePoints.Count() < 30 ? 1 : linePoints.Count() / 10;
+                for (int i = 0; i < linePoints.Count() - 1; i++)
+                {
+                    var p0 = linePoints[i];
+                    var p1 = linePoints[i + 1];
+                    var point0 = GetPoint(p0);
+                    var point1 = GetPoint(p1);
+                    CurrentGraphics.DrawLines(pen ?? DefaultPen, new System.Drawing.Point[] { point0, point1 });
+                    if (needPoint)
+                    {
+                        CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point0.X, point0.Y, 5, 5);
+                        CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point1.X, point1.Y, 5, 5);
+                    }
+                    if (needText && i % pointDensity == 0)
+                    {
+                        var brush = pen.Brush;
+                        CurrentGraphics.DrawString($"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, point0);
+                        CurrentGraphics.DrawString($"{ p1.X.ToString("f2") },{ p1.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, point1);
+                    }
+                }
+            }
+
+        }
+
+        public static void DisplayLines(List<Line> lines, Pen pen, bool needPoint = false, bool needText = false)
+        {
+            if (lines.Count == 0)
+                return;
+            foreach (var line in lines)
+            {
+                var p0 = line.GetEndPoint(0);
+                var p1 = line.GetEndPoint(1);
+                var point0 = GetPoint(p0);
+                var point1 = GetPoint(p1);
+                CurrentGraphics.DrawLines(pen ?? DefaultPen, new System.Drawing.Point[] { point0, point1 });
+                if (needPoint)
+                {
+                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point0.X, point0.Y, 5, 5);
+                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point1.X, point1.Y, 5, 5);
+                }
+                if (needText)
+                {
+                    var brush = pen.Brush;
+                    var point = line.GetEndPoint(0);
+                    CurrentGraphics.DrawString(GetPointString(p0), DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                    point = line.GetEndPoint(1);
+                    CurrentGraphics.DrawString(GetPointString(p0), DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                }
+            }
+        }
+
+        public static string GetPointString(XYZ p0)
+        {
+            return $"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }";
+        }
+
+        public static void DisplayPoints(List<XYZ> points, Pen pen, bool needText = false)
+        {
+            if (points.Count == 0)
+                return;
+            foreach (var pXYZ in points)
+            {
+                var point = GetPoint(pXYZ);
+                CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point.X, point.Y, 5, 5);
+                if (needText)
+                {
+                    var brush = (pen ?? DefaultPen).Brush;
+                    CurrentGraphics.DrawString(GetPointString(pXYZ), DefaultFont, brush, point);
+                }
+            }
+        }
+
+        public static void DisplayClosedInterval(List<XYZ> points, Pen pen, bool needPoint = false, bool needText = false)
+        {
+            if (points.Count == 0)
+                return;
+            var scaledPoints = points.Select(c => GetPoint(c)).ToList();
+            scaledPoints.Add(GetPoint(points.First()));
+            CurrentGraphics.DrawLines(pen ?? DefaultPen, scaledPoints.ToArray());
+            if (needPoint)
+            {
+                foreach (var point in scaledPoints)
+                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point.X, point.Y, 5, 5);
+            }
+            if (needText)
+            {
+                var brush = pen.Brush;
+                foreach (var point in points)
+                    CurrentGraphics.DrawString(GetPointString(point), DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+            }
+        }
+
+        public static void DisplayPointsText(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)
+        {
+            if (points.Count == 0)
+                return;
+            foreach (var point in points)
+                CurrentGraphics.DrawString(GetPointString(point), DefaultFont, brush ?? DefaultBrush, GetPoint(point, offsetX, offsetY));
+        }
+
+        static System.Drawing.Point GetPoint(XYZ c, int offsetX = 0, int offsetY = 0)
+        {
+            return new System.Drawing.Point((int)Math.Round(c.X * Scale, 0) + OffsetX * Scale + PaddingX + offsetX, Height - (int)Math.Round(c.Y * Scale, 0) - OffsetY * Scale + PaddingY + offsetY);
+        }
+
+        public static void SaveTo(string path)
+        {
+            CurrentImage.Save(path);
+        }
+    }
 }
-
-
-//using Autodesk.Revit.DB;
-//using System;
-//using System.Collections.Generic;
-//using System.Drawing;
-//using System.Linq;
-
-//namespace MyRevit.Utilities
-//{
-//    public class GraphicsDisplayer
-//    {
-//        Graphics CurrentGraphics;
-//        Image CurrentImage;
-//        int OffsetX;
-//        int OffsetY;
-//        int PaddingX = 100;
-//        int PaddingY = 100;
-
-//        public GraphicsDisplayer(int width, int height, int offsetX = 0, int offsetY = 0)
-//        {
-//            OffsetX = offsetX;
-//            OffsetY = offsetY;
-//            CurrentImage = new Bitmap(width * Scale + 2 * PaddingX, height * Scale + 2 * PaddingY);
-//            CurrentGraphics = Graphics.FromImage(CurrentImage);
-//            CurrentGraphics.Clear(System.Drawing.Color.White);
-//        }
-
-//        int Scale = 5;
-//        Brush DefaultBrush = Brushes.DarkGray;
-//        Pen DefaultPen = new Pen(Brushes.Black);
-//        Font DefaultFont = new Font("宋体", 12, FontStyle.Regular);
-
-//        #region 多管标注分析支持
-//        public void DisplayLines(List<Line> lines, Pen pen, bool needPoint = false)
-//        {
-//            if (lines.Count == 0)
-//                return;
-//            foreach (var line in lines)
-//            {
-//                var p0 = GetPoint(line.GetEndPoint(0));
-//                var p1 = GetPoint(line.GetEndPoint(1));
-//                CurrentGraphics.DrawLines(pen ?? DefaultPen, new System.Drawing.Point[] { p0, p1 });
-//                if (needPoint)
-//                {
-//                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, p0.X, p0.Y, 5, 5);
-//                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, p1.X, p1.Y, 5, 5);
-//                }
-//            }
-//        }
-//        public void DisplayPoints(List<Line> lines, Pen pen, bool needPoint = false)
-//        {
-//            if (lines.Count == 0)
-//                return;
-//            foreach (var line in lines)
-//            {
-//                var p0 = GetPoint(line.GetEndPoint(0));
-//                var p1 = GetPoint(line.GetEndPoint(1));
-//                CurrentGraphics.DrawLines(pen ?? DefaultPen, new System.Drawing.Point[] { p0, p1 });
-//                if (needPoint)
-//                {
-//                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, p0.X, p0.Y, 5, 5);
-//                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, p1.X, p1.Y, 5, 5);
-//                }
-//            }
-//        } 
-//        #endregion
-
-//        #region 梁齐板分析支持
-//        /// <summary>
-//        /// 闭合区间
-//        /// </summary>
-//        /// <param name="points"></param>
-//        /// <param name="pen"></param>
-//        /// <param name="needPoint"></param>
-//        public void DisplayClosedInterval(List<XYZ> points, Pen pen, bool needPoint = false)
-//        {
-//            if (points.Count == 0)
-//                return;
-//            var scaledPoints = points.Select(c => GetPoint(c)).ToList();
-//            scaledPoints.Add(GetPoint(points.First()));
-//            CurrentGraphics.DrawLines(pen ?? DefaultPen, scaledPoints.ToArray());
-//            if (needPoint)
-//                foreach (var point in scaledPoints)
-//                    CurrentGraphics.DrawEllipse(pen ?? DefaultPen, point.X, point.Y, 5, 5);
-//        }
-
-//        /// <summary>
-//        /// 点的文本
-//        /// </summary>
-//        /// <param name="points"></param>
-//        /// <param name="brush"></param>
-//        /// <param name="offsetX"></param>
-//        /// <param name="offsetY"></param>
-//        public void DisplayPointsText(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)
-//        {
-//            if (points.Count == 0)
-//                return;
-//            foreach (var point in points)
-//                CurrentGraphics.DrawString($"{(int)point.X },{(int)point.Y }", DefaultFont, brush ?? DefaultBrush, GetPoint(point, offsetX, offsetY));
-//        } 
-//        #endregion
-
-//        /// <summary>
-//        /// XYZ=>Point的通用转换
-//        /// </summary>
-//        /// <param name="c"></param>
-//        /// <param name="offsetX"></param>
-//        /// <param name="offsetY"></param>
-//        /// <returns></returns>
-//        private System.Drawing.Point GetPoint(XYZ c, int offsetX = 0, int offsetY = 0)
-//        {
-//            return new System.Drawing.Point(((int)c.X + OffsetX) * Scale + PaddingX + offsetX, ((int)c.Y + OffsetY) * Scale + PaddingX + offsetY);
-//        }
-
-//        /// <summary>
-//        /// 保存
-//        /// </summary>
-//        /// <param name="path"></param>
-//        public void SaveTo(string path)
-//        {
-//            CurrentImage.Save(path);
-//        }
-//    }
-//}

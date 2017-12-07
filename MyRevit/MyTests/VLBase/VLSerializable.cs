@@ -69,7 +69,7 @@ namespace MyRevit.MyTests.VLBase
         {
             sb.Append(GetFormatStr(item.X + InnerSplitterForXYZ + item.Y + InnerSplitterForXYZ + item.Z));
         }
-        public static string ToData(this StringBuilder sb)
+        public static string ToCollection(this StringBuilder sb)
         {
             return GetFormatStr(sb.ToString());
         }

@@ -9,18 +9,6 @@ using System.Collections.Generic;
 
 namespace MyRevit.MyTests.Template
 {
-    public class ElementIdComparer : IEqualityComparer<ElementId>
-    {
-        public bool Equals(ElementId t1, ElementId t2)
-        {
-            return (t1.IntegerValue == t2.IntegerValue );
-        }
-        public int GetHashCode(ElementId t)
-        {
-            return t.GetHashCode();
-        }
-    }
-
     public enum TemplateViewType
     {
         Idle,//闲置
@@ -94,7 +82,7 @@ namespace MyRevit.MyTests.Template
                             var element = Document.GetElement(Model.TargetIds.First());
                             var Collection = TemplateContext.GetCollection(Document);
                             //避免重复生成 由于一个对象可能在不同的视图中进行标注设置 所以还是需要重复生成的
-                            var existedModels = Collection.Data.Where(c => c.TargetIds.Intersect(Model.TargetIds, new ElementIdComparer()) != null);
+                            var existedModels = Collection.Data.Where(c => c.TargetIds.Intersect(Model.TargetIds, new VLElementIdComparer()) != null);
                             if (existedModels != null)
                             {
                                 foreach (var existedModel in existedModels)

@@ -3,41 +3,31 @@ using MyRevit.Utilities;
 using PmSoft.Optimization.DrawingProduction;
 using PmSoft.Optimization.DrawingProduction.Utils;
 
-namespace MyRevit.MyTests.Template
+namespace MyRevit.MyTests.Analysis
 {
-    class TemplateContext
+    class AnalysisContext
     {
-        #region Creator
-        private static TemplateCreator _Creator = null;
-        public static TemplateCreator Creator
-        {
-            get
-            {
-                return _Creator ?? (_Creator = new TemplateCreator());
-            }
-        }
-        #endregion
 
         #region Storage
         public static bool IsEditing;
-        private static TemplateModelCollection Collection;
-        private static TemplateStorageEntity CStorageEntity = new TemplateStorageEntity();
+        private static AnalysisModel Collection;
+        private static AnalysisStorageEntity CStorageEntity = new AnalysisStorageEntity();
         /// <summary>
         /// 取数据Collection
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        public static TemplateModelCollection GetCollection(Document doc)
+        public static AnalysisModel GetCollection(Document doc)
         {
             Collection = DelegateHelper.DelegateTryCatch(
                 () =>
                 {
                     string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfData);
-                    return new TemplateModelCollection(data);
+                    return new AnalysisModel(data);
                 },
                 () =>
                 {
-                    return new TemplateModelCollection("");
+                    return new AnalysisModel("");
                 }
             );
             return Collection;
