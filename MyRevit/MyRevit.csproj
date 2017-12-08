@@ -139,6 +139,10 @@
     <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
     <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\BaseControlService.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\MEPCurveConnectControlService.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\MEPCurveTurnControlService.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\RevitElementCommon.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdater_Delete.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdater_Edit.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdaterCommand.cs" />
