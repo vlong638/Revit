@@ -126,6 +126,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class2.cs" />
     <Compile Include="MyTests\Analysis\Command.cs" />
     <Compile Include="MyTests\Analysis\Context.cs" />
     <Compile Include="MyTests\Analysis\Model.cs" />

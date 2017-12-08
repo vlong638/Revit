@@ -254,7 +254,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             Scale = Math.Min(4000 / Width, 4000 / Height);
             Width = Scale * Width;
             Height = Scale * Height;
-            CurrentImage = new Bitmap(Width * Scale + 2 * PaddingX, Height * Scale + 2 * PaddingY);
+            CurrentImage = new Bitmap(Width + 2 * PaddingX, Height + 2 * PaddingY);
             CurrentGraphics = Graphics.FromImage(CurrentImage);
             CurrentGraphics.Clear(System.Drawing.Color.White);
         }
