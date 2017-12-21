@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using MyRevit.MyTests.CompoundStructureAnnotation;
 using MyRevit.MyTests.PipeAnnotationTest;
 using MyRevit.MyTests.VLBase;
 using MyRevit.Utilities;
@@ -12,303 +13,9 @@ using System.Threading.Tasks;
 namespace MyRevit.MyTests.CompoundStructureAnnotation
 {
     /// <summary>
-    /// CompoundStructureAnnotation数据的载体 详图线方案
-    /// </summary>
-    public class CSAModelForDetailLine : VLModel
-    {
-        public CSAModelForDetailLine(string data = "") : base(data)
-        {
-            Texts = new List<string>();
-            TextLocations = new List<XYZ>();
-            Texts = new List<string>();
-        }
-
-        #region 需要留存的数据
-        /// <summary>
-        /// 标注元素 对象,可以是墙,屋顶,伸展屋顶等等
-        /// </summary>
-        public ElementId TargetId { set; get; }
-        /// <summary>
-        /// 线 对象
-        /// </summary>
-        public List<ElementId> LineIds { get; set; }
-        /// <summary>
-        /// 文字样式
-        /// </summary>
-        public ElementId TextNoteTypeElementId
-        {
-            get
-            {
-                return textNoteTypeElementId;
-            }
-            set
-            {
-                textNoteTypeElementId = value;
-            }
-        }
-        private ElementId textNoteTypeElementId = null;
-        /// <summary>
-        /// 文字 对象
-        /// </summary>
-        public List<ElementId> TextNoteIds { set; get; }
-        /// <summary>
-        /// 文字 定位方案
-        /// </summary>
-        public CSALocationType CSALocationType { set; get; }
-        /// <summary>
-        /// 文本 位置
-        /// </summary>
-        public List<XYZ> TextLocations { set; get; }
-
-        public override bool LoadData(string data)
-        {
-            if (string.IsNullOrEmpty(data))
-                return false;
-            try
-            {
-                StringReader sr = new StringReader(data);
-                TargetId = sr.ReadFormatStringAsElementId();
-                LineIds = sr.ReadFormatStringAsElementIds();
-                TextNoteIds = sr.ReadFormatStringAsElementIds();
-                TextNoteTypeElementId = sr.ReadFormatStringAsElementId();
-                CSALocationType = sr.ReadFormatStringAsEnum<CSALocationType>();
-                TextLocations = sr.ReadFormatStringAsXYZs();
-                Texts = sr.ReadFormatStringAsStrings();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                //TODO log
-                return false;
-            }
-
-            //var values = data.Split(PropertySplitter_Char);
-            //if (values.Count() != 6)
-            //    return false;
-
-            //TargetId = new ElementId(Convert.ToInt32(values[0]));
-            //LineIds = new List<ElementId>();
-            //foreach (var item in values[1].Split(PropertyInnerSplitter_Char))
-            //    LineIds.Add(new ElementId(Convert.ToInt32(item)));
-            ////TextNoteIds
-            //TextNoteIds = new List<ElementId>();
-            //foreach (var item in values[2].Split(PropertyInnerSplitter_Char))
-            //    TextNoteIds.Add(new ElementId(Convert.ToInt32(item)));
-            //CSALocationType = (CSALocationType)Enum.Parse(typeof(CSALocationType), values[3]);
-            ////TextLocations
-            //TextLocations = new List<XYZ>();
-            //foreach (var item in values[4].Split(PropertyInnerSplitter_Char))
-            //{
-            //    if (string.IsNullOrEmpty(item))
-            //        continue;
-            //    var innerItem = item.Split(PropertyInnerSplitter2_Char);
-            //    TextLocations.Add(new XYZ(Convert.ToDouble(innerItem[0]), Convert.ToDouble(innerItem[1]), Convert.ToDouble(innerItem[2])));
-            //}
-            ////Texts
-            //Texts = new List<string>();
-            //foreach (var item in values[5].Split(PropertyInnerSplitter_Char))
-            //{
-            //    if (string.IsNullOrEmpty(item))
-            //        continue;
-            //    Texts.Add(item);
-            //}
-            //return true;
-        }
-
-        public override string ToData()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendItem(TargetId);
-            sb.AppendItem(LineIds);
-            sb.AppendItem(TextNoteIds);
-            sb.AppendItem(TextNoteTypeElementId);
-            sb.AppendItem(CSALocationType);
-            sb.AppendItem(TextLocations);
-            sb.AppendItem(Texts);
-            return sb.ToCollection();
-
-            ////string str = TargetId.IntegerValue.ToString();
-            ////sb.Append(str.Length + PropertyInnerSplitter + str);
-            ////string subStr = GetSubString(LineIds);
-            ////sb.Append(subStr.Length + PropertyInnerSplitter + subStr);
-            ////subStr = GetSubString(TextNoteIds);
-            ////sb.Append(subStr.Length + PropertyInnerSplitter + subStr);
-            ////sb.Append(TargetId.IntegerValue.ToString().Length + PropertyInnerSplitter + TargetId.IntegerValue);
-            ////str = CSALocationType.ToString();
-            ////sb.Append(str.Length + PropertyInnerSplitter + str);
-
-
-
-            //return TargetId.IntegerValue
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, LineIds.Select(c => c.IntegerValue))
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, TextNoteIds.Select(c => c.IntegerValue))
-            //+ PropertySplitter + (int)CSALocationType
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, TextLocations.Select(c => c.X + PropertyInnerSplitter2 + c.Y + PropertyInnerSplitter2 + c.Z))
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, Texts);
-
-
-
-            //return TargetId.IntegerValue
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, LineIds.Select(c => c.IntegerValue))
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, TextNoteIds.Select(c => c.IntegerValue))
-            //+ PropertySplitter + (int)CSALocationType
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, TextLocations.Select(c => c.X + PropertyInnerSplitter2 + c.Y + PropertyInnerSplitter2 + c.Z))
-            //+ PropertySplitter + string.Join(PropertyInnerSplitter, Texts);
-        }
-        #endregion
-
-        #region 无需留存的数据
-        //选中的文本长宽关键信息
-        public double currentFontSizeScale;
-        /// <summary>
-        /// 当前文本大小比例 以毫米表示
-        /// </summary>
-        public double CurrentFontSizeScale
-        {
-            get
-            {
-                return currentFontSizeScale;
-            }
-            set
-            {
-                currentFontSizeScale = value;
-                CurrentFontHeight = VLConstraintsForCSA.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
-            }
-        }
-        /// <summary>
-        /// 当前文本高度 double = foot
-        /// </summary>
-        public double CurrentFontHeight { set; get; }
-        /// <summary>
-        /// 当前文本 Revit中的宽度缩放比例
-        /// </summary>
-        public double CurrentFontWidthScale { set; get; }
-        public TargetType TargetType { set; get; }
-        /// <summary>
-        /// 需要显示的结构标注信息
-        /// </summary>
-        public List<string> Texts { set; get; }
-        /// <summary>
-        /// 坐标定位,平行于标注对象
-        /// </summary>
-        public XYZ ParallelVector = null;
-        /// <summary>
-        /// 坐标定位,垂直于标注对象
-        /// </summary>
-        public XYZ VerticalVector = null;
-        /// <summary>
-        /// 线起点
-        /// </summary>
-        public XYZ LineStartLocation { set; get; }
-        /// <summary>
-        /// 线终点
-        /// </summary>
-        public XYZ LineEndLocation { set; get; }
-        /// <summary>
-        /// 横线
-        /// </summary>
-        public List<TextLocation> ParallelLinesLocations { set; get; }
-        #endregion
-
-        #region 方法
-        public void UpdateVectors(Line locationCurve)
-        {
-            XYZ parallelVector = null;
-            XYZ verticalVector = null;
-            parallelVector = locationCurve.Direction;
-            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
-            double xyzTolarance = 0.01;
-            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-            {
-                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-            }
-            VerticalVector = verticalVector;
-            ParallelVector = parallelVector;
-        }
-
-        #region 详图线的计算方案
-        public void CalculateLocations(Element element, XYZ offset)
-        {
-            var scale = 1 / VLConstraintsForCSA.OrientFontSizeScale * CurrentFontSizeScale;
-            var width = CSALocationType.GetLineWidth() * scale;
-            var height = 400 * scale;
-            var widthFoot = UnitHelper.ConvertToFoot(width, VLUnitType.millimeter);
-            var heightFoot = UnitHelper.ConvertToFoot(height, VLUnitType.millimeter);
-            var verticalFix = UnitHelper.ConvertToFoot(100, VLUnitType.millimeter) * scale;
-            var locationCurve = TargetType.GetLine(element);
-            UpdateVectors(locationCurve);
-            //线起始点 (中点)
-            LineStartLocation = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
-            //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
-            //高度,宽度 取决于文本 
-            ParallelLinesLocations = new List<TextLocation>();
-            TextLocations = new List<XYZ>();
-            for (int i = Texts.Count() - 1; i >= 0; i--)
-            {
-                var start = LineStartLocation + (heightFoot + i * CurrentFontHeight) * VerticalVector;
-                var end = start + widthFoot * ParallelVector;
-                ParallelLinesLocations.Add(new TextLocation(start, end));
-                TextLocations.Add(CSALocationType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, start, end));
-            }
-            //线终点 (最高的文本位置)
-            LineEndLocation = ParallelLinesLocations[0].Start;
-        }
-
-        public void CalculateLocations(Element element)
-        {
-            CalculateLocations(element, new XYZ(0, 0, 0));
-        }
-        #endregion
-
-        #region 线族的计算方案
-        //public void CalculateLocations(Element element, FamilyInstance line, XYZ offset)
-        //{
-        //    var locationCurve = element.Location as LocationCurve;
-        //    LineLocation = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
-        //    XYZ parallelVector = null;
-        //    XYZ verticalVector = null;
-        //    parallelVector = (locationCurve.Curve as Line).Direction;
-        //    verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-        //    parallelVector = LocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
-        //    verticalVector = LocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
-        //    double xyzTolarance = 0.01;
-        //    if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-        //    {
-        //        verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-        //    }
-        //    model.ParallelVector = parallelVector;
-        //    model.VerticalVector = verticalVector;
-        //    var height = Convert.ToDouble(line.GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (model.Texts.Count() - 1) * AnnotationConstaints.TextHeight;
-        //    var textSize = PipeAnnotationContext.TextSize;
-        //    var widthScale = PipeAnnotationContext.WidthScale;
-        //    for (int i = 0; i < model.Texts.Count(); i++)
-        //    {
-        //        var textLength = System.Windows.Forms.TextRenderer.MeasureText(model.Texts[i], AnnotationConstaints.Font).Width;
-        //        var actualLength = textLength / (textSize * widthScale);
-        //        switch (model.CSALocationType)
-        //        {
-        //            case CSALocationType.OnLine:
-        //                model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
-        //                break;
-        //            case CSALocationType.OnEdge:
-        //                model.TextLocations.Add(GetTagHeadPositionWithParam(model, height, 0.2, 0.5, i, actualLength));
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
-        //}
-        #endregion
-
-        #endregion
-    }
-
-    /// <summary>
     /// CompoundStructureAnnotation数据的载体 线族方案
     /// </summary>
-    public class CSAModel : VLModel
+    public class CSAModel : VLModel//Base<CSAModel>
     {
         #region Construction
         public CSAModel() : base("")
@@ -324,7 +31,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             Texts = new List<string>();
             TextLocations = new List<XYZ>();
             Texts = new List<string>();
-        } 
+        }
         #endregion
 
         #region 需要留存的数据
@@ -376,17 +83,6 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// </summary>
         public List<string> Texts { set; get; }
 
-
-        //TODO
-        /// <summary>
-        /// 字体的毫米数
-        /// </summary>
-        public double FontScale { get; set; }
-        /// <summary>
-        /// 字体高度高度 由基础基础字体高度/4*FontScale得出
-        /// </summary>
-        public double LineHeight { set; get; }
-
         public override bool LoadData(string data)
         {
             if (string.IsNullOrEmpty(data))
@@ -420,13 +116,11 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             sb.AppendItem(CSALocationType);
             sb.AppendItem(LineLocation);
             sb.AppendItem(Texts);
-            return sb.ToCollection();
+            return sb.ToData();
         }
         #endregion
 
         #region 无需留存的数据
-        //选中的文本长宽关键信息
-        public double currentFontSizeScale;
         /// <summary>
         /// 当前文本大小比例 以毫米表示
         /// </summary>
@@ -442,6 +136,16 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 CurrentFontHeight = VLConstraintsForCSA.OrientFontHeight / 4 * currentFontSizeScale;//额外的留白 + HeightSpan;//宽度的比例基准似乎是以4mm来的
             }
         }
+        /// <summary>
+        /// 字体的毫米数
+        /// </summary>
+        public double FontScale { get; set; }
+        /// <summary>
+        /// 字体高度高度 由基础基础字体高度/4*FontScale得出
+        /// </summary>
+        public double LineHeight { set; get; }
+        //选中的文本长宽关键信息
+        public double currentFontSizeScale;
         /// <summary>
         /// 当前文本高度 double = foot
         /// </summary>
@@ -461,7 +165,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         /// <summary>
         /// 线宽
         /// </summary>
-        public double LineWidth { get; private set; }
+        public double LineWidth { get; set; }
         /// <summary>
         /// 间距
         /// </summary>
@@ -484,13 +188,10 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
             verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
-            double xyzTolarance = 0.01;
-            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-            {
-                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-            }
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            if ((verticalVector.X - 1).IsMiniValue())
+                verticalVector = verticalVector.RevertByCoordinateType(CoordinateType.XY);
             VerticalVector = verticalVector;
             ParallelVector = parallelVector;
         }
@@ -535,47 +236,177 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
         {
             //数据准备
             var locationCurve = TargetType.GetLine(element);
-            FontScale = 1 / VLConstraintsForCSA.OrientFontSizeScale * CurrentFontSizeScale;
-            var fontHeight = CurrentFontHeight;
-            XYZ parallelVector = null;
-            XYZ verticalVector = null;
-            parallelVector = (locationCurve as Line).Direction;
-            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
-            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
+            var miniHeight = CurrentFontHeight * 2;
+            UpdateVectors((locationCurve as Line));
+            //ParallelVector = VLLocationHelper.GetVectorByQuadrant((locationCurve as Line).Direction, QuadrantType.OneAndFour);
+            //VerticalVector = VLLocationHelper.GetVectorByQuadrant(new XYZ(ParallelVector.Y, -ParallelVector.X, 0), QuadrantType.OneAndTwo);
             //计算线的定位位置
             bool isRegenerate = offset != null;
             if (!isRegenerate)
             {
                 LineLocation = (locationCurve.GetEndPoint(0) + locationCurve.GetEndPoint(1)) / 2;
                 offset = new XYZ(0, 0, 0);
-                LineHeight = fontHeight;
+                LineHeight = UnitHelper.ConvertToFoot(1000, VLUnitType.millimeter);
             }
             else
             {
                 LineLocation = locationCurve.Project(LineLocation + offset).XYZPoint;
-                LineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() + VLLocationHelper.GetLengthBySide(offset, verticalVector);
-                LineHeight = LineHeight > fontHeight ? LineHeight : fontHeight;//确保最短长度有一个文字高度
+                LineHeight = line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() + VLLocationHelper.GetLengthBySide(offset, VerticalVector);
+                LineHeight = LineHeight > miniHeight ? LineHeight : miniHeight;//确保最短长度有一个文字高度
             }
-            double xyzTolarance = 0.01;
-            if (Math.Abs(verticalVector.X) > 1 - xyzTolarance)
-                verticalVector = new XYZ(-verticalVector.X, -verticalVector.Y, verticalVector.Z);
-            ParallelVector = parallelVector;
-            VerticalVector = verticalVector;
             //高度,宽度 取决于文本 
-            LineWidth = UnitHelper.ConvertToFoot(CSALocationType.GetLineWidth() * FontScale, VLUnitType.millimeter);
-            var verticalFix = fontHeight * VLConstraintsForCSA.TextSpace; ;//偏移修正 为了显示更好 方便更改
-            LineSpace = fontHeight * (1 + VLConstraintsForCSA.TextSpace);
+            FontScale = 1 / VLConstraintsForCSA.OrientFontSizeScale * CurrentFontSizeScale;
+            //LineWidth = UnitHelper.ConvertToFoot(CSALocationType.GetLineWidth() * FontScale, VLUnitType.millimeter);
+            var verticalFix = CurrentFontHeight * VLConstraintsForCSA.TextSpace; ;//偏移修正 为了显示更好 方便更改
+            var horizontalFix = UnitHelper.ConvertToFoot(50, VLUnitType.millimeter);//偏移修正 为了显示更好 方便更改
+            LineSpace = CurrentFontHeight * (1 + VLConstraintsForCSA.TextSpace);
             TextLocations = new List<XYZ>();
             for (int i = Texts.Count() - 1; i >= 0; i--)
             {
                 var start = LineLocation + (LineHeight + i * LineSpace) * VerticalVector;
                 var end = start + LineWidth * ParallelVector;
-                TextLocations.Add(CSALocationType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, start, end));
+                TextLocations.Add(CSALocationType.GetTextLocation(CurrentFontHeight, verticalFix, VerticalVector, horizontalFix, ParallelVector, start, end));
             }
         }
         #endregion
 
         #endregion
+    }
+    /// <summary>
+    /// 为CSAModel数据服务的处理类
+    /// </summary>
+    public static class CSAModelEx
+    {
+        /// <summary>
+        /// 获取文字的样式方案
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static List<TextNoteType> GetTextNoteTypes(this CSAModel model)
+        {
+            var textNoteTypes = new FilteredElementCollector(VLConstraintsForCSA.Doc).OfClass(typeof(TextNoteType)).ToElements().Select(p => p as TextNoteType).Where(c => !c.Name.Contains("明细表")).ToList();
+            return textNoteTypes;
+        }
+
+        /// <summary>
+        /// 线 参数设置
+        /// </summary>
+        public static void UpdateLineParameters(this CSAModel model, FamilyInstance line, double lineHeight, double lineWidth, double space, int textCount)
+        {
+            line.GetParameters(TagProperty.线高度1.ToString()).First().Set(lineHeight);
+            line.GetParameters(TagProperty.线宽度.ToString()).First().Set(lineWidth);
+            line.GetParameters(TagProperty.间距.ToString()).First().Set(space);
+            line.GetParameters(TagProperty.文字行数.ToString()).First().Set(textCount);
+        }
+
+        /// <summary>
+        /// 获取 CompoundStructure 对象
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public static CompoundStructure GetCompoundStructure(this CSAModel model, Element element)
+        {
+            CompoundStructure compoundStructure = null;
+            if (element is Wall)
+            {
+                compoundStructure = (element as Wall).WallType.GetCompoundStructure();
+                model.TargetType = TargetType.Wall;
+            }
+            else if (element is Floor)
+            {
+                compoundStructure = (element as Floor).FloorType.GetCompoundStructure();
+                model.TargetType = TargetType.Floor;
+            }
+            else if (element is RoofBase)
+            {
+                compoundStructure = (element as RoofBase).RoofType.GetCompoundStructure();
+                model.TargetType = TargetType.RoofBase;
+            }
+            else
+            {
+                throw new NotImplementedException("暂不支持该类型的对象,未能成功获取CompoundStructure");
+            }
+            return compoundStructure;
+        }
+
+        /// <summary>
+        /// 从 CompoundStructure 中获取标注信息
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="compoundStructure"></param>
+        /// <returns></returns>
+        public static List<string> FetchTextsFromCompoundStructure(this CSAModel model, Document doc, CompoundStructure compoundStructure)
+        {
+            var layers = compoundStructure.GetLayers();
+            var texts = new List<string>();
+            foreach (var layer in layers)
+            {
+                string name = "";
+                var material = doc.GetElement(layer.MaterialId);
+                if (material == null)
+                    name = "<按类别>";
+                else
+                    name = doc.GetElement(layer.MaterialId).Name;
+                texts.Add(UnitHelper.ConvertFromFootTo(layer.Width, VLUnitType.millimeter) + "厚" + name);
+            }
+            model.Texts = texts;
+            return texts;
+        }
+
+        /// <summary>
+        /// 从需要标注的对象中获取标注的源位置
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public static XYZ GetElementLocation(this CSAModel model, Element element)
+        {
+            var locationCurve = element.Location as LocationCurve;
+            var location = (locationCurve.Curve.GetEndPoint(0) + locationCurve.Curve.GetEndPoint(1)) / 2;
+            return location;
+        }
+
+        private static void SetCurveFromLine(CSAModel model, LocationCurve locationCurve)
+        {
+            XYZ parallelVector = null;
+            XYZ verticalVector = null;
+            parallelVector = (locationCurve.Curve as Line).Direction;
+            verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
+            parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
+            verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
+            if ((verticalVector.X - 1).IsMiniValue())
+                verticalVector = verticalVector.RevertByCoordinateType(CoordinateType.XY);
+            model.VerticalVector = verticalVector;
+            model.ParallelVector = parallelVector;
+        }
+
+        /// <summary>
+        /// 按XY的点的Z轴旋转
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="xyz"></param>
+        /// <param name="verticalVector"></param>
+        public static void RotateByXY(this LocationPoint point, XYZ xyz, XYZ verticalVector)
+        {
+            Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
+            if (verticalVector.X > VLConstraintsForCSA.MiniValueForXYZ)
+                point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+            else
+                point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+        }
+
+        /// <summary>
+        /// 按XY的点的Z轴旋转
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="xyz"></param>
+        /// <param name="verticalVector"></param>
+        public static void RotateByXY(this Location point, XYZ xyz, XYZ verticalVector)
+        {
+            Line axis = Line.CreateBound(xyz, xyz.Add(new XYZ(0, 0, 10)));
+            if (verticalVector.X > VLConstraintsForCSA.MiniValueForXYZ)
+                point.Rotate(axis, 2 * Math.PI - verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+            else
+                point.Rotate(axis, verticalVector.AngleTo(new XYZ(0, 1, verticalVector.Z)));
+        }
     }
 }

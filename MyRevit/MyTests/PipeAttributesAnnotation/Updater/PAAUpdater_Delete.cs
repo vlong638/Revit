@@ -98,7 +98,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     }
                 }
                 if (isDeleted)
-                    PAAContext.Save(doc);
+                    PAAContext.SaveCollection(doc);
             }
             catch (Exception ex)
             {

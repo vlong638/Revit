@@ -19,8 +19,10 @@ namespace MyRevit.MyTests.PAA
         #region Storage
         public static bool IsEditing;
         public static bool IsDeleting;
-        private static PAAModelCollection Collection;
         private static PAAStorageEntity CStorageEntity = new PAAStorageEntity();
+
+        #region Collection
+        private static PAAModelCollection Collection;
         /// <summary>
         /// 取数据Collection
         /// </summary>
@@ -46,7 +48,7 @@ namespace MyRevit.MyTests.PAA
         /// 保存Collection
         /// </summary>
         /// <param name="doc"></param>
-        public static bool Save(Document doc)
+        public static bool SaveCollection(Document doc)
         {
             if (Collection == null)
                 return false;
@@ -65,6 +67,55 @@ namespace MyRevit.MyTests.PAA
                 }
             );
         }
+        #endregion
+
+        #region Setting
+        static PAASetting Setting { set; get; }
+        /// <summary>
+        /// 取数据Setting
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
+        public static PAASetting GetSetting(Document doc)
+        {
+            Setting = DelegateHelper.DelegateTryCatch(
+                () =>
+                {
+                    string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting);
+                    return new PAASetting(data);
+                },
+                () =>
+                {
+                    return new PAASetting("");
+                }
+            );
+            return Setting;
+        }
+        /// <summary>
+        /// 保存Setting
+        /// </summary>
+        /// <param name="doc"></param>
+        public static bool SaveSetting(Document doc)
+        {
+            if (Setting == null)
+                return false;
+            var data = Setting.ToData();
+            return DelegateHelper.DelegateTryCatch(
+                () =>
+                {
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting, data);
+                    return true;
+                },
+                () =>
+                {
+                    ExtensibleStorageHelper.RemoveStorage(doc, CStorageEntity);
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting, data);
+                    return false;
+                }
+            );
+        }
+        #endregion
+
         #endregion
 
         #region Family
@@ -244,7 +295,7 @@ namespace MyRevit.MyTests.PAA
             if (!_MultipleLineOnLine.IsActive)
                 _MultipleLineOnLine.Activate();
             return _MultipleLineOnLine;
-        } 
+        }
         #endregion
 
         #endregion
@@ -255,11 +306,11 @@ namespace MyRevit.MyTests.PAA
         //共享参数
         public static string SharedParameterGroupName = "出图深化";
         public static string SharedParameterPL = "管道离地高度";
-        public static string SharedParameterOffset = "偏移量";
+        //public static string SharedParameterOffset = "偏移量";
         public static string SharedParameterSystemAbbreviation = "系统缩写";
         public static string SharedParameterTypeName = "类型名称";
-        public static string SharedParameterDiameter= "直径";
-        public static string SharedParameterHeight= "高度";
-        public static string SharedParameterWidth= "宽度";
+        public static string SharedParameterDiameter = "直径";
+        public static string SharedParameterHeight = "高度";
+        public static string SharedParameterWidth = "宽度";
     }
 }

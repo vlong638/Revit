@@ -7,6 +7,9 @@ using System.Linq;
 using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using PmSoft.Common.RevitClass.Utils;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
 
 namespace MyRevit.MyTests.PBPA
 {
@@ -24,25 +27,214 @@ namespace MyRevit.MyTests.PBPA
 
     public enum PBPAViewType
     {
-        Idle,//闲置
-        Close,//关闭
+        Closing = -1,//右上角或Alt+F4关闭
+        Close = 0,//按钮关闭或ESC关闭
+        Idle = 1,//闲置
         PickSingle_Target,//选择引注_起点
         PickSingle_End,//选择引注_终点
         GenerateSingle,
         GenerateAll,//一键引注
+        RegenerateAllFor_L,//更新离地高度
     }
 
-    public class PBPAViewModel : VLViewModel<PBPAModel, PBPAWindow, PBPAViewType>
+    public class PBPASetting : VLModel
     {
+        public bool TargetType_Punch = true;
+        public bool TargetType_BranchPipe = true;
+        public PBPAAnnotationType AnnotationType = PBPAAnnotationType.TwoLine;
+        public PBPALocationType LocationType = PBPALocationType.Center;
+        public string CenterPrefix = "CL+";
+        public string TopPrefix = "TL+";
+        public string BottomPrefix = "BL+";
+
+        public PBPASetting(string data) : base(data)
+        {
+        }
+
+        public override bool LoadData(string data)
+        {
+            if (string.IsNullOrEmpty(data))
+                return false;
+            try
+            {
+                StringReader sr = new StringReader(data);
+                TargetType_Punch = sr.ReadFormatStringAsBoolean();
+                TargetType_BranchPipe = sr.ReadFormatStringAsBoolean();
+                AnnotationType = sr.ReadFormatStringAsEnum<PBPAAnnotationType>();
+                LocationType = sr.ReadFormatStringAsEnum<PBPALocationType>();
+                CenterPrefix = sr.ReadFormatString();
+                TopPrefix = sr.ReadFormatString();
+                BottomPrefix = sr.ReadFormatString();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public override string ToData()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendItem(TargetType_Punch);
+            sb.AppendItem(TargetType_BranchPipe);
+            sb.AppendItem(AnnotationType);
+            sb.AppendItem(LocationType);
+            sb.AppendItem(CenterPrefix);
+            sb.AppendItem(TopPrefix);
+            sb.AppendItem(BottomPrefix);
+            return sb.ToString();
+        }
+
+        public PBPASetting CloneText()
+        {
+            PBPASetting newSetting = new PBPASetting("");
+            newSetting.CenterPrefix = this.CenterPrefix;
+            newSetting.TopPrefix = this.TopPrefix;
+            newSetting.BottomPrefix = this.BottomPrefix;
+            return newSetting;
+        }
+    }
+
+    public class PBPASettingMemo
+    {
+        public PBPASetting SettingTextMemo;
+        public bool IsSame { set; get; }
+        public bool IsSame_CenterPrefix { set; get; }
+        public bool IsSame_TopPrefix { set; get; }
+        public bool IsSame_BottomPrefix { set; get; }
+
+        void CheckDifference(PBPASetting origin)
+        {
+            IsSame_CenterPrefix = SettingTextMemo.CenterPrefix == origin.CenterPrefix;
+            IsSame_TopPrefix = SettingTextMemo.TopPrefix == origin.TopPrefix;
+            IsSame_BottomPrefix = SettingTextMemo.BottomPrefix == origin.BottomPrefix;
+            IsSame = IsSame_CenterPrefix && IsSame_TopPrefix && IsSame_BottomPrefix;
+        }
+
+        public void UpdateDifference(Document doc, PBPASetting origin, bool needUserConfirm = true)
+        {
+            bool IsPunchUpdate = origin.TargetType_Punch;
+            bool IsBranchPipeUpdate = origin.TargetType_BranchPipe;
+            CheckDifference(origin);
+            if (!IsSame)
+            {
+                if (!needUserConfirm || VLViewModel.ShowQuestion("前缀发生变化,是否更新所对应的标签") == DialogResult.OK)
+                {
+                    SettingTextMemo = origin.CloneText();
+                    VLTransactionHelper.DelegateTransaction(doc, "RegenerateAllFor_L", (Func<bool>)(() =>
+                    {
+                        var collection = PBPAContext.GetCollection(doc);
+                        if (!IsSame_CenterPrefix)
+                        {
+                            if (IsPunchUpdate)
+                            {
+                                var targetType = PBPATargetType.Punch;
+                                var locationType = PBPALocationType.Center;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                            if (IsBranchPipeUpdate)
+                            {
+                                var targetType = PBPATargetType.BranchPipe;
+                                var locationType = PBPALocationType.Center;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                        }
+                        if (!IsSame_TopPrefix)
+                        {
+                            if (IsPunchUpdate)
+                            {
+                                var targetType = PBPATargetType.Punch;
+                                var locationType = PBPALocationType.Top;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                            if (IsBranchPipeUpdate)
+                            {
+                                var targetType = PBPATargetType.BranchPipe;
+                                var locationType = PBPALocationType.Top;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                        }
+                        if (!IsSame_BottomPrefix)
+                        {
+                            if (IsPunchUpdate)
+                            {
+                                var targetType = PBPATargetType.Punch;
+                                var locationType = PBPALocationType.Bottom;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                            if (IsBranchPipeUpdate)
+                            {
+                                var targetType = PBPATargetType.BranchPipe;
+                                var locationType = PBPALocationType.Bottom;
+                                RegenerateAllFor_Prefix(doc, collection, targetType, locationType);
+                            }
+                        }
+                        collection.Save(doc);
+                        return true;
+                    }));
+                }
+            }
+            IsSame = true;
+        }
+
+        private void RegenerateAllFor_Prefix(Document doc, PBPAModelCollection collection, PBPATargetType targetType, PBPALocationType locationType)
+        {
+            string prefix = GetPrefix(targetType, locationType);
+            var dataToChange = collection.Data.Where(c => c.TargetType == targetType && c.LocationType == locationType).ToList();
+            for (int i = dataToChange.Count - 1; i >= 0; i--)
+            {
+                var model = dataToChange[i];
+                model.Document = doc;
+                model.IsRegenerate = true;
+                model.AnnotationPrefix = prefix;
+                var element = doc.GetElement(model.TargetId);
+                element.GetParameters(PBPAContext.SharedParameterPL).FirstOrDefault().Set(model.GetFull_L(element));
+                if (!PBPAContext.Creator.Regenerate(model))
+                    collection.Data.Remove(model);
+            }
+        }
+
+        private string GetPrefix(PBPATargetType targetType, PBPALocationType locationType)
+        {
+            string prefix = "";
+            switch (locationType)
+            {
+                case PBPALocationType.Center:
+                    prefix = SettingTextMemo.CenterPrefix;
+                    break;
+                case PBPALocationType.Top:
+                    prefix = SettingTextMemo.TopPrefix;
+                    break;
+                case PBPALocationType.Bottom:
+                    prefix = SettingTextMemo.BottomPrefix;
+                    break;
+                default:
+                    break;
+            }
+            return prefix;
+        }
+    }
+
+    public class PBPAViewModel : VLViewModel<PBPAModel, PBPAWindow>
+    {
+        PBPASetting Setting;
+        PBPASettingMemo MemoHelper = new PBPASettingMemo();
+
         public PBPAViewModel(UIApplication app) : base(app)
         {
             Model = new PBPAModel("");
             View = new PBPAWindow(this);
-            //用以打开时更新页面
-            TargetType_BranchPipe = true;
-            TargetType_Punch = true;
-            AnnotationType = PBPAAnnotationType.TwoLine;
-            LocationType = PBPALocationType.Center;
+
+            Setting = PBPAContext.GetSetting(Document);
+            MemoHelper.SettingTextMemo = Setting.CloneText();
+            TargetType_BranchPipe = Setting.TargetType_BranchPipe;
+            TargetType_Punch = Setting.TargetType_Punch;
+            AnnotationType = Setting.AnnotationType;
+            LocationType = Setting.LocationType;
+            CenterPrefix = Setting.CenterPrefix;
+            TopPrefix = Setting.TopPrefix;
+            BottomPrefix = Setting.BottomPrefix;
         }
 
         public bool Prepare()
@@ -50,8 +242,7 @@ namespace MyRevit.MyTests.PBPA
             if (!VLTransactionHelper.DelegateTransaction(Document, "PBPAViewModel", (Func<bool>)(() =>
             {
                 //添加共享参数
-                string shareFilePath = @"E:\WorkingSpace\Tasks\1101管道特性标注\PMSharedParameters.txt";
-                var parameterHelper = new ShareParameter(shareFilePath);
+                var parameterHelper = new ShareParameter(VLSharedParameterHelper.GetShareFilePath());
                 parameterHelper.AddShadeParameter(Document, PBPAContext.SharedParameterGroupName, PBPAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_PipeAccessory), true, BuiltInParameterGroup.PG_TEXT);
                 return true;
             })))
@@ -62,12 +253,11 @@ namespace MyRevit.MyTests.PBPA
             return true;
         }
 
-        public override bool IsIdling { get { return ViewType == PBPAViewType.Idle; } }
-        public override void Close() { ViewType = PBPAViewType.Close; }
-
         public override void Execute()
         {
-            switch (ViewType)
+            PBPAModelCollection collection;
+            var viewType = (PBPAViewType)Enum.Parse(typeof(PBPAViewType), ViewType.ToString());
+            switch (viewType)
             {
                 case PBPAViewType.Idle:
                     View = new PBPAWindow(this);
@@ -75,30 +265,58 @@ namespace MyRevit.MyTests.PBPA
                     break;
                 case PBPAViewType.Close:
                     View.Close();
+                    SaveSetting();
+                    break;
+                case PBPAViewType.Closing:
+                    SaveSetting();
+                    break;
+                case PBPAViewType.RegenerateAllFor_L:
+                    VLTransactionHelper.DelegateTransaction(Document, "RegenerateAllFor_L", (Func<bool>)(() =>
+                    {
+                        collection = PBPAContext.GetCollection(Document);
+                        for (int i = collection.Data.Count - 1; i >= 0; i--)
+                        {
+                            var model = collection.Data[i];
+                            model.Document = Document;
+                            model.IsRegenerate = true;
+
+                            var element = Document.GetElement(model.TargetId);
+                            element.GetParameters(PBPAContext.SharedParameterPL).FirstOrDefault().Set(model.GetFull_L(element));
+                            if (!PBPAContext.Creator.Regenerate(model))
+                                collection.Data.Remove(model);
+                        }
+                        collection.Save(Document);
+                        return true;
+                    }));
+                    ViewType = (int)PBPAViewType.Idle;
                     break;
                 case PBPAViewType.PickSingle_Target:
+                    UpdateSetting();
+                    MemoHelper.UpdateDifference(Document, Setting, false);
                     Model.Document = Document;
                     Model.ViewId = Document.ActiveView.Id;
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
+                        UpdateModelTargetType();
                         var targetType = Model.GetFilter();
                         var obj = UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择标注点");
                         if (obj != null)
                         {
                             Model.TargetId = obj.ElementId;
-                            ViewType = PBPAViewType.PickSingle_End;
+                            Model.TargetType = Model.IsPunch(Document.GetElement(obj.ElementId)) ? PBPATargetType.Punch : PBPATargetType.BranchPipe;
+                            ViewType = (int)PBPAViewType.PickSingle_End;
                             Model.BodyStartPoint = obj.GlobalPoint;
                         }
                     }))
-                        ViewType = PBPAViewType.Idle;
+                        ViewType = (int)PBPAViewType.Idle;
                     //获取族内参数信息
                     if (!GetFamilySymbolInfo(Model.TargetId))
                     {
-                        ShowMessage("加载族文字信息失败");
-                        ViewType = PBPAViewType.Idle;
+                        ShowMessage("加载族信息失败");
+                        ViewType = (int)PBPAViewType.Idle;
                         Execute();
                         return;
                     }
@@ -107,7 +325,7 @@ namespace MyRevit.MyTests.PBPA
                     break;
                 case PBPAViewType.PickSingle_End:
                     //业务逻辑处理
-                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //var locationCurve = (target.Location as LocationCurve).Curve as Line;
                         //XYZ vVector, pVector;
@@ -128,46 +346,79 @@ namespace MyRevit.MyTests.PBPA
                         var target = Document.GetElement(Model.TargetId);
                         Model.UpdateLineWidth(target);
                         var startPoint = Model.BodyStartPoint.ToWindowsPoint(coordinateType);
-                        var endPoint = (Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector).ToWindowsPoint(coordinateType);
+                        var offSet = (Model.LineWidth * Model.ParallelVector).ToWindowsPoint();
+                        //var endPoint = (Model.BodyStartPoint + Model.LineWidth * 1.02 * Model.ParallelVector).ToWindowsPoint(coordinateType);
                         var pEnd = new VLPointPicker().PickPointWithPreview(UIApplication, coordinateType, (view) =>
                         {
                             var mousePosition = System.Windows.Forms.Control.MousePosition;
-                            //已在初始化处理 为何重复?
-                            var rect = view.UIView.GetWindowRectangle();
-                            var Left = rect.Left;
-                            var Top = rect.Top;
-                            var Width = rect.Right - rect.Left;
-                            var Height = rect.Bottom - rect.Top;
+                            var midDrawP = new System.Windows.Point(mousePosition.X - view.Left, mousePosition.Y - view.Top);//中间选择点
+                            var midPoint = view.ConvertToRevitPointFromDrawPoint(midDrawP);
+                            var startDrawP = view.ConvertToDrawPointFromRevitPoint(startPoint);//起点
+                            var M_S = midPoint - Model.BodyStartPoint;
+                            if (Model.AnnotationType == PBPAAnnotationType.OneLine || Model.ParallelVector.CrossProductByCoordinateType(M_S, CoordinateType.XY) > 0)
+                            {
+                                var endPoint = startPoint.Plus(offSet);
+                                var endP = view.ConvertToDrawPointFromRevitPoint(endPoint);//终点
+                                if (Math.Abs(startDrawP.X - midDrawP.X) < 2 && Math.Abs(startDrawP.Y - midDrawP.Y) < 2)
+                                    return;
+                                var mid_s = midDrawP - startDrawP;
+                                mid_s.Normalize();
+                                var midSDrawP = midDrawP - mid_s * view.co_s;
+                                var height = midDrawP - startDrawP;
+                                var endDrawP = endP + height;
+                                var mid_e = midDrawP - endDrawP;
+                                mid_e.Normalize();
+                                var midEDrawP = midDrawP - mid_e * view.co_e;
+                                if (double.IsNaN(midEDrawP.X))
+                                    return;
 
-                            var startDrawP = view.ConvertToDrawPointFromViewPoint(startPoint);//起点
-                            var endP = view.ConvertToDrawPointFromViewPoint(endPoint);//终点
-                            var midDrawP = new System.Windows.Point(mousePosition.X - rect.Left, mousePosition.Y - rect.Top);//中间选择点
-                            var height = midDrawP - startDrawP;
-                            midDrawP -= height / 50;
-                            var endDrawP = endP + height;
-                            if (Math.Abs(startDrawP.X - midDrawP.X) < 2 && Math.Abs(startDrawP.Y - midDrawP.Y) < 2)
-                                return;
+                                var canvas = view.canvas;
+                                canvas.Children.RemoveRange(0, canvas.Children.Count);
+                                var line = new System.Windows.Shapes.Line() { X1 = startDrawP.X, Y1 = startDrawP.Y, X2 = midSDrawP.X, Y2 = midSDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                var line2 = new System.Windows.Shapes.Line() { X1 = midEDrawP.X, Y1 = midEDrawP.Y, X2 = endDrawP.X, Y2 = endDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line2, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                canvas.Children.Add(line);
+                                canvas.Children.Add(line2);
+                                Model.IsReversed = false;
+                            }
+                            else
+                            {
+                                var endPoint = startPoint.Minus(offSet);
+                                var endP = view.ConvertToDrawPointFromRevitPoint(endPoint);//终点
+                                if (Math.Abs(startDrawP.X - midDrawP.X) < 2 && Math.Abs(startDrawP.Y - midDrawP.Y) < 2)
+                                    return;
+                                var mid_s = midDrawP - startDrawP;
+                                mid_s.Normalize();
+                                var midSDrawP = midDrawP - mid_s * view.co_s;
+                                var height = midDrawP - startDrawP;
+                                var endDrawP = endP + height;
+                                var mid_e = midDrawP - endDrawP;
+                                mid_e.Normalize();
+                                var midEDrawP = midDrawP - mid_e * view.co_e;
+                                if (double.IsNaN(midEDrawP.X))
+                                    return;
 
-                            var canvas = view.canvas;
-                            midDrawP.X = midDrawP.X > startDrawP.X ? midDrawP.X - 1 : midDrawP.X + 1;
-                            midDrawP.Y = midDrawP.Y > startDrawP.Y ? midDrawP.Y - 1 : midDrawP.Y + 1;
-                            canvas.Children.RemoveRange(0, canvas.Children.Count);
-                            var line = new System.Windows.Shapes.Line() { X1 = startDrawP.X, Y1 = startDrawP.Y, X2 = midDrawP.X, Y2 = midDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
-                            var line2 = new System.Windows.Shapes.Line() { X1 = midDrawP.X, Y1 = midDrawP.Y, X2 = endDrawP.X, Y2 = endDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
-                            System.Windows.Media.RenderOptions.SetBitmapScalingMode(line, System.Windows.Media.BitmapScalingMode.LowQuality);
-                            System.Windows.Media.RenderOptions.SetBitmapScalingMode(line2, System.Windows.Media.BitmapScalingMode.LowQuality);
-                            canvas.Children.Add(line);
-                            canvas.Children.Add(line2);
+                                var canvas = view.canvas;
+                                canvas.Children.RemoveRange(0, canvas.Children.Count);
+                                var line = new System.Windows.Shapes.Line() { X1 = startDrawP.X, Y1 = startDrawP.Y, X2 = midSDrawP.X, Y2 = midSDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                var line2 = new System.Windows.Shapes.Line() { X1 = midEDrawP.X, Y1 = midEDrawP.Y, X2 = endDrawP.X, Y2 = endDrawP.Y, Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(136, 136, 136)), StrokeThickness = 1 };
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                System.Windows.Media.RenderOptions.SetBitmapScalingMode(line2, System.Windows.Media.BitmapScalingMode.LowQuality);
+                                canvas.Children.Add(line);
+                                canvas.Children.Add(line2);
+                                Model.IsReversed = true;
+                            }
                         });
                         if (pEnd == null)
-                            ViewType = PBPAViewType.Idle;
+                            ViewType = (int)PBPAViewType.Idle;
                         else
                         {
                             Model.BodyEndPoint = pEnd.ToSame(Model.BodyStartPoint, coordinateType);
-                            ViewType = PBPAViewType.GenerateSingle;
+                            ViewType = (int)PBPAViewType.GenerateSingle;
                         }
                     }))
-                        ViewType = PBPAViewType.Idle;
+                        ViewType = (int)PBPAViewType.Idle;
                     Execute();
                     break;
                 case PBPAViewType.GenerateSingle:
@@ -175,21 +426,21 @@ namespace MyRevit.MyTests.PBPA
                     if (VLTransactionHelper.DelegateTransaction(Document, "GenerateSingle", (Func<bool>)(() =>
                     {
                         #region 生成处理
-                        var Collection = PBPAContext.GetCollection(Document);
-                        var existedModels = Collection.Data.Where(c => Model.TargetId == c.TargetId).ToList();//避免重复生成
+                        collection = PBPAContext.GetCollection(Document);
+                        var existedModels = collection.Data.Where(c => Model.TargetId == c.TargetId).ToList();//避免重复生成
                         if (existedModels != null)
                         {
                             for (int i = existedModels.Count() - 1; i >= 0; i--)
                             {
                                 existedModels[i].Document = Document;
-                                Collection.Data.Remove(existedModels[i]);
+                                collection.Data.Remove(existedModels[i]);
                                 existedModels[i].Clear();
                             }
                         }
                         if (!PBPAContext.Creator.Generate(Model))
                             return false;
-                        Collection.Data.Add(Model);
-                        Collection.Save(Document);
+                        collection.Data.Add(Model);
+                        collection.Save(Document);
                         #endregion
 
                         #region 共享参数设置
@@ -198,15 +449,42 @@ namespace MyRevit.MyTests.PBPA
                         #endregion
                         return true;
                     })))
-                        ViewType = PBPAViewType.PickSingle_Target;
+                        ViewType = (int)PBPAViewType.PickSingle_Target;
                     else
-                        ViewType = PBPAViewType.Idle;
+                        ViewType = (int)PBPAViewType.Idle;
                     Execute();
                     break;
                 case PBPAViewType.GenerateAll:
                 default:
                     throw new NotImplementedException("功能未实现");
             }
+        }
+
+        private void SaveSetting()
+        {
+            VLTransactionHelper.DelegateTransaction(Document, "Close", (Func<bool>)(() =>
+            {
+                Setting.TargetType_BranchPipe = TargetType_BranchPipe;
+                Setting.TargetType_Punch = TargetType_Punch;
+                Setting.AnnotationType = AnnotationType;
+                Setting.LocationType = LocationType;
+                Setting.BottomPrefix = BottomPrefix;
+                Setting.CenterPrefix = CenterPrefix;
+                Setting.TopPrefix = TopPrefix;
+                PBPAContext.SaveSetting(Document);
+                return true;
+            }));
+        }
+
+        private void UpdateSetting()
+        {
+            Setting.TargetType_BranchPipe = TargetType_BranchPipe;
+            Setting.TargetType_Punch = TargetType_Punch;
+            Setting.AnnotationType = AnnotationType;
+            Setting.LocationType = LocationType;
+            Setting.BottomPrefix = BottomPrefix;
+            Setting.CenterPrefix = CenterPrefix;
+            Setting.TopPrefix = TopPrefix;
         }
 
         private bool GetFamilySymbolInfo(ElementId targetId)
@@ -224,7 +502,14 @@ namespace MyRevit.MyTests.PBPA
                 var familyDoc = Document.EditFamily(annotationFamily.Family);
                 var textElement = new FilteredElementCollector(familyDoc).OfClass(typeof(TextElement)).First(c => c.Name == "3mm") as TextElement;
                 var textElementType = textElement.Symbol as TextElementType;
-                PBPAContext.FontManagement.SetCurrentFont(textElementType);
+
+#if Revit2016
+                PBPAContext.FontManagement.SetCurrentFont(textElementType, 1, 1.2);
+#elif Revit2017
+                PBPAContext.FontManagement.SetCurrentFont(textElementType, 1, 1.55);
+#else
+                PBPAContext.FontManagement.SetCurrentFont(textElementType, 1, 1.6);
+#endif
             }
             return true;
         }
@@ -271,7 +556,6 @@ namespace MyRevit.MyTests.PBPA
         #endregion
 
         #region PBPAAnnotationType
-
         PBPAAnnotationType AnnotationType
         {
             get
@@ -298,6 +582,16 @@ namespace MyRevit.MyTests.PBPA
         #endregion
 
         #region PBPALocationType
+        private void UpdateModelAnnotationPrefix()
+        {
+            if (Model.LocationType == PBPALocationType.Center)
+                Model.AnnotationPrefix = CenterPrefix;
+            else if (Model.LocationType == PBPALocationType.Top)
+                Model.AnnotationPrefix = TopPrefix;
+            else if (Model.LocationType == PBPALocationType.Bottom)
+                Model.AnnotationPrefix = BottomPrefix;
+        }
+
         PBPALocationType LocationType
         {
             get
@@ -310,6 +604,7 @@ namespace MyRevit.MyTests.PBPA
                 RaisePropertyChanged("LocationType_Center");
                 RaisePropertyChanged("LocationType_Top");
                 RaisePropertyChanged("LocationType_Bottom");
+                UpdateModelAnnotationPrefix();
             }
         }
         public bool LocationType_Center
@@ -326,6 +621,52 @@ namespace MyRevit.MyTests.PBPA
         {
             get { return LocationType == PBPALocationType.Bottom; }
             set { if (value) LocationType = PBPALocationType.Bottom; }
+        }
+
+
+        private string centerPrefix = "CL+";
+        public string CenterPrefix
+        {
+            get
+            {
+                return centerPrefix;
+            }
+
+            set
+            {
+                centerPrefix = value;
+                UpdateModelAnnotationPrefix();
+            }
+        }
+
+        private string topPrefix = "TL+";
+        public string TopPrefix
+        {
+            get
+            {
+                return topPrefix;
+            }
+
+            set
+            {
+                topPrefix = value;
+                UpdateModelAnnotationPrefix();
+            }
+        }
+
+        private string bottomPrefix = "BL+";
+        public string BottomPrefix
+        {
+            get
+            {
+                return bottomPrefix;
+            }
+
+            set
+            {
+                bottomPrefix = value;
+                UpdateModelAnnotationPrefix();
+            }
         }
         #endregion
 

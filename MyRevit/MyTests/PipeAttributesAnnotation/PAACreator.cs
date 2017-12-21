@@ -96,7 +96,7 @@ namespace MyRevit.MyTests.PAA
             //double verticalSkew = 0;
             //if (isRegenerate)// && regenerateType != RegenerateType.RegenerateByPipe)
             //{
-            //    //原始线高度+偏移数据
+            //    //原始高度 +偏移数据
             //    var line = doc.GetElement(model.LineId);
             //    var orientLineHeight = isRegenerate ? line.GetParameters(TagProperty.线高度1.ToString()).First().AsDouble() : 0;
             //    verticalSkew = LocationHelper.GetLengthBySide(offset, model.VerticalVector);

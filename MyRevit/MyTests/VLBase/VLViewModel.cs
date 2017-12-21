@@ -3,10 +3,11 @@ using Autodesk.Revit.UI;
 using System.ComponentModel;
 using System.Windows;
 using System;
+using System.Windows.Forms;
 
 namespace MyRevit.MyTests.VLBase
 {
-    public abstract class VLViewModel<TModel, TView, TViewType> : VLViewModel
+    public abstract class VLViewModel<TModel, TView> : VLViewModel
         where TModel : VLModel where TView : VLWindow
     {
         public VLViewModel(UIApplication app) : base(app)
@@ -17,8 +18,6 @@ namespace MyRevit.MyTests.VLBase
         public TModel Model { set; get; }
         //View
         public TView View { set; get; }
-        //ViewType
-        public TViewType ViewType { set; get; }
 
         public void ShowMessage(string msg)
         {
@@ -26,28 +25,27 @@ namespace MyRevit.MyTests.VLBase
         }
     }
 
-    public abstract class VLViewModel: DependencyObject, INotifyPropertyChanged
+    public abstract class VLViewModel : DependencyObject, INotifyPropertyChanged
     {
         //Revit
         public UIApplication UIApplication;
         public UIDocument UIDocument { get { return UIApplication.ActiveUIDocument; } }
         public Document Document { get { return UIApplication.ActiveUIDocument.Document; } }
-         
+
         public VLViewModel(UIApplication app)
         {
             UIApplication = app;
         }
 
         #region 基本执行功能
-        public abstract void Execute(); 
+        public abstract void Execute();
         #endregion
 
         #region ESC退出
-        /// <summary>
-        /// 界面是否处于ESC可退出的状态
-        /// </summary>
-        public abstract bool IsIdling { get; }
-        public abstract void Close();
+        public int ViewType = 1;
+        public bool IsIdling { get { return ViewType == 1; } }
+        public void Close() { ViewType = 0; Execute(); }
+        public void Closing() { ViewType = -1; Execute(); }
         #endregion
 
         #region INotifyPropertyChanged
@@ -62,6 +60,17 @@ namespace MyRevit.MyTests.VLBase
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        #endregion
+
+        #region MessageBox
+        public static void ShowMessage(string msg)
+        {
+            PmSoft.Common.Controls.PMMessageBox.Show(msg);
+        }
+        public static DialogResult ShowQuestion(string msg)
+        {
+            return PmSoft.Common.Controls.PMMessageBox.ShowQuestion(msg);
+        }
         #endregion
     }
 }

@@ -92,7 +92,7 @@ namespace MyRevit.MyTests.PBPA
                     }
                     #endregion
                 }
-                PBPAContext.Save(document);
+                PBPAContext.SaveCollection(document);
             }
             catch (Exception ex)
             {

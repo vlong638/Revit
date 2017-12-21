@@ -3,12 +3,14 @@ using Autodesk.Revit.UI;
 using MyRevit.Utilities;
 using PmSoft.Common.RevitClass;
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace MyRevit.Utilities
 {
     public static class VLPointPickerEx
     {
-        public static System.Windows.Point ToWindowsPoint(this XYZ xyz, CoordinateType coordinateType)
+        public static System.Windows.Point ToWindowsPoint(this XYZ xyz, CoordinateType coordinateType = CoordinateType.XY)
         {
             switch (coordinateType)
             {
@@ -22,72 +24,137 @@ namespace MyRevit.Utilities
                     throw new NotImplementedException();
             }
         }
+
+        public static System.Windows.Point Plus(this System.Windows.Point start, System.Windows.Point end)
+        {
+            return new System.Windows.Point(start.X + end.X, start.Y + end.Y);
+        }
+        public static System.Windows.Point Minus(this System.Windows.Point start, System.Windows.Point end)
+        {
+            return new System.Windows.Point(start.X - end.X, start.Y - end.Y);
+        }
+        public static System.Windows.Point Minus(this System.Drawing.Point start, System.Windows.Point end)
+        {
+            return new System.Windows.Point(start.X - end.X, start.Y - end.Y);
+        }
+
+        /// <summary>
+        /// 小 start在end左侧
+        /// 大 start在end右侧
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static double Dot(this System.Windows.Point start, System.Windows.Point end)
+        {
+            return start.X * end.Y - start.Y * end.X;
+        }
+        public static double Dot(this System.Windows.Point start, System.Windows.Vector end)
+        {
+            return start.X * end.Y - start.Y * end.X;
+        }
+        public static double Dot(this System.Windows.Vector start, System.Windows.Vector end)
+        {
+            return start.X * end.Y - start.Y * end.X;
+        }
     }
+
 
     public class VLPointPicker
     {
+        ///// <summary>
+        ///// 选择点,带预览,空时返回null
+        ///// </summary>
+        ///// <param name="uiApp"></param>
+        ///// <param name="startPoint"></param>
+        ///// <returns></returns>
+        //public XYZ PickPointWithPreview(UIApplication uiApp, CoordinateType coordinateType, Action<DrawAreaView> preview = null)
+        //{
+        //    XYZ result = null;
+        //    Document doc = uiApp.ActiveUIDocument.Document;
+        //    PickObjectsMouseHook mouseHook = null;
+        //    mouseHook = InitMouseHook();
+        //    System.Windows.Forms.Timer timer = null;
+        //    var view = new DrawAreaView(uiApp, coordinateType);
+        //    view.Show();
+        //    //开启定时器 实时绘图
+        //    timer = new System.Windows.Forms.Timer();
+        //    timer.Interval = 6;
+        //    timer.Tick += (sender, e) =>
+        //    {
+        //        if (preview != null)
+        //            preview(view);
+        //    };
+        //    timer.Start();
+        //    //选点
+        //    try
+        //    {
+        //        result = uiApp.ActiveUIDocument.Selection.PickPoint("PM-预览绘线中，鼠标左键确定,右键取消");//Autodesk.Revit.UI.Selection.ObjectSnapTypes.Endpoints,
+        //    }
+        //    catch
+        //    {
+        //        mouseHook.UninstallHook();
+        //    }
+        //    timer.Stop();
+        //    view.Close();
+        //    mouseHook.Dispose();
+        //    mouseHook = null;
+        //    return result;
+        //}
+
+        [DllImport("user32.dll", EntryPoint = "GetForegroundWindow")]
+        public static extern int GetForegroundWindow();
+        [DllImport("user32.dll", EntryPoint = "SetForegroundWindow")]
+        public static extern int SetForegroundWindow(int hwnd);
+
         /// <summary>
         /// 选择点,带预览,空时返回null
         /// </summary>
         /// <param name="uiApp"></param>
         /// <param name="startPoint"></param>
         /// <returns></returns>
-        public XYZ PickPointWithPreview(UIApplication uiApp, CoordinateType coordinateType, Action<DrawAreaView> preview=null)
+        public XYZ PickPointWithPreview(UIApplication uiApp, CoordinateType coordinateType, Action<DrawAreaView> preview = null)
         {
             XYZ result = null;
             Document doc = uiApp.ActiveUIDocument.Document;
-            PickObjectsMouseHook mouseHook = null;
-            mouseHook = InitMouseHook();
-            System.Windows.Forms.Timer timer = null;
-            var view = new DrawAreaView(uiApp, coordinateType);
-            view.Show();
-            //开启定时器 实时绘图
-            timer = new System.Windows.Forms.Timer();
-            timer.Interval = 6;
-            timer.Tick += (sender, e) =>
-            {
-                if (preview != null)
-                    preview(view);
-            };
-            timer.Start();
+
+            #region old鼠标右键取消
+            //PickObjectsMouseHook mouseHook = null;
+            //mouseHook = InitMouseHook();
+            //try
+            //{
+            //    result = uiApp.ActiveUIDocument.Selection.PickPoint("PM-预览绘线中，鼠标左键确定,右键取消");//Autodesk.Revit.UI.Selection.ObjectSnapTypes.Endpoints,
+            //}
+            //catch
+            //{
+            //    mouseHook.UninstallHook();
+            //}
+            //mouseHook.Dispose();
+            //mouseHook = null; 
+            #endregion
+
             //选点
-            try
+            System.Windows.Forms.Timer timer = null;
+            DrawAreaView view = null;
+            VLMouseHookHelper.DelegateKeyBoardHook(() =>
             {
-                result = uiApp.ActiveUIDocument.Selection.PickPoint("PM-预览绘线中，鼠标左键确定,右键取消");//Autodesk.Revit.UI.Selection.ObjectSnapTypes.Endpoints,
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("No work plane set in current view."))
+                IntPtr intPtr = Process.GetCurrentProcess().MainWindowHandle;
+                view = new DrawAreaView(uiApp, coordinateType);
+                view.Show();
+                //开启定时器 实时绘图
+                timer = new System.Windows.Forms.Timer();
+                timer.Interval = 6;
+                timer.Tick += (sender, e) =>
                 {
-                    timer.Stop();
-                    uiApp.ActiveUIDocument.Selection.Dispose();
-                    VLTransactionHelper.DelegateTransaction(doc, "PickPointWithPreview_CreateWorkPlaneSet", () =>
-                     {
-                         Plane plane = new Plane(uiApp.ActiveUIDocument.Document.ActiveView.ViewDirection, uiApp.ActiveUIDocument.Document.ActiveView.Origin);
-                         SketchPlane sp = SketchPlane.Create(doc, plane);
-                         doc.ActiveView.SketchPlane = sp;
-                         doc.ActiveView.ShowActiveWorkPlane();
-                         timer.Start();
-                         try
-                         {
-                             result = uiApp.ActiveUIDocument.Selection.PickPoint("PM-预览绘线中，鼠标左键确定,右键取消");//Autodesk.Revit.UI.Selection.ObjectSnapTypes.Endpoints,
-                         }
-                         catch
-                         {
-                             mouseHook.UninstallHook();
-                         }
-                         return true;
-                     });
-                }
-                else
-                {
-                    mouseHook.UninstallHook();
-                }
-            }
+                    if (preview != null)
+                        preview(view);
+                };
+                timer.Start();
+                SetForegroundWindow(intPtr.ToInt32());
+                result = uiApp.ActiveUIDocument.Selection.PickPoint("PM-预览绘线中，鼠标左键确定,ESC取消");
+            });
             timer.Stop();
             view.Close();
-            mouseHook.Dispose();
-            mouseHook = null;
             return result;
         }
 

@@ -150,7 +150,7 @@ namespace MyRevit.MyTests.PAA
                     }
                     #endregion
                 }
-                PAAContext.Save(document);
+                PAAContext.SaveCollection(document);
             }
             catch (Exception ex)
             {

@@ -17,13 +17,17 @@ namespace MyRevit.MyTests.VLBase
     /// <summary>
     /// Data构建用的扩展
     /// </summary>
-    public static class StringBuilderEx
+    public static partial class VLSerializableEx
     {
         public static string Splitter = " ";
         public static string InnerSplitterForXYZ = ",";
         public static char InnerSplitterForXYZ_Char = ',';
 
         #region SetData
+        public static void AppendItem(this StringBuilder sb, bool item)
+        {
+            sb.AppendItem(item.ToString());
+        }
         public static void AppendItem(this StringBuilder sb, Enum item)
         {
             sb.AppendItem(item.ToString());
@@ -69,7 +73,7 @@ namespace MyRevit.MyTests.VLBase
         {
             sb.Append(GetFormatStr(item.X + InnerSplitterForXYZ + item.Y + InnerSplitterForXYZ + item.Z));
         }
-        public static string ToCollection(this StringBuilder sb)
+        public static string ToData(this StringBuilder sb)
         {
             return GetFormatStr(sb.ToString());
         }
@@ -96,6 +100,10 @@ namespace MyRevit.MyTests.VLBase
                 }
             }
             return null;
+        }
+        public static bool ReadFormatStringAsBoolean(this StringReader sr)
+        {
+            return Convert.ToBoolean(ReadFormatString(sr));
         }
         public static ElementId ReadFormatStringAsElementId(this StringReader sr)
         {
@@ -167,6 +175,7 @@ namespace MyRevit.MyTests.VLBase
         }
 
         #endregion
+
         private static string GetFormatStr(string str)
         {
             return str.Length + VLConstraints.Splitter + str;

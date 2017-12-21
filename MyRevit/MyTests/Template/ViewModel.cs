@@ -19,7 +19,7 @@ namespace MyRevit.MyTests.Template
         PickMultiplePipes,//选择多管
     }
 
-    public class TemplateViewModel : VLViewModel<TemplateModel, TemplateWindow, TemplateViewType>
+    public class TemplateViewModel : VLViewModel<TemplateModel, TemplateWindow>
     {
         public TemplateViewModel(UIApplication app) : base(app)
         {
@@ -30,12 +30,10 @@ namespace MyRevit.MyTests.Template
             LocationType = TemplateLocationType.Center;
         }
 
-        public override bool IsIdling { get { return ViewType == TemplateViewType.Idle; } }
-        public override void Close() { ViewType = TemplateViewType.Close; }
-
         public override void Execute()
         {
-            switch (ViewType)
+            var viewType = (TemplateViewType)Enum.Parse(typeof(TemplateViewType), ViewType.ToString());
+            switch (viewType)
             {
                 case TemplateViewType.Idle:
                     View = new TemplateWindow(this);
@@ -46,20 +44,20 @@ namespace MyRevit.MyTests.Template
                     break;
                 case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
                         var targetType = Model.GetFilter();
                         Model.TargetIds = new List<ElementId>() { UIDocument.Selection.PickObject(ObjectType.Element, targetType, "请选择管道标注点").ElementId };
                         if (Model.TargetIds.Count > 0)
-                            ViewType = TemplateViewType.PickSinglePipe_Location;
+                            ViewType = (int)TemplateViewType.PickSinglePipe_Location;
                     }))
-                        ViewType = TemplateViewType.Idle;
+                        ViewType = (int)TemplateViewType.Idle;
                     Execute();
                     break;
                 case TemplateViewType.PickSinglePipe_Location:
-                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
                     {
                         ////业务逻辑处理
                         //var target = Document.GetElement(Model.TargetIds.First());
@@ -73,7 +71,7 @@ namespace MyRevit.MyTests.Template
                         //else
                         //    ViewType = TemplateViewType.GenerateSinglePipe;
                     }))
-                        ViewType = TemplateViewType.Idle;
+                        ViewType = (int)TemplateViewType.Idle;
                     Execute();
                     break;
                 case TemplateViewType.GenerateSinglePipe:
@@ -96,9 +94,9 @@ namespace MyRevit.MyTests.Template
                             Collection.Save(Document);
                             return true;
                         })))
-                            ViewType = TemplateViewType.PickSinglePipe_Pipe;
+                            ViewType = (int)TemplateViewType.PickSinglePipe_Pipe;
                     else
-                        ViewType = TemplateViewType.Idle;
+                        ViewType = (int)TemplateViewType.Idle;
                     Execute();
                     break;
                 default:

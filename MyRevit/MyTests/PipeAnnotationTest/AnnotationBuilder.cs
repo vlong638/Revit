@@ -39,6 +39,8 @@ namespace MyRevit.MyTests.PipeAnnotationTest
         public static Font Font = new Font("Angsana New", 20);
         public static double TextHeight = 150;
         public static VLUnitType UnitType = VLUnitType.millimeter;
+
+        public static double MiniValueForXYZ = 0.0001;
     }
     /// <summary>
     /// 标注生成类

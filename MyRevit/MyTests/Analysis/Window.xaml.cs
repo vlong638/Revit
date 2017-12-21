@@ -21,7 +21,7 @@ namespace MyRevit.MyTests.Analysis
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = AnalysisViewType.DisplayGeometry;
+            ViewModel.ViewType = (int)AnalysisViewType.DisplayGeometry;
             ViewModel.Execute();
         }
     }

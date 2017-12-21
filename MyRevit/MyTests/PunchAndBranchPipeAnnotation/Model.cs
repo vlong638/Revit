@@ -64,18 +64,28 @@ namespace MyRevit.MyTests.PBPA
         Bottom,
     }
 
-
-
     public class PBPAModel : VLModel
     {
-        public Document Document { set; get;}
+        public Document Document { set; get; }
 
         #region 留存数据
         public ElementId ViewId { get; internal set; }
         /// <summary>
+        /// 标注对象
+        /// </summary>
+        public PBPATargetType TargetType { set; get; }
+        /// <summary>
+        /// 离地模式
+        /// </summary>
+        public PBPALocationType LocationType { set; get; }
+        /// <summary>
         /// 标记样式
         /// </summary>
         public PBPAAnnotationType AnnotationType { set; get; }
+        /// <summary>
+        /// 标注前缀
+        /// </summary>
+        public string AnnotationPrefix { get; set; }
         /// <summary>
         /// 单一标注 目标对象
         /// </summary>
@@ -116,6 +126,7 @@ namespace MyRevit.MyTests.PBPA
 
 
         #region 非留存数据
+        public bool IsReversed { set; get; }
         public CoordinateType CoordinateType { set; get; }
         public bool IsRegenerate { set; get; }
         /// <summary>
@@ -126,12 +137,6 @@ namespace MyRevit.MyTests.PBPA
         public XYZ VerticalVector = null;//坐标定位,垂直于标注对象
 
         #endregion
-
-
-        public PBPATargetType TargetType { set; get; }//标注对象
-        public PBPALocationType LocationType { set; get; }//离地模式
-
-        public string AnnotationPrefix { get; internal set; }//标注前缀
 
         public PBPAModel() : base("")
         {
@@ -148,7 +153,10 @@ namespace MyRevit.MyTests.PBPA
             {
                 StringReader sr = new StringReader(data);
                 ViewId = sr.ReadFormatStringAsElementId();
+                TargetType = sr.ReadFormatStringAsEnum<PBPATargetType>();
+                LocationType = sr.ReadFormatStringAsEnum<PBPALocationType>();
                 AnnotationType = sr.ReadFormatStringAsEnum<PBPAAnnotationType>();
+                AnnotationPrefix = sr.ReadFormatString();
                 TargetId = sr.ReadFormatStringAsElementId();
                 LineIds = sr.ReadFormatStringAsElementIds();
                 AnnotationId = sr.ReadFormatStringAsElementId();
@@ -170,7 +178,10 @@ namespace MyRevit.MyTests.PBPA
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendItem(ViewId);
+            sb.AppendItem(TargetType);
+            sb.AppendItem(LocationType);
             sb.AppendItem(AnnotationType);
+            sb.AppendItem(AnnotationPrefix);
             sb.AppendItem(TargetId);
             sb.AppendItem(LineIds);
             sb.AppendItem(AnnotationId);
@@ -180,13 +191,13 @@ namespace MyRevit.MyTests.PBPA
             sb.AppendItem(TargetLocation);
             sb.AppendItem(AnnotationLocation);
             sb.AppendItem(CurrentFontWidthSize);
-            return sb.ToCollection();
+            return sb.ToData();
         }
 
         public ISelectionFilter GetFilter()
         {
             List<VLClassFilter> ClassFilters = new List<VLClassFilter>();
-            if ((int)(TargetType & PBPATargetType.BranchPipe) >0)
+            if ((int)(TargetType & PBPATargetType.BranchPipe) > 0)
             {
                 ClassFilters.Add(new VLClassFilter(typeof(FamilyInstance), false, (element) =>
                 {
@@ -250,10 +261,62 @@ namespace MyRevit.MyTests.PBPA
             return;
         }
 
+        private static bool IsRound(Element element)
+        {
+            var familyName = element.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString();
+            return familyName.Contains("圆形") && !familyName.Contains("椭圆形");
+        }
+
+        public bool IsPunch(Element element)
+        {
+            var familyName = element.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString();
+            return familyName.Contains("洞口");
+        }
+
+        private double GetDN(Element target)
+        {
+            switch (TargetType)
+            {
+                case PBPATargetType.BranchPipe:
+                    if (IsRound(target))
+                        return (Document.GetElement(target.GetTypeId()) as FamilySymbol).GetParameters(PBPAContext.SharedParameterWidth).First().AsDouble();
+                    else
+                        return (Document.GetElement(target.GetTypeId()) as FamilySymbol).GetParameters(PBPAContext.SharedParameterHeight).First().AsDouble();
+                //{
+                //    var symbol = (Document.GetElement(target.GetTypeId()) as FamilySymbol);
+                //    var height = symbol.GetParameters(PBPAContext.SharedParameterHeight);
+                //    return height.First().AsDouble();
+                //}
+                case PBPATargetType.Punch:
+                    if (IsRound(target))
+                        return (Document.GetElement(target.GetTypeId()) as FamilySymbol).GetParameters(PBPAContext.SharedParameterWidth).First().AsDouble();
+                    else
+                        return (Document.GetElement(target.GetTypeId()) as FamilySymbol).GetParameters(PBPAContext.SharedParameterHeight).First().AsDouble();
+                case PBPATargetType.BranchPipe | PBPATargetType.Punch:
+                default:
+                    throw new NotImplementedException("暂未支持该类型");
+            }
+        }
+
         internal string GetFull_L(Element target)
         {
-            var offset = UnitHelper.ConvertFromFootTo(target.GetParameters(PBPAContext.SharedParameterOffset).First().AsDouble(), VLUnitType.millimeter);
-            return AnnotationPrefix + offset;
+            var offset = (target as Instance).GetTotalTransform().Origin.Z;
+            switch (LocationType)
+            {
+                case PBPALocationType.Center:
+                    break;
+                case PBPALocationType.Top:
+                    var DN = GetDN(target);
+                    offset += DN / 2;
+                    break;
+                case PBPALocationType.Bottom:
+                    DN = GetDN(target);
+                    offset -= DN / 2;
+                    break;
+                default:
+                    break;
+            }
+            return AnnotationPrefix + UnitHelper.ConvertFromFootTo(offset, VLUnitType.millimeter).ToString("f1").TrimEnd(".0");
         }
 
         public FamilySymbol GetAnnotationFamily(Document doc, ElementId targetId)
@@ -275,22 +338,44 @@ namespace MyRevit.MyTests.PBPA
             UpdateVector(coordinateType);
 
             var target = Document.GetElement(TargetId);
-            var locationCurve =(target.Location as LocationCurve).Curve as Line;
+            var locationCurve = (target.Location as LocationCurve).Curve as Line;
             //干线起始点 
             var lineBound = Line.CreateBound(BodyStartPoint, BodyEndPoint);
             if (lineBound.VL_IsIntersect(locationCurve))
             {
                 var intersectionPoints = lineBound.VL_GetIntersectedOrContainedPoints(locationCurve);
                 if (intersectionPoints.Count == 1)
-                    BodyStartPoint = intersectionPoints.FirstOrDefault().ToSameZ(BodyStartPoint);
+                    BodyStartPoint = intersectionPoints.FirstOrDefault().ToSameZ(BodyEndPoint);//.ToSameZ(BodyStartPoint);
             }
             else { } //否则不改变原始坐标,仅重置
                      //支线终点
-            if (!IsRegenerate)
-                LeafEndPoint = BodyEndPoint + LineWidth * ParallelVector;
-            //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
-            //高度,宽度 取决于文本 
-            AnnotationLocation = BodyEndPoint;
+            if (AnnotationType == PBPAAnnotationType.OneLine)
+            {
+                if (!IsRegenerate)
+                    LeafEndPoint = BodyEndPoint + LineWidth * ParallelVector;
+                //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
+                //高度,宽度 取决于文本 
+                AnnotationLocation = BodyEndPoint;
+            }
+            else
+            {
+                if (!IsRegenerate)
+                    LeafEndPoint = BodyEndPoint + (IsReversed ? -LineWidth * ParallelVector : LineWidth * ParallelVector);
+                var bb = BodyEndPoint - BodyStartPoint;
+                var lb = (LeafEndPoint - BodyEndPoint);
+                if (lb.CrossProductByCoordinateType(bb, CoordinateType.XY) < 0)
+                {
+                    var temp = LeafEndPoint;
+                    LeafEndPoint = BodyEndPoint;
+                    BodyEndPoint = temp;
+                }
+                //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
+                //高度,宽度 取决于文本 
+                if (bb.CrossProductByCoordinateType(ParallelVector, CoordinateType.XY) < 0)
+                    AnnotationLocation = LeafEndPoint;
+                else
+                    AnnotationLocation = BodyEndPoint;
+            }
             return true;
         }
 
@@ -298,7 +383,7 @@ namespace MyRevit.MyTests.PBPA
         {
             var pVector = coordinateType.GetParallelVector();
             pVector = VLLocationHelper.GetVectorByQuadrant(pVector, QuadrantType.OneAndFour, coordinateType);
-            var vVector = VLLocationHelper.GetVerticalVector(pVector);
+            var vVector = VLLocationHelper.GetVerticalVector(pVector, CoordinateType.XY);
             vVector = VLLocationHelper.GetVectorByQuadrant(vVector, QuadrantType.OneAndFour, coordinateType);
             VerticalVector = vVector;
             ParallelVector = pVector;

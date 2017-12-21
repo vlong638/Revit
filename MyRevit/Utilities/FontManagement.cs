@@ -5,19 +5,17 @@ namespace MyRevit.Utilities
 {
     public class FontManagement
     {
-
-
         #region Orient
         /// <summary>
         /// 原始文本字体
         /// </summary>
-        public Font OrientFont = new Font("Angsana New", 12);//12码 4.23毫米
+        public Font OrientFont = new Font("华文仿宋", 12);//12码 4.23毫米
         /// <summary>
         /// 原始文本大小比例 以毫米表示
         /// </summary>
         public double OrientFontSizeScale = 4.23;
         public double OrientWidthSize = 25.4;
-        public double OrientHeight = 609;//338.4//针对4.23毫米的字体的高度
+        public double OrientHeight = 609.6;//609.6=25.4*24  338.4//针对4.23毫米的字体的高度
         #endregion
 
         #region Current
@@ -31,12 +29,12 @@ namespace MyRevit.Utilities
         /// </summary>
         /// <param name="textType"></param>
         /// <returns></returns>
-        public void SetCurrentFont(LineAndTextAttrSymbol textType)
+        public void SetCurrentFont(LineAndTextAttrSymbol textType, double heightCoefficient, double widthCoefficient)
         {
             CurrentFontSizeScale = UnitHelper.ConvertFromFootTo(textType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble(), VLUnitType.millimeter);//文本大小
             CurrentFontWidthScale = textType.get_Parameter(BuiltInParameter.TEXT_WIDTH_SCALE).AsDouble();//文本宽度系数
-            CurrentHeight = UnitHelper.ConvertToFoot(OrientHeight /OrientFontSizeScale * CurrentFontSizeScale, VLUnitType.millimeter);
-            CurrentFontWidthSize = UnitHelper.ConvertToFoot(OrientWidthSize / OrientFontSizeScale * CurrentFontSizeScale * CurrentFontWidthScale, VLUnitType.millimeter);
+            CurrentHeight = UnitHelper.ConvertToFoot(OrientHeight / OrientFontSizeScale * CurrentFontSizeScale, VLUnitType.millimeter) * heightCoefficient;
+            CurrentFontWidthSize = UnitHelper.ConvertToFoot(OrientWidthSize / OrientFontSizeScale * CurrentFontSizeScale * CurrentFontWidthScale, VLUnitType.millimeter) * widthCoefficient;
         }
 
         /// <summary>

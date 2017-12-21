@@ -5,6 +5,42 @@ namespace MyRevit.Utilities
 {
     class VLMouseHookHelper
     {
+        #region Sample
+        //KeyBoardHook KeyBoarHook;
+        //void Unhook()
+        //{
+        //    if (KeyBoarHook != null)
+        //    {
+        //        KeyBoarHook.UnHook();
+        //        KeyBoarHook.OnKeyDownEvent -= KeyBoarHook_OnKeyDownEvent;
+        //        GC.Collect();//增加GC防止窗体关闭后,钩子未被卸载.
+        //    }
+        //}
+
+        //void Hook()
+        //{
+        //    KeyBoarHook = new KeyBoardHook();
+        //    KeyBoarHook.SetHook();
+        //    KeyBoarHook.OnKeyDownEvent += KeyBoarHook_OnKeyDownEvent;
+        //}
+
+        ///// <summary>
+        ///// 钩子事件,监听ESC关闭窗体
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        ///// <returns></returns>
+        //int KeyBoarHook_OnKeyDownEvent(object sender, System.Windows.Forms.KeyEventArgs e)
+        //{
+        //    if (ViewModel != null && ViewModel.IsIdling && e.KeyData == System.Windows.Forms.Keys.Escape)
+        //    {
+        //        ViewModel.Close();
+        //        return 1;
+        //    }
+        //    return 0;
+        //} 
+        #endregion
+
         /// <summary>
         ///  Try Catch 流程模板
         /// </summary>
@@ -12,51 +48,30 @@ namespace MyRevit.Utilities
         /// <param name="func"></param>
         /// <param name="onError"></param>
         /// <returns></returns>
-        public static bool DelegateMouseHook(Action action)
+        public static bool DelegateKeyBoardHook(Action action)
         {
-            using (PmSoft.Common.RevitClass.PickObjectsMouseHook MouseHook = new PmSoft.Common.RevitClass.PickObjectsMouseHook())
+            KeyBoardHook hook = new KeyBoardHook();
+            hook.SetHook();
+            try
             {
-                MouseHook.InstallHook(PmSoft.Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
-                try
-                {
-                    action();
-                    MouseHook.UninstallHook();
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    //Log(ex);
-                    MouseHook.UninstallHook();
-                    return false;
-                }
+                action();
+                Unhook(hook);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Unhook(hook);
+                return false;
             }
         }
-        /// <summary>
-        ///  Try Catch 流程模板
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="onError"></param>
-        /// <returns></returns>
-        public static T DelegateMouseHook<T>(Func<T> func, Func<T> onError = null)
+
+        private static void Unhook(KeyBoardHook hook)
         {
-            using (PmSoft.Common.RevitClass.PickObjectsMouseHook MouseHook = new PmSoft.Common.RevitClass.PickObjectsMouseHook())
+            if (hook != null)
             {
-                MouseHook.InstallHook(PmSoft.Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
-                try
-                {
-                    var result = func();
-                    MouseHook.UninstallHook();
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    //Log(ex);
-                    MouseHook.UninstallHook();
-                    onError?.Invoke();
-                }
+                hook.UnHook();
+                GC.Collect();
             }
-            return default(T);
         }
         /// <summary>
         /// 异常记录,有待优化

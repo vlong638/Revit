@@ -41,6 +41,8 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     var itemToDelete = collection.Data.FirstOrDefault(c => c.TargetId == deleteId);
                     if (itemToDelete == null)
                         itemToDelete = collection.Data.FirstOrDefault(c => c.AnnotationId == deleteId);
+                    if (itemToDelete == null)
+                        itemToDelete = collection.Data.FirstOrDefault(c => c.LineIds.Contains(deleteId));
                     if (itemToDelete != null)
                     {
                         itemToDelete.Document = doc;
@@ -50,7 +52,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                     }
                 }
                 if (isDeleted)
-                    PBPAContext.Save(doc);
+                    PBPAContext.SaveCollection(doc);
             }
             catch (Exception ex)
             {

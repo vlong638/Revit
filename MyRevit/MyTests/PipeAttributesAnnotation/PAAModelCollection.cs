@@ -19,7 +19,7 @@ namespace MyRevit.MyTests.PAA
         /// <param name="doc"></param>
         public void Save(Document doc)
         {
-            PAAContext.Save(doc);
+            PAAContext.SaveCollection(doc);
         }
     }
 }

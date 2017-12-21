@@ -23,7 +23,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
 
         private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            ViewModel.ViewType = CSAViewType.Close;
+            ViewModel.ViewType = (int)CSAViewType.Close;
             DialogResult = true;
         }
 
@@ -34,14 +34,14 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 MessageBox.Show("请先选择文字样式");
                 return;
             }
-            ViewModel.ViewType = CSAViewType.Select;
+            ViewModel.ViewType = (int)CSAViewType.Select;
             DialogResult = true;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (ViewModel.ViewType!=CSAViewType.Select)
-                ViewModel.ViewType = CSAViewType.Close;
+            if (ViewModel.ViewType!= (int)CSAViewType.Select)
+                ViewModel.ViewType = (int)CSAViewType.Close;
             base.OnClosing(e);
         }
     }

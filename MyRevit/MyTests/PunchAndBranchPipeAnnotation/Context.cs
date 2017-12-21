@@ -5,7 +5,7 @@ using PmSoft.Optimization.DrawingProduction.Utils;
 
 namespace MyRevit.MyTests.PBPA
 {
-    class PBPAContext
+    public class PBPAContext
     {
         #region Creator
         private static PBPACreator _Creator = null;
@@ -22,8 +22,10 @@ namespace MyRevit.MyTests.PBPA
 
         #region Storage
         public static bool IsEditing;
-        private static PBPAModelCollection Collection;
         private static PBPAStorageEntity CStorageEntity = new PBPAStorageEntity();
+
+        #region Collection
+        static PBPAModelCollection Collection;
         /// <summary>
         /// 取数据Collection
         /// </summary>
@@ -44,12 +46,11 @@ namespace MyRevit.MyTests.PBPA
             );
             return Collection;
         }
-
         /// <summary>
         /// 保存Collection
         /// </summary>
         /// <param name="doc"></param>
-        public static bool Save(Document doc)
+        public static bool SaveCollection(Document doc)
         {
             if (Collection == null)
                 return false;
@@ -68,6 +69,55 @@ namespace MyRevit.MyTests.PBPA
                 }
             );
         }
+        #endregion
+
+        #region Setting
+        static PBPASetting Setting { set; get; }
+        /// <summary>
+        /// 取数据Setting
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
+        public static PBPASetting GetSetting(Document doc)
+        {
+            Setting = DelegateHelper.DelegateTryCatch(
+                () =>
+                {
+                    string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting);
+                    return new PBPASetting(data);
+                },
+                () =>
+                {
+                    return new PBPASetting("");
+                }
+            );
+            return Setting;
+        }
+        /// <summary>
+        /// 保存Setting
+        /// </summary>
+        /// <param name="doc"></param>
+        public static bool SaveSetting(Document doc)
+        {
+            if (Setting == null)
+                return false;
+            var data = Setting.ToData();
+            return DelegateHelper.DelegateTryCatch(
+                () =>
+                {
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting, data);
+                    return true;
+                },
+                () =>
+                {
+                    ExtensibleStorageHelper.RemoveStorage(doc, CStorageEntity);
+                    ExtensibleStorageHelper.SetData(doc, CStorageEntity, CStorageEntity.FieldOfSetting, data);
+                    return false;
+                }
+            );
+        }
+        #endregion
+
         #endregion
 
         #region Family
@@ -104,6 +154,9 @@ namespace MyRevit.MyTests.PBPA
         //共享参数
         public static string SharedParameterGroupName = "出图深化";
         public static string SharedParameterPL = "开洞或套管高度";
-        public static string SharedParameterOffset = "偏移量";
+        //public static string SharedParameterOffset = "偏移量";
+        public static string SharedParameterDiameter = "直径";
+        public static string SharedParameterHeight = "高度";
+        public static string SharedParameterWidth = "宽度";
     }
 }

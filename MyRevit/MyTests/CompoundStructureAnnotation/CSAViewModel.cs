@@ -15,7 +15,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
     /// <summary>
     /// CompoundStructureAnnotation ViewModel
     /// </summary>
-    public class CSAViewModel : VLViewModel<CSAModel,CompoundStructureAnnotationWindow, CSAViewType>
+    public class CSAViewModel : VLViewModel<CSAModel, CompoundStructureAnnotationWindow>
     {
         public CSAViewModel(UIApplication app) : base(app)
         {
@@ -65,19 +65,12 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                 this.RaisePropertyChanged("Type");
             }
         }
-
-        public override bool IsIdling
-        {
-            get
-            {
-                return ViewType == CSAViewType.Idle;
-            }
-        }
         #endregion
 
         public override void Execute()
         {
-            switch (ViewType)
+            var viewType = (CSAViewType)Enum.Parse(typeof(CSAViewType), ViewType.ToString());
+            switch (viewType)
             {
                 case CSAViewType.Idle:
                     View = new CompoundStructureAnnotationWindow(this);
@@ -97,18 +90,18 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             Model.TargetId = UIDocument.Selection.PickObject(ObjectType.Element
                                 , new VLClassesFilter(false, typeof(Wall), typeof(Floor), typeof(ExtrusionRoof), typeof(FootPrintRoof))).ElementId;
                             MouseHook.UninstallHook();
-                            ViewType = CSAViewType.Generate;
+                            ViewType = (int)CSAViewType.Generate;
                         }
                         catch (Exception ex)
                         {
                             MouseHook.UninstallHook();
-                            ViewType = CSAViewType.Idle;
+                            ViewType = (int)CSAViewType.Idle;
                         }
                     }
                     break;
                 case CSAViewType.Generate:
                     var doc = UIDocument.Document;
-                    if (VLTransactionHelper.DelegateTransaction(doc, "生成结构标注", (Func<bool>)(() =>
+                    if (VLTransactionHelper.DelegateTransaction(doc, "生成结构标注", () =>
                     {
                         var element = doc.GetElement(Model.TargetId);
                         var Collection = CSAContext.GetCollection(doc);
@@ -119,26 +112,24 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
                             Collection.Data.Remove(existedModel);
                             CSAContext.Creator.Clear(doc, existedModel);
                         }
+                        var fontScale = 1 / VLConstraintsForCSA.OrientFontSizeScale * Model.CurrentFontSizeScale;
+                        Model.LineWidth = UnitHelper.ConvertToFoot(Model.CSALocationType.GetLineWidth() * fontScale, VLUnitType.millimeter);
                         CSAContext.Creator.Generate(doc, Model, element);
                         Collection.Data.Add(Model);
                         Collection.Save(doc);
                         return true;
-                    })))
-                        ViewType = CSAViewType.Select;
+                    }))
+                        ViewType = (int)CSAViewType.Select;
                     else
-                        ViewType = CSAViewType.Idle;
+                        ViewType = (int)CSAViewType.Idle;
                     break;
                 case CSAViewType.Close:
                     View.Close();
                     break;
+                case CSAViewType.Closing:
                 default:
                     break;
             }
-        }
-
-        public override void Close()
-        {
-            ViewType = CSAViewType.Close;
         }
     }
 }

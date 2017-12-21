@@ -21,7 +21,7 @@ namespace MyRevit.MyTests.Template
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = TemplateViewType.PickSinglePipe_Pipe;
+            ViewModel.ViewType = (int)TemplateViewType.PickSinglePipe_Pipe;
             ViewModel.Execute();
         }
 
@@ -30,7 +30,7 @@ namespace MyRevit.MyTests.Template
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = TemplateViewType.PickMultiplePipes;
+            ViewModel.ViewType = (int)TemplateViewType.PickMultiplePipes;
             ViewModel.Execute();
         }
     }

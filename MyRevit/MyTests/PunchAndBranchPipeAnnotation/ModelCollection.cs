@@ -19,7 +19,7 @@ namespace MyRevit.MyTests.PBPA
         /// <param name="doc"></param>
         public void Save(Document doc)
         {
-            PBPAContext.Save(doc);
+            PBPAContext.SaveCollection(doc);
         }
     }
 }

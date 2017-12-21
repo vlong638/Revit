@@ -8,13 +8,13 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\
 MyRevit
 none
 false
-DEBUG;TRACE
+TRACE;DEBUG;Revit2016
 
 101776105430
 191292709687
-220-281994307
+223848212141
 35-1398852450
 MyTests\Analysis\Window.xaml;MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\Window.xaml;MyTests\Template\Window.xaml;MyTests\Template\ResourceDictionary.xaml;Utilities\DrawAreaView.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
 
-False
+True
 

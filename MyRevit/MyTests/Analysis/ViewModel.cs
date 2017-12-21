@@ -27,7 +27,7 @@ namespace MyRevit.MyTests.Analysis
         DisplayGeometry,
     }
 
-    public class AnalysisViewModel : VLViewModel<AnalysisModel, AnalysisWindow, AnalysisViewType>
+    public class AnalysisViewModel : VLViewModel<AnalysisModel, AnalysisWindow>
     {
         public AnalysisViewModel(UIApplication app) : base(app)
         {
@@ -41,13 +41,11 @@ namespace MyRevit.MyTests.Analysis
             //AnnotationType = AnalysisAnnotationType.SPL;
             //LocationType = AnalysisLocationType.Center;
         }
-
-        public override bool IsIdling { get { return ViewType == AnalysisViewType.Idle; } }
-        public override void Close() { ViewType = AnalysisViewType.Close; }
-
+        
         public override void Execute()
         {
-            switch (ViewType)
+            var viewType = (AnalysisViewType)Enum.Parse(typeof(AnalysisViewType), ViewType.ToString());
+            switch (viewType)
             {
                 case AnalysisViewType.Idle:
                     View = new AnalysisWindow(this);
@@ -58,13 +56,13 @@ namespace MyRevit.MyTests.Analysis
                     break;
                 case AnalysisViewType.DisplayGeometry:
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateMouseHook(() =>
+                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
                     {
                         Model.TargetId = UIDocument.Selection.PickObject(ObjectType.Element, "请选择对象").ElementId;
                     }))
                     {
                         Model.TargetId = null;
-                        ViewType = AnalysisViewType.Idle;
+                        ViewType = (int)AnalysisViewType.Idle;
                     }
                     if (VLTransactionHelper.DelegateTransaction(Document, "DisplayGeometry", () =>
                     {
@@ -84,9 +82,9 @@ namespace MyRevit.MyTests.Analysis
                         AnalysisContext.SaveCollection(Document);
                         return true;
                     }))
-                        ViewType = AnalysisViewType.DisplayGeometry;
+                        ViewType = (int)AnalysisViewType.DisplayGeometry;
                     else
-                        ViewType = AnalysisViewType.Idle;
+                        ViewType = (int)AnalysisViewType.Idle;
                     Execute();
                     break;
                 default:

@@ -22,7 +22,7 @@ namespace MyRevit.MyTests.PBPA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PBPAViewType.PickSingle_Target;
+            ViewModel.ViewType = (int)PBPAViewType.PickSingle_Target;
             ViewModel.Execute();
         }
 
@@ -32,7 +32,7 @@ namespace MyRevit.MyTests.PBPA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = PBPAViewType.Close;
+            ViewModel.ViewType = (int)PBPAViewType.Close;
             ViewModel.Execute();
         }
     }

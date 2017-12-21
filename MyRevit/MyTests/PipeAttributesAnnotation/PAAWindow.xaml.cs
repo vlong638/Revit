@@ -2,9 +2,6 @@
 
 namespace MyRevit.MyTests.PAA
 {
-    /// <summary>
-    /// TemplateWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class PAAWindow : VLWindow
     {
         public new PAAViewModel ViewModel { set; get; }
@@ -21,7 +18,7 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.UpdateViewType(true);
+            ViewModel.UpdateViewType(1);
             ViewModel.Execute();
         }
 
@@ -30,7 +27,16 @@ namespace MyRevit.MyTests.PAA
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.UpdateViewType(false);
+            ViewModel.UpdateViewType(2);
+            ViewModel.Execute();
+        }
+
+        private void Btn_3_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (!ViewModel.IsIdling)
+                return;
+
+            ViewModel.UpdateViewType(3);
             ViewModel.Execute();
         }
     }
