@@ -3,7 +3,7 @@ using System;
 
 namespace MyRevit.Utilities
 {
-    class VLMouseHookHelper
+    class VLHookHelper
     {
         #region Sample
         //KeyBoardHook KeyBoarHook;
@@ -41,6 +41,35 @@ namespace MyRevit.Utilities
         //} 
         #endregion
 
+        #region Mouse
+        /// <summary>
+        ///  Try Catch 流程模板
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="func"></param>
+        /// <param name="onError"></param>
+        /// <returns></returns>
+        public static bool DelegateMouseHook(Action action)
+        {
+            using (PmSoft.Common.RevitClass.PickObjectsMouseHook MouseHook = new PmSoft.Common.RevitClass.PickObjectsMouseHook())
+            {
+                MouseHook.InstallHook(PmSoft.Common.RevitClass.PickObjectsMouseHook.OKModeENUM.Objects);
+                try
+                {
+                    action();
+                    MouseHook.UninstallHook();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MouseHook.UninstallHook();
+                    return false;
+                }
+            }
+        } 
+        #endregion
+
+        #region KeyBoard
         /// <summary>
         ///  Try Catch 流程模板
         /// </summary>
@@ -64,7 +93,6 @@ namespace MyRevit.Utilities
                 return false;
             }
         }
-
         private static void Unhook(KeyBoardHook hook)
         {
             if (hook != null)
@@ -72,7 +100,9 @@ namespace MyRevit.Utilities
                 hook.UnHook();
                 GC.Collect();
             }
-        }
+        } 
+        #endregion
+
         /// <summary>
         /// 异常记录,有待优化
         /// </summary>

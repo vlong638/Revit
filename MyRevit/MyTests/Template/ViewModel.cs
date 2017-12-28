@@ -44,7 +44,7 @@ namespace MyRevit.MyTests.Template
                     break;
                 case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -57,7 +57,7 @@ namespace MyRevit.MyTests.Template
                     Execute();
                     break;
                 case TemplateViewType.PickSinglePipe_Location:
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         ////业务逻辑处理
                         //var target = Document.GetElement(Model.TargetIds.First());

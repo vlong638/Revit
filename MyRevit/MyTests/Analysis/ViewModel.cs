@@ -56,7 +56,7 @@ namespace MyRevit.MyTests.Analysis
                     break;
                 case AnalysisViewType.DisplayGeometry:
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         Model.TargetId = UIDocument.Selection.PickObject(ObjectType.Element, "请选择对象").ElementId;
                     }))

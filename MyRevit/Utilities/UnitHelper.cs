@@ -16,7 +16,7 @@ namespace MyRevit.Utilities
     /// </summary>
     public class UnitHelper
     {
-        public static double MiniValueForXYZ = 0.001;
+        public static double MiniValueForXYZ = 0.0038;
 
         #region Foot,英尺
         /// <summary>

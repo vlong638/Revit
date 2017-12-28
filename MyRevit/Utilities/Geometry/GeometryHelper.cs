@@ -102,7 +102,7 @@ namespace MyRevit.MyTests.Utilities
                 return next + ((pre.Y - next.Y) / nextDirection.Y) * nextDirection;
             else
                 throw new NotImplementedException("计算错误");
-                //return next + ((pre.Z - next.Z) / nextDirection.Z) * nextDirection;
+            //return next + ((pre.Z - next.Z) / nextDirection.Z) * nextDirection;
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace MyRevit.MyTests.Utilities
                     y0 = beam0.Y;
                     x0 = double.IsNaN(kBoard) || double.IsInfinity(kBoard) ? board0.X : (y0 - board0.Y) / kBoard + board0.X;
                 }
-                else if (double.IsNaN(kBoard)|| double.IsInfinity(kBoard))
+                else if (double.IsNaN(kBoard) || double.IsInfinity(kBoard))
                 {
                     x0 = board0.X;
                     y0 = kBeam * (board0.X - beam0.X) + beam0.Y;
@@ -195,7 +195,7 @@ namespace MyRevit.MyTests.Utilities
             return (p1_0.X < p1_1.X || (p1_0.X == p1_1.X && p1_0.Y <= p1_1.Y)) ? p1_0 : p1_1;
         }
         /// <summary>
-        /// 获得左下的点,相同返回前点
+        /// 获得左上的点,相同返回前点
         /// </summary>
         public static XYZ GetLeftUp(XYZ p0, XYZ p1)
         {
@@ -214,7 +214,7 @@ namespace MyRevit.MyTests.Utilities
             {
                 var tPoints = edge.Tessellate();
                 //链接顺序 1S-1E,2E-1S,3E-2S,4E-3S
-                for (int i = tPoints.Count()-1; i >=0 ; i--)
+                for (int i = tPoints.Count() - 1; i >= 0; i--)
                 {
                     var point = tPoints[i];
                     if (points.FirstOrDefault(c => c.IsAlmostEqualTo(point, ConstraintsOfBeamAlignToFloor.XYZTolerance)) == null)
@@ -311,7 +311,7 @@ namespace MyRevit.MyTests.Utilities
                     return false;
             }
             return true;
-        } 
+        }
         #endregion
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace MyRevit.MyTests.Utilities
             List<XYZ> points = new List<XYZ>();
             points.Add(line.GetEndPoint(0));
             points.Add(line.GetEndPoint(1));
-            if (PlanarContains(triangles,points))
+            if (PlanarContains(triangles, points))
                 return VLCoverType.Contain;
             return VLCoverType.Disjoint;
         }
@@ -368,7 +368,7 @@ namespace MyRevit.MyTests.Utilities
         /// t = (vT·pT - vT·pL)/(vT·vL)
         /// p = pL + t*vL
         /// </summary>
-        public  static XYZ GetIntersection(Triangle triangle, XYZ point, XYZ direction)
+        public static XYZ GetIntersection(Triangle triangle, XYZ point, XYZ direction)
         {
             var pT = triangle.A;
             var vT = (triangle.B - triangle.A).CrossProduct(triangle.C - triangle.A);

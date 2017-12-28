@@ -143,6 +143,10 @@
     <Compile Include="MyTests\MepCurveAvoid\old\MEPCurveConnectControlService.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\MEPCurveTurnControlService.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\RevitElementCommon.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\调研_区段避让.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\调研_类型区分_碰撞检测.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\调研_连续避让.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\调研_单点避让.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdater_Delete.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdater_Edit.cs" />
     <Compile Include="MyTests\PipeAttributesAnnotation\Updater\PAAUpdaterCommand.cs" />

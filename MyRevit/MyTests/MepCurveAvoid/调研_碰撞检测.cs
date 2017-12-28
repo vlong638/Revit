@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace MyRevit.Entities
 {
-
     [Transaction(TransactionMode.Manual)]
     public class 调研_碰撞检测 : IExternalCommand
     {
@@ -29,13 +28,10 @@ namespace MyRevit.Entities
             {
                 ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(pickedElement);
                 var conflict = pickedElements.Where(c => filter.PassesFilter(c)).ToList();
+                var conflictIds = conflict.Select(c => c.Id);
+                var conflictIds2 = string.Join(",", conflictIds);
             }
             return Result.Succeeded;
-        }
-
-        private static void TaskDialogShow(string message)
-        {
-            TaskDialog.Show("a", message);
         }
     }
 }

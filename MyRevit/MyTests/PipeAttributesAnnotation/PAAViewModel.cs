@@ -560,7 +560,7 @@ namespace MyRevit.MyTests.PAA
                     UpdateSetting();
                     MemoHelper.UpdateDifference(Document, Setting, false);
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -713,7 +713,7 @@ namespace MyRevit.MyTests.PAA
                     UpdateSetting();
                     MemoHelper.UpdateDifference(Document, Setting, false);
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -798,7 +798,7 @@ namespace MyRevit.MyTests.PAA
                     MemoHelper.UpdateDifference(Document, Setting, false);
                     View.Close();
                     #region 对象选择及必要族信息加载
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤

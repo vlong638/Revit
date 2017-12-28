@@ -296,7 +296,7 @@ namespace MyRevit.MyTests.PBPA
                     Model.Document = Document;
                     Model.ViewId = Document.ActiveView.Id;
                     View.Close();
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //业务逻辑处理
                         //选择符合类型的过滤
@@ -325,7 +325,7 @@ namespace MyRevit.MyTests.PBPA
                     break;
                 case PBPAViewType.PickSingle_End:
                     //业务逻辑处理
-                    if (!VLMouseHookHelper.DelegateKeyBoardHook(() =>
+                    if (!VLHookHelper.DelegateKeyBoardHook(() =>
                     {
                         //var locationCurve = (target.Location as LocationCurve).Curve as Line;
                         //XYZ vVector, pVector;

@@ -2,6 +2,12 @@
 <RevitAddIns>
   <AddIn Type="Command">
     <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
+    <ClientId>4D882905-C452-4C87-B285-4C31C9089C19</ClientId>
+    <FullClassName>MyRevit.Entities.调研_碰撞检测</FullClassName>
+    <VendorId>VL</VendorId>
+  </AddIn>
+  <AddIn Type="Command">
+    <Assembly>E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\MyRevit.dll</Assembly>
     <ClientId>429F2A2D-8A5E-476E-B465-246D92605AAA</ClientId>
     <FullClassName>MyRevit.MyTests.BeamAlignToFloor.CommandOfCompoundStructureAnnotation</FullClassName>
     <VendorId>VL</VendorId>

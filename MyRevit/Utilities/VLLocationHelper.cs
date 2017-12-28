@@ -122,7 +122,7 @@ namespace MyRevit.Utilities
         /// <param name="vector"></param>
         /// <param name="quadrantType"></param>
         /// <returns></returns>
-        public static XYZ GetVectorByQuadrant(XYZ vector, QuadrantType quadrantType, CoordinateType coordinateType = CoordinateType.XY)
+        public static XYZ GetVectorByQuadrant(this XYZ vector, QuadrantType quadrantType, CoordinateType coordinateType = CoordinateType.XY)
         {
             var result = vector;
             switch (quadrantType)
@@ -161,6 +161,34 @@ namespace MyRevit.Utilities
                     throw new NotImplementedException("");
             }
         }
+
+        public static double DotProductByCoordinate(this XYZ vector, XYZ vector2, CoordinateType coordinateType = CoordinateType.XY)
+        {
+            switch (coordinateType)
+            {
+                case CoordinateType.XY:
+                    return vector.X * vector2.X + vector.Y * vector2.Y;
+                case CoordinateType.YZ:
+                case CoordinateType.XZ:
+                default:
+                    throw new NotImplementedException("");
+            }
+        }
+
+        public static double GetLengthByCoordinate(this XYZ vector, CoordinateType coordinateType = CoordinateType.XY)
+        {
+            switch (coordinateType)
+            {
+                case CoordinateType.XY:
+                    return Math.Sqrt(vector.X * vector.X + vector.Y * vector.Y);
+                case CoordinateType.YZ:
+                case CoordinateType.XZ:
+                default:
+                    throw new NotImplementedException("");
+            }
+        }
+
+
 
         #region 平面XYZ
         public enum XYZAxle

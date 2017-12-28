@@ -136,7 +136,7 @@ namespace MyRevit.Utilities
             //选点
             System.Windows.Forms.Timer timer = null;
             DrawAreaView view = null;
-            VLMouseHookHelper.DelegateKeyBoardHook(() =>
+            VLHookHelper.DelegateKeyBoardHook(() =>
             {
                 IntPtr intPtr = Process.GetCurrentProcess().MainWindowHandle;
                 view = new DrawAreaView(uiApp, coordinateType);
