@@ -139,6 +139,14 @@
     <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
     <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElementType.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElemntManager.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElement.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictElement.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictNode.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictNodeDealType.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElementValueGroup.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\ValuedConflictNode.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\BaseControlService.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\MEPCurveConnectControlService.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\MEPCurveTurnControlService.cs" />
@@ -165,6 +173,7 @@
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Delete.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Edit.cs" />
     <Compile Include="MyTests\MepCurveAvoid\调研_碰撞检测.cs" />
+    <Compile Include="References\UnitTransUtils.cs" />
     <Compile Include="Utilities\VLElementIdComparer.cs" />
     <Compile Include="Utilities\VLPointPicker.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Command.cs" />
@@ -189,7 +198,6 @@
     <Compile Include="MyTests\Template\Window.xaml.cs">
       <DependentUpon>Window.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyTests\Template\VLPointPicker.cs" />
     <Compile Include="MyTests\VLBase\VLConstraints.cs" />
     <Compile Include="MyTests\VLBase\VLStorable.cs" />
     <Compile Include="MyTests\VLBase\VLViewModel.cs" />
@@ -408,7 +416,7 @@
     <Compile Include="Utilities\VLSharedParameterHelper.cs" />
     <Compile Include="Utilities\VLStringHelper.cs" />
     <Compile Include="Utilities\VLTransactionHelper.cs" />
-    <Compile Include="Utilities\UnitTransUtils.cs" />
+    <Compile Include="Utilities\VLUnitTransUtils.cs" />
     <EmbeddedResource Include="MyTests\EarthWork\UI\EarthworkBlockCPSettingsForm.resx">
       <DependentUpon>EarthworkBlockCPSettingsForm.cs</DependentUpon>
       <SubType>Designer</SubType>

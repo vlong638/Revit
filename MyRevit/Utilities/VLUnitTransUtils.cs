@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace MyRevit.Utilities
 {
-    public class UnitTransUtils
+    public class VLUnitTransUtils
     {
         #region 英寸毫米转化
         /// <summary>

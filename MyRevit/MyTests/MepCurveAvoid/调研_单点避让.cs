@@ -6,6 +6,7 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MyRevit.Entities;
+using MyRevit.MyTests.MepCurveAvoid;
 using MyRevit.MyTests.Utilities;
 using MyRevit.Utilities;
 using System.Collections.Generic;

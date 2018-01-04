@@ -11,8 +11,9 @@ namespace MyRevit.MyTests.Template
 {
     public enum TemplateViewType
     {
-        Idle,//闲置
-        Close,//关闭
+        Closing = -1,//右上角或Alt+F4关闭
+        Close = 0,//按钮关闭或ESC关闭
+        Idle = 1,//闲置
         PickSinglePipe_Pipe,//选择单管 管道
         PickSinglePipe_Location,//选择单管 定位
         GenerateSinglePipe,//单管标注生成
@@ -26,6 +27,7 @@ namespace MyRevit.MyTests.Template
             Model = new TemplateModel("");
             View = new TemplateWindow(this);
             //用以打开时更新页面
+            //LoadSetting();
             AnnotationType = TemplateAnnotationType.SPL;
             LocationType = TemplateLocationType.Center;
         }
@@ -41,6 +43,10 @@ namespace MyRevit.MyTests.Template
                     break;
                 case TemplateViewType.Close:
                     View.Close();
+                    //SaveSetting();
+                    break;
+                case TemplateViewType.Closing:
+                    //SaveSetting();
                     break;
                 case TemplateViewType.PickSinglePipe_Pipe:
                     View.Close();
