@@ -13,7 +13,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// </summary>
     public class XYZComparer : IComparer<XYZ>
     {
-        public int Compare(XYZ a ,XYZ b)
+        public int Compare(XYZ a, XYZ b)
         {
             return a.X > b.X || ((a.X - b.X).IsMiniValue() && a.Y > b.Y) ? 1 : -1;
         }
@@ -107,17 +107,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
             if (c1 != null)
             {
                 if (new XYZComparer().Compare(c1.Origin, middle) > 0)
-                    ConnectorEnd = c1;
-                else
                     ConnectorStart = c1;
+                else
+                    ConnectorEnd = c1;
             }
             var c2 = MEPElement.ConnectorManager.Connectors.GetConnectorById(1);
             if (c2 != null)
             {
                 if (new XYZComparer().Compare(c2.Origin, middle) > 0)
-                    ConnectorEnd = c2;
-                else
                     ConnectorStart = c2;
+                else
+                    ConnectorEnd = c2;
             }
         }
 
@@ -206,7 +206,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public List<ConflictElement> ConflictElements { set; get; }
 
 
-        internal void SetConflictElements(List<AvoidElement> elementsToAvoid,List<ValuedConflictNode> conflictNodes)
+        internal void SetConflictElements(List<AvoidElement> elementsToAvoid, List<ValuedConflictNode> conflictNodes)
         {
             ConflictElements = new List<ConflictElement>();
             ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(MEPElement);
@@ -216,9 +216,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var conflictLocation = GetConflictPoint(conflictElement.MEPElement);
                 if (conflictLocation != null)
                     ConflictElements.Add(new ConflictElement(this, conflictLocation, conflictElement));
-                conflictNodes.FirstOrDefault(c => c.ConflictLocation.VL_XYZEqualTo(conflictLocation) && (c.ValueNode1.AvoidElement == this || c.ValueNode2.AvoidElement == this));
-                if (conflictLocation == null)
-                    conflictNodes.Add(new ValuedConflictNode(this, conflictLocation, conflictElement));
+                if (conflictLocation != null)
+                    if (conflictNodes.FirstOrDefault(c => c.ConflictLocation.VL_XYZEqualTo(conflictLocation) && (c.ValueNode1.OrientAvoidElement == this || c.ValueNode2.OrientAvoidElement == this)) == null)
+                        conflictNodes.Add(new ValuedConflictNode(this, conflictLocation, conflictElement));
             }
             ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer());
 
@@ -300,5 +300,99 @@ namespace MyRevit.MyTests.MepCurveAvoid
             return null;
         }
         #endregion
+
+        //public static IList<MEPCurve> GetConnectingMEPs(this FamilyInstance fi)
+        //{
+        //    List<MEPCurve> list = new List<MEPCurve>();
+        //    if (fi.MEPModel == null || fi.MEPModel.ConnectorManager == null)
+        //        return list;
+
+        //    foreach (Connector con in fi.MEPModel.ConnectorManager.Connectors)
+        //    {
+        //        var linkedCon = con.GetConnectedConnector();
+        //        while (linkedCon != null && linkedCon.Owner is FamilyInstance)
+        //        {
+        //            var linkedFi = linkedCon.Owner as FamilyInstance;
+        //            var linkedAnotherCon = linkedFi.GetAnthorConnector(linkedCon);
+        //            if (linkedAnotherCon != null)
+        //                linkedCon = linkedAnotherCon.GetConnectedConnector();
+        //            else
+        //                linkedCon = null;
+        //        }
+
+        //        if (linkedCon != null && linkedCon.Owner is MEPCurve)
+        //            list.Add(linkedCon.Owner as MEPCurve);
+        //    }
+
+        //    return list;
+        //}
+
+
+        ///// <summary>
+        ///// 获取相连的连接点
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <returns></returns>
+        //public static Connector GetConnectedConnector(this Connector src)
+        //{
+        //    if (src.ConnectorType == ConnectorType.MasterSurface || src.ConnectorType == ConnectorType.Logical)
+        //        return null;
+
+        //    if (!src.IsConnected)
+        //        return null;
+
+        //    foreach (Connector con in src.AllRefs)
+        //    {
+        //        if (con.IsConnectedTo(src) && con.Owner.Id != src.Owner.Id && con.Shape != ConnectorProfileType.Invalid)
+        //            return con;
+        //    }
+
+        //    return null;
+        //}
+
+        /// <summary>
+        /// 获取相连的连接点
+        /// </summary>
+        /// <param name="src"></param>
+        /// <returns></returns>
+        public static List<MEPCurve> GetConnectedMepElements(this Connector src)
+        {
+            List<MEPCurve> result = new List<MEPCurve>();
+            if (src.ConnectorType == ConnectorType.MasterSurface || src.ConnectorType == ConnectorType.Logical)
+                return result;
+            if (!src.IsConnected)
+                return result;
+            foreach (Connector con in src.AllRefs)
+            {
+                if (con.IsConnectedTo(src) && con.Owner.Id != src.Owner.Id && con.Shape != ConnectorProfileType.Invalid)
+                {
+                    // 弯头 三通 四通
+                    var fi = con.Owner as FamilyInstance;
+                    if (fi != null)
+                    {
+                        for (int i = 0; i < fi.MEPModel.ConnectorManager.Connectors.Size; i++)
+                        {
+                            var subConnector = fi.MEPModel.ConnectorManager.Connectors.GetConnectorById(i);
+                            if (subConnector == null || !subConnector.IsConnected)
+                                continue;
+                            var link = subConnector.GetConnectedConnector();
+                            if (link == null)
+                                continue;
+                            if (link.Owner is MEPCurve)
+                            {
+                                result.Add(link.Owner as MEPCurve);
+                            }
+                            else
+                            {
+                                //TODO 其他连接件情况
+                                continue;
+                            }
+                        }
+                    }
+                    //TODO 其他连接件情况
+                }
+            }
+            return result;
+        }
     }
 }

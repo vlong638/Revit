@@ -32,10 +32,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public bool IsSettled { get { return (ValueNode1.IsSettled && ValueNode2.IsSettled); } }
         internal void Settle(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
-            if (ValueNode1.IsSettled)
-                ValueNode1.SettleValue(ConflictLocation, conflictNodes, avoidElements);
-            if (ValueNode2.IsSettled)
-                ValueNode1.SettleValue(ConflictLocation, conflictNodes, avoidElements);
+            if (IsSettled)
+                return;
+
+            ValueNode1.SettleValue(ConflictLocation, conflictNodes, avoidElements);
+            ValueNode2.SettleValue(ConflictLocation, conflictNodes, avoidElements);
         }
         #endregion
     }

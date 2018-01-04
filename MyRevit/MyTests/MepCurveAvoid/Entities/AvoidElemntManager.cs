@@ -38,7 +38,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
             for (int i = ConflictNodes.Count()-1; i >= 0; i--)
             {
                 var conflictNode = ConflictNodes[i];
-                if (conflictNode.IsSettled)
                     conflictNode.Settle(ConflictNodes, AvoidElements);
             }
         }

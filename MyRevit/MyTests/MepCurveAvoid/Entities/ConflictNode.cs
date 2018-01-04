@@ -8,7 +8,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// <summary>
     /// 线的价值取决于为其避让的元素的总和
     /// </summary>
-    public class ConflictLine: List<ConflictElement> 
+    public class ConflictLineSection : List<ConflictElement>
     {
         //public List<ConflictElement> ConflictElements { set; get; }
     }
@@ -28,9 +28,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         #region 价值分析
 
         public bool IsSettled = false;
-        public List<ConflictLine> ConflictLines { set; get; }
+        public List<ConflictLineSection> ConflictLineSections { set; get; }
         public int PriorityValue { set; get; }
 
+        static double GroupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(300);//成组的最小距离
         /// <summary>
         /// 价值分析
         /// 组团+价值计算
@@ -45,40 +46,42 @@ namespace MyRevit.MyTests.MepCurveAvoid
 
         public void SettleValue(XYZ conflictLocation, List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
+            if (IsSettled)
+                return;
+
             ///找到原始碰撞单元
             ///连续组团处理
             ///边界连接件组团处理
             ///价值计算
-            var groupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(300);//成组的最小距离
-            ConflictLines = new List<ConflictLine>();
-            ConflictLine conflictLine = new ConflictLine();
+            ConflictLineSections = new List<ConflictLineSection>();
+
+            ConflictLineSection conflictLineSection = new ConflictLineSection();
+            //碰撞点处理
             var conflictElement = OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation == conflictLocation);
-            conflictLine.Add(conflictElement);
-
-
-
-
-
-            //ConflictNodes.Add(new ValuedConflictNode(OrientAvoidElement, conflictElement.ConflictLocation, conflictElement.ConflictEle));
+            conflictLineSection.Add(conflictElement);
+            //向后 连续组团处理
             var startIndex = OrientAvoidElement.ConflictElements.IndexOf(conflictElement);
             var currentIndex = startIndex;
             ConflictElement current = conflictElement;
             ConflictElement next;
-            //向后 连续组团处理
             for (int i = currentIndex + 1; i < OrientAvoidElement.ConflictElements.Count(); i++)
             {
                 next = OrientAvoidElement.ConflictElements[i];
-                if (current.ConflictLocation.DistanceTo(next.ConflictLocation) > groupingDistance)
+                if (current.ConflictLocation.DistanceTo(next.ConflictLocation) > GroupingDistance)
                     break;
                 current = next;
                 currentIndex = i;
             }
             //向后 连接件处理
-            if (currentIndex== OrientAvoidElement.ConflictElements.Count()-1)
+            if (currentIndex == OrientAvoidElement.ConflictElements.Count() - 1)
             {
-                if (current.ConflictLocation.DistanceTo(conflictElement.End) <= groupingDistance)
+                if (OrientAvoidElement.ConnectorEnd != null && current.ConflictLocation.DistanceTo(OrientAvoidElement.EndPoint) <= GroupingDistance)
                 {
-                    ConflictNodes.Add(new ValuedConflictNode(conflictElement.ConflictLocation, OrientAvoidElement, conflictElement.AvoidEle.ConnectorEnd));
+                    ConflictElement endContinue = new ConflictElement(OrientAvoidElement, OrientAvoidElement.EndPoint, OrientAvoidElement.ConnectorEnd);
+                    conflictLineSection.Add(endContinue);
+                    OrientAvoidElement.ConflictElements.Add(endContinue);
+                    //TODO 边界连续处理
+                    var connectedMepElement1 = OrientAvoidElement.ConnectorEnd.GetConnectedMepElements();
                 }
             }
             //重置
@@ -88,7 +91,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             for (int i = currentIndex - 1; i >= 0; i--)
             {
                 next = OrientAvoidElement.ConflictElements[i];
-                if (current.ConflictLocation.DistanceTo(next.ConflictLocation) > groupingDistance)
+                if (current.ConflictLocation.DistanceTo(next.ConflictLocation) > GroupingDistance)
                     break;
                 current = next;
                 currentIndex = i;
@@ -96,16 +99,19 @@ namespace MyRevit.MyTests.MepCurveAvoid
             //往前 连接件处理
             if (currentIndex == 0)
             {
-                if (current.ConflictLocation.DistanceTo(conflictElement.Start) <= groupingDistance)
+                if (OrientAvoidElement.ConnectorStart != null && current.ConflictLocation.DistanceTo(OrientAvoidElement.StartPoint) <= GroupingDistance)
                 {
-                    ConflictNodes.Add(new ValuedConflictNode(OrientAvoidElement, conflictElement.ConflictLocation, conflictElement.ConflictEle));
+                    ConflictElement startContinue = new ConflictElement(OrientAvoidElement, OrientAvoidElement.StartPoint, OrientAvoidElement.ConnectorStart);
+                    conflictLineSection.Add(startContinue);
+                    OrientAvoidElement.ConflictElements.Add(startContinue);
+                    //TODO 边界连续处理
+                    var connectedMepElement = OrientAvoidElement.ConnectorEnd.GetConnectedMepElements();
                 }
             }
-            //价值计算
+            //TODO 组内关系传递 避免重复计算
 
-           
+            //TODO 价值计算
 
-            throw new NotImplementedException();
         }
         #endregion
     }
