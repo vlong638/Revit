@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using MyRevit.MyTests.Utilities;
 using MyRevit.Utilities;
+using PmSoft.Common.RevitClass.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +16,27 @@ namespace MyRevit.MyTests.MepCurveAvoid
     {
         public int Compare(XYZ a, XYZ b)
         {
-            return a.X > b.X || ((a.X - b.X).IsMiniValue() && a.Y > b.Y) ? 1 : -1;
+            if (!(a.X - b.X).IsMiniValue())
+            {
+                if (a.X > b.X)
+                    return 1;
+                if (a.X < b.X)
+                    return -1;
+            }
+            if (!(a.Y - b.Y).IsMiniValue())
+            {
+                if (a.Y > b.Y)
+                    return 1;
+                if (a.Y < b.Y)
+                    return -1;
+            }
+            return 0;
         }
     }
 
 
     /// <summary>
-    /// 避让元素(MEP)
+    /// 避让元素(MEP)(基础点)
     /// 录入元素的基础单元
     /// 负责在录入时整理必要的基础信息
     /// </summary>
@@ -31,6 +46,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             MEPElement = element;
             AvoidElementType = avoidElementType;
+        }
+
+        public AvoidElement(MEPCurve connectedMepElement)
+        {
+            MEPElement = connectedMepElement;
+            //TODO AvoidElementType 类型自动识别
         }
 
         #region 属性
@@ -89,6 +110,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 UpdateIsHeavy(MEPElement);
             }
+            UpdatePriorityElementType();
             var curve = (MEPElement.Location as LocationCurve).Curve;
             var p1 = curve.GetEndPoint(0);
             var p2 = curve.GetEndPoint(1);
@@ -124,17 +146,29 @@ namespace MyRevit.MyTests.MepCurveAvoid
         #region Width and Height
         public double Width { set; get; }
         public double Height { set; get; }
+        public double GetSize()
+        {
+            return -1;
+        }
         public void UpdateSize(Element element)
         {
-            //TODO
             switch (AvoidElementType)
             {
                 case AvoidElementType.Pipe:
                     Width = Height = element.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
                     break;
                 case AvoidElementType.Duct:
+                    if (IsRound(element))
+                        Width = Height = element.get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM).AsDouble();
+                    else
+                    {
+                        Width = element.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
+                        Height = element.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
+                    }
                     break;
                 case AvoidElementType.CableTray:
+                    Width = element.get_Parameter(BuiltInParameter.RBS_CABLETRAY_WIDTH_PARAM).AsDouble();
+                    Height = element.get_Parameter(BuiltInParameter.RBS_CABLETRAY_HEIGHT_PARAM).AsDouble();
                     break;
                 case AvoidElementType.Conduit:
                     break;
@@ -142,7 +176,50 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     break;
             }
         }
+
+        private static bool IsRound(Element element)
+        {
+            var familyName = element.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString();
+            return familyName.Contains("圆形") && !familyName.Contains("椭圆形");
+        }
         #endregion
+
+        public PriorityElementType PriorityElementType { set; get; }
+        static double LargeDuctSize = UnitTransUtils.MMToFeet(800);
+        static double LargePipeSize = UnitTransUtils.MMToFeet(100);
+        static double LargeCableTraySize = UnitTransUtils.MMToFeet(300);
+
+        private void UpdatePriorityElementType()
+        {
+            switch (AvoidElementType)
+            {
+                case AvoidElementType.None:
+                    PriorityElementType = PriorityElementType.None;
+                    break;
+                case AvoidElementType.Pipe:
+                    if (!IsPressed)
+                        PriorityElementType = PriorityElementType.UnpressedPipe;
+                    else if (Height>= LargeDuctSize)
+                        PriorityElementType = PriorityElementType.LargePressedPipe;
+                    else
+                        PriorityElementType = PriorityElementType.NormalPressedPipe;
+                    break;
+                case AvoidElementType.Duct:
+                    if (Height >= LargeDuctSize)
+                        PriorityElementType = PriorityElementType.LargeDuct;
+                    else
+                        PriorityElementType = PriorityElementType.NormalDuct;
+                    break;
+                case AvoidElementType.CableTray:
+                    if (Height >= LargeCableTraySize)
+                        PriorityElementType = PriorityElementType.LargeCableTray;
+                    else
+                        PriorityElementType = PriorityElementType.NormalCableTray;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
 
         #region IsPressed //For Pipe
         public bool IsPressed { set; get; }
@@ -210,20 +287,43 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             ConflictElements = new List<ConflictElement>();
             ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(MEPElement);
-            var conflictElements = elementsToAvoid.Where(c => filter.PassesFilter(c.MEPElement)).ToList();
-            foreach (var conflictElement in conflictElements)
+            var elementsConflicted = elementsToAvoid.Where(c => filter.PassesFilter(c.MEPElement)).ToList();
+            foreach (var elementConflicted in elementsConflicted)
             {
-                var conflictLocation = GetConflictPoint(conflictElement.MEPElement);
+                var conflictLocation = GetConflictPoint(elementConflicted.MEPElement);
                 if (conflictLocation != null)
-                    ConflictElements.Add(new ConflictElement(this, conflictLocation, conflictElement));
-                if (conflictLocation != null)
-                    if (conflictNodes.FirstOrDefault(c => c.ConflictLocation.VL_XYZEqualTo(conflictLocation) && (c.ValueNode1.OrientAvoidElement == this || c.ValueNode2.OrientAvoidElement == this)) == null)
-                        conflictNodes.Add(new ValuedConflictNode(this, conflictLocation, conflictElement));
+                {
+                    var conflictElement = new ConflictElement(this, conflictLocation, elementConflicted);
+                    ConflictElements.Add(conflictElement);
+                    if (conflictNodes.FirstOrDefault(c => c.ConflictLocation.VL_XYEqualTo(conflictLocation) && (c.ValueNode1.OrientAvoidElement == this || c.ValueNode2.OrientAvoidElement == this)) == null)
+                        conflictNodes.Add(new ValuedConflictNode(this, conflictLocation, elementConflicted));
+                }
             }
-            ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer());
+            SortConflictElements();
 
-            //TEST
-            var conflictIds = string.Join(",", conflictElements.Select(c => c.MEPElement.Id));
+            ////TEST
+            //var conflictIds = string.Join(",", elementsConflicted.Select(c => c.MEPElement.Id));
+        }
+
+        internal ConflictElement AddConflictElement(Connector connectorToMepElement)
+        {
+            if (ConflictElements == null)
+                ConflictElements = new List<ConflictElement>();
+            ConflictElement conflictElement = null;
+            if (ConnectorStart.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
+                conflictElement = new ConflictElement(this, StartPoint, connectorToMepElement);
+            else if (ConnectorEnd.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
+                conflictElement = new ConflictElement(this, EndPoint, connectorToMepElement);
+            else
+                throw new NotImplementedException("错误的连接点");
+            ConflictElements.Add(conflictElement);
+            SortConflictElements();
+            return conflictElement;
+        }
+
+        public void SortConflictElements()
+        {
+            ConflictElements = ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer()).ToList();
         }
 
         /// <summary>
@@ -355,9 +455,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// </summary>
         /// <param name="src"></param>
         /// <returns></returns>
-        public static List<MEPCurve> GetConnectedMepElements(this Connector src)
+        public static List<Connector> GetConnectorsToMepElement(this Connector src)
         {
-            List<MEPCurve> result = new List<MEPCurve>();
+            List<Connector> result = new List<Connector>();
             if (src.ConnectorType == ConnectorType.MasterSurface || src.ConnectorType == ConnectorType.Logical)
                 return result;
             if (!src.IsConnected)
@@ -370,17 +470,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     var fi = con.Owner as FamilyInstance;
                     if (fi != null)
                     {
-                        for (int i = 0; i < fi.MEPModel.ConnectorManager.Connectors.Size; i++)
+                        for (int i = 1; i <= fi.MEPModel.ConnectorManager.Connectors.Size; i++)
                         {
-                            var subConnector = fi.MEPModel.ConnectorManager.Connectors.GetConnectorById(i);
-                            if (subConnector == null || !subConnector.IsConnected)
+                            var fiConnector = fi.MEPModel.ConnectorManager.Connectors.GetConnectorById(i);
+                            if (fiConnector == null || !fiConnector.IsConnected)
                                 continue;
-                            var link = subConnector.GetConnectedConnector();
-                            if (link == null)
+                            var linkedConnector = fiConnector.GetConnectedConnector();
+                            if (linkedConnector == null)
                                 continue;
-                            if (link.Owner is MEPCurve)
+                            if (linkedConnector.Owner is MEPCurve && linkedConnector.Owner.Id != src.Owner.Id)
                             {
-                                result.Add(link.Owner as MEPCurve);
+                                result.Add(linkedConnector);
                             }
                             else
                             {

@@ -1,7 +1,15 @@
 ﻿using Autodesk.Revit.DB;
+using System;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
+    public enum CompeteType
+    {
+        None,
+        Winner,
+        Loser,
+    }
+
     /// <summary>
     /// 碰撞节点
     /// 被碰撞的基础单元,包含被碰撞双方和碰撞节点的关键信息
@@ -9,6 +17,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// </summary>
     public class ConflictElement
     {
+        public Guid GroupId { set; get; }
+        public CompeteType CompeteType { set; get; }
+
         public AvoidElement AvoidEle { set; get; }
         public XYZ ConflictLocation { set; get; }
 
@@ -49,5 +60,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public XYZ MiddleEnd { set; get; }//中间段终结点
         public XYZ EndSplit { set; get; }//终结点切割端
         public XYZ End { set; get; }//终结点
+
+        internal double GetDistanceTo(ConflictElement next)
+        {
+            return ConflictLocation.DistanceTo(next.ConflictLocation) - (IsConnector ? 0 : ConflictEle.Width) - (next.IsConnector ? 0 : next.ConflictEle.Width);
+        }
+
+        internal double GetDistanceTo(XYZ point)
+        {
+            return ConflictLocation.DistanceTo(point) - (IsConnector ? 0 : ConflictEle.Width);
+        }
     }
 }

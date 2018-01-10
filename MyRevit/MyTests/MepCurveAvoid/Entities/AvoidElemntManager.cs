@@ -2,8 +2,7 @@
 using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
-using MyRevit.Utilities;
-using System;
+using MyRevit.MyTests.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,14 +11,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
 {
     /// <summary>
     /// 避让统筹管理
+    /// 这里存在两批模型的概念
+    /// Revit中的基础模型
+    /// 非Revit的价值模型
     /// </summary>
     public class AvoidElemntManager
     {
         List<AvoidElement> AvoidElements = new List<AvoidElement>();
-        List<ValuedConflictNode> ConflictNodes = new List<ValuedConflictNode>();
+        List<ValuedConflictNode> ValuedConflictNodes = new List<ValuedConflictNode>();
 
         public void AddElements(List<Element> elements)
-        {
+       { 
             AvoidElements.AddRange(elements.Where(c => c is Pipe).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Pipe)));
             AvoidElements.AddRange(elements.Where(c => c is Duct).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Duct)));
             AvoidElements.AddRange(elements.Where(c => c is Conduit).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Conduit)));
@@ -33,44 +35,38 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             //基本碰撞&&构建碰撞网络
             foreach (var avoidElement in AvoidElements)
-                avoidElement.SetConflictElements(AvoidElements, ConflictNodes);
+                avoidElement.SetConflictElements(AvoidElements, ValuedConflictNodes);
             //价值分组
-            for (int i = ConflictNodes.Count()-1; i >= 0; i--)
+            for (int i = ValuedConflictNodes.Count()-1; i >= 0; i--)
             {
-                var conflictNode = ConflictNodes[i];
-                    conflictNode.Settle(ConflictNodes, AvoidElements);
+                var conflictNode = ValuedConflictNodes[i];
+                    conflictNode.Settle(ValuedConflictNodes, AvoidElements);
             }
-        }
-
-        /// <summary>
-        /// 碰撞结果整合
-        /// 
-        /// </summary>
-        internal void MergeConflict()
-        {
-            //foreach (var ConflictNode in ConflictNodes)
+            //价值对抗(按照优势者优先原则) 价值模型
+            //由组队团体进行团体对抗
+            //按照优势团体优先的原则进行对抗
+            List<ValueNode> ValueNodes = new List<ValueNode>();
+            foreach (var ValuedConflictNode in ValuedConflictNodes)
+            {
+                ValueNodes.Add(ValuedConflictNode.ValueNode1);
+                ValueNodes.Add(ValuedConflictNode.ValueNode2);
+            }
+            ValueNodes = ValueNodes.OrderBy(c => c.ConflictLineSections.PriorityValue, new PriorityValueComparer()).ToList();
+            for (int i = ValueNodes.Count() - 1; i >= 0; i--)
+            {
+                var ValueNode = ValueNodes[i];
+                ValueNode.ValuedConflictNode.Compete(AvoidElements);
+            }
+            //foreach (var ValueNode in ValueNodes)//对象信息反填到基础模型中
             //{
-            //    ConflictNode.Settle(ConflictNodes);
+            //    var avoidElement = AvoidElements.First(c => c.MEPElement == ValueNode.OrientAvoidElement.MEPElement);
+            //    var conflictElement = avoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ValueNode.ValuedConflictNode.ConflictLocation));
+            //    conflictElement.CompeteType = ValueNode.ConflictLineSections.PriorityValue.CompeteType;
+            //    if (conflictElement.CompeteType == CompeteType.Winner)
+            //        conflictElement.GroupId = ValueNode.ConflictLineSections.GroupId;
             //}
-
-            //foreach (var avoidElement in AvoidElements)
-            //{
-            //    var undealtConflictNodes = avoidElement.ConflictElements.Where(c => c.DealType == ConflictNodeDealType.Undealt).ToList();
-            //    for (int i = 0; i < undealtConflictNodes.Count(); i++)
-            //    {
-            //        var current = undealtConflictNodes[i];
-            //        bool isContinuous = false;
-            //        while (i != undealtConflictNodes.Count() - 1)
-            //        {
-            //        }
-            //        //current.IsContinuous()
-            //        //是否连续
-            //    }
-            //}
-
-
-            //TODO
-            return;
+            var winners = ValueNodes.Where(c => c.ConflictLineSections.PriorityValue.CompeteType == CompeteType.Winner);
+            PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\AvoidElement.png", AvoidElements, winners);
         }
 
         /// <summary>
@@ -79,6 +75,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="doc"></param>
         public void AutoAvoid(Document doc)
         {
+            //TODO 避让位置计算
+            //TODO 避让处理
+
+
+
+
+
+
             ////var groupedAvoidElements = AvoidElements.GroupBy(c => c.AvoidPriorityValue).OrderBy(c => c.Key);
 
             //var miniMepLength = UnitHelper.ConvertToFoot(96, VLUnitType.millimeter);//最短连接管长度 双向带连接件

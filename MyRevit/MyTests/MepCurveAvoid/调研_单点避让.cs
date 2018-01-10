@@ -38,7 +38,6 @@ namespace MyRevit.MyTests
             AvoidElemntManager manager = new AvoidElemntManager();
             manager.AddElements(selectedElements);
             manager.CheckConflict();
-            manager.MergeConflict();
             VLTransactionHelper.DelegateTransaction(doc, "调研_单点避让", () =>
             {
                 manager.AutoAvoid(doc);

@@ -1,5 +1,17 @@
 ﻿namespace MyRevit.MyTests.MepCurveAvoid
 {
+    public enum PriorityElementType
+    {
+        None,
+        UnpressedPipe,//无压管
+        LargeDuct,//大风管
+        LargePressedPipe,//大有压管
+        LargeCableTray,//大桥架
+        NormalDuct,//标准风管
+        NormalPressedPipe,//标准有压管
+        NormalCableTray,//标准桥架
+        Connector,//连接件
+    }
     /// <summary>
     /// 避让处理类型
     /// </summary>

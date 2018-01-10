@@ -25,7 +25,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     Display(outLine);
             GraphicsDisplayer.DisplayClosedInterval(lineSeperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), new Pen(Brushes.Red), true);
             var randomValue = new Random().Next(10);
-            GraphicsDisplayer.DisplayPointsText(lineSeperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), Brushes.Red, randomValue, randomValue);
+            GraphicsDisplayer.DisplayPoints(lineSeperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), Brushes.Red, randomValue, randomValue);
             GraphicsDisplayer.SaveTo(path);
         }
         static void Display(OutLine outLine)
@@ -33,7 +33,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             var randomValue = new Random().Next(10);
             GraphicsDisplayer.DisplayClosedInterval(outLine.Points, null, false);
             if (outLine.Points.Count <= 6)
-                GraphicsDisplayer.DisplayPointsText(outLine.Points, null, randomValue, randomValue);
+                GraphicsDisplayer.DisplayPoints(outLine.Points, null, randomValue, randomValue);
 
             foreach (var subOutLine in outLine.SubOutLines)
                 Display(subOutLine);
@@ -65,7 +65,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         {
             GraphicsDisplayer.DisplayClosedInterval(seperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), new Pen(Brushes.Red), true);
             var randomValue = new Random().Next(10);
-            GraphicsDisplayer.DisplayPointsText(seperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), Brushes.Red, randomValue, randomValue);
+            GraphicsDisplayer.DisplayPoints(seperatePoints.AdvancedPoints.Select(c => c.Point).ToList(), Brushes.Red, randomValue, randomValue);
 
             GraphicsDisplayerManager.Save(@"E:\WorkingSpace\Outputs\Images\display3.png");
         }

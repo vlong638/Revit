@@ -7,11 +7,44 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using static PmSoft.Optimization.DrawingProduction.AnnotationCreater;
+using MyRevit.MyTests.MepCurveAvoid;
 
 namespace PmSoft.Optimization.DrawingProduction.Utils
 {
     public class GraphicsDisplayerManager
     {
+        #region 全自动绕弯
+
+        internal static void Display(string path, List<AvoidElement> avoidElements, IEnumerable<ValueNode> winners)
+        {
+            if (avoidElements.Count() == 0)
+                return;
+
+            var lines = avoidElements.Select(c => Line.CreateBound((c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(0), (c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(1))).ToList();
+            var maxX = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.X));
+            var minX = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.X));
+            var maxY = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.Y));
+            var minY = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.Y));
+            var graphicsDisplayer = new GraphicsDisplayer(minX, maxX, minY, maxY);
+            //显示 线
+            graphicsDisplayer.DisplayLines(lines, new Pen(Brushes.Black), false, false);
+            //显示 线的ID
+            var lineIds = avoidElements.Select(c => ((c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(0) + (c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(1)) / 2).ToList();
+            var lineIdTexts = avoidElements.Select(c => c.MEPElement.Id.IntegerValue.ToString()).ToList();
+            graphicsDisplayer.DisplayPointText(lineIds, lineIdTexts, Brushes.DarkGreen);
+            foreach (var avoidElement in avoidElements)
+            {
+                var elements = avoidElement.ConflictElements.Where(c => c.CompeteType == CompeteType.Winner);//!c.IsConnector&& 
+                //显示 碰撞点结果 分组
+                var locations = elements.Select(c => c.ConflictLocation).ToList();
+                var texts = elements.Select(c => "W:" + c.AvoidEle.MEPElement.Id.IntegerValue.ToString() + "-G:" + c.GroupId.ToString().Substring(0, 4)).ToList();
+                graphicsDisplayer.DisplayPointText(locations, texts, Brushes.Red);
+
+            }
+            graphicsDisplayer.SaveTo(path);
+        }
+        #endregion
+
         #region 标注避让
         public static void Display(string path, Triangle triangle, List<Line> pipeLines, List<Line> pipeCollisions, List<BoundingBoxXYZ> crossedBoundingBoxes, List<BoundingBoxXYZ> uncrossedBoundingBoxes)
         {
@@ -282,9 +315,9 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 {
                     var brush = pen.Brush;
                     var point = line.GetEndPoint(0);
-                    CurrentGraphics.DrawString($"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                    CurrentGraphics.DrawString($"{ point.X.ToString("f2") },{ point.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
                     point = line.GetEndPoint(1);
-                    CurrentGraphics.DrawString($"{ p0.X.ToString("f2") },{ p0.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
+                    CurrentGraphics.DrawString($"{ point.X.ToString("f2") },{ point.Y.ToString("f2") }", DefaultFont, brush ?? DefaultBrush, GetPoint(point));
                 }
             }
         }
@@ -309,7 +342,38 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
                 }
             }
         }
+        /// <summary>
+        /// 点的文本
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="brush">null for default</param>
+        /// <param name="offsetX"></param>
+        /// <param name="offsetY"></param>
+        public void DisplayPoints(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)
+        {
+            if (points.Count == 0)
+                return;
+            foreach (var point in points)
+                CurrentGraphics.DrawString($"{(int)Math.Round(point.X, 0) },{(int)Math.Round(point.Y, 0) }", DefaultFont, brush ?? DefaultBrush, GetPoint(point, offsetX, offsetY));
+        }
 
+        /// <summary>
+        /// 点的文本
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="brush">null for default</param>
+        /// <param name="offsetX"></param>
+        /// <param name="offsetY"></param>
+        public void DisplayPointText(List<XYZ> points,List<string> texts, Brush brush, int offsetX = 0, int offsetY = 0)
+        {
+            if (points.Count == 0)
+                return;
+            for (int i = 0; i < points.Count(); i++)
+            {
+                var point = points[i];
+                CurrentGraphics.DrawString($"{(int)Math.Round(point.X, 0) },{(int)Math.Round(point.Y, 0) }:{texts[i]}", DefaultFont, brush ?? DefaultBrush, GetPoint(point, offsetX, offsetY));
+            }
+        }
         /// <summary>
         /// 闭合区间
         /// </summary>
@@ -336,20 +400,6 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             }
         }
 
-        /// <summary>
-        /// 点的文本
-        /// </summary>
-        /// <param name="points"></param>
-        /// <param name="brush">null for default</param>
-        /// <param name="offsetX"></param>
-        /// <param name="offsetY"></param>
-        public void DisplayPointsText(List<XYZ> points, Brush brush, int offsetX = 0, int offsetY = 0)
-        {
-            if (points.Count == 0)
-                return;
-            foreach (var point in points)
-                CurrentGraphics.DrawString($"{(int)Math.Round(point.X, 0) },{(int)Math.Round(point.Y, 0) }", DefaultFont, brush ?? DefaultBrush, GetPoint(point, offsetX, offsetY));
-        }
 
         /// <summary>
         /// XYZ=>Point的通用转换
