@@ -305,6 +305,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
             //var conflictIds = string.Join(",", elementsConflicted.Select(c => c.MEPElement.Id));
         }
 
+        internal ConflictElement AddConflictElement(ConflictElement conflictElement)
+        {
+            if (ConflictElements == null)
+                ConflictElements = new List<ConflictElement>();
+            ConflictElements.Add(conflictElement);
+            SortConflictElements();
+            return conflictElement;
+        }
         internal ConflictElement AddConflictElement(Connector connectorToMepElement)
         {
             if (ConflictElements == null)

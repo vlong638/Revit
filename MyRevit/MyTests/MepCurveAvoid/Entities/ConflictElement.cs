@@ -17,7 +17,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// </summary>
     public class ConflictElement
     {
-        public Guid GroupId { set; get; }
         public CompeteType CompeteType { set; get; }
 
         public AvoidElement AvoidEle { set; get; }
@@ -54,12 +53,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
         }
 
         //点位计算
-        public XYZ Start { set; get; }//起始点
+        public Guid GroupId { set; get; }
+        //public XYZ Start { set; get; }//起始点
+        //public XYZ End { set; get; }//终结点
         public XYZ StartSplit { set; get; }//起始点切割端
         public XYZ MiddleStart { set; get; }//中间段起始点
         public XYZ MiddleEnd { set; get; }//中间段终结点
         public XYZ EndSplit { set; get; }//终结点切割端
-        public XYZ End { set; get; }//终结点
+        public XYZ ConnectorLocation { set; get; }//边界位置
+        public double Height { set; get; }//偏移高度
 
         internal double GetDistanceTo(ConflictElement next)
         {

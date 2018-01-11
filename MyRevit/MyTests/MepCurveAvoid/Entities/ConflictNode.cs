@@ -18,6 +18,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
     public class ConflictLineSection : List<ConflictElement>
     {
         //public List<ConflictElement> ConflictElements { set; get; }
+        public ElementId ElementId;
+
+        public ConflictLineSection(ElementId id)
+        {
+            this.ElementId = id;
+        }
     }
 
     public class PriorityValueComparer : IComparer<PriorityValue>
@@ -260,7 +266,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElements"></param>
         private void SetupGroup(AvoidElement startElement, ConflictElement conflictElement, List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
-            ConflictLineSection conflictLineSection = new ConflictLineSection();
+            ConflictLineSection conflictLineSection = new ConflictLineSection(startElement.MEPElement.Id);
             //碰撞点处理
             conflictLineSection.Add(conflictElement);
             //向后 连续组团处理
@@ -285,9 +291,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.EndPoint;
                 if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
                 {
-                    ConflictElement continueEle = new ConflictElement(startElement, point, connector);
+                    //ConflictElement continueEle = new ConflictElement(startElement, point, connector);
+                    //conflictLineSection.Add(continueEle);
+                    //startElement.ConflictElements.Add(continueEle);
+                    var continueEle = startElement.AddConflictElement(connector);
                     conflictLineSection.Add(continueEle);
-                    startElement.ConflictElements.Add(continueEle);
                     TopoConnector(conflictNodes, avoidElements, connector);
                 }
             }
@@ -312,9 +320,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.StartPoint;
                 if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
                 {
-                    ConflictElement continueEle = new ConflictElement(startElement, point, connector);
+                    //ConflictElement continueEle = new ConflictElement(startElement, point, connector);
+                    //conflictLineSection.Add(continueEle);
+                    //startElement.ConflictElements.Add(continueEle);
+                    var continueEle = startElement.AddConflictElement(connector);
                     conflictLineSection.Add(continueEle);
-                    startElement.ConflictElements.Add(continueEle);
                     TopoConnector(conflictNodes, avoidElements, connector);
                 }
             }
