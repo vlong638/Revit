@@ -180,3 +180,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PunchAndBranchPip
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PunchAndBranchPipeAnnotation\Window.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Analysis\Window.g.cs
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\Analysis\Window.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
