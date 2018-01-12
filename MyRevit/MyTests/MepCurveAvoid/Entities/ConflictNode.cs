@@ -15,14 +15,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// <summary>
     /// 碰撞区间的价值
     /// </summary>
-    public class ConflictLineSection : List<ConflictElement>
+    public class ConflictLineSection
     {
-        //public List<ConflictElement> ConflictElements { set; get; }
         public ElementId ElementId;
+        public List<ConflictElement> ConflictElements;
 
         public ConflictLineSection(ElementId id)
         {
-            this.ElementId = id;
+            ElementId = id;
+            ConflictElements = new List<ConflictElement>();
         }
     }
 
@@ -209,7 +210,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             //组内关系传递 避免重复计算
             foreach (ConflictLineSection ConflictLineSection in ConflictLineSections)
             {
-                foreach (ConflictElement ConflictElement in ConflictLineSection)
+                foreach (ConflictElement ConflictElement in ConflictLineSection.ConflictElements)
                 {
                     var valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode1.ConflictLineSections.IsSettled && c.ValueNode1.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
                     if (valuedConflictNode != null)
@@ -236,22 +237,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
             foreach (var conflictLineSection in ConflictLineSections)
             {
                 //计算为之避让的内容的价值
-                foreach (var conflictElement in conflictLineSection)
+                foreach (var conflictElement in conflictLineSection.ConflictElements)
                 {
                     if (conflictElement.IsConnector)
                         continue;
                     ConflictLineSections.PriorityValue.TypeNumber[conflictElement.ConflictEle.PriorityElementType]++;
                     ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.ConflictEle.PriorityElementType] = Math.Max(ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.ConflictEle.PriorityElementType], conflictElement.ConflictEle.GetSize());//TODO Size
                 }
-                ConflictLineSections.PriorityValue.FullLength += conflictLineSection.First().ConflictLocation.DistanceTo(conflictLineSection.Last().ConflictLocation);
-
-
-
-                ////old
-                //var conflictElement = conflictLineSection.First();
-                //ConflictLineSections.PriorityValue.TypeNumber[conflictElement.AvoidEle.PriorityElementType]++;
-                //ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.AvoidEle.PriorityElementType] = Math.Max(ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.AvoidEle.PriorityElementType], conflictElement.AvoidEle.GetSize());//TODO Size
-                //ConflictLineSections.PriorityValue.FullLength += conflictLineSection.First().ConflictLocation.DistanceTo(conflictLineSection.Last().ConflictLocation);
+                ConflictLineSections.PriorityValue.FullLength += conflictLineSection.ConflictElements.First().ConflictLocation.DistanceTo(conflictLineSection.ConflictElements.Last().ConflictLocation);
             }
         }
 
@@ -268,7 +261,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             ConflictLineSection conflictLineSection = new ConflictLineSection(startElement.MEPElement.Id);
             //碰撞点处理
-            conflictLineSection.Add(conflictElement);
+            conflictLineSection.ConflictElements.Add(conflictElement);
             //向后 连续组团处理
             var startIndex = startElement.ConflictElements.IndexOf(conflictElement);
             var currentIndex = startIndex;
@@ -280,7 +273,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 if (current.GetDistanceTo(next) > GroupingDistance)
                     break;
 
-                conflictLineSection.Add(next);
+                conflictLineSection.ConflictElements.Add(next);
                 current = next;
                 currentIndex = i;
             }
@@ -291,11 +284,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.EndPoint;
                 if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
                 {
-                    //ConflictElement continueEle = new ConflictElement(startElement, point, connector);
-                    //conflictLineSection.Add(continueEle);
-                    //startElement.ConflictElements.Add(continueEle);
                     var continueEle = startElement.AddConflictElement(connector);
-                    conflictLineSection.Add(continueEle);
+                    conflictLineSection.ConflictElements.Add(continueEle);
                     TopoConnector(conflictNodes, avoidElements, connector);
                 }
             }
@@ -309,7 +299,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 if (current.GetDistanceTo(next)> GroupingDistance)
                     break;
 
-                conflictLineSection.Add(next);
+                conflictLineSection.ConflictElements.Add(next);
                 current = next;
                 currentIndex = i;
             }
@@ -320,14 +310,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.StartPoint;
                 if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
                 {
-                    //ConflictElement continueEle = new ConflictElement(startElement, point, connector);
-                    //conflictLineSection.Add(continueEle);
-                    //startElement.ConflictElements.Add(continueEle);
                     var continueEle = startElement.AddConflictElement(connector);
-                    conflictLineSection.Add(continueEle);
+                    conflictLineSection.ConflictElements.Add(continueEle);
                     TopoConnector(conflictNodes, avoidElements, connector);
                 }
             }
+            conflictLineSection.ConflictElements = conflictLineSection.ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer()).ToList();
             ConflictLineSections.Add(conflictLineSection);
         }
 
