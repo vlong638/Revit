@@ -268,10 +268,18 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 从大到小
         /// </summary>
         public XYZ StartPoint { set; get; }
+        public bool IsStartPoint(ConflictElement conflictElement)
+        {
+            return StartPoint.VL_XYEqualTo(conflictElement.ConflictLocation);
+        }
         /// <summary>
         /// 从大到小
         /// </summary>
         public XYZ EndPoint { set; get; }
+        public bool IsEndPoint(ConflictElement conflictElement)
+        {
+            return EndPoint.VL_XYEqualTo(conflictElement.ConflictLocation);
+        }
         #endregion
 
         #endregion

@@ -20,8 +20,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public CompeteType CompeteType { set; get; }
 
         public AvoidElement AvoidEle { set; get; }
+        /// <summary>
+        /// 拓扑传递碰撞点位都是线的边界
+        /// </summary>
         public XYZ ConflictLocation { set; get; }
-
         public AvoidElement ConflictEle { set; get; }
         public bool IsConnector { set; get; }
         private Connector Connector { set; get; }

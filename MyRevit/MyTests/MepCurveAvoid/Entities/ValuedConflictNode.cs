@@ -39,7 +39,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
 
         public static PriorityValueComparer Comparer= new PriorityValueComparer();
         public bool IsCompeted = false;
-        internal void Compete(List<AvoidElement> avoidElements)
+        internal void Compete(List<AvoidElement> avoidElements, List<ConflictLineSections> conflictLineSections_Collection)
         {
             if (!IsSettled || IsCompeted)
                 return;
@@ -89,11 +89,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var conflictElement = winner.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
                 CalculateLocations(winner.OrientAvoidElement, conflictElement);
                 CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
-
-                //var avoidElement = avoidElements.First(c => c.MEPElement == winner.OrientAvoidElement.MEPElement);
-                //var conflictElement = avoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
-                //CalculateLocations(avoidElement, conflictElement);
-                //CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
+                //ConflictLineSections汇总
+                if (conflictLineSections_Collection.FirstOrDefault(c => c.GroupId == winner.ConflictLineSections.GroupId) == null)
+                    conflictLineSections_Collection.Add(winner.ConflictLineSections);
             }
             if (!isLoserSettled)
             {
@@ -105,13 +103,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
             IsCompeted = true;
         }
 
-        /// <summary>
-        /// TODO 可能存在的问题 
-        /// conflictEle
-        /// </summary>
-        /// <param name="startConflictElement"></param>
-        /// <param name="winner"></param>
-        /// <param name="conflictLocation"></param>
         private void CalculateLocations(ConflictElement startConflictElement, ValueNode winner, XYZ conflictLocation, List<AvoidElement> avoidElements)
         {
             foreach (var ConflictLineSection in winner.ConflictLineSections)
@@ -122,12 +113,27 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     var conflictEle = ConflictLineSection.ConflictElements[i];
                     //边界计算
                     if (i == 0 || i == ConflictLineSection.ConflictElements.Count() - 1)
+                    {
+                        ////TODO 区块信息整理
+                        //if (conflictEle.IsConnector)
+                        //{
+                        //    Connector linkToConnectorStart = connectorStart.GetConnectedConnector();
+                        //    if (linkToConnectorStart != null)
+                        //        connectorStart.DisconnectFrom(linkToConnectorStart);
+                        //}
+                        //ConflictLineSection.StartConnector_ElementId = Connector
+
+
+
+
+
                         CalculateLocations(avoidElement, conflictEle, startConflictElement.Height);
+                    }
                 }
             }
         }
 
-        static XYZ VerticalDirection = new XYZ(0, 0, 1);
+        static XYZ VerticalDirection = new XYZ(0, 0, 1);//上下翻转方向
         private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement, double height = -1)
         {
             var miniMepLength = UnitTransUtils.MMToFeet(96);//最短连接管长度 双向带连接件
