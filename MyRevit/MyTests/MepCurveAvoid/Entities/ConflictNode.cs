@@ -26,7 +26,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// </summary>
     public class ConflictLineSection
     {
-        public ElementId ElementId { get { return AvoidElement.MEPElement.Id; } }
+        public ElementId ElementId { set; get; }
         public List<ConflictElement> ConflictElements;
         public AvoidElement AvoidElement;
 
@@ -41,6 +41,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public ConflictLineSection(AvoidElement startElement)
         {
             AvoidElement = startElement;
+            ElementId= AvoidElement.MEPElement.Id;
             ConflictElements = new List<ConflictElement>();
         }
     }
