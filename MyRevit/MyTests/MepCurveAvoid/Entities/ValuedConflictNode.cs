@@ -27,54 +27,64 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public ValueNode ValueNode2 { set; get; }
 
         #region 价值分组
-        public bool IsSettled { get { return (ValueNode1.ConflictLineSections.IsSettled && ValueNode2.ConflictLineSections.IsSettled); } }
-        public void Settle(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
+        public bool IsGrouped { get { return (ValueNode1.ConflictLineSections.IsGrouped && ValueNode2.ConflictLineSections.IsGrouped); } }
+        public bool IsValued { get { return (ValueNode1.ConflictLineSections.IsValued && ValueNode2.ConflictLineSections.IsValued); } }
+        public void Grouping(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
-            if (IsSettled)
+            if (IsGrouped)
                 return;
 
-            ValueNode1.SetupValue(ValueNode1.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
-            ValueNode2.SetupValue(ValueNode2.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
+            ValueNode1.Grouping(ValueNode1.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
+            ValueNode2.Grouping(ValueNode2.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
+        }
+
+        internal void Valuing(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
+        {
+            if (IsValued)
+                return;
+
+            ValueNode1.Valuing(ValueNode1.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
+            ValueNode2.Valuing(ValueNode2.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
         }
 
         public static PriorityValueComparer Comparer= new PriorityValueComparer();
         public bool IsCompeted = false;
         internal void Compete(List<AvoidElement> avoidElements, List<ConflictLineSections> conflictLineSections_Collection)
         {
-            if (!IsSettled || IsCompeted)
+            if (!IsGrouped || IsCompeted)
                 return;
 
             bool isWinnerSettled;
             bool isLoserSettled;
             ValueNode winner=null;
             ValueNode loser=null;
-            if (Comparer.Compare(ValueNode1.ConflictLineSections.PriorityValue, ValueNode2.ConflictLineSections.PriorityValue) > 0)
+            if (Comparer.Compare(ValueNode1.ConflictLineSections.AvoidPriorityValue, ValueNode2.ConflictLineSections.AvoidPriorityValue) > 0)
             {
-                isWinnerSettled = ValueNode1.ConflictLineSections.PriorityValue.CompeteType == CompeteType.Winner;
+                isWinnerSettled = ValueNode1.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Winner;
                 if (!isWinnerSettled)
                 {
-                    ValueNode1.ConflictLineSections.PriorityValue.CompeteType = CompeteType.Winner;
+                    ValueNode1.ConflictLineSections.AvoidPriorityValue.CompeteType = CompeteType.Winner;
                     winner = ValueNode1;
                 }
-                isLoserSettled = ValueNode2.ConflictLineSections.PriorityValue.CompeteType == CompeteType.Loser;
+                isLoserSettled = ValueNode2.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Loser;
                 if (!isLoserSettled)
                 {
-                    ValueNode2.ConflictLineSections.PriorityValue.CompeteType = CompeteType.Loser;
+                    ValueNode2.ConflictLineSections.AvoidPriorityValue.CompeteType = CompeteType.Loser;
                     loser = ValueNode2;
                 }
             }
             else
             {
-                isLoserSettled = ValueNode1.ConflictLineSections.PriorityValue.CompeteType == CompeteType.Loser;
+                isLoserSettled = ValueNode1.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Loser;
                 if (!isLoserSettled)
                 {
-                    ValueNode1.ConflictLineSections.PriorityValue.CompeteType = CompeteType.Loser;
+                    ValueNode1.ConflictLineSections.AvoidPriorityValue.CompeteType = CompeteType.Loser;
                     loser = ValueNode1;
                 }
-                isWinnerSettled = ValueNode2.ConflictLineSections.PriorityValue.CompeteType == CompeteType.Winner;
+                isWinnerSettled = ValueNode2.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Winner;
                 if (!isWinnerSettled)
                 {
-                    ValueNode2.ConflictLineSections.PriorityValue.CompeteType = CompeteType.Winner;
+                    ValueNode2.ConflictLineSections.AvoidPriorityValue.CompeteType = CompeteType.Winner;
                     winner = ValueNode2;
                 }
             }
@@ -145,8 +155,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
         static XYZ VerticalDirection = new XYZ(0, 0, 1);//上下翻转方向
         private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement, double height = -1)
         {
-            var miniMepLength = UnitTransUtils.MMToFeet(96);//最短连接管长度 双向带连接件
-            var miniSpace = UnitTransUtils.MMToFeet(5);//避免碰撞及提供留白的安全距离
+            var miniMepLength = UnitTransUtils.MMToFeet(400);//(96);//最短连接管长度 双向带连接件
+            var miniSpace = UnitTransUtils.MMToFeet(100);//避免碰撞及提供留白的安全距离
             var angleToTurn = Math.PI / 4;//45°
             var curve = (avoidElement.MEPElement.Location as LocationCurve).Curve;
             var pointStart = avoidElement.StartPoint;

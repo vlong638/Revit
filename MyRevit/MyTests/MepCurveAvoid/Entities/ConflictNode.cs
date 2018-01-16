@@ -9,8 +9,16 @@ namespace MyRevit.MyTests.MepCurveAvoid
     public class ConflictLineSections : List<ConflictLineSection>
     {
         public Guid GroupId = Guid.NewGuid();
-        public bool IsSettled = false;
-        public PriorityValue PriorityValue { set; get; }
+        public bool IsGrouped = false;
+        public bool IsValued = false;
+        /// <summary>
+        /// 为其避让的价值
+        /// </summary>
+        public PriorityValue AvoidPriorityValue { set; get; }
+        /// <summary>
+        /// 组价值
+        /// </summary>
+        public PriorityValue GroupPriorityValue { set; get; }
         public double Height { set; get; }
     }
     /// <summary>
@@ -18,8 +26,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// </summary>
     public class ConflictLineSection
     {
-        public ElementId ElementId;
+        public ElementId ElementId { get { return AvoidElement.MEPElement.Id; } }
         public List<ConflictElement> ConflictElements;
+        public AvoidElement AvoidElement;
 
         public XYZ StartPoint { set; get; }
         public Connector StartLinkedConnector { get; internal set; }
@@ -29,9 +38,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public Connector EndLinkedConnector { get; internal set; }
         public ElementId NewEndElementId { set; get; }
 
-        public ConflictLineSection(ElementId id)
+        public ConflictLineSection(AvoidElement startElement)
         {
-            ElementId = id;
+            AvoidElement = startElement;
             ConflictElements = new List<ConflictElement>();
         }
     }
@@ -111,6 +120,31 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public double FullLength = 0;
 
         #region Compare
+
+
+        public static List<PriorityElementType> PriorityElementTypes = new List<PriorityElementType>()
+        {
+            PriorityElementType.UnpressedPipe,
+            PriorityElementType.LargeDuct,
+            PriorityElementType.LargePressedPipe,
+            PriorityElementType.LargeCableTray,
+            PriorityElementType.NormalDuct,
+            PriorityElementType.NormalPressedPipe,
+            PriorityElementType.NormalCableTray,
+        };
+        public static PriorityValue operator +(PriorityValue item, PriorityValue itemToAdd)
+        {
+            foreach (var PriorityElementType in PriorityElementTypes)
+            {
+                var type = PriorityElementType;
+                item.TypeNumber[type] += itemToAdd.TypeNumber[type];
+                item.TypeMaxLength[type] += itemToAdd.TypeMaxLength[type];
+            }
+            item.FullLength += itemToAdd.FullLength;
+            return item;
+        }
+
+
         //public static List<PriorityElementType> PriorityElementTypes = new List<PriorityElementType>()
         //{
         //    PriorityElementType.UnpressedPipe,
@@ -180,6 +214,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public ValuedConflictNode ValuedConflictNode;
         public AvoidElement OrientAvoidElement { set; get; }
         public ConflictLineSections ConflictLineSections { set; get; }
+        public ValueNode OtherNode { get; internal set; }
 
         public ValueNode(ValuedConflictNode valuedConflictNode, AvoidElement avoidElement)
         {            
@@ -191,7 +226,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         #region 价值分析
 
 
-        static double GroupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(300);//成组的最小距离
+        static double GroupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(600);//成组的最小距离
 
         /// <summary>
         /// 价值分析
@@ -206,25 +241,41 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="valuedConflictNodes">源碰撞</param>
         /// <param name="avoidElements">源碰撞</param>
 
-        public void SetupValue(ConflictElement conflictElement, List<ValuedConflictNode> valuedConflictNodes, List<AvoidElement> avoidElements)
+        public void Grouping(ConflictElement conflictElement, List<ValuedConflictNode> valuedConflictNodes, List<AvoidElement> avoidElements)
         {
-            if (ConflictLineSections.IsSettled)
+            if (ConflictLineSections.IsGrouped)
                 return;
 
             ConflictLineSections = new ConflictLineSections();
             SetupGroup(OrientAvoidElement, conflictElement, valuedConflictNodes, avoidElements);
-            SetupPriorityValue();
-            ConflictLineSections.IsSettled = true;
+            RenderGroupInfo(valuedConflictNodes);
+            SetupGroupPriorityValue();
+            //SetupAvoidPriorityValue(valuedConflictNodes);
+            ConflictLineSections.IsGrouped = true;
+        }
+        public void Valuing(ConflictElement conflictElement, List<ValuedConflictNode> valuedConflictNodes, List<AvoidElement> avoidElements)
+        {
+            if (ConflictLineSections.IsValued)
+                return;
 
-            //组内关系传递 避免重复计算
+            SetupAvoidPriorityValue(valuedConflictNodes);
+            ConflictLineSections.IsValued = true;
+        }
+
+        /// <summary>
+        /// 组内关系传递 避免重复计算
+        /// </summary>
+        /// <param name="valuedConflictNodes"></param>
+        private void RenderGroupInfo(List<ValuedConflictNode> valuedConflictNodes)
+        {
             foreach (ConflictLineSection ConflictLineSection in ConflictLineSections)
             {
                 foreach (ConflictElement ConflictElement in ConflictLineSection.ConflictElements)
                 {
-                    var valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode1.ConflictLineSections.IsSettled && c.ValueNode1.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
+                    var valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode1.ConflictLineSections.IsGrouped && c.ValueNode1.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
                     if (valuedConflictNode != null)
                         valuedConflictNode.ValueNode1.Settle(ConflictLineSections);
-                    valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode2.ConflictLineSections.IsSettled && c.ValueNode2.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
+                    valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode2.ConflictLineSections.IsGrouped && c.ValueNode2.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
                     if (valuedConflictNode != null)
                         valuedConflictNode.ValueNode2.Settle(ConflictLineSections);
                 }
@@ -234,26 +285,50 @@ namespace MyRevit.MyTests.MepCurveAvoid
         private void Settle(ConflictLineSections conflictLineSections)
         {
             ConflictLineSections = conflictLineSections;
-            ConflictLineSections.IsSettled = true;
+            ConflictLineSections.IsGrouped = true;
         }
 
         /// <summary>
         /// 价值计算
         /// </summary>
-        private void SetupPriorityValue()
+
+        private void SetupAvoidPriorityValue(List<ValuedConflictNode> valuedConflictNodes)
         {
-            ConflictLineSections.PriorityValue = new PriorityValue();
+            //为之避让的内容的价值
+            ConflictLineSections.AvoidPriorityValue = new PriorityValue();
             foreach (var conflictLineSection in ConflictLineSections)
             {
-                //计算为之避让的内容的价值
                 foreach (var conflictElement in conflictLineSection.ConflictElements)
                 {
                     if (conflictElement.IsConnector)
                         continue;
-                    ConflictLineSections.PriorityValue.TypeNumber[conflictElement.ConflictEle.PriorityElementType]++;
-                    ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.ConflictEle.PriorityElementType] = Math.Max(ConflictLineSections.PriorityValue.TypeMaxLength[conflictElement.ConflictEle.PriorityElementType], conflictElement.ConflictEle.GetSize());//TODO Size
+
+                    foreach (var valuedConflictNode in valuedConflictNodes)
+                    {
+                        if (valuedConflictNode.ValueNode1.ConflictLineSections.GroupId == conflictElement.GroupId)
+                        {
+                            ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode1.ConflictLineSections.GroupPriorityValue;
+                            break;
+                        }
+                        if (valuedConflictNode.ValueNode2.ConflictLineSections.GroupId == conflictElement.GroupId)
+                        {
+                            ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode2.ConflictLineSections.GroupPriorityValue;
+                            break;
+                        }
+                    }
                 }
-                ConflictLineSections.PriorityValue.FullLength += conflictLineSection.ConflictElements.First().ConflictLocation.DistanceTo(conflictLineSection.ConflictElements.Last().ConflictLocation);
+            }
+        }
+        private void SetupGroupPriorityValue()
+        {
+            //组的价值
+            ConflictLineSections.GroupPriorityValue = new PriorityValue();
+            foreach (var conflictLineSection in ConflictLineSections)
+            {
+                ConflictLineSections.GroupPriorityValue.TypeNumber[conflictLineSection.AvoidElement.PriorityElementType]++;
+                ConflictLineSections.GroupPriorityValue.TypeMaxLength[conflictLineSection.AvoidElement.PriorityElementType]
+                    = Math.Max(ConflictLineSections.GroupPriorityValue.TypeMaxLength[conflictLineSection.AvoidElement.PriorityElementType], conflictLineSection.AvoidElement.GetSize());
+                ConflictLineSections.GroupPriorityValue.FullLength += conflictLineSection.ConflictElements.First().ConflictLocation.DistanceTo(conflictLineSection.ConflictElements.Last().ConflictLocation);
             }
         }
 
@@ -268,7 +343,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElements"></param>
         private void SetupGroup(AvoidElement startElement, ConflictElement conflictElement, List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
-            ConflictLineSection conflictLineSection = new ConflictLineSection(startElement.MEPElement.Id);
+            ConflictLineSection conflictLineSection = new ConflictLineSection(startElement);
             //碰撞点处理
             conflictLineSection.ConflictElements.Add(conflictElement);
             //向后 连续组团处理

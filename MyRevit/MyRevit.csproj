@@ -89,6 +89,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.MainModel.EntData.dll</HintPath>
     </Reference>
+    <Reference Include="PmSoft.MepProject.ControlService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLLs\PmSoft.MepProject.ControlService.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="PresentationFramework.Aero" />
@@ -146,6 +150,7 @@
     <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictNode.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictNodeDealType.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElementValueGroup.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\ConnectionNode.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\ValuedConflictNode.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\BaseControlService.cs" />
     <Compile Include="MyTests\MepCurveAvoid\old\MEPCurveConnectControlService.cs" />
@@ -517,6 +522,7 @@
     </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
+    <Content Include="DLLs\PmSoft.MepProject.ControlService.dll" />
     <Content Include="MyTests\EarthWork\Images\AddElement.png" />
     <Content Include="MyTests\EarthWork\Images\AddNode.png" />
     <Content Include="MyTests\EarthWork\Images\DeleteElement.png" />

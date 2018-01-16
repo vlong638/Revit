@@ -50,7 +50,7 @@ namespace MyRevit.Entities
                 return Result.Cancelled;
 
             var selectedElements = elementIds.Select(c => doc.GetElement(c)).ToList();
-            AvoidElemntManager manager = new AvoidElemntManager();
+            AvoidElemntManager manager = new AvoidElemntManager(uiApp);
             manager.AddElements(selectedElements);
             manager.CheckConflict();
 
