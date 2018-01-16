@@ -11,6 +11,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public Guid GroupId = Guid.NewGuid();
         public bool IsSettled = false;
         public PriorityValue PriorityValue { set; get; }
+        public double Height { set; get; }
     }
     /// <summary>
     /// 碰撞区间的价值
@@ -19,6 +20,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
     {
         public ElementId ElementId;
         public List<ConflictElement> ConflictElements;
+
+        public XYZ StartPoint { set; get; }
+        public Connector StartLinkedConnector { get; internal set; }
+        public ElementId NewStartElementId { set; get; }
+
+        public XYZ EndPoint { set; get; }
+        public Connector EndLinkedConnector { get; internal set; }
+        public ElementId NewEndElementId { set; get; }
 
         public ConflictLineSection(ElementId id)
         {
@@ -326,7 +335,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 var startEle = avoidElements.FirstOrDefault(c => c.MEPElement.Id == connectorToMepElement.Owner.Id);
                 if (startEle == null)
+                {
                     startEle = new AvoidElement(connectorToMepElement.Owner as MEPCurve);
+                    avoidElements.Add(startEle);
+                }
                 var conflictEle = startEle.AddConflictElement(connectorToMepElement);
                 SetupGroup(startEle, conflictEle, conflictNodes, avoidElements);
             }

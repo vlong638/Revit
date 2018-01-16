@@ -37,9 +37,9 @@ namespace MyRevit.MyTests
             var selectedElements = elementIds.Select(c => doc.GetElement(c)).ToList();
             AvoidElemntManager manager = new AvoidElemntManager();
             manager.AddElements(selectedElements);
-            manager.CheckConflict();
             VLTransactionHelper.DelegateTransaction(doc, "调研_单点避让", () =>
             {
+                manager.CheckConflict();
                 manager.AutoAvoid(doc);
                 return true;
             });

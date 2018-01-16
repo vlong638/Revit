@@ -52,6 +52,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             MEPElement = connectedMepElement;
             //TODO AvoidElementType 类型自动识别
+            AvoidElementType = AvoidElementType.Pipe;
         }
 
         #region 属性
@@ -125,21 +126,31 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 StartPoint = p2;
                 EndPoint = p1;
             }
-            var c1 = MEPElement.ConnectorManager.Connectors.GetConnectorById(0);
+            Connector start, end;
+            GetStartAndEndConnector(MEPElement,middle, out start, out end);
+            ConnectorStart = start;
+            ConnectorEnd = end;
+        }
+
+        public static void GetStartAndEndConnector(MEPCurve mepCurve, XYZ middle, out Connector start, out Connector end)
+        {
+            var c1 = mepCurve.ConnectorManager.Connectors.GetConnectorById(0);
+            start = null;
+            end = null;
             if (c1 != null)
             {
                 if (new XYZComparer().Compare(c1.Origin, middle) > 0)
-                    ConnectorStart = c1;
+                    start = c1;
                 else
-                    ConnectorEnd = c1;
+                    end = c1;
             }
-            var c2 = MEPElement.ConnectorManager.Connectors.GetConnectorById(1);
+            var c2 = mepCurve.ConnectorManager.Connectors.GetConnectorById(1);
             if (c2 != null)
             {
                 if (new XYZComparer().Compare(c2.Origin, middle) > 0)
-                    ConnectorStart = c2;
+                    start = c2;
                 else
-                    ConnectorEnd = c2;
+                    end = c2;
             }
         }
 

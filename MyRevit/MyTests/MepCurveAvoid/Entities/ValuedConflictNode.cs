@@ -88,10 +88,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     }
                 var conflictElement = winner.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
                 CalculateLocations(winner.OrientAvoidElement, conflictElement);
+                winner.ConflictLineSections.Height = conflictElement.Height;
                 CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
-                //ConflictLineSections汇总
-                if (conflictLineSections_Collection.FirstOrDefault(c => c.GroupId == winner.ConflictLineSections.GroupId) == null)
-                    conflictLineSections_Collection.Add(winner.ConflictLineSections);
+                if (conflictLineSections_Collection.FirstOrDefault(c => c.GroupId == winner.ConflictLineSections.GroupId) == null)//ConflictLineSections汇总
+                    conflictLineSections_Collection.Add(winner.ConflictLineSections);//TODO StartConnector信息有 EndConnector信息已经录入但是丢失了
             }
             if (!isLoserSettled)
             {
@@ -114,19 +114,28 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     //边界计算
                     if (i == 0 || i == ConflictLineSection.ConflictElements.Count() - 1)
                     {
-                        ////TODO 区块信息整理
-                        //if (conflictEle.IsConnector)
-                        //{
-                        //    Connector linkToConnectorStart = connectorStart.GetConnectedConnector();
-                        //    if (linkToConnectorStart != null)
-                        //        connectorStart.DisconnectFrom(linkToConnectorStart);
-                        //}
-                        //ConflictLineSection.StartConnector_ElementId = Connector
-
-
-
-
-
+                        //区块信息整理
+                        if (conflictEle.IsConnector)
+                        {
+                            if (avoidElement.IsStartPoint(conflictEle))
+                            {
+                                var connector = avoidElement.ConnectorStart;
+                                Connector linkedConnector = connector.GetConnectedConnector();
+                                if (linkedConnector != null)
+                                    connector.DisconnectFrom(linkedConnector);
+                                ConflictLineSection.StartLinkedConnector = linkedConnector;
+                                ConflictLineSection.StartPoint = avoidElement.StartPoint;
+                            }
+                            if (avoidElement.IsEndPoint(conflictEle))
+                            {
+                                var connector = avoidElement.ConnectorEnd;
+                                Connector linkedConnector = connector.GetConnectedConnector();
+                                if (linkedConnector != null)
+                                    connector.DisconnectFrom(linkedConnector);
+                                ConflictLineSection.EndLinkedConnector = linkedConnector;
+                                ConflictLineSection.EndPoint = avoidElement.EndPoint;
+                            }
+                        }
                         CalculateLocations(avoidElement, conflictEle, startConflictElement.Height);
                     }
                 }
