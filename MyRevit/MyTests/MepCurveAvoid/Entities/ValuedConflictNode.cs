@@ -94,7 +94,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     foreach (var ConflictElement in ConflictLineSection.ConflictElements)
                     {
                         ConflictElement.CompeteType = CompeteType.Winner;
-                        ConflictElement.GroupId = winner.ConflictLineSections.GroupId;
+                        //ConflictElement.GroupId = winner.ConflictLineSections.GroupId;
                     }
                 var conflictElement = winner.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
                 CalculateLocations(winner.OrientAvoidElement, conflictElement);

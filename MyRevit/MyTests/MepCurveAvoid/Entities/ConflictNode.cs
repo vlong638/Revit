@@ -253,6 +253,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             SetupGroupPriorityValue();
             //SetupAvoidPriorityValue(valuedConflictNodes);
             ConflictLineSections.IsGrouped = true;
+            //组Id
+            foreach (var ConflictLineSection in ConflictLineSections)
+                foreach (var ConflictElement in ConflictLineSection.ConflictElements)
+                    ConflictElement.GroupId = ConflictLineSections.GroupId;
         }
         public void Valuing(ConflictElement conflictElement, List<ValuedConflictNode> valuedConflictNodes, List<AvoidElement> avoidElements)
         {
@@ -297,23 +301,35 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             //为之避让的内容的价值
             ConflictLineSections.AvoidPriorityValue = new PriorityValue();
+            List<Guid> addedGroups = new List<Guid>();
             foreach (var conflictLineSection in ConflictLineSections)
             {
                 foreach (var conflictElement in conflictLineSection.ConflictElements)
                 {
+                    //TODO 找到 conflictElement.ConflictEle.MEPElement.Id 所属的价值组
                     if (conflictElement.IsConnector)
                         continue;
 
                     foreach (var valuedConflictNode in valuedConflictNodes)
                     {
-                        if (valuedConflictNode.ValueNode1.ConflictLineSections.GroupId == conflictElement.GroupId)
+                        if (!valuedConflictNode.ConflictLocation.VL_XYEqualTo(conflictElement.ConflictLocation))
+                            continue;
+                        if (valuedConflictNode.ValueNode1.OrientAvoidElement.MEPElement.Id == conflictElement.ConflictEle.MEPElement.Id)
                         {
-                            ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode1.ConflictLineSections.GroupPriorityValue;
+                            if (!addedGroups.Contains(valuedConflictNode.ValueNode1.ConflictLineSections.GroupId))
+                            {
+                                ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode1.ConflictLineSections.GroupPriorityValue;
+                                addedGroups.Add(valuedConflictNode.ValueNode1.ConflictLineSections.GroupId);
+                            }
                             break;
                         }
-                        if (valuedConflictNode.ValueNode2.ConflictLineSections.GroupId == conflictElement.GroupId)
+                        if (valuedConflictNode.ValueNode2.OrientAvoidElement.MEPElement.Id == conflictElement.ConflictEle.MEPElement.Id)
                         {
-                            ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode2.ConflictLineSections.GroupPriorityValue;
+                            if (!addedGroups.Contains(valuedConflictNode.ValueNode2.ConflictLineSections.GroupId))
+                            {
+                                ConflictLineSections.AvoidPriorityValue += valuedConflictNode.ValueNode2.ConflictLineSections.GroupPriorityValue;
+                                addedGroups.Add(valuedConflictNode.ValueNode2.ConflictLineSections.GroupId);
+                            }
                             break;
                         }
                     }

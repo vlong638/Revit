@@ -69,6 +69,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 var conflictNode = ValuedConflictNodes[i];
                 conflictNode.Grouping(ValuedConflictNodes, AvoidElements);
+            }
+            for (int i = ValuedConflictNodes.Count() - 1; i >= 0; i--)
+            {
+                var conflictNode = ValuedConflictNodes[i];
                 conflictNode.Valuing(ValuedConflictNodes, AvoidElements);
             }
             //价值对抗(按照优势者优先原则) 价值模型
