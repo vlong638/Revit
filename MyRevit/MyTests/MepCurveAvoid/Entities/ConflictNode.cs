@@ -144,64 +144,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
             item.FullLength += itemToAdd.FullLength;
             return item;
         }
-
-
-        //public static List<PriorityElementType> PriorityElementTypes = new List<PriorityElementType>()
-        //{
-        //    PriorityElementType.UnpressedPipe,
-        //    PriorityElementType.LargeDuct,
-        //    PriorityElementType.LargePressedPipe,
-        //    PriorityElementType.LargeCableTray,
-        //    PriorityElementType.NormalDuct,
-        //    PriorityElementType.NormalPressedPipe,
-        //    PriorityElementType.NormalCableTray,
-        //};
-        //public static bool operator >(PriorityValue item, PriorityValue itemToCompare)
-        //{
-        //    if (item.CompeteType == CompeteType.Winner && itemToCompare.CompeteType == CompeteType.Winner)
-        //        throw new NotImplementedException("暂不支持同时避让");
-        //    if (item.CompeteType == CompeteType.Winner)
-        //        return false;
-        //    if (itemToCompare.CompeteType == CompeteType.Winner)
-        //        return true;
-
-        //    foreach (var PriorityElementType in PriorityElementTypes)
-        //    {
-        //        var type = PriorityElementType;
-        //        if (item.TypeNumber[type] > itemToCompare.TypeNumber[type])
-        //            return true;
-        //        if (item.TypeNumber[type] < itemToCompare.TypeNumber[type])
-        //            return false;
-        //        if (item.TypeMaxLength[type] > itemToCompare.TypeMaxLength[type])
-        //            return true;
-        //        if (item.TypeMaxLength[type] < itemToCompare.TypeMaxLength[type])
-        //            return false;
-        //    }
-        //    return item.FullLength > itemToCompare.FullLength;
-        //}
-        //public static bool operator <(PriorityValue item, PriorityValue itemToCompare)
-        //{
-        //    if (item.CompeteType == CompeteType.Winner && itemToCompare.CompeteType == CompeteType.Winner)
-        //        throw new NotImplementedException("暂不支持同时避让");
-        //    if (item.CompeteType == CompeteType.Winner)
-        //        return true;
-        //    if (itemToCompare.CompeteType == CompeteType.Winner)
-        //        return false;
-
-        //    foreach (var PriorityElementType in PriorityElementTypes)
-        //    {
-        //        var type = PriorityElementType;
-        //        if (item.TypeNumber[type] > itemToCompare.TypeNumber[type])
-        //            return false;
-        //        if (item.TypeNumber[type] < itemToCompare.TypeNumber[type])
-        //            return true;
-        //        if (item.TypeMaxLength[type] > itemToCompare.TypeMaxLength[type])
-        //            return false;
-        //        if (item.TypeMaxLength[type] < itemToCompare.TypeMaxLength[type])
-        //            return true;
-        //    }
-        //    return item.FullLength < itemToCompare.FullLength;
-        //} 
         #endregion
     }
 
@@ -251,7 +193,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
             SetupGroup(OrientAvoidElement, conflictElement, valuedConflictNodes, avoidElements);
             RenderGroupInfo(valuedConflictNodes);
             SetupGroupPriorityValue();
-            //SetupAvoidPriorityValue(valuedConflictNodes);
             ConflictLineSections.IsGrouped = true;
             //组Id
             foreach (var ConflictLineSection in ConflictLineSections)
@@ -306,7 +247,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 foreach (var conflictElement in conflictLineSection.ConflictElements)
                 {
-                    //TODO 找到 conflictElement.ConflictEle.MEPElement.Id 所属的价值组
+                    //找到 conflictElement.ConflictEle.MEPElement.Id 所属的价值组
                     if (conflictElement.IsConnector)
                         continue;
 

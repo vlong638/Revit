@@ -1,6 +1,10 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Electrical;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using MyRevit.MyTests.Utilities;
 using MyRevit.Utilities;
+using PmSoft.Common.RevitClass.CommonRevitClass;
 using PmSoft.Common.RevitClass.Utils;
 using System;
 using System.Collections.Generic;
@@ -33,8 +37,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
             return 0;
         }
     }
-
-
     /// <summary>
     /// 避让元素(MEP)(基础点)
     /// 录入元素的基础单元
@@ -51,8 +53,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public AvoidElement(MEPCurve connectedMepElement)
         {
             MEPElement = connectedMepElement;
-            //TODO AvoidElementType 类型自动识别
-            AvoidElementType = AvoidElementType.Pipe;
+            //AvoidElementType 类型自动识别
+            if (connectedMepElement is Pipe)
+                AvoidElementType = AvoidElementType.Pipe;
+            else if (connectedMepElement is Duct)
+                AvoidElementType = AvoidElementType.Duct;
+            else if (connectedMepElement is CableTray)
+                AvoidElementType = AvoidElementType.CableTray;
+            else
+                throw new NotImplementedException("类型未在范围内");
         }
 
         #region 属性
@@ -95,7 +104,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     UpdateProperties();//初始设置元素类型时
             }
         }
-
+        public double AngleToTurn { get; internal set; }
+        public double ConnectHeight { get; internal set; }
+        public double ConnectWidth { get; internal set; }
         /// <summary>
         /// 更新相关属性
         /// </summary>
@@ -127,10 +138,85 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 EndPoint = p1;
             }
             Connector start, end;
-            GetStartAndEndConnector(MEPElement,middle, out start, out end);
+            GetStartAndEndConnector(MEPElement, middle, out start, out end);
             ConnectorStart = start;
             ConnectorEnd = end;
+            //更新避让所需的点位信息
+            AngleToTurn = 0;
+            ConnectHeight = 0;
+            ConnectWidth = 0;
         }
+
+
+        /// <summary>
+        /// 计算管道所用管件的WidthX，widthY，Length
+        /// </summary>
+        /// <param name="mep"></param>
+        /// <param name="angle"></param>
+        /// <param name="ent"></param>
+        /// <returns></returns>
+        private bool GetFittingData(Document doc,MEPCurve mep, double angle, out double widthX, out double widthY, out double length)
+        {
+            widthX = 0;
+            widthY = 0;
+            length = 0;
+
+            Connector con1 = null, con2 = null;
+            Line line1 = null, line2 = null;
+            FamilySymbol fs = null;
+            if (mep is CableTray)
+            {
+                var param = (mep as CableTray).GetMEPCurveType().GetParameters("垂直内弯头");
+                if (param.Count != 0)
+                    fs = doc.GetElement(param.First().AsElementId()) as FamilySymbol;
+            }
+            else
+                fs = this.Judge_LoadDefaultFitting(mep, MEPCurveConnectTypeENUM.Elbow);
+            if (fs == null)
+                return false;
+
+            Transaction trans = new Transaction(mep.Document);
+            try
+            {
+                trans.Start("临时");
+                var fi = doc.Create.NewFamilyInstance(XYZ.Zero, fs, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                var angleP = fi.GetParameters("角度").FirstOrDefault();
+                if (angleP != null)
+                    angleP.Set(Math.PI * angle / 180);
+                foreach (Connector con in fi.MEPModel.ConnectorManager.Connectors)
+                {
+                    if (mep is CableTray || (mep is Duct && con.Shape == ConnectorProfileType.Rectangular))
+                        con.SetWidth(mep.ConnectorManager.Lookup(0), true);
+                    else
+                        con.SetWidth(mep.ConnectorManager.Lookup(0));
+                    if (con1 == null)
+                        con1 = con;
+                    else
+                        con2 = con;
+                }
+                doc.Regenerate();
+
+                //生成出口直线
+                line1 = Line.CreateUnbound(con1.Origin, con1.CoordinateSystem.BasisZ);
+                line2 = Line.CreateUnbound(con2.Origin, con2.CoordinateSystem.BasisZ);
+                length = line1.GetIntersectWithPoint(line2).DistanceTo(con1.Origin);
+
+                //计算X向和Y向的距离
+                widthX = Math.Abs(con1.Origin.X - con2.Origin.X);
+                widthY = Math.Abs(con1.Origin.Y - con2.Origin.Y);
+
+                trans.RollBack();
+            }
+            catch
+            {
+                if (trans.HasStarted())
+                    trans.RollBack();
+
+                return false;
+            }
+            return true;
+        }
+
 
         public static void GetStartAndEndConnector(MEPCurve mepCurve, XYZ middle, out Connector start, out Connector end)
         {
@@ -181,10 +267,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     Width = element.get_Parameter(BuiltInParameter.RBS_CABLETRAY_WIDTH_PARAM).AsDouble();
                     Height = element.get_Parameter(BuiltInParameter.RBS_CABLETRAY_HEIGHT_PARAM).AsDouble();
                     break;
-                case AvoidElementType.Conduit:
-                    break;
                 default:
-                    break;
+                    throw new NotImplementedException("未分类的内容");
             }
         }
 
@@ -199,7 +283,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         static double LargeDuctSize = UnitTransUtils.MMToFeet(800);
         static double LargePipeSize = UnitTransUtils.MMToFeet(100);
         static double LargeCableTraySize = UnitTransUtils.MMToFeet(300);
-
+        
         private void UpdatePriorityElementType()
         {
             switch (AvoidElementType)
@@ -300,7 +384,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 从大到小
         /// </summary>
         public List<ConflictElement> ConflictElements { set; get; }
-
 
         internal void SetConflictElements(List<AvoidElement> elementsToAvoid, List<ValuedConflictNode> conflictNodes)
         {

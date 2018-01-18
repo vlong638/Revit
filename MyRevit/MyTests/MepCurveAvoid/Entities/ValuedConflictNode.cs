@@ -92,11 +92,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 foreach (var ConflictLineSection in winner.ConflictLineSections)
                     foreach (var ConflictElement in ConflictLineSection.ConflictElements)
-                    {
                         ConflictElement.CompeteType = CompeteType.Winner;
-                        //ConflictElement.GroupId = winner.ConflictLineSections.GroupId;
-                    }
                 var conflictElement = winner.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
+                //定位计算
                 CalculateLocations(winner.OrientAvoidElement, conflictElement);
                 winner.ConflictLineSections.Height = conflictElement.Height;
                 CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
@@ -109,7 +107,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     foreach (var ConflictElement in ConflictLineSection.ConflictElements)
                         ConflictElement.CompeteType = CompeteType.Loser;
             }
-            //定位计算
             IsCompeted = true;
         }
 
@@ -151,13 +148,21 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 }
             }
         }
-
+        
         static XYZ VerticalDirection = new XYZ(0, 0, 1);//上下翻转方向
         private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement, double height = -1)
         {
+            double angleToTurn = avoidElement.AngleToTurn;
+            double miniConnectHeight = avoidElement.ConnectHeight;
+            double miniConnectWidth = avoidElement.ConnectWidth;
+
+            ////TODO 基于不同类型的不同数据进行计算
+            //var angleToTurn = Math.PI / 4;//45°
+            //var miniConnectHeight = 0;//TODO 考虑构件的最小高度需求
+            //var miniConnectWidth = 0;//TODO 考虑构件的最小宽度需求
+
             var miniMepLength = UnitTransUtils.MMToFeet(400);//(96);//最短连接管长度 双向带连接件
             var miniSpace = UnitTransUtils.MMToFeet(100);//避免碰撞及提供留白的安全距离
-            var angleToTurn = Math.PI / 4;//45°
             var curve = (avoidElement.MEPElement.Location as LocationCurve).Curve;
             var pointStart = avoidElement.StartPoint;
             var pointEnd = avoidElement.EndPoint;
@@ -189,11 +194,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
             if (height == -1)
             {
                 height = avoidElement.Height / 2 + elementToAvoidHeight / 2 + miniSpace;
-                //height = Math.Max(height,构件的最小高度);//TODO 考虑构件的最小高度需求
+                height = Math.Max(height, miniConnectHeight);//TODO 考虑构件的最小高度需求
                 conflictElement.Height = height;
             }
             var widthUp = miniMepLength / 2;
-            //widthUp = Math.Max(widthUp, height - 构件的最小宽度); //TODO 考虑构件的最小宽度需求
+            widthUp = Math.Max(widthUp, miniConnectWidth); //TODO 考虑构件的最小宽度需求 //height - miniConnectWidth
             var diameterAvoid = Math.Max(avoidElement.Width, avoidElement.Height);
             var diameterToAvoid = Math.Max(elementToAvoidWidth, elementToAvoidHeight);
             widthUp = Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + miniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));
