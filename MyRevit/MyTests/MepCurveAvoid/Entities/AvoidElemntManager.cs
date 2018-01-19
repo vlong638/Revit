@@ -10,6 +10,7 @@ using System;
 using PmSoft.Common.RevitClass.Utils;
 using Autodesk.Revit.UI;
 using PmSoft.MepProject.ControlService;
+using PmSoft.Common.CADBase;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
@@ -50,6 +51,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="elements"></param>
         public void AddElements(List<Element> elements)
         {
+            elements = elements.Where(c => ((c.Location as LocationCurve).Curve as Line).Direction.Z < 0.9).ToList();
+            //过滤斜率过高的管线
             AvoidElements.AddRange(elements.Where(c => c is Pipe).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Pipe)));
             AvoidElements.AddRange(elements.Where(c => c is Duct).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Duct)));
             AvoidElements.AddRange(elements.Where(c => c is Conduit).Select(c => new AvoidElement(c as MEPCurve, AvoidElementType.Conduit)));
@@ -171,7 +174,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElement"></param>
         private void RebuiltCurves(Document doc, AvoidElement avoidElement)
         {
-            int id = avoidElement.MEPElement.Id.IntegerValue;
+            int id = avoidElement.MEPCurve.Id.IntegerValue;
             var source = avoidElement.ConflictElements.Where(c => c.CompeteType == CompeteType.Winner).ToList();
             if (source.Count == 0)
                 return;
@@ -182,7 +185,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             XYZ middleEnd = null;
             XYZ endSplit = null;
             XYZ endPoint = avoidElement.EndPoint;
-
+            int startAt=0, endAt;
             for (int i = 0; i < source.Count(); i++)
             {
                 var currentConflictEle = source[i];
@@ -204,6 +207,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 }
                 else
                 {
+                    endAt = i;
                     //边界连接件点位变更
                     if (currentConflictEle.IsConnector)
                     {
@@ -223,15 +227,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         startPoint = currentConflictEle.ConnectorLocation;
                         middleEnd = currentConflictEle.MiddleEnd;
                         endSplit = currentConflictEle.EndSplit;
-                        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
-                        var leanEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                        var leanEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (leanEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
-                            //连接件补充
+                        //连接件补充
                         AddConnectionNode(offsetMep, leanEnd);
+                        //垂直被还原的旋转回归
+                        LeanTransfrom(doc, avoidElement, currentConflictEle, leanEnd, false);
                         if (i == source.Count() - 1)
                         {
-                            var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                            var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
                             //连接件补充
                             AddConnectionNode(leanEnd, mepEnd);
@@ -239,7 +245,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         //连接件迁移
                         foreach (var ConflictLineSections in ConflictLineSections_Collection)
                         {
-                            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPElement.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint));
+                            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint));
                             if (lineSection != null)
                             {
                                 lineSection.NewStartElementId = offsetMep.Id;
@@ -252,14 +258,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         if (isContinuing) //连续避让
                         {
                             isContinuing = false;
-                            if ((startPoint.Z - endPoint.Z).IsMiniValue())//前后边界都是Connector
+                            if (source[startAt].IsConnector && source[endAt].IsConnector)//前后边界都是Connector
                             {
-                                var fullmep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                var fullmep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (fullmep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, endPoint);
                                 //连接件迁移
                                 foreach (var ConflictLineSections in ConflictLineSections_Collection)
                                 {
-                                    var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPElement.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint) && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
+                                    var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint) && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
                                     if (lineSection != null)
                                     {
                                         lineSection.NewStartElementId = fullmep.Id;
@@ -277,19 +283,21 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             middleStart = currentConflictEle.MiddleStart;
                             endPoint = currentConflictEle.ConnectorLocation;
                         }
-                        var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                        var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
-                        var leanStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                        var leanStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (leanStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
-                        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);
                         //连接件补充
                         AddConnectionNode(mepStart, leanStart);
                         AddConnectionNode(leanStart, offsetMep);
+                        //垂直被还原的旋转回归
+                        LeanTransfrom(doc, avoidElement, currentConflictEle, leanStart, true);
                         //连接件迁移
                         foreach (var ConflictLineSections in ConflictLineSections_Collection)
                         {
-                            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPElement.Id && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
+                            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
                             if (lineSection != null)
                             {
                                 lineSection.NewEndElementId = offsetMep.Id;
@@ -319,80 +327,324 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             {
                                 if (compare.Compare(endPoint, endSplit) >= 0)
                                 {
-                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, endPoint);
                                 }
                                 else
                                 {
-                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
-                                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
-                                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
                                     //连接件补充
                                     AddConnectionNode(offsetMep, leanMepEnd);
                                     AddConnectionNode(leanMepEnd, mepEnd);
+                                    //垂直被还原的旋转回归
+                                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
                                 }
                             }
                             else
                             {
-                                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
-                                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
                                 //连接件补充
                                 AddConnectionNode(offsetMep, leanMepEnd);
+                                //垂直被还原的旋转回归
+                                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
                             }
                         }
                         else
                         {
-                            var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                            var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
-                            var leanMepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                            var leanMepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (leanMepStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
                             //连接件补充
                             AddConnectionNode(mepStart, leanMepStart);
+                            //垂直被还原的旋转回归
+                            LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepStart, true);
                             if (i == source.Count() - 1)
                             {
                                 if (compare.Compare(endPoint, endSplit) >= 0)
                                 {
-                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);
                                     //连接件补充
                                     AddConnectionNode(leanMepStart, offsetMep);
                                 }
                                 else
                                 {
-                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, middleEnd);
-                                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
-                                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                     (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
                                     //连接件补充
                                     AddConnectionNode(leanMepStart, offsetMep);
                                     AddConnectionNode(offsetMep, leanMepEnd);
                                     AddConnectionNode(leanMepEnd, mepEnd);
+                                    //垂直被还原的旋转回归
+                                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
                                 }
                             }
                             else
                             {
-                                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, middleEnd);
-                                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPElement.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
                                 //连接件补充
                                 AddConnectionNode(leanMepStart, offsetMep);
                                 AddConnectionNode(offsetMep, leanMepEnd);
+                                //垂直被还原的旋转回归
+                                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
                             }
                         }
                     }
                     startPoint = endSplit;
+                    startAt = endAt + 1;
                 }
             }
-            doc.Delete(avoidElement.MEPElement.Id);
+            doc.Delete(avoidElement.MEPCurve.Id);
         }
+
+        #region 垂直修正计算
+        private void LeanTransfrom(Document doc, AvoidElement avoidElement, ConflictElement currentConflictEle, MEPCurve lean, bool isStart)
+        {
+            //仅为垂直的非管道的管线做修复处理
+            if (avoidElement.AvoidElementType == AvoidElementType.Pipe || !(avoidElement.AngleToTurn - Math.PI / 2).IsMiniValue())
+                return;
+
+            var connectorOrient = isStart ? avoidElement.ConnectorStart : avoidElement.ConnectorEnd;
+            var connectorLean = isStart ? lean.ConnectorManager.Connectors.GetConnectorById(0) : lean.ConnectorManager.Connectors.GetConnectorById(1);
+            Curve curve = (Curve)Line.CreateBound(new XYZ(0, 0, 0), new XYZ(1, 0, 0));
+            var orientCurve = curve.CreateTransformed(connectorOrient.CoordinateSystem);
+            var orientPlaneDirection = (orientCurve as Line).Direction;
+            orientPlaneDirection -= new XYZ(0, 0, orientPlaneDirection.Z);
+            var leanCurve = curve.CreateTransformed(connectorLean.CoordinateSystem);
+            var leanPlaneDirection = (leanCurve as Line).Direction;
+            leanPlaneDirection -= new XYZ(0, 0, leanPlaneDirection.Z);
+            var angle = orientPlaneDirection.AngleOnPlaneTo(leanPlaneDirection, avoidElement.GetVerticalVector());
+            if (isStart)
+                angle = -angle;
+            ElementTransformUtils.RotateElement(doc, lean.Id, (lean.Location as LocationCurve).Curve as Line, angle);
+
+            //var sumDirection1 = connectorOrient.CoordinateSystem.BasisX + connectorOrient.CoordinateSystem.BasisY + connectorOrient.CoordinateSystem.BasisZ;
+            //sumDirection1 -= new XYZ(0, 0, sumDirection1.Z);
+            ////全对称的特殊情况
+            //if (sumDirection1.GetLength() == 0)
+            //{
+            //    sumDirection1 = connectorOrient.CoordinateSystem.BasisX + connectorOrient.CoordinateSystem.BasisY;
+            //    sumDirection1 -= new XYZ(0, 0, sumDirection1.Z);
+            //}
+            //var sumDirection2 = connectorLean.CoordinateSystem.BasisX + connectorLean.CoordinateSystem.BasisY + connectorLean.CoordinateSystem.BasisZ;
+            //sumDirection2 -= new XYZ(0, 0, sumDirection2.Z);
+            //var angle = sumDirection1.AngleOnPlaneTo(sumDirection2, avoidElement.GetVerticalDirection());
+            //XYZ normal = GetNormalForMove(avoidElement, currentConflictEle, connectorOrient, avoidElement.AngleToTurn);
+            //ElementTransformUtils.RotateElement(doc, lean.Id, Line.CreateBound(connectorOrient.Origin, connectorOrient.Origin + normal), avoidElement.AngleToTurn * Math.PI / 180);
+        }
+
+        #region reference
+        //private void LeanTransfrom(Document doc, AvoidElement avoidElement, ConflictElement currentConflictEle, MEPCurve lean, bool isStart)
+        //{
+        //    //仅为垂直的非管道的管线做修复处理
+        //    if (avoidElement.AvoidElementType == AvoidElementType.Pipe || !(avoidElement.AngleToTurn - Math.PI / 2).IsMiniValue())
+        //        return;
+
+        //    var connectorOrient = isStart ? avoidElement.ConnectorStart : avoidElement.ConnectorEnd;
+        //    XYZ normal = GetNormalForMove(avoidElement, currentConflictEle, connectorOrient, avoidElement.AngleToTurn);
+        //    ElementTransformUtils.RotateElement(doc, lean.Id, Line.CreateBound(connectorOrient.Origin, connectorOrient.Origin + normal), avoidElement.AngleToTurn * Math.PI / 180);
+        //}
+
+        //private XYZ GetNormalForMove(AvoidElement avoidElement, ConflictElement currentConflictEle, Connector connector1, double angleToTurn)
+        //{
+        //    //var isUp = avoidElement.GetVerticalDirection().Z > 0;
+        //    //var dst = currentConflictEle.ConflictEle.MEPCurve;
+        //    //XYZ dstV = ((dst.Location as LocationCurve).Curve as Line).Direction;
+        //    //dstV = dstV - new XYZ(0, 0, dstV.Z);
+        //    //var angle = dstV.AngleTo(XYZ.BasisX);
+        //    //angle = angle > Math.PI / 2 ? (Math.PI - angle) : angle;
+        //    //dstV = angle < (Math.PI / 4) ? new XYZ(0, -1, 0) : new XYZ(1, 0, 0);
+        //    //return GetNormal(connector1.CoordinateSystem.BasisZ, isUp ? dstV : -dstV);
+
+        //    var isUp = avoidElement.GetVerticalDirection().Z > 0;
+        //    var mep = avoidElement.MEPCurve;
+        //    var dst = currentConflictEle.ConflictEle.MEPCurve;
+        //    XYZ normal = null;
+        //    if ((IsCross(dst) || (IsLessThanEqualTo(GetSlope(dst),1))))//被绕过的弯是横管或者角度小于45度的管
+        //    {
+        //        XYZ dstV = GetLine(dst).Direction;
+        //        dstV = dstV - new XYZ(0, 0, dstV.Z);
+        //        var angle = dstV.AngleTo(XYZ.BasisX);
+        //        angle = angle > Math.PI / 2 ? (Math.PI - angle) : angle;
+        //        dstV = angle < (Math.PI / 4) ? new XYZ(0, -1, 0) : new XYZ(1, 0, 0);
+        //        if (!isUp)
+        //            dstV = -dstV;
+        //        normal = GetNormal(connector1.CoordinateSystem.BasisZ, dstV);
+        //    }
+        //    else//被绕过的弯是立管或者角度大于45度的管
+        //    {
+        //        //var normal = connector1.CoordinateSystem.BasisZ.GetNormal(data.TurnDirection == MEPCurveTurnData.TurnDirectionENUM.Up ? new XYZ(0, -1, 0) : new XYZ(0, 1, 0));
+        //        XYZ dstV = null;
+        //        dstV = GetLine(mep).Direction;
+        //        dstV = dstV - new XYZ(0, 0, dstV.Z);
+        //        var angle = dstV.AngleTo(XYZ.BasisX);
+        //        angle = angle > Math.PI / 2 ? (Math.PI - angle) : angle;
+        //        dstV = angle < (Math.PI / 4) ? new XYZ(0, -1, 0) : new XYZ(1, 0, 0);
+        //        if (!isUp)
+        //            dstV = -dstV;
+        //        normal = GetNormal(connector1.CoordinateSystem.BasisZ,dstV);
+        //    }
+        //    return normal;
+        //}
+
+        ///// <summary>
+        ///// 小于等于
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <param name="dst"></param>
+        ///// <param name="dTol"></param>
+        ///// <returns></returns>
+        //public static bool IsLessThanEqualTo(double src, double dst, double dTol = 0.00328)
+        //{
+        //    if (src < dst ||IsAlmostEqualTo(src,dst, dTol))
+        //        return true;
+        //    else
+        //        return false;
+        //}
+        ///// <summary>
+        ///// 管道的坡度
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <returns></returns>
+        //public static double GetSlope(MEPCurve src)
+        //{
+        //    var p = src.GetParameters("坡度").FirstOrDefault();
+        //    if (p != null)
+        //        return p.AsDouble();
+        //    else
+        //    {
+        //        var startP = src.GetParameters("开始偏移").FirstOrDefault();
+        //        var endP = src.GetParameters("端点偏移").FirstOrDefault();
+        //        if (startP == null || endP == null)
+        //            return 0;
+        //        var line = GetLine(src);
+        //        var xyz1 = line.GetEndPoint(0);
+        //        var xyz2 = line.GetEndPoint(1); xyz2 += new XYZ(0, 0, -xyz2.Z + xyz1.Z);
+
+        //        return Math.Abs(startP.AsDouble() - endP.AsDouble()) / xyz1.DistanceTo(xyz2);
+        //    }
+        //}
+        ///// <summary>
+        ///// 获取直线(只对应直线)
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <returns></returns>
+        //public static Line GetLine(MEPCurve src)
+        //{
+        //    LocationCurve lCurve1 = src.Location as LocationCurve;
+        //    return lCurve1.Curve as Line;
+        //}
+        ///// <summary>
+        ///// 判断是否为横管
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <returns></returns>
+        //public static bool IsCross(MEPCurve src)
+        //{
+        //    Line line = GetLine(src);
+
+        //    if (IsAlmostEqualTo(line.Direction.Z, 0, 0.001))
+        //        return true;
+        //    else
+        //        return false;
+        //}
+        //public static XYZ GetNormal(XYZ srcV, XYZ dstV)
+        //{
+        //    //解决srcV与dstV在同一直线上的情况
+        //    if (srcV.IsAlmostEqualTo(dstV) || srcV.IsAlmostEqualTo(-dstV))
+        //    {
+        //        Line line = Line.CreateUnbound(new XYZ(0, 0, 0), srcV);
+        //        Random random = new Random();
+        //        XYZ xyz = null;
+        //        while (xyz == null || IsOn(line, xyz))
+        //        {
+        //            xyz = new XYZ(random.Next(-1, 1), random.Next(-1, 1), random.Next(-1, 1));
+        //        }
+        //        return Line.CreateBound(GetClosestPoint(line, xyz), xyz).Direction;
+        //    }
+
+        //    CPlane cplane = new CPlane(new CPoint3d(0, 0, 0), new CVector3d(srcV.X, srcV.Y, srcV.Z), new CVector3d(dstV.X, dstV.Y, dstV.Z));
+        //    var cXYZ = cplane.normal();
+        //    return new XYZ(cXYZ.x, cXYZ.y, cXYZ.z);
+        //}
+        ///// <summary>
+        ///// 判断某点是否在直线上
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <param name="xyz"></param>
+        ///// <param name="dTol">误差，默认值为0.000001</param>
+        ///// <returns></returns>
+        //public static bool IsOn(Line src, XYZ xyz, double dTol = 0.00328)
+        //{
+        //    if (src.Distance(xyz) < dTol)
+        //        return true;
+        //    else
+        //        return false;
+        //}
+
+        ///// <summary>
+        ///// 获取该line上与某点的最近点，就是垂直点
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <param name="p"></param>
+        ///// <returns></returns>
+        //public static XYZ GetClosestPoint(Line src, XYZ p)
+        //{
+        //    XYZ lineP1 = null;
+        //    XYZ lineP2 = null;
+        //    if (src.IsBound)
+        //    {
+        //        lineP1 = src.GetEndPoint(0);
+        //        lineP2 = src.GetEndPoint(1);
+        //    }
+        //    else
+        //    {
+        //        lineP1 = src.Origin;
+        //        lineP2 = src.Origin + src.Direction;
+        //    }
+
+        //    CPoint3d cp = new CPoint3d(p.X, p.Y, p.Z);
+        //    CLine3d dstLine = new CLine3d();
+        //    CLine3d line = new CLine3d(new CPoint3d(lineP1.X, lineP1.Y, lineP1.Z), new CPoint3d(lineP2.X, lineP2.Y, lineP2.Z));
+        //    line.getLine(dstLine);
+
+        //    cp = line.closestPointTo(cp, 0.00000000000000000001);
+
+        //    return new XYZ(cp.x, cp.y, cp.z);
+        //}
+        ///// <summary>
+        ///// 比较两个double数值是否相等
+        ///// </summary>
+        ///// <param name="src"></param>
+        ///// <param name="dst"></param>
+        ///// <param name="dTol">误差，默认为0.001</param>
+        ///// <returns></returns>
+        //public static bool IsAlmostEqualTo(double src, double dst, double dTol = 0.00328)
+        //{
+        //    if (Math.Abs(src - dst) < dTol)
+        //        return true;
+        //    else
+        //        return false;
+        //} 
+        #endregion
+
+        #endregion
 
         /// <summary>
         /// 连接件补充

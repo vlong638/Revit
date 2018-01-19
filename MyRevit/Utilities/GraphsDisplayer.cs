@@ -20,7 +20,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             if (avoidElements.Count() == 0)
                 return;
 
-            var lines = avoidElements.Select(c => Line.CreateBound((c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(0), (c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(1))).ToList();
+            var lines = avoidElements.Select(c => Line.CreateBound((c.MEPCurve.Location as LocationCurve).Curve.GetEndPoint(0), (c.MEPCurve.Location as LocationCurve).Curve.GetEndPoint(1))).ToList();
             var maxX = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.X));
             var minX = (int)lines.Min(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Min(b => b.X));
             var maxY = (int)lines.Max(c => new XYZ[] { c.GetEndPoint(0), c.GetEndPoint(1) }.Max(b => b.Y));
@@ -29,15 +29,15 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
             //显示 线
             graphicsDisplayer.DisplayLines(lines, new Pen(Brushes.Black), false, false);
             //显示 线的ID
-            var lineIds = avoidElements.Select(c => ((c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(0) + (c.MEPElement.Location as LocationCurve).Curve.GetEndPoint(1)) / 2).ToList();
-            var lineIdTexts = avoidElements.Select(c => c.MEPElement.Id.IntegerValue.ToString()).ToList();
+            var lineIds = avoidElements.Select(c => ((c.MEPCurve.Location as LocationCurve).Curve.GetEndPoint(0) + (c.MEPCurve.Location as LocationCurve).Curve.GetEndPoint(1)) / 2).ToList();
+            var lineIdTexts = avoidElements.Select(c => c.MEPCurve.Id.IntegerValue.ToString()).ToList();
             graphicsDisplayer.DisplayPointText(lineIds, lineIdTexts, Brushes.DarkGreen);
             foreach (var avoidElement in avoidElements)
             {
                 var elements = avoidElement.ConflictElements.Where(c => c.CompeteType == CompeteType.Winner);//!c.IsConnector&& 
                 //显示 碰撞点结果 分组
                 var locations = elements.Select(c => c.ConflictLocation).ToList();
-                var texts = elements.Select(c => "W:" + c.AvoidEle.MEPElement.Id.IntegerValue.ToString() + "-G:" + c.GroupId.ToString().Substring(0, 4)).ToList();
+                var texts = elements.Select(c => "W:" + c.AvoidEle.MEPCurve.Id.IntegerValue.ToString() + "-G:" + c.GroupId.ToString().Substring(0, 4)).ToList();
                 graphicsDisplayer.DisplayPointText(locations, texts, Brushes.Red);
 
             }

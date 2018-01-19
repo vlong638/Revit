@@ -41,7 +41,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public ConflictLineSection(AvoidElement startElement)
         {
             AvoidElement = startElement;
-            ElementId= AvoidElement.MEPElement.Id;
+            ElementId= AvoidElement.MEPCurve.Id;
             ConflictElements = new List<ConflictElement>();
         }
     }
@@ -61,9 +61,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public int Compare(PriorityValue item, PriorityValue itemToCompare)
         {
             if (item.CompeteType != CompeteType.None && itemToCompare.CompeteType != CompeteType.None)
-                if (item.CompeteType==CompeteType.Winner&& itemToCompare.CompeteType==CompeteType.Winner||
+                if (item.CompeteType == CompeteType.Winner && itemToCompare.CompeteType == CompeteType.Winner ||
                     item.CompeteType == CompeteType.Loser && itemToCompare.CompeteType == CompeteType.Loser)
-                throw new NotImplementedException("暂不支持互斥避让");
+                    return 0;
+                //throw new NotImplementedException("暂不支持互斥避让");
             if (item.CompeteType == CompeteType.Winner)
                 return 1;
             if (item.CompeteType == CompeteType.Loser)
@@ -169,7 +170,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         #region 价值分析
 
 
-        static double GroupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(600);//成组的最小距离
+        static double GroupingDistance = PmSoft.Common.RevitClass.Utils.UnitTransUtils.MMToFeet(300);//成组的最小距离
 
         /// <summary>
         /// 价值分析
@@ -218,10 +219,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 foreach (ConflictElement ConflictElement in ConflictLineSection.ConflictElements)
                 {
-                    var valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode1.ConflictLineSections.IsGrouped && c.ValueNode1.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
+                    var valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode1.ConflictLineSections.IsGrouped && c.ValueNode1.OrientAvoidElement.MEPCurve.Id == ConflictElement.AvoidEle.MEPCurve.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
                     if (valuedConflictNode != null)
                         valuedConflictNode.ValueNode1.Settle(ConflictLineSections);
-                    valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode2.ConflictLineSections.IsGrouped && c.ValueNode2.OrientAvoidElement.MEPElement.Id == ConflictElement.AvoidEle.MEPElement.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
+                    valuedConflictNode = valuedConflictNodes.FirstOrDefault(c => !c.ValueNode2.ConflictLineSections.IsGrouped && c.ValueNode2.OrientAvoidElement.MEPCurve.Id == ConflictElement.AvoidEle.MEPCurve.Id && c.ConflictLocation.VL_XYEqualTo(ConflictElement.ConflictLocation));
                     if (valuedConflictNode != null)
                         valuedConflictNode.ValueNode2.Settle(ConflictLineSections);
                 }
@@ -255,7 +256,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     {
                         if (!valuedConflictNode.ConflictLocation.VL_XYEqualTo(conflictElement.ConflictLocation))
                             continue;
-                        if (valuedConflictNode.ValueNode1.OrientAvoidElement.MEPElement.Id == conflictElement.ConflictEle.MEPElement.Id)
+                        if (valuedConflictNode.ValueNode1.OrientAvoidElement.MEPCurve.Id == conflictElement.ConflictEle.MEPCurve.Id)
                         {
                             if (!addedGroups.Contains(valuedConflictNode.ValueNode1.ConflictLineSections.GroupId))
                             {
@@ -264,7 +265,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             }
                             break;
                         }
-                        if (valuedConflictNode.ValueNode2.OrientAvoidElement.MEPElement.Id == conflictElement.ConflictEle.MEPElement.Id)
+                        if (valuedConflictNode.ValueNode2.OrientAvoidElement.MEPCurve.Id == conflictElement.ConflictEle.MEPCurve.Id)
                         {
                             if (!addedGroups.Contains(valuedConflictNode.ValueNode2.ConflictLineSections.GroupId))
                             {
@@ -301,6 +302,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElements"></param>
         private void SetupGroup(AvoidElement startElement, ConflictElement conflictElement, List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
+            var currentGroupingDistance = GroupingDistance + startElement.ConnectWidth * 2;
             ConflictLineSection conflictLineSection = new ConflictLineSection(startElement);
             //碰撞点处理
             conflictLineSection.ConflictElements.Add(conflictElement);
@@ -312,7 +314,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             for (int i = currentIndex + 1; i < startElement.ConflictElements.Count(); i++)
             {
                 next = startElement.ConflictElements[i];
-                if (current.GetDistanceTo(next) > GroupingDistance)
+                if (current.GetDistanceTo(next) > currentGroupingDistance)
                     break;
 
                 conflictLineSection.ConflictElements.Add(next);
@@ -324,7 +326,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 var connector = startElement.ConnectorEnd;
                 var point = startElement.EndPoint;
-                if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
+                if (connector != null && current.GetDistanceTo(point) <= currentGroupingDistance)
                 {
                     var continueEle = startElement.AddConflictElement(connector);
                     conflictLineSection.ConflictElements.Add(continueEle);
@@ -338,7 +340,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             for (int i = currentIndex - 1; i >= 0; i--)
             {
                 next = startElement.ConflictElements[i];
-                if (current.GetDistanceTo(next)> GroupingDistance)
+                if (current.GetDistanceTo(next)> currentGroupingDistance)
                     break;
 
                 conflictLineSection.ConflictElements.Add(next);
@@ -350,7 +352,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 var connector = startElement.ConnectorStart;
                 var point = startElement.StartPoint;
-                if (connector != null && current.GetDistanceTo(point) <= GroupingDistance)
+                if (connector != null && current.GetDistanceTo(point) <= currentGroupingDistance)
                 {
                     var continueEle = startElement.AddConflictElement(connector);
                     conflictLineSection.ConflictElements.Add(continueEle);
@@ -366,7 +368,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var connectorsToMepElement = connector.GetConnectorsToMepElement();
             foreach (var connectorToMepElement in connectorsToMepElement)
             {
-                var startEle = avoidElements.FirstOrDefault(c => c.MEPElement.Id == connectorToMepElement.Owner.Id);
+                var startEle = avoidElements.FirstOrDefault(c => c.MEPCurve.Id == connectorToMepElement.Owner.Id);
                 if (startEle == null)
                 {
                     startEle = new AvoidElement(connectorToMepElement.Owner as MEPCurve);

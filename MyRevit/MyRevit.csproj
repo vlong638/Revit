@@ -522,6 +522,7 @@
     </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
+    <Content Include="DLLs\PmSoft.Common.RevitClass.dll" />
     <Content Include="DLLs\PmSoft.MepProject.ControlService.dll" />
     <Content Include="MyTests\EarthWork\Images\AddElement.png" />
     <Content Include="MyTests\EarthWork\Images\AddNode.png" />

@@ -46,13 +46,13 @@ namespace MyRevit.MyTests.MepCurveAvoid
     {
         public AvoidElement(MEPCurve element, AvoidElementType avoidElementType)
         {
-            MEPElement = element;
+            MEPCurve = element;
             AvoidElementType = avoidElementType;
         }
 
         public AvoidElement(MEPCurve connectedMepElement)
         {
-            MEPElement = connectedMepElement;
+            MEPCurve = connectedMepElement;
             //AvoidElementType 类型自动识别
             if (connectedMepElement is Pipe)
                 AvoidElementType = AvoidElementType.Pipe;
@@ -70,7 +70,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 主体元素
         /// </summary>
         private MEPCurve element;
-        public MEPCurve MEPElement
+        public MEPCurve MEPCurve
         {
             get
             {
@@ -104,26 +104,29 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     UpdateProperties();//初始设置元素类型时
             }
         }
+        #region 定位计算
         public double AngleToTurn { get; internal set; }
         public double ConnectHeight { get; internal set; }
         public double ConnectWidth { get; internal set; }
+        public double OffsetWidth { get; private set; }
+        #endregion
         /// <summary>
         /// 更新相关属性
         /// </summary>
         private void UpdateProperties()
         {
-            UpdateSize(MEPElement);
+            UpdateSize(MEPCurve);
             if (AvoidElementType == AvoidElementType.Pipe)
             {
-                UpdateIsPressed(MEPElement);
-                UpdateIsHot(MEPElement);
+                UpdateIsPressed(MEPCurve);
+                UpdateIsHot(MEPCurve);
             }
             else if (AvoidElementType == AvoidElementType.Duct)
             {
-                UpdateIsHeavy(MEPElement);
+                UpdateIsHeavy(MEPCurve);
             }
             UpdatePriorityElementType();
-            var curve = (MEPElement.Location as LocationCurve).Curve;
+            var curve = (MEPCurve.Location as LocationCurve).Curve;
             var p1 = curve.GetEndPoint(0);
             var p2 = curve.GetEndPoint(1);
             var middle = (p1 + p2) / 2;
@@ -138,32 +141,226 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 EndPoint = p1;
             }
             Connector start, end;
-            GetStartAndEndConnector(MEPElement, middle, out start, out end);
+            GetStartAndEndConnector(MEPCurve, middle, out start, out end);
             ConnectorStart = start;
             ConnectorEnd = end;
             //更新避让所需的点位信息
-            AngleToTurn = 0;
-            ConnectHeight = 0;
-            ConnectWidth = 0;
+            ConnectInfo connectInfo;
+            if (!ConnectInfoDic.ContainsKey(MEPCurve.Name))
+            {
+                double angleToTurn, connectHeight, connectWidth, offsetWidth;
+                if (GetFittingData(MEPCurve, out connectWidth, out connectHeight, out offsetWidth, out angleToTurn))
+                {
+                    connectInfo = new ConnectInfo(connectHeight, connectHeight, offsetWidth, angleToTurn);
+                    ConnectInfoDic.Add(MEPCurve.Name, connectInfo);
+                }
+                else
+                {
+                    throw new NotImplementedException("加载连接件信息失败,构件Id:" + MEPCurve.Id.IntegerValue.ToString());
+                }
+            }
+            else
+            {
+                connectInfo = ConnectInfoDic[MEPCurve.Name];
+            }
+            ConnectHeight = connectInfo.ConnectHeight;
+            ConnectWidth = connectInfo.ConnectWidth;
+            OffsetWidth = connectInfo.OffsetWidth;
+            AngleToTurn = connectInfo.AngleToTurn;
         }
 
+        struct ConnectInfo
+        {
+            public double ConnectHeight;
+            public double ConnectWidth;
+            public double OffsetWidth;
+            public double AngleToTurn;
+
+            public ConnectInfo(double connectHeight, double connectWidth, double offsetWidth, double angleToTurn)
+            {
+                ConnectHeight = connectHeight;
+                ConnectWidth = connectWidth;
+                OffsetWidth = offsetWidth;
+                AngleToTurn = angleToTurn;
+            }
+        }
+        static Dictionary<string, ConnectInfo> ConnectInfoDic = new Dictionary<string, ConnectInfo>();
+
+
+        #region 获取构件信息
+        protected enum MEPCurveConnectTypeENUM { MultiShapeTransition, Transition, Elbow, Tee, Cross, TakeOff }
+        /// <summary>
+        /// 获取设置文件中管件名称 
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private string GetDefaultFittingName(MEPCurve src, MEPCurveConnectTypeENUM type)
+        {
+            string searchText = "/Root/";
+            if (src is Pipe)
+            {
+                searchText += "Pipe/";
+            }
+            else if (src is Duct)
+            {
+                var con = src.ConnectorManager.Lookup(0);
+                if (con.Shape == ConnectorProfileType.Round)
+                    searchText += "Duct/圆形/";
+                else if (con.Shape == ConnectorProfileType.Rectangular)
+                    searchText += "Duct/矩形/";
+                else if (con.Shape == ConnectorProfileType.Oval)
+                    searchText += "Duct/椭圆/";
+            }
+            else if (src is Conduit)
+                searchText += "Conduit/";
+            else if (src is CableTray)
+                searchText += "CableTray/";
+
+            switch (type)
+            {
+                case MEPCurveConnectTypeENUM.Elbow://弯头
+                    searchText += "弯头"; break;
+                case MEPCurveConnectTypeENUM.Tee://三通
+                    searchText += "三通"; break;
+                case MEPCurveConnectTypeENUM.Cross://四通
+                    searchText += "四通"; break;
+                case MEPCurveConnectTypeENUM.Transition://过渡件
+                    searchText += "过渡件"; break;
+                case MEPCurveConnectTypeENUM.TakeOff://侧接
+                    searchText += "侧接"; break;
+                default:
+                    break;
+            }
+
+            System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
+            xml.Load(FamilyLoadUtils.FamilyLibPath + "\\..\\..\\SysData\\MEPCurveConnect.xml");
+            var node = xml.SelectSingleNode(searchText);
+            if (node == null)
+                return null;
+            else
+                return node.InnerText;
+        }
+        public bool IsOnlyUseRevitDefault { get; set; }
 
         /// <summary>
-        /// 计算管道所用管件的WidthX，widthY，Length
+        /// 检测系统中是否有默认连接项，无则进行添加
         /// </summary>
-        /// <param name="mep"></param>
-        /// <param name="angle"></param>
-        /// <param name="ent"></param>
-        /// <returns></returns>
-        private bool GetFittingData(Document doc,MEPCurve mep, double angle, out double widthX, out double widthY, out double length)
+        /// <param name="src"></param>
+        /// <param name="type"></param>
+        protected FamilySymbol Judge_LoadDefaultFitting(MEPCurve src, MEPCurveConnectTypeENUM type)
+        {
+            FamilySymbol fs = null;
+            switch (type)
+            {
+                case MEPCurveConnectTypeENUM.Elbow://弯头
+                    fs = src.GetDefaultFittingSymbol(RoutingPreferenceRuleGroupType.Elbows); break;
+                case MEPCurveConnectTypeENUM.Tee://三通
+                    fs = src.GetDefaultFittingSymbol(RoutingPreferenceRuleGroupType.Junctions); break;
+                case MEPCurveConnectTypeENUM.Cross://四通
+                    fs = src.GetDefaultFittingSymbol(RoutingPreferenceRuleGroupType.Crosses); break;
+                case MEPCurveConnectTypeENUM.Transition://过渡件
+                    fs = src.GetDefaultFittingSymbol(RoutingPreferenceRuleGroupType.Transitions); break;
+                case MEPCurveConnectTypeENUM.TakeOff://侧接
+                    fs = src.GetDefaultTakeoffFittingSymbol(); break;
+                default:
+                    fs = null;
+                    break;
+            }
+
+            if (fs != null)
+                return fs;
+
+            if (this.IsOnlyUseRevitDefault)
+                return null;
+
+            var familyName = this.GetDefaultFittingName(src, type);
+            if (familyName == null)
+                return null;
+
+            fs = FamilyLoadUtils.FindFamilySymbol_SubTransaction(src.Document, familyName, null);
+            if (fs == null)
+                return null;
+            if (src is Pipe || src is Duct)
+            {
+                RoutingPreferenceManager rpm = src.GetMEPCurveType().RoutingPreferenceManager;
+                var rule = new RoutingPreferenceRule(fs.Id, "");
+                rule.AddCriterion(PrimarySizeCriterion.All());
+
+                switch (type)
+                {
+                    case MEPCurveConnectTypeENUM.Elbow://弯头
+                        rpm.AddRule(RoutingPreferenceRuleGroupType.Elbows, rule); break;
+                    case MEPCurveConnectTypeENUM.Tee://三通
+                        rpm.AddRule(RoutingPreferenceRuleGroupType.Junctions, rule); break;
+                    case MEPCurveConnectTypeENUM.Cross://四通
+                        rpm.AddRule(RoutingPreferenceRuleGroupType.Crosses, rule); break;
+                    case MEPCurveConnectTypeENUM.Transition://过渡件
+                        rpm.AddRule(RoutingPreferenceRuleGroupType.Transitions, rule); break;
+                    case MEPCurveConnectTypeENUM.TakeOff://侧接
+                        rpm.AddRule(RoutingPreferenceRuleGroupType.Junctions, rule); break;
+                    default:
+                        break;
+                }
+
+            }
+            else if (src is Conduit)
+            {
+                Parameter param = null;
+
+                switch (type)
+                {
+                    case MEPCurveConnectTypeENUM.Elbow://弯头
+                        param = (src.Document.GetElement(src.GetTypeId())).GetParameters("弯头").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Tee://三通
+                        param = (src.Document.GetElement(src.GetTypeId())).GetParameters("T 形三通").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Cross://四通
+                        param = (src.Document.GetElement(src.GetTypeId())).GetParameters("交叉线").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Transition://过渡件
+                        param = (src.Document.GetElement(src.GetTypeId())).GetParameters("过渡件").FirstOrDefault(); break;
+                    default:
+                        break;
+                }
+
+                if (param != null)
+                {
+                    param.Set(fs.Id);
+                }
+            }
+            else if (src is CableTray)
+            {
+                Parameter param = null;
+                var t = new FilteredElementCollector(src.Document).OfClass(typeof(CableTrayType)).FirstOrDefault(p => p.GetParameters("族名称").First().AsString() == "带配件的电缆桥架");
+                switch (type)
+                {
+                    case MEPCurveConnectTypeENUM.Elbow://弯头
+                        param = t.GetParameters("水平弯头").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Tee://三通
+                        param = t.GetParameters("T 形三通").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Cross://四通
+                        param = t.GetParameters("交叉线").FirstOrDefault(); break;
+                    case MEPCurveConnectTypeENUM.Transition://过渡件
+                        param = t.GetParameters("过渡件").FirstOrDefault(); break;
+                    default:
+                        break;
+                }
+
+                if (param != null)
+                {
+                    param.Set(fs.Id);
+                }
+            }
+            return fs;
+        }
+        public bool GetFittingData(MEPCurve mep, out double widthX, out double widthY, out double offsetX, out double angle)
         {
             widthX = 0;
             widthY = 0;
-            length = 0;
-
+            offsetX = 0;
+            angle = 0;
             Connector con1 = null, con2 = null;
-            Line line1 = null, line2 = null;
             FamilySymbol fs = null;
+            var doc = mep.Document;
             if (mep is CableTray)
             {
                 var param = (mep as CableTray).GetMEPCurveType().GetParameters("垂直内弯头");
@@ -181,8 +378,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 trans.Start("临时");
                 var fi = doc.Create.NewFamilyInstance(XYZ.Zero, fs, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
                 var angleP = fi.GetParameters("角度").FirstOrDefault();
-                if (angleP != null)
-                    angleP.Set(Math.PI * angle / 180);
+                if (angleP == null)
+                {
+                    angle = Math.PI / 2;
+                    angleP.Set(angle);
+                }
+                else
+                {
+                    angle = angleP.AsDouble();
+                }
                 foreach (Connector con in fi.MEPModel.ConnectorManager.Connectors)
                 {
                     if (mep is CableTray || (mep is Duct && con.Shape == ConnectorProfileType.Rectangular))
@@ -196,15 +400,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 }
                 doc.Regenerate();
 
-                //生成出口直线
-                line1 = Line.CreateUnbound(con1.Origin, con1.CoordinateSystem.BasisZ);
-                line2 = Line.CreateUnbound(con2.Origin, con2.CoordinateSystem.BasisZ);
-                length = line1.GetIntersectWithPoint(line2).DistanceTo(con1.Origin);
-
                 //计算X向和Y向的距离
                 widthX = Math.Abs(con1.Origin.X - con2.Origin.X);
                 widthY = Math.Abs(con1.Origin.Y - con2.Origin.Y);
-
+                offsetX = Math.Max((fi.Location as LocationPoint).Point.DistanceTo(con1.Origin), (fi.Location as LocationPoint).Point.DistanceTo(con2.Origin));//取长边作为偏移量
                 trans.RollBack();
             }
             catch
@@ -216,7 +415,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             }
             return true;
         }
-
+        #endregion
 
         public static void GetStartAndEndConnector(MEPCurve mepCurve, XYZ middle, out Connector start, out Connector end)
         {
@@ -280,6 +479,33 @@ namespace MyRevit.MyTests.MepCurveAvoid
         #endregion
 
         public PriorityElementType PriorityElementType { set; get; }
+        XYZ VerticalVector;
+        internal XYZ GetVerticalVector()
+        {
+            if (VerticalVector == null)
+            {
+                //VerticalVector = PriorityElementType == PriorityElementType.UnpressedPipe ? ;
+                var direction = ((MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+                var normal = direction.GetNormal(new XYZ(0, 0, 1));
+                var verticalVector = direction.GetNormal(normal);
+                if (PriorityElementType == PriorityElementType.UnpressedPipe)
+                {
+                    if (verticalVector.Z > 0)
+                    {
+                        verticalVector = -verticalVector;
+                    }
+                }
+                else
+                {
+                    if (verticalVector.Z < 0)
+                    {
+                        verticalVector = -verticalVector;
+                    }
+                }
+                VerticalVector = verticalVector;
+            }
+            return VerticalVector;
+        }
         static double LargeDuctSize = UnitTransUtils.MMToFeet(800);
         static double LargePipeSize = UnitTransUtils.MMToFeet(100);
         static double LargeCableTraySize = UnitTransUtils.MMToFeet(300);
@@ -388,11 +614,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
         internal void SetConflictElements(List<AvoidElement> elementsToAvoid, List<ValuedConflictNode> conflictNodes)
         {
             ConflictElements = new List<ConflictElement>();
-            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(MEPElement);
-            var elementsConflicted = elementsToAvoid.Where(c => filter.PassesFilter(c.MEPElement)).ToList();
+            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(MEPCurve);
+            var elementsConflicted = elementsToAvoid.Where(c => filter.PassesFilter(c.MEPCurve)).ToList();
             foreach (var elementConflicted in elementsConflicted)
             {
-                var conflictLocation = GetConflictPoint(elementConflicted.MEPElement);
+                var conflictLocation = GetConflictPoint(elementConflicted.MEPCurve);
                 if (conflictLocation != null)
                 {
                     var conflictElement = new ConflictElement(this, conflictLocation, elementConflicted);
@@ -442,7 +668,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// </summary>
         public XYZ GetConflictPoint(MEPCurve mepCurve)
         {
-            var line = (MEPElement.Location as LocationCurve).Curve as Line;
+            var line = (MEPCurve.Location as LocationCurve).Curve as Line;
             var lineToAvoid = (mepCurve.Location as LocationCurve).Curve as Line;
             var lineDirection1 = line.Direction;
             var lineDirection2 = lineToAvoid.Direction;
