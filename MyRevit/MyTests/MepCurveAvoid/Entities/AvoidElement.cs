@@ -646,9 +646,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
             if (ConflictElements == null)
                 ConflictElements = new List<ConflictElement>();
             ConflictElement conflictElement = null;
-            if (ConnectorStart.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
+            if (ConnectorStart != null && ConnectorStart.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
                 conflictElement = new ConflictElement(this, StartPoint, connectorToMepElement);
-            else if (ConnectorEnd.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
+            else if (ConnectorEnd != null && ConnectorEnd.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
                 conflictElement = new ConflictElement(this, EndPoint, connectorToMepElement);
             else
                 throw new NotImplementedException("错误的连接点");
@@ -721,9 +721,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <returns></returns>
         public static Connector GetConnectedConnector(this Connector src)
         {
+            if (src == null)
+                return null;
             if (src.ConnectorType == ConnectorType.MasterSurface || src.ConnectorType == ConnectorType.Logical)
                 return null;
-
             if (!src.IsConnected)
                 return null;
 

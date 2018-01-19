@@ -43,6 +43,24 @@ namespace MyRevit.MyTests
                 manager.AutoAvoid(doc);
                 return true;
             });
+            VLTransactionHelper.DelegateTransaction(doc, "调研_单点避让", () =>
+            {
+                var result = string.Join(",", manager.ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+                var service = new MEPCurveConnectControlService(uiApp);
+                foreach (var ConnectionNode in manager.ConnectionNodes)
+                    try
+                    {
+                        service.NewTwoFitting(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
+                        doc.Regenerate();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        VLLogHelper.Error(string.Format("Node1:{0},Node2:{1},Error:{2}", ConnectionNode.MEPCurve1.Id, ConnectionNode.MEPCurve2.Id, ex.Message));
+
+                        var error = ex.ToString();
+                    }
+                return true;
+            });
             return Result.Succeeded;
         }
     }

@@ -37,7 +37,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <summary>
         /// 连接点位
         /// </summary>
-        List<ConnectionNode> ConnectionNodes = new List<ConnectionNode>();
+        public List<ConnectionNode> ConnectionNodes = new List<ConnectionNode>();
         private UIApplication uiApp;
 
         public AvoidElemntManager(UIApplication uiApp)
@@ -113,11 +113,32 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 TransportConnections(doc, ConflictLineSections);
             #endregion
 
+            //#region 连接点补充连接件
+            //var result = string.Join(",", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+            //var service = new MEPCurveConnectControlService(uiApp);
+            //foreach (var ConnectionNode in ConnectionNodes)
+            //    service.NewTwoFitting(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
+            //#endregion
+
+            //doc.Regenerate();
+        }
+        public void LinkConnection(Document doc)
+        {
+            //#region 管线重构
+            //foreach (var AvoidElement in AvoidElements)
+            //    RebuiltCurves(doc, AvoidElement);
+            //#endregion
+
+            //#region 连接件迁移
+            //foreach (var ConflictLineSections in ConflictLineSections_Collection)
+            //    TransportConnections(doc, ConflictLineSections);
+            //#endregion
+
             #region 连接点补充连接件
-            var m_Factory = new MepControlServiceFactory(uiApp);
-            var m_MEPCurveCS = m_Factory.IMEPCurveCS;
+            var result = string.Join(",", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+            var service = new MEPCurveConnectControlService(uiApp);
             foreach (var ConnectionNode in ConnectionNodes)
-                m_MEPCurveCS.NewElbowDefault(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
+                service.NewTwoFitting(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
             #endregion
 
             doc.Regenerate();
@@ -132,14 +153,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             List<ElementId> elementsToMove = new List<ElementId>();
             var height = ConflictLineSections.Height;
-            var vector = new XYZ(0, 0, 1);
+            var vector = ConflictLineSections.First().AvoidElement.GetVerticalVector(); //= new XYZ(0, 0, 1);
             foreach (var ConflictLineSection in ConflictLineSections)
             {
                 if (ConflictLineSection.StartLinkedConnector != null && ConflictLineSection.NewStartElementId != null)
                 {
                     //复位
-                    ElementTransformUtils.MoveElement(doc, ConflictLineSection.NewStartElementId, -height * vector);
-                    elementsToMove.Add(ConflictLineSection.NewStartElementId);
+                    if (!elementsToMove.Contains(ConflictLineSection.NewStartElementId))
+                    {
+                        ElementTransformUtils.MoveElement(doc, ConflictLineSection.NewStartElementId, -height * vector);
+                        elementsToMove.Add(ConflictLineSection.NewStartElementId);
+                    }
                     //修复连接关系
                     var element = doc.GetElement(ConflictLineSection.NewStartElementId);
                     var curve = (element.Location as LocationCurve).Curve;
@@ -151,8 +175,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 if (ConflictLineSection.EndLinkedConnector != null && ConflictLineSection.NewEndElementId != null)
                 {
                     //复位
-                    ElementTransformUtils.MoveElement(doc, ConflictLineSection.NewEndElementId, -height * vector);
-                    elementsToMove.Add(ConflictLineSection.NewEndElementId);
+                    if (!elementsToMove.Contains(ConflictLineSection.NewEndElementId))
+                    {
+                        ElementTransformUtils.MoveElement(doc, ConflictLineSection.NewEndElementId, -height * vector);
+                        elementsToMove.Add(ConflictLineSection.NewEndElementId);
+                    }
                     //修复连接关系
                     var element = doc.GetElement(ConflictLineSection.NewEndElementId);
                     var curve = (element.Location as LocationCurve).Curve;
@@ -164,7 +191,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             }
             //二次复位
             if (elementsToMove.Count() > 0)
-                ElementTransformUtils.MoveElements(doc, elementsToMove, height * vector);
+                ElementTransformUtils.MoveElements(doc, elementsToMove.ToList(), height * vector);
         }
 
         /// <summary>
@@ -185,6 +212,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             XYZ middleEnd = null;
             XYZ endSplit = null;
             XYZ endPoint = avoidElement.EndPoint;
+            MEPCurve preLeanMepEnd = null;
             int startAt=0, endAt;
             for (int i = 0; i < source.Count(); i++)
             {
@@ -203,6 +231,33 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             startPoint = currentConflictEle.ConnectorLocation;
                         startSplit = currentConflictEle.StartSplit;
                         middleStart = currentConflictEle.MiddleStart;
+                        if (startSplit == null)
+                        {
+                            var j = 1;
+                            while (j < source.Count() - 1)
+                            {
+                                var next = source[j];
+                                if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.StartSplit != null)
+                                {
+                                    startSplit = next.StartSplit;
+                                    middleStart = next.MiddleStart;
+                                }
+                                j++;
+                            }
+                        }
+                        //if (middleStart == null)
+                        //{
+                        //    var j = 1;
+                        //    while (j < source.Count() - 1)
+                        //    {
+                        //        var next = source[j];
+                        //        if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.MiddleStart != null)
+                        //        {
+                        //            middleStart = next.MiddleStart;
+                        //        }
+                        //        j++;
+                        //    }
+                        //}
                     }
                 }
                 else
@@ -351,6 +406,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
                                 var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                                preLeanMepEnd = leanMepEnd;
                                 //连接件补充
                                 AddConnectionNode(offsetMep, leanMepEnd);
                                 //垂直被还原的旋转回归
@@ -364,6 +420,11 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             var leanMepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (leanMepStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
                             //连接件补充
+                            if (preLeanMepEnd!=null)
+                            {
+                                AddConnectionNode(preLeanMepEnd, mepStart);
+                                preLeanMepEnd = null;
+                            }
                             AddConnectionNode(mepStart, leanMepStart);
                             //垂直被还原的旋转回归
                             LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepStart, true);
@@ -398,6 +459,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, middleEnd);
                                 var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                                preLeanMepEnd = leanMepEnd;
                                 //连接件补充
                                 AddConnectionNode(leanMepStart, offsetMep);
                                 AddConnectionNode(offsetMep, leanMepEnd);

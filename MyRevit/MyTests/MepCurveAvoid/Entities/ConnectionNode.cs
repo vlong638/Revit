@@ -2,7 +2,7 @@
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
-    internal class ConnectionNode
+    public class ConnectionNode
     {
         public ConnectionNode(MEPCurve mEPCurve1, MEPCurve mEPCurve2)
         {

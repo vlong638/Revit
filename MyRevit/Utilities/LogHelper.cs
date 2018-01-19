@@ -27,15 +27,16 @@ namespace MyRevit.Utilities
             Error(ex.ToString());
         }
 
-        private static void Error(string msg)
+        public static void Error(string msg)
         {
-            var logger = new TextLogger("PmLogger.txt", @"D:\");
-            logger.Error(msg);
+            TextLogger.Instance.Error(msg);
         }
     }
 
     public class TextLogger
     {
+        public static TextLogger Instance = new TextLogger("PmLogger.txt", @"D:\");
+
         #region Properties
         static object LogLocker = new object();
         string _fileName;

@@ -4,6 +4,7 @@ using Autodesk.Revit.DB;
 using System.Linq;
 using MyRevit.MyTests.Utilities;
 using PmSoft.Common.RevitClass.Utils;
+using MyRevit.Utilities;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
@@ -47,7 +48,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             ValueNode2.Valuing(ValueNode2.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(ConflictLocation)), conflictNodes, avoidElements);
         }
 
-        public static PriorityValueComparer Comparer= new PriorityValueComparer();
+        public static PriorityValueComparer Comparer = new PriorityValueComparer();
         public bool IsCompeted = false;
         internal void Compete(List<AvoidElement> avoidElements, List<ConflictLineSections> conflictLineSections_Collection)
         {
@@ -56,8 +57,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
 
             bool isWinnerSettled;
             bool isLoserSettled;
-            ValueNode winner=null;
-            ValueNode loser=null;
+            ValueNode winner = null;
+            ValueNode loser = null;
             if (Comparer.Compare(ValueNode1.ConflictLineSections.AvoidPriorityValue, ValueNode2.ConflictLineSections.AvoidPriorityValue) > 0)
             {
                 isWinnerSettled = ValueNode1.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Winner;
@@ -117,14 +118,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var avoidElement = avoidElements.First(c => c.MEPCurve.Id == ConflictLineSection.ElementId);
                 for (int i = 0; i < ConflictLineSection.ConflictElements.Count(); i++)
                 {
-                    var conflictEle = ConflictLineSection.ConflictElements[i];
+                    var currentConflictEle = ConflictLineSection.ConflictElements[i];
                     //边界计算
                     if (i == 0 || i == ConflictLineSection.ConflictElements.Count() - 1)
                     {
                         //区块信息整理
-                        if (conflictEle.IsConnector)
+                        if (currentConflictEle.IsConnector)
                         {
-                            if (avoidElement.IsStartPoint(conflictEle))
+                            if (avoidElement.IsStartPoint(currentConflictEle))
                             {
                                 var connector = avoidElement.ConnectorStart;
                                 Connector linkedConnector = connector.GetConnectedConnector();
@@ -133,7 +134,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 ConflictLineSection.StartLinkedConnector = linkedConnector;
                                 ConflictLineSection.StartPoint = avoidElement.StartPoint;
                             }
-                            if (avoidElement.IsEndPoint(conflictEle))
+                            if (avoidElement.IsEndPoint(currentConflictEle))
                             {
                                 var connector = avoidElement.ConnectorEnd;
                                 Connector linkedConnector = connector.GetConnectedConnector();
@@ -143,16 +144,48 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 ConflictLineSection.EndPoint = avoidElement.EndPoint;
                             }
                         }
-                        CalculateLocations(avoidElement, conflictEle, startConflictElement.Height);
+                        CalculateLocations(avoidElement, currentConflictEle, startConflictElement.Height);
+                        ////重叠关系处理
+                        //if (i == 0)
+                        //{
+                        //    var j = 1;
+                        //    while (j < ConflictLineSection.ConflictElements.Count() - 1)
+                        //    {
+                        //        var next = ConflictLineSection.ConflictElements[j];
+                        //        if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation))
+                        //            CalculateLocations(avoidElement, currentConflictEle, startConflictElement.Height);
+                        //        else
+                        //            break;
+                        //        j++;
+                        //    }
+                        //}
+                        //if (i == ConflictLineSection.ConflictElements.Count() - 1)
+                        //{
+                        //    var j = ConflictLineSection.ConflictElements.Count() - 2;
+                        //    while (j > 0)
+                        //    {
+                        //        var next = ConflictLineSection.ConflictElements[j];
+                        //        if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation))
+                        //            CalculateLocations(avoidElement, currentConflictEle, startConflictElement.Height);
+                        //        else
+                        //            break;
+                        //        j--;
+                        //    }
+                        //}
                     }
                 }
             }
         }
-        
+
         static double MiniMepLength = UnitTransUtils.MMToFeet(20);//最短连接管长度 双向带连接件
         static double MiniSpace = UnitTransUtils.MMToFeet(10);//避免碰撞及提供留白的安全距离
+        public static double GetFixedJumpLength(double orientJumpLength, double angle)
+        {
+            return orientJumpLength / Math.Abs(Math.Sin(angle));
+        }
         private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement, double height = -1)
         {
+            int id = avoidElement.MEPCurve.Id.IntegerValue;
             XYZ verticalDirection = avoidElement.GetVerticalVector();
             double angleToTurn = avoidElement.AngleToTurn;
             double miniConnectHeight = avoidElement.ConnectHeight;
@@ -189,7 +222,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             if (height == -1)
             {
                 height = avoidElement.Height / 2 + elementToAvoidHeight / 2 + MiniSpace;
-                height = Math.Max(height, MiniMepLength+ miniConnectHeight * 2);//考虑构件的最小高度需求
+                height = Math.Max(height, MiniMepLength + miniConnectHeight * 2);//考虑构件的最小高度需求
                 conflictElement.Height = height;
             }
             //widthUp = Math.Max(widthUp, offsetWidth+miniMepLength); //TODO 考虑构件的最小宽度需求 //height - miniConnectWidth
@@ -203,10 +236,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
             widthUp = Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
             widthUp = Math.Max(widthUp, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);//直径最短需求
             var widthDown = widthUp + height / Math.Tan(angleToTurn);//水平最短距离对应的水平偏移
-            //widthDown = Math.Max(widthDown, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);
-            //widthDown = Math.Max(widthDown, widthUp + miniConnectWidth * 2);
-            widthUp = widthUp / Math.Abs(Math.Sin(faceAngle));
-            widthDown = widthDown / Math.Abs(Math.Sin(faceAngle));
+            widthUp = GetFixedJumpLength(widthUp, faceAngle);
+            widthDown = GetFixedJumpLength(widthDown, faceAngle);
+            //double co = Math.Abs(Math.Cos(faceAngle));
+            //if (!co.IsMiniValue())
+            //{
+            //    widthUp = widthUp / co;
+            //    widthDown = widthDown / co;
+            //}
             conflictElement.StartSplit = midPoint + parallelDirection * widthDown;
             conflictElement.EndSplit = midPoint - parallelDirection * widthDown;
             midPoint += height * verticalDirection;
