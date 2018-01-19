@@ -91,7 +91,7 @@
     </Reference>
     <Reference Include="PmSoft.MepProject.ControlService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>DLLs\PmSoft.MepProject.ControlService.dll</HintPath>
+      <HintPath>..\..\..\..\..\Work\RevitProject\2.ProjectSource\MepProject\PmSoft.MepProject.ControlService\bin\Debug_R2016\PmSoft.MepProject.ControlService.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -522,8 +522,14 @@
     </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
-    <Content Include="DLLs\PmSoft.Common.RevitClass.dll" />
-    <Content Include="DLLs\PmSoft.MepProject.ControlService.dll" />
+    <Content Include="DLLs\PmSoft.Common.RevitClass.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DLLs\PmSoft.MepProject.ControlService.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DLLs\RevitAPI.dll" />
+    <Content Include="DLLs\RevitAPIUI.dll" />
     <Content Include="MyTests\EarthWork\Images\AddElement.png" />
     <Content Include="MyTests\EarthWork\Images\AddNode.png" />
     <Content Include="MyTests\EarthWork\Images\DeleteElement.png" />

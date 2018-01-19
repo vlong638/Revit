@@ -181,4 +181,7 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\InterfaceAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PointCloudAccessAPI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\DBManagedServices.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\IntfIFCAPI.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\DLLs\PmSoft.Common.RevitClass.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\DLLs\PmSoft.MepProject.ControlService.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPI.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.dll

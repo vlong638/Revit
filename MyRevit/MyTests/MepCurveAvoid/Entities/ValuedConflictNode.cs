@@ -100,7 +100,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 winner.ConflictLineSections.Height = conflictElement.Height;
                 CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
                 if (conflictLineSections_Collection.FirstOrDefault(c => c.GroupId == winner.ConflictLineSections.GroupId) == null)//ConflictLineSections汇总
-                    conflictLineSections_Collection.Add(winner.ConflictLineSections);//TODO StartConnector信息有 EndConnector信息已经录入但是丢失了
+                    conflictLineSections_Collection.Add(winner.ConflictLineSections);
             }
             if (!isLoserSettled)
             {
@@ -225,7 +225,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 height = Math.Max(height, MiniMepLength + miniConnectHeight * 2);//考虑构件的最小高度需求
                 conflictElement.Height = height;
             }
-            //widthUp = Math.Max(widthUp, offsetWidth+miniMepLength); //TODO 考虑构件的最小宽度需求 //height - miniConnectWidth
             //TODO 考虑矩形的最佳方案
             //if (avoidElement.Width!= avoidElement.Height|| elementToAvoidWidth!= elementToAvoidHeight)
             //{

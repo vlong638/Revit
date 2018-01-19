@@ -575,7 +575,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public bool IsHeavy { set; get; }
         public void UpdateIsHeavy(Element duct)
         {
-            IsHeavy = Width >= 1000;//TODO Width or Height
+            IsHeavy = Width >= 1000;//Width or Height
         }
         #endregion
 
@@ -792,44 +792,52 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// </summary>
         /// <param name="src"></param>
         /// <returns></returns>
-        public static List<Connector> GetConnectorsToMepElement(this Connector src)
+        public static List<Connector> GetConnectorsToMepElement(this Connector source)
         {
             List<Connector> result = new List<Connector>();
-            if (src.ConnectorType == ConnectorType.MasterSurface || src.ConnectorType == ConnectorType.Logical)
+            if (source.ConnectorType == ConnectorType.MasterSurface || source.ConnectorType == ConnectorType.Logical)
                 return result;
-            if (!src.IsConnected)
+            if (!source.IsConnected)
                 return result;
-            foreach (Connector con in src.AllRefs)
+            foreach (Connector linkedConnector in source.AllRefs)
             {
-                if (con.IsConnectedTo(src) && con.Owner.Id != src.Owner.Id && con.Shape != ConnectorProfileType.Invalid)
+                if (linkedConnector.IsConnectedTo(source) && linkedConnector.Owner.Id != source.Owner.Id && linkedConnector.Shape != ConnectorProfileType.Invalid)
                 {
-                    // 弯头 三通 四通
-                    var fi = con.Owner as FamilyInstance;
-                    if (fi != null)
-                    {
-                        for (int i = 1; i <= fi.MEPModel.ConnectorManager.Connectors.Size; i++)
-                        {
-                            var fiConnector = fi.MEPModel.ConnectorManager.Connectors.GetConnectorById(i);
-                            if (fiConnector == null || !fiConnector.IsConnected)
-                                continue;
-                            var linkedConnector = fiConnector.GetConnectedConnector();
-                            if (linkedConnector == null)
-                                continue;
-                            if (linkedConnector.Owner is MEPCurve && linkedConnector.Owner.Id != src.Owner.Id)
-                            {
-                                result.Add(linkedConnector);
-                            }
-                            else
-                            {
-                                //TODO 其他连接件情况
-                                continue;
-                            }
-                        }
-                    }
-                    //TODO 其他连接件情况
+                    SearchByFamily(source, result, linkedConnector);
                 }
             }
             return result;
+        }
+
+        private static void SearchByFamily(Connector source, List<Connector> result, Connector currentConnector, Connector preConnector=null)
+        {
+            // 弯头 三通 四通 大转小 终止(风口)
+            var fi = currentConnector.Owner as FamilyInstance;
+            if (fi != null)
+            {
+                for (int i = 1; i <= fi.MEPModel.ConnectorManager.Connectors.Size; i++)
+                {
+                    var fiConnector = fi.MEPModel.ConnectorManager.Connectors.GetConnectorById(i);
+                    if (fiConnector == null || !fiConnector.IsConnected)
+                        continue;
+                    var linkedConnector = fiConnector.GetConnectedConnector();
+                    if (linkedConnector == null)
+                        continue;
+                    if (linkedConnector.Owner is MEPCurve)
+                    {
+                        if (linkedConnector.Owner.Id != source.Owner.Id)
+                        {
+                            result.Add(linkedConnector);
+                        }
+                    }
+                    else
+                    {
+                        //TODO 其他连接件情况
+                        if (preConnector == null|| linkedConnector.Owner.Id!=preConnector.Owner.Id)
+                            SearchByFamily(source, result, linkedConnector, currentConnector);
+                    }
+                }
+            }
         }
     }
 }

@@ -11,9 +11,9 @@ false
 TRACE;DEBUG;Revit2016
 
 101776105430
-211492260044
+23-872041643
 240-1051187613
-361400176611
+36162379208
 MyTests\Analysis\Window.xaml;MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\Window.xaml;MyTests\Template\Window.xaml;MyTests\Template\ResourceDictionary.xaml;Utilities\DrawAreaView.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
 
 True
