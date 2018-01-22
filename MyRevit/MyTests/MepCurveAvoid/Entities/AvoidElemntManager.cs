@@ -7,10 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MyRevit.Utilities;
 using System;
-using PmSoft.Common.RevitClass.Utils;
 using Autodesk.Revit.UI;
-using PmSoft.MepProject.ControlService;
-using PmSoft.Common.CADBase;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
@@ -112,28 +109,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
             foreach (var ConflictLineSections in ConflictLineSections_Collection)
                 TransportConnections(doc, ConflictLineSections);
             #endregion
-
-            //#region 连接点补充连接件
-            //var result = string.Join(",", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
-            //var service = new MEPCurveConnectControlService(uiApp);
-            //foreach (var ConnectionNode in ConnectionNodes)
-            //    service.NewTwoFitting(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
-            //#endregion
-
-            //doc.Regenerate();
         }
         public void LinkConnection(Document doc)
         {
-            //#region 管线重构
-            //foreach (var AvoidElement in AvoidElements)
-            //    RebuiltCurves(doc, AvoidElement);
-            //#endregion
-
-            //#region 连接件迁移
-            //foreach (var ConflictLineSections in ConflictLineSections_Collection)
-            //    TransportConnections(doc, ConflictLineSections);
-            //#endregion
-
             #region 连接点补充连接件
             var result = string.Join(",", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
             var service = new MEPCurveConnectControlService(uiApp);
@@ -297,6 +275,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             //连接件补充
                             AddConnectionNode(leanEnd, mepEnd);
                         }
+                        else
+                        {
+                            preLeanMepEnd = leanEnd;
+                        }
                         //连接件迁移
                         foreach (var ConflictLineSections in ConflictLineSections_Collection)
                         {
@@ -343,7 +325,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         var leanStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (leanStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
                         var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
-                        (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);
+                        (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);                            //连接件补充
+                        if (preLeanMepEnd != null)
+                        {
+                            AddConnectionNode(preLeanMepEnd, mepStart);
+                            preLeanMepEnd = null;
+                        }
                         //连接件补充
                         AddConnectionNode(mepStart, leanStart);
                         AddConnectionNode(leanStart, offsetMep);
