@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace MyRevit.Utilities
 {
     #region CoordinateType
-    public enum CoordinateType
+    public enum VLCoordinateType
     {
         /// <summary>
         /// 平面使用XY
@@ -23,15 +23,15 @@ namespace MyRevit.Utilities
     }
     public static class CoordinateTypeEx
     {
-        public static XYZ GetParallelVector(this CoordinateType type)
+        public static XYZ GetParallelVector(this VLCoordinateType type)
         {
             switch (type)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return new XYZ(1, 0, 0);
-                case CoordinateType.YZ:
+                case VLCoordinateType.YZ:
                     return new XYZ(0, 1, 0);
-                case CoordinateType.XZ:
+                case VLCoordinateType.XZ:
                     return new XYZ(1, 0, 0);
                 default:
                     return null;
@@ -60,14 +60,14 @@ namespace MyRevit.Utilities
     {
         public static double MiniValueForXYZ = 0.001;
 
-        public static double CrossProductByCoordinateType(this XYZ lb, XYZ bb, CoordinateType coordinateType)
+        public static double CrossProductByCoordinateType(this XYZ lb, XYZ bb, VLCoordinateType coordinateType)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return (lb.X * bb.X + lb.Y * bb.Y);
-                case CoordinateType.YZ:
-                case CoordinateType.XZ:
+                case VLCoordinateType.YZ:
+                case VLCoordinateType.XZ:
                 default:
                     throw new NotImplementedException();
             }
@@ -90,27 +90,27 @@ namespace MyRevit.Utilities
         /// </summary>
         /// <param name="parallelVector"></param>
         /// <returns></returns>
-        public static XYZ GetVerticalVector(XYZ parallelVector, CoordinateType coordinateType)
+        public static XYZ GetVerticalVector(XYZ parallelVector, VLCoordinateType coordinateType)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                case CoordinateType.YZ:
-                case CoordinateType.XZ:
+                case VLCoordinateType.YZ:
+                case VLCoordinateType.XZ:
                 default:
                     throw new NotImplementedException("未支持");
             }
         }
 
-        public static XYZ RevertByCoordinateType(this XYZ vector, CoordinateType coordinateType)
+        public static XYZ RevertByCoordinateType(this XYZ vector, VLCoordinateType coordinateType)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return new XYZ(-vector.X, -vector.Y, vector.Z);
-                case CoordinateType.YZ:
-                case CoordinateType.XZ:
+                case VLCoordinateType.YZ:
+                case VLCoordinateType.XZ:
                 default:
                     throw new NotImplementedException("未支持");
             }
@@ -122,7 +122,7 @@ namespace MyRevit.Utilities
         /// <param name="vector"></param>
         /// <param name="quadrantType"></param>
         /// <returns></returns>
-        public static XYZ GetVectorByQuadrant(this XYZ vector, QuadrantType quadrantType, CoordinateType coordinateType = CoordinateType.XY)
+        public static XYZ GetVectorByQuadrant(this XYZ vector, QuadrantType quadrantType, VLCoordinateType coordinateType = VLCoordinateType.XY)
         {
             var result = vector;
             switch (quadrantType)
@@ -130,12 +130,12 @@ namespace MyRevit.Utilities
                 case QuadrantType.OneAndFour://竖直时取第一象限
                     switch (coordinateType)
                     {
-                        case CoordinateType.XY:
+                        case VLCoordinateType.XY:
                             if ((!vector.X.IsMiniValue() && vector.X < 0) || (vector.X.IsMiniValue() && (result.Y + 1).IsMiniValue()))
                                 result = new XYZ(-vector.X, -vector.Y, vector.Z);
                             return result;
-                        case CoordinateType.YZ:
-                        case CoordinateType.XZ:
+                        case VLCoordinateType.YZ:
+                        case VLCoordinateType.XZ:
                             throw new NotImplementedException("未支持");
                         default:
                             return null;
@@ -143,12 +143,12 @@ namespace MyRevit.Utilities
                 case QuadrantType.OneAndTwo://水平时取第一象限
                     switch (coordinateType)
                     {
-                        case CoordinateType.XY:
+                        case VLCoordinateType.XY:
                             if ((!vector.Y.IsMiniValue() && vector.Y < 0) || (vector.Y.IsMiniValue() && (result.X + 1).IsMiniValue()))
                                 result = new XYZ(-vector.X, -vector.Y, vector.Z);
                             return result;
-                        case CoordinateType.YZ:
-                        case CoordinateType.XZ:
+                        case VLCoordinateType.YZ:
+                        case VLCoordinateType.XZ:
                             throw new NotImplementedException("未支持");
                         default:
                             return null;
@@ -162,27 +162,27 @@ namespace MyRevit.Utilities
             }
         }
 
-        public static double DotProductByCoordinate(this XYZ vector, XYZ vector2, CoordinateType coordinateType = CoordinateType.XY)
+        public static double DotProductByCoordinate(this XYZ vector, XYZ vector2, VLCoordinateType coordinateType = VLCoordinateType.XY)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return vector.X * vector2.X + vector.Y * vector2.Y;
-                case CoordinateType.YZ:
-                case CoordinateType.XZ:
+                case VLCoordinateType.YZ:
+                case VLCoordinateType.XZ:
                 default:
                     throw new NotImplementedException("");
             }
         }
 
-        public static double GetLengthByCoordinate(this XYZ vector, CoordinateType coordinateType = CoordinateType.XY)
+        public static double GetLengthByCoordinate(this XYZ vector, VLCoordinateType coordinateType = VLCoordinateType.XY)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return Math.Sqrt(vector.X * vector.X + vector.Y * vector.Y);
-                case CoordinateType.YZ:
-                case CoordinateType.XZ:
+                case VLCoordinateType.YZ:
+                case VLCoordinateType.XZ:
                 default:
                     throw new NotImplementedException("");
             }
@@ -346,15 +346,15 @@ namespace MyRevit.Utilities
         /// <param name="point"></param>
         /// <param name="pointZ"></param>
         /// <returns></returns>
-        public static XYZ ToSame(this XYZ point1, XYZ point2, CoordinateType coordinateType)
+        public static XYZ ToSame(this XYZ point1, XYZ point2, VLCoordinateType coordinateType)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return new XYZ(point1.X, point1.Y, point2.Z);
-                case CoordinateType.YZ:
+                case VLCoordinateType.YZ:
                     return new XYZ(point2.X, point1.Y, point1.Z);
-                case CoordinateType.XZ:
+                case VLCoordinateType.XZ:
                     return new XYZ(point1.X, point2.Y, point1.Z);
                 default:
                     return null;

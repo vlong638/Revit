@@ -463,11 +463,11 @@ namespace MyRevit.MyTests.PAA
             XYZ parallelVector = null;
             XYZ verticalVector = null;
             parallelVector = locationCurve.Direction;
-            verticalVector = VLLocationHelper.GetVerticalVector(parallelVector, CoordinateType.XY);
+            verticalVector = VLLocationHelper.GetVerticalVector(parallelVector, VLCoordinateType.XY);
             parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
             verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             if ((verticalVector.X - 1).IsMiniValue())
-                verticalVector = verticalVector.RevertByCoordinateType(CoordinateType.XY);
+                verticalVector = verticalVector.RevertByCoordinateType(VLCoordinateType.XY);
             VerticalVector = verticalVector;
             ParallelVector = parallelVector;
         }
@@ -623,7 +623,7 @@ namespace MyRevit.MyTests.PAA
                             LeafEndPoint = BodyEndPoint + (IsReversed ? -LineWidth * ParallelVector : LineWidth * ParallelVector);
                         var bb = BodyEndPoint - BodyStartPoint;
                         var lb = (LeafEndPoint - BodyEndPoint);
-                        if (lb.CrossProductByCoordinateType(bb, CoordinateType.XY) < 0)
+                        if (lb.CrossProductByCoordinateType(bb, VLCoordinateType.XY) < 0)
                         {
                             var temp = LeafEndPoint;
                             LeafEndPoint = BodyEndPoint;
@@ -631,7 +631,7 @@ namespace MyRevit.MyTests.PAA
                         }
                         //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
                         //高度,宽度 取决于文本 
-                        if (bb.CrossProductByCoordinateType(ParallelVector, CoordinateType.XY) < 0)
+                        if (bb.CrossProductByCoordinateType(ParallelVector, VLCoordinateType.XY) < 0)
                             AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, VerticalVector, LeafEndPoint, BodyEndPoint);
                         else
                             AnnotationLocation = TextType.GetTextLocation(CurrentFontHeight, VerticalVector, BodyEndPoint, LeafEndPoint);

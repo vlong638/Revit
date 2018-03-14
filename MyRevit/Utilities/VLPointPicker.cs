@@ -10,15 +10,15 @@ namespace MyRevit.Utilities
 {
     public static class VLPointPickerEx
     {
-        public static System.Windows.Point ToWindowsPoint(this XYZ xyz, CoordinateType coordinateType = CoordinateType.XY)
+        public static System.Windows.Point ToWindowsPoint(this XYZ xyz, VLCoordinateType coordinateType = VLCoordinateType.XY)
         {
             switch (coordinateType)
             {
-                case CoordinateType.XY:
+                case VLCoordinateType.XY:
                     return new System.Windows.Point(xyz.X, xyz.Y);
-                case CoordinateType.YZ:
+                case VLCoordinateType.YZ:
                     return new System.Windows.Point(xyz.Y, xyz.Z);
-                case CoordinateType.XZ:
+                case VLCoordinateType.XZ:
                     return new System.Windows.Point(xyz.X, xyz.Z);
                 default:
                     throw new NotImplementedException();
@@ -113,7 +113,7 @@ namespace MyRevit.Utilities
         /// <param name="uiApp"></param>
         /// <param name="startPoint"></param>
         /// <returns></returns>
-        public XYZ PickPointWithPreview(UIApplication uiApp, CoordinateType coordinateType, Action<DrawAreaView> preview = null)
+        public XYZ PickPointWithPreview(UIApplication uiApp, VLCoordinateType coordinateType, Action<DrawAreaView> preview = null)
         {
             XYZ result = null;
             Document doc = uiApp.ActiveUIDocument.Document;

@@ -333,9 +333,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.EndPoint;
                 if (connector != null && current.GetDistanceTo(point) <= currentGroupingDistance)
                 {
-                    var continueEle = startElement.AddConflictElement(connector);
+                    var continueEle = startElement.AddConflictElement(connector, conflictElement);
                     conflictLineSection.ConflictElements.Add(continueEle);
-                    TopoConnector(conflictNodes, avoidElements, connector);
+                    TopoConnector(conflictNodes, avoidElements, connector, conflictElement);
                 }
             }
             //重置
@@ -363,16 +363,16 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 var point = startElement.StartPoint;
                 if (connector != null && current.GetDistanceTo(point) <= currentGroupingDistance)
                 {
-                    var continueEle = startElement.AddConflictElement(connector);
+                    var continueEle = startElement.AddConflictElement(connector, conflictElement);
                     conflictLineSection.ConflictElements.Add(continueEle);
-                    TopoConnector(conflictNodes, avoidElements, connector);
+                    TopoConnector(conflictNodes, avoidElements, connector, conflictElement);
                 }
             }
             conflictLineSection.ConflictElements = conflictLineSection.ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer()).ToList();
             ConflictLineSections.Add(conflictLineSection);
         }
 
-        private void TopoConnector(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements, Connector connector)
+        private void TopoConnector(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements, Connector connector,ConflictElement conflictElement)
         {
             var connectorsToMepElement = connector.GetConnectorsToMepElement();
             foreach (var connectorToMepElement in connectorsToMepElement)
@@ -383,7 +383,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     startEle = new AvoidElement(connectorToMepElement.Owner as MEPCurve);
                     avoidElements.Add(startEle);
                 }
-                var conflictEle = startEle.AddConflictElement(connectorToMepElement);
+                var conflictEle = startEle.AddConflictElement(connectorToMepElement, conflictElement);
                 SetupGroup(startEle, conflictEle, conflictNodes, avoidElements);
             }
         }

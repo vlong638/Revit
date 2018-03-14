@@ -45,14 +45,14 @@ namespace MyRevit.MyTests.PipeAnnotation
             IEnumerable<ElementId> selectedPipeIds = data.SelectedPipeIds;
             ElementId currentLineId = new ElementId(data.Entity.LineId);
             List<Line> currentLines = tryAvoid ? data.TemporaryLines : data.CurrentLines;
-            Triangle currentTriangle = tryAvoid ? data.TemporaryTriangle : data.CurrentTriangle;
+            VLTriangle currentTriangle = tryAvoid ? data.TemporaryTriangle : data.CurrentTriangle;
             FamilySymbol multipleTagSymbol = data.MultipleTagSymbol;
             //管道避让
             var otherPipeLines = new FilteredElementCollector(document).OfClass(typeof(Pipe))
                 .Select(c => Line.CreateBound((c.Location as LocationCurve).Curve.GetEndPoint(0), (c.Location as LocationCurve).Curve.GetEndPoint(1))).ToList();
             var pipeCollisions = new FilteredElementCollector(document).OfClass(typeof(Pipe)).Excluding(selectedPipeIds.ToList())
                 .Select(c => Line.CreateBound((c.Location as LocationCurve).Curve.GetEndPoint(0), (c.Location as LocationCurve).Curve.GetEndPoint(1))).ToList()
-                .Where(c => GeometryHelper.IsPlanarCover(currentLines, currentTriangle, c) != GeometryHelper.VLCoverType.Disjoint).ToList();
+                .Where(c => VLGeometryHelper.IsPlanarCover(currentLines, currentTriangle, c) != VLGeometryHelper.VLCoverType.Disjoint).ToList();
             //标注避让
             var collector = new FilteredElementCollector(document).OfClass(typeof(FamilyInstance)).WhereElementIsNotElementType().Excluding(new List<ElementId>() { currentLineId });
             var otherLines = collector.Where(c => (c as FamilyInstance).Symbol.Id == multipleTagSymbol.Id);
@@ -60,7 +60,7 @@ namespace MyRevit.MyTests.PipeAnnotation
             List<BoundingBoxXYZ> crossedBoundingBox = new List<BoundingBoxXYZ>();
             List<BoundingBoxXYZ> uncrossedBoundingBox = new List<BoundingBoxXYZ>();
             foreach (var boundingBox in boundingBoxes.Where(c => c != null))
-                if (GeometryHelper.VL_IsRectangleCrossed(currentTriangle.A, currentTriangle.C, boundingBox.Min, boundingBox.Max))
+                if (VLGeometryHelper.VL_IsRectangleCrossed(currentTriangle.A, currentTriangle.C, boundingBox.Min, boundingBox.Max))
                     crossedBoundingBox.Add(boundingBox);
                 else
                     uncrossedBoundingBox.Add(boundingBox);

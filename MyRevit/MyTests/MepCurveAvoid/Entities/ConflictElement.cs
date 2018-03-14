@@ -28,6 +28,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public bool IsConnector { set; get; }
         private Connector Connector { set; get; }
 
+        public double AvoidHeight { set; get; }
+        public double AvoidWidth { set; get; }
+
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -39,6 +43,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
             AvoidEle = avoidElement;
             ConflictEle = conflictElement;
             ConflictLocation = conflictLocation;
+
+            AvoidHeight = conflictElement.Height;
+            AvoidWidth = conflictElement.Width;
         }
         /// <summary>
         /// 构造函数
@@ -46,12 +53,16 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElement">谁</param>
         /// <param name="conflictLocation">在哪里</param>
         /// <param name="conflictElement">跟谁撞了</param>
-        public ConflictElement(AvoidElement avoidElement, XYZ conflictLocation, Connector connector)
+        public ConflictElement(AvoidElement avoidElement, XYZ conflictLocation, Connector connector, AvoidElement conflictElement)
         {
-            ConflictLocation = conflictLocation;
             AvoidEle = avoidElement;
+            ConflictEle = conflictElement;
             Connector = connector;
+            ConflictLocation = conflictLocation;
             IsConnector = true;
+
+            AvoidHeight = conflictElement.Height;
+            AvoidWidth = conflictElement.Width;
         }
 
         //点位计算

@@ -21,9 +21,9 @@ namespace MyRevit.Utilities
 #endif
         public double co_s;
         public double co_e;
-        CoordinateType CoordinateType { set; get; }
+        VLCoordinateType CoordinateType { set; get; }
 
-        public DrawAreaView(UIApplication uiApp, CoordinateType coordinateType = CoordinateType.XY)
+        public DrawAreaView(UIApplication uiApp, VLCoordinateType coordinateType = VLCoordinateType.XY)
         {
             UIView = uiApp.ActiveUIDocument.GetOpenUIViews().FirstOrDefault(p => p.ViewId == uiApp.ActiveUIDocument.ActiveGraphicalView.Id);
             CoordinateType = coordinateType;

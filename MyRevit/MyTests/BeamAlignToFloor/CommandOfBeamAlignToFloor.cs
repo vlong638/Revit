@@ -167,8 +167,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     {
                         var sp0 = ungenerateBeamLine.GetEndPoint(0);
                         var sp1 = ungenerateBeamLine.GetEndPoint(1);
-                        var fixedSP0 = GeometryHelper.VL_GetIntersectionOnLine(sp0, beamLine.GetEndPoint(0), beamLine.Direction);
-                        var fixedSP1 = GeometryHelper.VL_GetIntersectionOnLine(sp1, beamLine.GetEndPoint(0), beamLine.Direction);
+                        var fixedSP0 = VLGeometryHelper.VL_GetIntersectionOnLine(sp0, beamLine.GetEndPoint(0), beamLine.Direction);
+                        var fixedSP1 = VLGeometryHelper.VL_GetIntersectionOnLine(sp1, beamLine.GetEndPoint(0), beamLine.Direction);
                         var sectionBeam = doc.Create.NewFamilyInstance(Line.CreateBound(fixedSP0, fixedSP1), beamSymbol, beamLevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                         collector.CreatedBeams.Add(sectionBeam);
                     }

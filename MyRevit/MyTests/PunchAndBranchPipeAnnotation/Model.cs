@@ -127,7 +127,7 @@ namespace MyRevit.MyTests.PBPA
 
         #region 非留存数据
         public bool IsReversed { set; get; }
-        public CoordinateType CoordinateType { set; get; }
+        public VLCoordinateType CoordinateType { set; get; }
         public bool IsRegenerate { set; get; }
         /// <summary>
         /// 线宽
@@ -334,7 +334,7 @@ namespace MyRevit.MyTests.PBPA
 
         public bool CalculateLocations()
         {
-            CoordinateType coordinateType = CoordinateType.XY;
+            VLCoordinateType coordinateType = VLCoordinateType.XY;
             UpdateVector(coordinateType);
 
             var target = Document.GetElement(TargetId);
@@ -363,7 +363,7 @@ namespace MyRevit.MyTests.PBPA
                     LeafEndPoint = BodyEndPoint + (IsReversed ? -LineWidth * ParallelVector : LineWidth * ParallelVector);
                 var bb = BodyEndPoint - BodyStartPoint;
                 var lb = (LeafEndPoint - BodyEndPoint);
-                if (lb.CrossProductByCoordinateType(bb, CoordinateType.XY) < 0)
+                if (lb.CrossProductByCoordinateType(bb, VLCoordinateType.XY) < 0)
                 {
                     var temp = LeafEndPoint;
                     LeafEndPoint = BodyEndPoint;
@@ -371,7 +371,7 @@ namespace MyRevit.MyTests.PBPA
                 }
                 //文本位置 start:(附着元素中点+线基本高度+文本高度*(文本个数-1))  end: start+宽
                 //高度,宽度 取决于文本 
-                if (bb.CrossProductByCoordinateType(ParallelVector, CoordinateType.XY) < 0)
+                if (bb.CrossProductByCoordinateType(ParallelVector, VLCoordinateType.XY) < 0)
                     AnnotationLocation = LeafEndPoint;
                 else
                     AnnotationLocation = BodyEndPoint;
@@ -379,11 +379,11 @@ namespace MyRevit.MyTests.PBPA
             return true;
         }
 
-        public void UpdateVector(CoordinateType coordinateType)
+        public void UpdateVector(VLCoordinateType coordinateType)
         {
             var pVector = coordinateType.GetParallelVector();
             pVector = VLLocationHelper.GetVectorByQuadrant(pVector, QuadrantType.OneAndFour, coordinateType);
-            var vVector = VLLocationHelper.GetVerticalVector(pVector, CoordinateType.XY);
+            var vVector = VLLocationHelper.GetVerticalVector(pVector, VLCoordinateType.XY);
             vVector = VLLocationHelper.GetVectorByQuadrant(vVector, QuadrantType.OneAndFour, coordinateType);
             VerticalVector = vVector;
             ParallelVector = pVector;

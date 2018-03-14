@@ -17,7 +17,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// Revit中的基础模型
     /// 非Revit的价值模型
     /// </summary>
-    public class AvoidElemntManager
+    public class AvoidElementManager
     {
         /// <summary>
         ///基础模型
@@ -37,7 +37,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public List<ConnectionNode> ConnectionNodes = new List<ConnectionNode>();
         private UIApplication uiApp;
 
-        public AvoidElemntManager(UIApplication uiApp)
+        public AvoidElementManager(UIApplication uiApp)
         {
             this.uiApp = uiApp;
         }
@@ -180,42 +180,45 @@ namespace MyRevit.MyTests.MepCurveAvoid
         private void RebuiltCurves(Document doc, AvoidElement avoidElement)
         {
             int id = avoidElement.MEPCurve.Id.IntegerValue;
-            var source = avoidElement.ConflictElements.Where(c => c.CompeteType == CompeteType.Winner).ToList();
-            if (source.Count == 0)
+            var winners = avoidElement.ConflictElements.Where(c => c.CompeteType == CompeteType.Winner).ToList();
+            if (winners.Count == 0)
                 return;
-            XYZ startPoint = avoidElement.StartPoint;
-            bool isContinuing = false;
-            XYZ startSplit = null;
-            XYZ middleStart = null;
-            XYZ middleEnd = null;
-            XYZ endSplit = null;
-            XYZ endPoint = avoidElement.EndPoint;
+            XYZ startPoint = avoidElement.StartPoint;//起点
+            bool isContinuing = false;//是否正在连续(用以确立连续段的起始位置)
+            bool isSectionContinued = false;//是否还有后续
+            XYZ startSplit = null;//起点邻近的分割点
+            XYZ middleStart = null;//避让段的起点
+            XYZ middleEnd = null;//避让段的终点
+            XYZ endSplit = null;//终点邻近的分割点
+            XYZ endPoint = avoidElement.EndPoint;//终点
             MEPCurve preLeanMepEnd = null;
             int startAt=0, endAt;
-            for (int i = 0; i < source.Count(); i++)
+            for (int i = 0; i < winners.Count(); i++)
             {
-                var currentConflictEle = source[i];
-                if (currentConflictEle.CompeteType != CompeteType.Winner)
+                var winner = winners[i];
+                if (winner.CompeteType != CompeteType.Winner)
                     continue;
 
-                //1.连续性
-                var isContinue = (i < source.Count() - 1) && currentConflictEle.GroupId == source[i + 1].GroupId;//不是最后一个 且和下一个是一组
-                if (isContinue)
+                //(准备数据)判断点位是否是组内连续的
+                isSectionContinued = (i < winners.Count() - 1) && winner.GroupId == winners[i + 1].GroupId;//有下一个 且 是一组
+                if (isSectionContinued)
                 {
-                    if (!isContinuing)
+                    #region 连续
+                    if (!isContinuing)// 是否正在连续(用以确立连续段的起始位置)
                     {
                         isContinuing = true;
-                        if (currentConflictEle.IsConnector)
-                            startPoint = currentConflictEle.ConnectorLocation;
-                        startSplit = currentConflictEle.StartSplit;
-                        middleStart = currentConflictEle.MiddleStart;
-                        if (startSplit == null)
+                        if (winner.IsConnector)
+                            startPoint = winner.ConnectorLocation;
+                        startSplit = winner.StartSplit;
+                        middleStart = winner.MiddleStart;
+                        if (startSplit == null)//TODO 这部分待确定作用
                         {
+                            throw new NotImplementedException("这部分待确定作用03131516");
                             var j = 1;
-                            while (j < source.Count() - 1)
+                            while (j < winners.Count() - 1)
                             {
-                                var next = source[j];
-                                if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.StartSplit != null)
+                                var next = winners[j];
+                                if (winner.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.StartSplit != null)
                                 {
                                     startSplit = next.StartSplit;
                                     middleStart = next.MiddleStart;
@@ -223,43 +226,37 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 j++;
                             }
                         }
-                        //if (middleStart == null)
-                        //{
-                        //    var j = 1;
-                        //    while (j < source.Count() - 1)
-                        //    {
-                        //        var next = source[j];
-                        //        if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.MiddleStart != null)
-                        //        {
-                        //            middleStart = next.MiddleStart;
-                        //        }
-                        //        j++;
-                        //    }
-                        //}
                     }
+                    #endregion
                 }
                 else
                 {
+                    #region 不再连续
                     endAt = i;
-                    //边界连接件点位变更
-                    if (currentConflictEle.IsConnector)
+                    if (winner.IsConnector)//边界点是连接件
                     {
-                        if (i == 0 && i == source.Count() - 1)//是起始点 又是终结点
-                            if (avoidElement.IsStartPoint(currentConflictEle))//avoidElement.StartPoint.VL_XYEqualTo(currentConflictEle.ConflictLocation))//拓扑时碰撞点即起始点
-                                startPoint = currentConflictEle.ConnectorLocation;
-                            else
-                                endPoint = currentConflictEle.ConnectorLocation;
-                        else if (i == 0)//起始点连接件
-                            startPoint = currentConflictEle.ConnectorLocation;
-                        else if (i == source.Count() - 1)//终结点连接件
-                            endPoint = currentConflictEle.ConnectorLocation;
+                        if (avoidElement.IsStartPoint(winner))//是起始点的连接件
+                            startPoint = winner.ConnectorLocation;
+                        else//是终结点的连接件
+                            endPoint = winner.ConnectorLocation;
+
+                        //和避让点的数量没有直接关系
+                        //if (winners.Count() - 1 == 0)//只有一个避让点
+                        //    if (avoidElement.IsStartPoint(winner))//是起始点的连接件
+                        //        startPoint = winner.ConnectorLocation;
+                        //    else//是终结点的连接件
+                        //        endPoint = winner.ConnectorLocation;
+                        //else if (i == 0)//是起始点连接件
+                        //    startPoint = winner.ConnectorLocation;
+                        //else if (i == winners.Count() - 1)//终结点连接件
+                        //    endPoint = winner.ConnectorLocation;
                     }
-                    if (i == 0 && currentConflictEle.IsConnector && avoidElement.IsStartPoint(currentConflictEle))//起始点 单个连接件 Connector是否是起始点
+                    if (i == 0 && winner.IsConnector && avoidElement.IsStartPoint(winner))//起始点 单个连接件 Connector是否是起始点
                     {
                         //单点避让
-                        startPoint = currentConflictEle.ConnectorLocation;
-                        middleEnd = currentConflictEle.MiddleEnd;
-                        endSplit = currentConflictEle.EndSplit;
+                        startPoint = winner.ConnectorLocation;
+                        middleEnd = winner.MiddleEnd;
+                        endSplit = winner.EndSplit;
                         var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
                         var leanEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
@@ -267,8 +264,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         //连接件补充
                         AddConnectionNode(offsetMep, leanEnd);
                         //垂直被还原的旋转回归
-                        LeanTransfrom(doc, avoidElement, currentConflictEle, leanEnd, false);
-                        if (i == source.Count() - 1)
+                        LeanTransfrom(doc, avoidElement, winner, leanEnd, false);
+                        if (i == winners.Count() - 1)
                         {
                             var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
@@ -290,12 +287,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             }
                         }
                     }
-                    else if (i == source.Count() - 1 && currentConflictEle.IsConnector && avoidElement.IsEndPoint(currentConflictEle))//终结点 单个连接件
+                    else if (i == winners.Count() - 1 && winner.IsConnector && avoidElement.IsEndPoint(winner))//终结点 单个连接件
                     {
                         if (isContinuing) //连续避让
                         {
                             isContinuing = false;
-                            if (source[startAt].IsConnector && source[endAt].IsConnector)//前后边界都是Connector
+                            if (winners[startAt].IsConnector && winners[endAt].IsConnector)//前后边界都是Connector
                             {
                                 var fullmep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                                 (fullmep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, endPoint);
@@ -316,9 +313,9 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         else
                         {
                             //单点避让
-                            startSplit = currentConflictEle.StartSplit;
-                            middleStart = currentConflictEle.MiddleStart;
-                            endPoint = currentConflictEle.ConnectorLocation;
+                            startSplit = winner.StartSplit;
+                            middleStart = winner.MiddleStart;
+                            endPoint = winner.ConnectorLocation;
                         }
                         var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
@@ -335,7 +332,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         AddConnectionNode(mepStart, leanStart);
                         AddConnectionNode(leanStart, offsetMep);
                         //垂直被还原的旋转回归
-                        LeanTransfrom(doc, avoidElement, currentConflictEle, leanStart, true);
+                        LeanTransfrom(doc, avoidElement, winner, leanStart, true);
                         //连接件迁移
                         foreach (var ConflictLineSections in ConflictLineSections_Collection)
                         {
@@ -357,15 +354,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         else
                         {
                             //单点避让
-                            startSplit = currentConflictEle.StartSplit;
-                            middleStart = currentConflictEle.MiddleStart;
+                            startSplit = winner.StartSplit;
+                            middleStart = winner.MiddleStart;
                         }
-                        middleEnd = currentConflictEle.MiddleEnd;
-                        endSplit = currentConflictEle.EndSplit;
+                        middleEnd = winner.MiddleEnd;
+                        endSplit = winner.EndSplit;
                         var compare = new XYZComparer();
                         if (compare.Compare(startPoint, startSplit) <= 0)
                         {
-                            if (i == source.Count() - 1)
+                            if (i == winners.Count() - 1)
                             {
                                 if (compare.Compare(endPoint, endSplit) >= 0)
                                 {
@@ -384,7 +381,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                     AddConnectionNode(offsetMep, leanMepEnd);
                                     AddConnectionNode(leanMepEnd, mepEnd);
                                     //垂直被还原的旋转回归
-                                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                                    LeanTransfrom(doc, avoidElement, winner, leanMepEnd, false);
                                 }
                             }
                             else
@@ -397,7 +394,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 //连接件补充
                                 AddConnectionNode(offsetMep, leanMepEnd);
                                 //垂直被还原的旋转回归
-                                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                                LeanTransfrom(doc, avoidElement, winner, leanMepEnd, false);
                             }
                         }
                         else
@@ -407,15 +404,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             var leanMepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                             (leanMepStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
                             //连接件补充
-                            if (preLeanMepEnd!=null)
+                            if (preLeanMepEnd != null)
                             {
                                 AddConnectionNode(preLeanMepEnd, mepStart);
                                 preLeanMepEnd = null;
                             }
                             AddConnectionNode(mepStart, leanMepStart);
                             //垂直被还原的旋转回归
-                            LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepStart, true);
-                            if (i == source.Count() - 1)
+                            LeanTransfrom(doc, avoidElement, winner, leanMepStart, true);
+                            if (i == winners.Count() - 1)
                             {
                                 if (compare.Compare(endPoint, endSplit) >= 0)
                                 {
@@ -437,7 +434,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                     AddConnectionNode(offsetMep, leanMepEnd);
                                     AddConnectionNode(leanMepEnd, mepEnd);
                                     //垂直被还原的旋转回归
-                                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                                    LeanTransfrom(doc, avoidElement, winner, leanMepEnd, false);
                                 }
                             }
                             else
@@ -451,13 +448,276 @@ namespace MyRevit.MyTests.MepCurveAvoid
                                 AddConnectionNode(leanMepStart, offsetMep);
                                 AddConnectionNode(offsetMep, leanMepEnd);
                                 //垂直被还原的旋转回归
-                                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                                LeanTransfrom(doc, avoidElement, winner, leanMepEnd, false);
                             }
                         }
                     }
                     startPoint = endSplit;
                     startAt = endAt + 1;
+                    #endregion
                 }
+
+                #region old
+                ////1.连续性
+                //if (isContinued)
+                //{
+                //    if (!isContinuing)
+                //    {
+                //        isContinuing = true;
+                //        if (currentConflictEle.IsConnector)
+                //            startPoint = currentConflictEle.ConnectorLocation;
+                //        startSplit = currentConflictEle.StartSplit;
+                //        middleStart = currentConflictEle.MiddleStart;
+                //        if (startSplit == null)//TODO 这部分待确定作用
+                //        {
+                //            var j = 1;
+                //            while (j < source.Count() - 1)
+                //            {
+                //                var next = source[j];
+                //                if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.StartSplit != null)
+                //                {
+                //                    startSplit = next.StartSplit;
+                //                    middleStart = next.MiddleStart;
+                //                }
+                //                j++;
+                //            }
+                //        }
+                //        //if (middleStart == null)
+                //        //{
+                //        //    var j = 1;
+                //        //    while (j < source.Count() - 1)
+                //        //    {
+                //        //        var next = source[j];
+                //        //        if (currentConflictEle.ConflictLocation.VL_XYEqualTo(next.ConflictLocation) && next.MiddleStart != null)
+                //        //        {
+                //        //            middleStart = next.MiddleStart;
+                //        //        }
+                //        //        j++;
+                //        //    }
+                //        //}
+                //    }
+                //}
+                //else
+                //{
+                //    endAt = i;
+                //    //边界连接件点位变更
+                //    if (currentConflictEle.IsConnector)
+                //    {
+                //        if (i == 0 && i == source.Count() - 1)//是起始点 又是终结点
+                //            if (avoidElement.IsStartPoint(currentConflictEle))//avoidElement.StartPoint.VL_XYEqualTo(currentConflictEle.ConflictLocation))//拓扑时碰撞点即起始点
+                //                startPoint = currentConflictEle.ConnectorLocation;
+                //            else
+                //                endPoint = currentConflictEle.ConnectorLocation;
+                //        else if (i == 0)//起始点连接件
+                //            startPoint = currentConflictEle.ConnectorLocation;
+                //        else if (i == source.Count() - 1)//终结点连接件
+                //            endPoint = currentConflictEle.ConnectorLocation;
+                //    }
+                //    if (i == 0 && currentConflictEle.IsConnector && avoidElement.IsStartPoint(currentConflictEle))//起始点 单个连接件 Connector是否是起始点
+                //    {
+                //        //单点避让
+                //        startPoint = currentConflictEle.ConnectorLocation;
+                //        middleEnd = currentConflictEle.MiddleEnd;
+                //        endSplit = currentConflictEle.EndSplit;
+                //        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //        (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
+                //        var leanEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //        (leanEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                //        //连接件补充
+                //        AddConnectionNode(offsetMep, leanEnd);
+                //        //垂直被还原的旋转回归
+                //        LeanTransfrom(doc, avoidElement, currentConflictEle, leanEnd, false);
+                //        if (i == source.Count() - 1)
+                //        {
+                //            var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //            (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
+                //            //连接件补充
+                //            AddConnectionNode(leanEnd, mepEnd);
+                //        }
+                //        else
+                //        {
+                //            preLeanMepEnd = leanEnd;
+                //        }
+                //        //连接件迁移
+                //        foreach (var ConflictLineSections in ConflictLineSections_Collection)
+                //        {
+                //            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint));
+                //            if (lineSection != null)
+                //            {
+                //                lineSection.NewStartElementId = offsetMep.Id;
+                //                break;
+                //            }
+                //        }
+                //    }
+                //    else if (i == source.Count() - 1 && currentConflictEle.IsConnector && avoidElement.IsEndPoint(currentConflictEle))//终结点 单个连接件
+                //    {
+                //        if (isContinuing) //连续避让
+                //        {
+                //            isContinuing = false;
+                //            if (source[startAt].IsConnector && source[endAt].IsConnector)//前后边界都是Connector
+                //            {
+                //                var fullmep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                (fullmep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, endPoint);
+                //                //连接件迁移
+                //                foreach (var ConflictLineSections in ConflictLineSections_Collection)
+                //                {
+                //                    var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.StartPoint != null && d.StartPoint.VL_XYEqualTo(startPoint) && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
+                //                    if (lineSection != null)
+                //                    {
+                //                        lineSection.NewStartElementId = fullmep.Id;
+                //                        lineSection.NewEndElementId = fullmep.Id;
+                //                        break;
+                //                    }
+                //                }
+                //                continue;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            //单点避让
+                //            startSplit = currentConflictEle.StartSplit;
+                //            middleStart = currentConflictEle.MiddleStart;
+                //            endPoint = currentConflictEle.ConnectorLocation;
+                //        }
+                //        var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //        (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
+                //        var leanStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //        (leanStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
+                //        var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //        (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);                            //连接件补充
+                //        if (preLeanMepEnd != null)
+                //        {
+                //            AddConnectionNode(preLeanMepEnd, mepStart);
+                //            preLeanMepEnd = null;
+                //        }
+                //        //连接件补充
+                //        AddConnectionNode(mepStart, leanStart);
+                //        AddConnectionNode(leanStart, offsetMep);
+                //        //垂直被还原的旋转回归
+                //        LeanTransfrom(doc, avoidElement, currentConflictEle, leanStart, true);
+                //        //连接件迁移
+                //        foreach (var ConflictLineSections in ConflictLineSections_Collection)
+                //        {
+                //            var lineSection = ConflictLineSections.FirstOrDefault(d => d.ElementId == avoidElement.MEPCurve.Id && d.EndPoint != null && d.EndPoint.VL_XYEqualTo(endPoint));
+                //            if (lineSection != null)
+                //            {
+                //                lineSection.NewEndElementId = offsetMep.Id;
+                //                break;
+                //            }
+                //        }
+                //    }
+                //    else//单点避让
+                //    {
+                //        if (isContinuing)
+                //        {
+                //            //连续避让
+                //            isContinuing = false;
+                //        }
+                //        else
+                //        {
+                //            //单点避让
+                //            startSplit = currentConflictEle.StartSplit;
+                //            middleStart = currentConflictEle.MiddleStart;
+                //        }
+                //        middleEnd = currentConflictEle.MiddleEnd;
+                //        endSplit = currentConflictEle.EndSplit;
+                //        var compare = new XYZComparer();
+                //        if (compare.Compare(startPoint, startSplit) <= 0)
+                //        {
+                //            if (i == source.Count() - 1)
+                //            {
+                //                if (compare.Compare(endPoint, endSplit) >= 0)
+                //                {
+                //                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, endPoint);
+                //                }
+                //                else
+                //                {
+                //                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
+                //                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                //                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
+                //                    //连接件补充
+                //                    AddConnectionNode(offsetMep, leanMepEnd);
+                //                    AddConnectionNode(leanMepEnd, mepEnd);
+                //                    //垂直被还原的旋转回归
+                //                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                //                }
+                //            }
+                //            else
+                //            {
+                //                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(startPoint, middleEnd);
+                //                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                //                preLeanMepEnd = leanMepEnd;
+                //                //连接件补充
+                //                AddConnectionNode(offsetMep, leanMepEnd);
+                //                //垂直被还原的旋转回归
+                //                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                //            }
+                //        }
+                //        else
+                //        {
+                //            var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //            (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
+                //            var leanMepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //            (leanMepStart.Location as LocationCurve).Curve = Line.CreateBound(startSplit, middleStart);
+                //            //连接件补充
+                //            if (preLeanMepEnd != null)
+                //            {
+                //                AddConnectionNode(preLeanMepEnd, mepStart);
+                //                preLeanMepEnd = null;
+                //            }
+                //            AddConnectionNode(mepStart, leanMepStart);
+                //            //垂直被还原的旋转回归
+                //            LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepStart, true);
+                //            if (i == source.Count() - 1)
+                //            {
+                //                if (compare.Compare(endPoint, endSplit) >= 0)
+                //                {
+                //                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, endPoint);
+                //                    //连接件补充
+                //                    AddConnectionNode(leanMepStart, offsetMep);
+                //                }
+                //                else
+                //                {
+                //                    var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, middleEnd);
+                //                    var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                //                    var mepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                    (mepEnd.Location as LocationCurve).Curve = Line.CreateBound(endSplit, endPoint);
+                //                    //连接件补充
+                //                    AddConnectionNode(leanMepStart, offsetMep);
+                //                    AddConnectionNode(offsetMep, leanMepEnd);
+                //                    AddConnectionNode(leanMepEnd, mepEnd);
+                //                    //垂直被还原的旋转回归
+                //                    LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                //                }
+                //            }
+                //            else
+                //            {
+                //                var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                (offsetMep.Location as LocationCurve).Curve = Line.CreateBound(middleStart, middleEnd);
+                //                var leanMepEnd = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
+                //                (leanMepEnd.Location as LocationCurve).Curve = Line.CreateBound(middleEnd, endSplit);
+                //                preLeanMepEnd = leanMepEnd;
+                //                //连接件补充
+                //                AddConnectionNode(leanMepStart, offsetMep);
+                //                AddConnectionNode(offsetMep, leanMepEnd);
+                //                //垂直被还原的旋转回归
+                //                LeanTransfrom(doc, avoidElement, currentConflictEle, leanMepEnd, false);
+                //            }
+                //        }
+                //    }
+                //    startPoint = endSplit;
+                //    startAt = endAt + 1;
+                //} 
+                #endregion
             }
             doc.Delete(avoidElement.MEPCurve.Id);
         }

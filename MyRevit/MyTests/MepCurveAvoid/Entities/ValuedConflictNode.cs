@@ -91,13 +91,20 @@ namespace MyRevit.MyTests.MepCurveAvoid
             }
             if (!isWinnerSettled)
             {
+                //避让总是以最大的避让幅度作为连续的标准
+                var maxHeight = winner.ConflictLineSections.Max(c => c.ConflictElements.Max(d => d.AvoidHeight));
+                var maxWidth = winner.ConflictLineSections.Max(c => c.ConflictElements.Max(d => d.AvoidWidth));
                 foreach (var ConflictLineSection in winner.ConflictLineSections)
                     foreach (var ConflictElement in ConflictLineSection.ConflictElements)
+                    {
                         ConflictElement.CompeteType = CompeteType.Winner;
+                        ConflictElement.AvoidHeight = maxHeight;
+                        ConflictElement.AvoidWidth = maxWidth;
+                    }
                 var conflictElement = winner.OrientAvoidElement.ConflictElements.First(c => c.ConflictLocation.VL_XYEqualTo(winner.ValuedConflictNode.ConflictLocation));
                 //定位计算
                 CalculateLocations(winner.OrientAvoidElement, conflictElement);
-                winner.ConflictLineSections.Height = conflictElement.Height;
+                winner.ConflictLineSections.Height = conflictElement.Height;//maxHeight;//这里应为最大避让幅度作为最终的避让距离 //但
                 CalculateLocations(conflictElement, winner, ConflictLocation, avoidElements);
                 if (conflictLineSections_Collection.FirstOrDefault(c => c.GroupId == winner.ConflictLineSections.GroupId) == null)//ConflictLineSections汇总
                     conflictLineSections_Collection.Add(winner.ConflictLineSections);
@@ -196,25 +203,26 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var pointEnd = avoidElement.EndPoint;
             XYZ parallelDirection = (pointStart - pointEnd).Normalize();
             var elementToAvoid = conflictElement.ConflictEle;
-
+            var elementToAvoidHeight = conflictElement.AvoidHeight;
+            var elementToAvoidWidth = conflictElement.AvoidWidth;
             XYZ direction1 = (curve as Line).Direction;
-            double elementToAvoidHeight = 0;
-            double elementToAvoidWidth = 0;
             double faceAngle = 0;
+            XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;//TODO 连接件的ElementToAvoid依旧需要填上 作为溯源数据源
+            faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
             if (conflictElement.IsConnector)
-            {
-                elementToAvoidHeight = 0;
-                elementToAvoidWidth = 0;
-                faceAngle = Math.PI / 2;
                 conflictElement.ConnectorLocation = conflictElement.ConflictLocation + height * verticalDirection;
-            }
-            else
-            {
-                elementToAvoidHeight = elementToAvoid.Height;
-                elementToAvoidWidth = elementToAvoid.Width;
-                XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
-                faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
-            }
+            #region old
+            //if (conflictElement.IsConnector)
+            //{
+            //    faceAngle = Math.PI / 2;//问题出在 如果连接点作为
+            //    conflictElement.ConnectorLocation = conflictElement.ConflictLocation + height * verticalDirection;
+            //}
+            //else
+            //{
+            //    XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+            //    faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
+            //} 
+            #endregion
             //对象信息反填到基础模型中
             //点位计算
             var midPoint = conflictElement.ConflictLocation;

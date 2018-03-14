@@ -118,8 +118,8 @@ namespace MyRevit.Entities
                     XYZ verticalVector = null;
                     parallelVector = ((document.GetElement(new ElementId(entity.PipeIds.First())).Location as LocationCurve).Curve as Line).Direction;
                     verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                    parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, CoordinateType.XY);
-                    verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
+                    parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour, VLCoordinateType.XY);
+                    verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, VLCoordinateType.XY);
                     int indexOfPipe = entity.PipeIds.IndexOf(editId.IntegerValue);
                     var startPoint = entity.StartPoint;
                     var movedPipe = document.GetElement(new ElementId(editId.IntegerValue)) as Pipe;
@@ -154,8 +154,8 @@ namespace MyRevit.Entities
                     XYZ verticalVector = null;
                     parallelVector = ((document.GetElement(new ElementId(entity.PipeIds.First())).Location as LocationCurve).Curve as Line).Direction;
                     verticalVector = new XYZ(parallelVector.Y, -parallelVector.X, 0);
-                    parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour,CoordinateType.XY);
-                    verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, CoordinateType.XY);
+                    parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour,VLCoordinateType.XY);
+                    verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo, VLCoordinateType.XY);
                     var height = Convert.ToDouble(document.GetElement(new ElementId(entity.LineId)).GetParameters(TagProperty.线高度1.ToString()).First().AsValueString()) + (entity.PipeIds.Count() - 1) * AnnotationConstaints.TextHeight;
                     double skewLength = 0;
                     XYZ startPoint = null;

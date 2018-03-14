@@ -46,7 +46,7 @@ namespace PmSoft.Optimization.DrawingProduction.Utils
         #endregion
 
         #region 标注避让
-        public static void Display(string path, Triangle triangle, List<Line> pipeLines, List<Line> pipeCollisions, List<BoundingBoxXYZ> crossedBoundingBoxes, List<BoundingBoxXYZ> uncrossedBoundingBoxes)
+        public static void Display(string path, VLTriangle triangle, List<Line> pipeLines, List<Line> pipeCollisions, List<BoundingBoxXYZ> crossedBoundingBoxes, List<BoundingBoxXYZ> uncrossedBoundingBoxes)
         {
             if (pipeLines.Count() == 0)
                 return;

@@ -88,18 +88,18 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                         var triangle =leveledOutLines.GetContainer(sp0);
                         if (triangle==null)
                             throw new NotImplementedException("Container Not Found");
-                        var fixedSP0 = GeometryHelper.GetIntersection(triangle, sp0, new XYZ(0, 0, 1));
+                        var fixedSP0 = VLGeometryHelper.GetIntersection(triangle, sp0, new XYZ(0, 0, 1));
                         triangle = leveledOutLines.GetContainer(sp1);
                         if (triangle == null)
                             throw new NotImplementedException("Container Not Found");
-                        var fixedSP1 = GeometryHelper.GetIntersection(triangle, sp1, new XYZ(0, 0, 1));
+                        var fixedSP1 = VLGeometryHelper.GetIntersection(triangle, sp1, new XYZ(0, 0, 1));
                         var sectionBeam = Document.Create.NewFamilyInstance(Line.CreateBound(fixedSP0, fixedSP1), beamSymbol, beamLevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                         CreatedBeams.Add(sectionBeam);
                     }
                     else
                     {
-                        var fixedSP0 = GeometryHelper.VL_GetIntersectionOnLine(sp0, pBeamZ0, beamLineZ0.Direction);
-                        var fixedSP1 = GeometryHelper.VL_GetIntersectionOnLine(sp1, pBeamZ0, beamLineZ0.Direction);
+                        var fixedSP0 = VLGeometryHelper.VL_GetIntersectionOnLine(sp0, pBeamZ0, beamLineZ0.Direction);
+                        var fixedSP1 = VLGeometryHelper.VL_GetIntersectionOnLine(sp1, pBeamZ0, beamLineZ0.Direction);
                         undealedZ0.Add(Line.CreateBound(fixedSP0, fixedSP1));
                     }
                     isSolid = !isSolid;

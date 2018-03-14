@@ -18,7 +18,7 @@ namespace MyRevit.MyTests.PipeAnnotation
             if (UnitHelper.ConvertToInch(Data.RightSpace, VLUnitType.millimeter) < OffsetLength)
                 return false;
 
-            Data.TemporaryTriangle = new Triangle(Data.CurrentTriangle, GetSideVector());
+            Data.TemporaryTriangle = new VLTriangle(Data.CurrentTriangle, GetSideVector());
             Data.TemporaryLines = Data.TemporaryTriangle.GetLines();
             return !CheckCollision(Data, true);
         }

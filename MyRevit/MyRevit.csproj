@@ -143,8 +143,19 @@
     <Compile Include="MyTests\CompoundStructureAnnotation\CSACreater.cs" />
     <Compile Include="MyTests\EarthWork\Command\EarthworkBlockCommand.cs" />
     <Compile Include="MyTests\0906Construction\CreateModelText_Command.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Command.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Context.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Creator.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Model.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\ModelCollection.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Set.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\StorageEntity.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\ViewModel.cs" />
+    <Compile Include="MyTests\MEPCurveAutomaticTurn\Window.xaml.cs">
+      <DependentUpon>Window.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElementType.cs" />
-    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElemntManager.cs" />
+    <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElementManager.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\AvoidElement.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictElement.cs" />
     <Compile Include="MyTests\MepCurveAvoid\Entities\ConflictNode.cs" />
@@ -480,6 +491,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Page Include="MyTests\MEPCurveAutomaticTurn\ResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MyTests\MEPCurveAutomaticTurn\Window.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MyTests\PipeAttributesAnnotation\PAAWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -550,7 +569,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MyTests\TemplateForPM\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

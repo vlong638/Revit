@@ -235,7 +235,7 @@ namespace PmSoft.Optimization.DrawingProduction
                 entity.TagIds.Add(tag.Id.IntegerValue);
             entity.StartPoint = startPoint;
             //碰撞检测
-            Triangle triangle = new Triangle(avoidP1_Line1, avoidP2_Line2, avoidP3_Annotation1);
+            VLTriangle triangle = new VLTriangle(avoidP1_Line1, avoidP2_Line2, avoidP3_Annotation1);
             List<Line> lines = triangle.GetLines();
             AvoidData data = new AvoidData(document, selectedIds, entity, lines, triangle, multipleTagSymbol, parallelVector, rightOfLefts.GetLength(), leftOfRights.GetLength());
             AvoidStrategy strategty = AvoidStrategy.MoveLeft;

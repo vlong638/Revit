@@ -97,7 +97,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
             return false;
         }
 
-        public Triangle GetContainer(XYZ pointZ0)
+        public VLTriangle GetContainer(XYZ pointZ0)
         {
             foreach (var subOutLine in OutLines)
             {
@@ -149,7 +149,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     if (triangle != null)
                     {
                         var directOutLine = SubOutLine.GetContainedOutLine(point);
-                        fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                        fitLines.AdvancedPoints.Add(new AdvancedPoint(VLGeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
                     }
                 }
                 point = p1;
@@ -159,7 +159,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
                     if (triangle != null)
                     {
                         var directOutLine = SubOutLine.GetContainedOutLine(point);
-                        fitLines.AdvancedPoints.Add(new AdvancedPoint(GeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
+                        fitLines.AdvancedPoints.Add(new AdvancedPoint(VLGeometryHelper.GetIntersection(triangle, point, new XYZ(0, 0, 1)), beamLineZ0.Direction, directOutLine.IsSolid));
                     }
                 }
             }

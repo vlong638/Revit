@@ -146,13 +146,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
             ConnectorEnd = end;
             //更新避让所需的点位信息
             ConnectInfo connectInfo;
-            if (!ConnectInfoDic.ContainsKey(MEPCurve.Name))
+            string keyName = MEPCurve.Name + MEPCurve.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsString();
+            if (!ConnectInfoDic.ContainsKey(keyName))
             {
                 double angleToTurn, connectHeight, connectWidth, offsetWidth;
                 if (GetFittingData(MEPCurve, out connectWidth, out connectHeight, out offsetWidth, out angleToTurn))
                 {
                     connectInfo = new ConnectInfo(connectHeight, connectHeight, offsetWidth, angleToTurn);
-                    ConnectInfoDic.Add(MEPCurve.Name, connectInfo);
+                    ConnectInfoDic.Add(keyName, connectInfo);
                 }
                 else
                 {
@@ -161,7 +162,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             }
             else
             {
-                connectInfo = ConnectInfoDic[MEPCurve.Name];
+                connectInfo = ConnectInfoDic[keyName];
             }
             ConnectHeight = connectInfo.ConnectHeight;
             ConnectWidth = connectInfo.ConnectWidth;
@@ -641,15 +642,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
             SortConflictElements();
             return conflictElement;
         }
-        internal ConflictElement AddConflictElement(Connector connectorToMepElement)
+        internal ConflictElement AddConflictElement(Connector connectorToMepElement, ConflictElement srcConflictElement)
         {
             if (ConflictElements == null)
                 ConflictElements = new List<ConflictElement>();
             ConflictElement conflictElement = null;
             if (ConnectorStart != null && ConnectorStart.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
-                conflictElement = new ConflictElement(this, StartPoint, connectorToMepElement);
+                conflictElement = new ConflictElement(this, StartPoint, connectorToMepElement, srcConflictElement.ConflictEle);
             else if (ConnectorEnd != null && ConnectorEnd.Origin.VL_XYEqualTo(connectorToMepElement.Origin))
-                conflictElement = new ConflictElement(this, EndPoint, connectorToMepElement);
+                conflictElement = new ConflictElement(this, EndPoint, connectorToMepElement, srcConflictElement.ConflictEle);
             else
                 throw new NotImplementedException("错误的连接点");
             ConflictElements.Add(conflictElement);
@@ -672,10 +673,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var lineToAvoid = (mepCurve.Location as LocationCurve).Curve as Line;
             var lineDirection1 = line.Direction;
             var lineDirection2 = lineToAvoid.Direction;
-            if ((Math.Abs(lineDirection1.DotProductByCoordinate(lineDirection2, CoordinateType.XY)) - lineDirection1.GetLengthByCoordinate(CoordinateType.XY) * lineDirection2.GetLengthByCoordinate(CoordinateType.XY)).IsMiniValue())
+            if ((Math.Abs(lineDirection1.DotProductByCoordinate(lineDirection2, VLCoordinateType.XY)) - lineDirection1.GetLengthByCoordinate(VLCoordinateType.XY) * lineDirection2.GetLengthByCoordinate(VLCoordinateType.XY)).IsMiniValue())
                 return null;
-            Triangle triangle = new Triangle(lineToAvoid.GetEndPoint(0), lineToAvoid.GetEndPoint(1), lineToAvoid.GetEndPoint(0) + new XYZ(0, 0, 1));
-            return GeometryHelper.GetIntersection(triangle, line.GetEndPoint(0), line.Direction);
+            VLTriangle triangle = new VLTriangle(lineToAvoid.GetEndPoint(0), lineToAvoid.GetEndPoint(1), lineToAvoid.GetEndPoint(0) + new XYZ(0, 0, 1));
+            return VLGeometryHelper.GetIntersection(triangle, line.GetEndPoint(0), line.Direction);
         }
         #endregion
 
@@ -832,7 +833,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     }
                     else
                     {
-                        //TODO 其他连接件情况
+                        //其他连接件情况
                         if (preConnector == null|| linkedConnector.Owner.Id!=preConnector.Owner.Id)
                             SearchByFamily(source, result, linkedConnector, currentConnector);
                     }

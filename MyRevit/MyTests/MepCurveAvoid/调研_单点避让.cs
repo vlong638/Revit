@@ -35,7 +35,7 @@ namespace MyRevit.MyTests
             if (elementIds==null || elementIds.Count() < 2)
                 return Result.Failed;
             var selectedElements = elementIds.Select(c => doc.GetElement(c)).ToList();
-            AvoidElemntManager manager = new AvoidElemntManager(uiApp);
+            AvoidElementManager manager = new AvoidElementManager(uiApp);
             manager.AddElements(selectedElements);
             VLTransactionHelper.DelegateTransaction(doc, "调研_单点避让", () =>
             {

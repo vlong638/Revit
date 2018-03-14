@@ -15,9 +15,9 @@ namespace MyRevit.MyTests.PipeAnnotation
         public PipeAnnotationEntity Entity;
         public FamilySymbol MultipleTagSymbol;
         public List<Line> CurrentLines;
-        public Triangle CurrentTriangle;
+        public VLTriangle CurrentTriangle;
         public List<Line> TemporaryLines;
-        public Triangle TemporaryTriangle;
+        public VLTriangle TemporaryTriangle;
         #endregion
 
         #region 避让数据
@@ -28,7 +28,7 @@ namespace MyRevit.MyTests.PipeAnnotation
 
         public AvoidData(
             //碰撞检测数据
-            Document document, IEnumerable<ElementId> selectedPipeIds, PipeAnnotationEntity entity, List<Line> currentLines, Triangle currentTriangle, FamilySymbol multipleTagSymbol,
+            Document document, IEnumerable<ElementId> selectedPipeIds, PipeAnnotationEntity entity, List<Line> currentLines, VLTriangle currentTriangle, FamilySymbol multipleTagSymbol,
             //避让数据
             XYZ parallelVector, double leftSpace, double rightSpace
             )

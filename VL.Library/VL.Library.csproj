@@ -65,6 +65,7 @@
     <Compile Include="VLUtils\ExtensibleStorage\ExtensibleStorageHelper.cs" />
     <Compile Include="VLUtils\ExtensibleStorage\IExtensibleStorageEntity.cs" />
     <Compile Include="VLUtils\ExtensibleStorage\Simple_StorageEntity.cs" />
+    <Compile Include="VLUtils\GraphicsDisplayer\GraphicsDisplayer.cs" />
     <Compile Include="VLUtils\Hook\KeyBoardHook.cs" />
     <Compile Include="VLUtils\Hook\PickObjectsMouseHook.cs" />
     <Compile Include="VLUtils\Hook\VLHookHelper.cs" />

@@ -18,8 +18,8 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         List<XYZ> PointZ0s;
         List<Line> Lines;
         List<Line> LineZ0s;
-        List<Triangle> Triangles;
-        List<Triangle> TriangleZ0s;
+        List<VLTriangle> Triangles;
+        List<VLTriangle> TriangleZ0s;
         public List<OutLine> SubOutLines = new List<OutLine>();
         public bool IsSolid { set; get; }
 
@@ -32,15 +32,15 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         void Init(EdgeArray edgeArray, BeamAlignToFloorModel model)
         {
             Edges = edgeArray;
-            Points = GeometryHelper.GetPoints(Edges, model);
+            Points = VLGeometryHelper.GetPoints(Edges, model);
             PointZ0s = Points.Select(c => new XYZ(c.X, c.Y, 0)).ToList();
             Lines = new List<Line>();
             AddLinesFromPoints(ref Lines, Points);
             LineZ0s = new List<Line>();
             AddLinesFromPoints(ref LineZ0s, PointZ0s);
             //TODO 某些轮廓是由多个面组成,需修正Triangle的分解算法,此处修正即支持非平面的轮廓集合的处理
-            Triangles = GeometryHelper.GetTriangles(Points);
-            TriangleZ0s = GeometryHelper.GetTriangles(PointZ0s);
+            Triangles = VLGeometryHelper.GetTriangles(Points);
+            TriangleZ0s = VLGeometryHelper.GetTriangles(PointZ0s);
             IsSolid = true;
         }
 
@@ -155,7 +155,7 @@ namespace MyRevit.MyTests.BeamAlignToFloor
         /// <summary>
         /// 检测轮廓是否被包含 另一轮廓
         /// </summary>
-        public Triangle GetContainer(XYZ pointZ0)
+        public VLTriangle GetContainer(XYZ pointZ0)
         {
             var triangleZ0 = TriangleZ0s.AsParallel().FirstOrDefault(c => c.Contains(pointZ0));
             if (triangleZ0 != null)

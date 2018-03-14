@@ -9,7 +9,7 @@ namespace MyRevit.MyTests.Utilities
     /// <summary>
     /// 几何处理帮助类
     /// </summary>
-    public static class GeometryHelper
+    public static class VLGeometryHelper
     {
         /// <summary>
         /// 计算两个矩形是否重叠
@@ -250,16 +250,16 @@ namespace MyRevit.MyTests.Utilities
         /// </summary>
         /// <param name="edgeArray"></param>
         /// <returns></returns>
-        public static List<Triangle> GetTriangles(List<XYZ> points)
+        public static List<VLTriangle> GetTriangles(List<XYZ> points)
         {
             if (points.Count <= 2)
                 throw new NotImplementedException("点数小于2无法构建最小的三点面");
 
-            List<Triangle> triangles = new List<Triangle>();
+            List<VLTriangle> triangles = new List<VLTriangle>();
             var start = points[0];
             for (int i = 1; i < points.Count - 1; i++)
             {
-                triangles.Add(new Triangle(start, points[i], points[i + 1]));
+                triangles.Add(new VLTriangle(start, points[i], points[i + 1]));
             }
             return triangles;
         }
@@ -281,7 +281,7 @@ namespace MyRevit.MyTests.Utilities
         }
 
         #region 标注避让 二维平面避让
-        public static VLCoverType IsPlanarCover(List<Line> lines, Triangle triangle, Line line)
+        public static VLCoverType IsPlanarCover(List<Line> lines, VLTriangle triangle, Line line)
         {
             //根据线段相交判断
             var p0 = line.GetEndPoint(0);
@@ -302,7 +302,7 @@ namespace MyRevit.MyTests.Utilities
         /// <summary>
         /// 检测轮廓是否被包含 另一轮廓
         /// </summary>
-        public static bool PlanarContains(List<Triangle> triangles, List<XYZ> points)
+        public static bool PlanarContains(List<VLTriangle> triangles, List<XYZ> points)
         {
             foreach (var pointZ0 in points)
             {
@@ -321,7 +321,7 @@ namespace MyRevit.MyTests.Utilities
         /// <param name="triangles"></param>
         /// <param name="line"></param>
         /// <returns></returns>
-        public static VLCoverType IsCover(List<Line> lines, List<Triangle> triangles, Line line)
+        public static VLCoverType IsCover(List<Line> lines, List<VLTriangle> triangles, Line line)
         {
             //根据线段相交判断
             var intersect = lines.FirstOrDefault(c => c.VL_IsIntersect(line));
@@ -339,7 +339,7 @@ namespace MyRevit.MyTests.Utilities
         /// <summary>
         /// 三角形包含点
         /// </summary>
-        public static bool Contains(this Triangle triangle, XYZ point)
+        public static bool Contains(this VLTriangle triangle, XYZ point)
         {
             var vB = triangle.B - triangle.A;
             var vC = triangle.C - triangle.A;
@@ -360,7 +360,7 @@ namespace MyRevit.MyTests.Utilities
                 v = 0;
             if (v < 0 || v > 1)
                 return false;
-            return u + v <= 1 + GeometryHelper.XYZTolerance;
+            return u + v <= 1 + VLGeometryHelper.XYZTolerance;
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace MyRevit.MyTests.Utilities
         /// t = (vT·pT - vT·pL)/(vT·vL)
         /// p = pL + t*vL
         /// </summary>
-        public static XYZ GetIntersection(Triangle triangle, XYZ point, XYZ direction)
+        public static XYZ GetIntersection(VLTriangle triangle, XYZ point, XYZ direction)
         {
             var pT = triangle.A;
             var vT = (triangle.B - triangle.A).CrossProduct(triangle.C - triangle.A);

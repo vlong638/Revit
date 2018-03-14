@@ -600,14 +600,14 @@ namespace MyRevit.MyTests.PAA
                     Model.UpdateLineWidth(target);
                     var startPoint = Model.BodyStartPoint.ToWindowsPoint();
                     var offSet = (Model.LineWidth * Model.ParallelVector).ToWindowsPoint();
-                    var pEnd = new VLPointPicker().PickPointWithPreview(UIApplication, CoordinateType.XY, (view) =>
+                    var pEnd = new VLPointPicker().PickPointWithPreview(UIApplication, VLCoordinateType.XY, (view) =>
                     {
                         var mousePosition = System.Windows.Forms.Control.MousePosition;
                         var midDrawP = new System.Windows.Point(mousePosition.X - view.Left, mousePosition.Y - view.Top);//中间选择点
                         var midPoint = view.ConvertToRevitPointFromDrawPoint(midDrawP);
                         var startDrawP = view.ConvertToDrawPointFromRevitPoint(startPoint);//起点
                         var M_S = midPoint - Model.BodyStartPoint;
-                        if (Model.TextType == PAATextType.Option2 || Model.ParallelVector.CrossProductByCoordinateType(M_S, CoordinateType.XY) > 0)
+                        if (Model.TextType == PAATextType.Option2 || Model.ParallelVector.CrossProductByCoordinateType(M_S, VLCoordinateType.XY) > 0)
                         {
                             var endPoint = startPoint.Plus(offSet);
                             var endP = view.ConvertToDrawPointFromRevitPoint(endPoint);//终点

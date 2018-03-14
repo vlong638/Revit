@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace MyRevit.MyTests.Utilities
 {
-    public class Triangle
+    public class VLTriangle
     {
-        public Triangle(Triangle triangle, XYZ offset)
+        public VLTriangle(VLTriangle triangle, XYZ offset)
         {
             A = triangle.A + offset;
             B = triangle.B + offset;
             C = triangle.C + offset;
         }
 
-        public Triangle(XYZ a, XYZ b, XYZ c)
+        public VLTriangle(XYZ a, XYZ b, XYZ c)
         {
             A = a;
             B = b;
@@ -39,16 +39,16 @@ namespace MyRevit.MyTests.Utilities
             double dotC_P = vC.DotProduct(vP);
             double inverDeno = 1 / (dotB_B * dotC_C - dotB_C * dotB_C);
             double u = (dotC_C * dotB_P - dotB_C * dotC_P) * inverDeno;
-            if (Math.Abs(u) < GeometryHelper.XYZTolerance)
+            if (Math.Abs(u) < VLGeometryHelper.XYZTolerance)
                 u = 0;
             if (u < 0 || u > 1)
                 return false;
             double v = (dotB_B * dotC_P - dotB_C * dotB_P) * inverDeno;
-            if (Math.Abs(v) < GeometryHelper.XYZTolerance)
+            if (Math.Abs(v) < VLGeometryHelper.XYZTolerance)
                 v = 0;
             if (v < 0 || v > 1)
                 return false;
-            return u + v <= 1 + GeometryHelper.XYZTolerance;
+            return u + v <= 1 + VLGeometryHelper.XYZTolerance;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace MyRevit.MyTests.Utilities
                 return false;
             if (v < 0 || v > 1)
                 return false;
-            return u + v <= 1 + GeometryHelper.XYZTolerance;
+            return u + v <= 1 + VLGeometryHelper.XYZTolerance;
         }
 
         /// <summary>

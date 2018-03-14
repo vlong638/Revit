@@ -341,7 +341,7 @@ namespace MyRevit.MyTests.PBPA
                         //vVector = VLLocationHelper.GetVectorByQuadrant(vVector, QuadrantType.OneAndFour, coordinateType); 
                         #endregion
 
-                        CoordinateType coordinateType = CoordinateType.XY;
+                        VLCoordinateType coordinateType = VLCoordinateType.XY;
                         Model.UpdateVector(coordinateType);
                         var target = Document.GetElement(Model.TargetId);
                         Model.UpdateLineWidth(target);
@@ -355,7 +355,7 @@ namespace MyRevit.MyTests.PBPA
                             var midPoint = view.ConvertToRevitPointFromDrawPoint(midDrawP);
                             var startDrawP = view.ConvertToDrawPointFromRevitPoint(startPoint);//起点
                             var M_S = midPoint - Model.BodyStartPoint;
-                            if (Model.AnnotationType == PBPAAnnotationType.OneLine || Model.ParallelVector.CrossProductByCoordinateType(M_S, CoordinateType.XY) > 0)
+                            if (Model.AnnotationType == PBPAAnnotationType.OneLine || Model.ParallelVector.CrossProductByCoordinateType(M_S, VLCoordinateType.XY) > 0)
                             {
                                 var endPoint = startPoint.Plus(offSet);
                                 var endP = view.ConvertToDrawPointFromRevitPoint(endPoint);//终点

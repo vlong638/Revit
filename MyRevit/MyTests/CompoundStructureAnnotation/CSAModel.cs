@@ -191,7 +191,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
             verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             if ((verticalVector.X - 1).IsMiniValue())
-                verticalVector = verticalVector.RevertByCoordinateType(CoordinateType.XY);
+                verticalVector = verticalVector.RevertByCoordinateType(VLCoordinateType.XY);
             VerticalVector = verticalVector;
             ParallelVector = parallelVector;
         }
@@ -374,7 +374,7 @@ namespace MyRevit.MyTests.CompoundStructureAnnotation
             parallelVector = VLLocationHelper.GetVectorByQuadrant(parallelVector, QuadrantType.OneAndFour);
             verticalVector = VLLocationHelper.GetVectorByQuadrant(verticalVector, QuadrantType.OneAndTwo);
             if ((verticalVector.X - 1).IsMiniValue())
-                verticalVector = verticalVector.RevertByCoordinateType(CoordinateType.XY);
+                verticalVector = verticalVector.RevertByCoordinateType(VLCoordinateType.XY);
             model.VerticalVector = verticalVector;
             model.ParallelVector = parallelVector;
         }
