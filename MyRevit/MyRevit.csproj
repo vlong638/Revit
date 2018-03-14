@@ -542,10 +542,44 @@
     </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
-    <Content Include="DLLs\PmBaseClass20_x64.dll" />
-    <Content Include="DLLs\PMBaseOpr20_x64.dll" />
-    <Content Include="DLLs\PmGeoBase20_x64.dll" />
-    <Content Include="DLLs\PmOdexBase20_x64.dll" />
+    <Content Include="DLLsSupport\dataset20_x64.dll" />
+    <Content Include="DLLsSupport\hoops2140_x64_vc11.dll" />
+    <Content Include="DLLsSupport\hoops_mfcu2140_x64_vc11.dll" />
+    <Content Include="DLLsSupport\hoops_mvo2140_x64_vc11.dll" />
+    <Content Include="DLLsSupport\hoops_mvo2140_x64_vc112.dll" />
+    <Content Include="DLLsSupport\hoops_mvo_mgk2140_x64_vc11.dll" />
+    <Content Include="DLLsSupport\hoops_mvo_mgk2140_x64_vc112.dll" />
+    <Content Include="DLLsSupport\hoops_stream2140_x64_vc11.dll" />
+    <Content Include="DLLsSupport\KernelBaseClass20_x64.dll" />
+    <Content Include="DLLsSupport\LDVectorView20_x64.dll" />
+    <Content Include="DLLsSupport\PmAcEntDataCompute20_x64.dll" />
+    <Content Include="DLLsSupport\PmArchiveBase_x64.dll" />
+    <Content Include="DLLsSupport\PmBaseClass20_x64.dll" />
+    <Content Include="DLLsSupport\PMBaseOpr20_x64.dll" />
+    <Content Include="DLLsSupport\PMBIMDataService20_x64.dll" />
+    <Content Include="DLLsSupport\PmBuildReportSourceRevit20_x64.dll" />
+    <Content Include="DLLsSupport\PmCalParm_Compute20_x64.dll" />
+    <Content Include="DLLsSupport\PmGeoBase20_x64.dll" />
+    <Content Include="DLLsSupport\PMGraphicGeoFunOpr20_x64.dll" />
+    <Content Include="DLLsSupport\PmOdexBase20_x64.dll" />
+    <Content Include="DLLsSupport\PMOutPutInterFace20_x64.dll" />
+    <Content Include="DLLsSupport\PmRegInfoOpr20_x64.dll" />
+    <Content Include="DLLsSupport\PmRegInfoOprCompute20_x64.dll" />
+    <Content Include="DLLsSupport\PMSLGJDataService20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.CivilProject.SlCalc20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.Common.BmCalParm20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.Common.CADBase20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.Common.MFCDll20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.General.MFCDll20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.MainModel.CADCal20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.MainModel.CADTrans20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.MepProject.CADCal20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.MepProject.CADTrans20_x64.dll" />
+    <Content Include="DLLsSupport\pm_hstream20_x64.dll" />
+    <Content Include="DLLsSupport\PM_LogicDataOpr20_x64.dll" />
+    <Content Include="DLLsSupport\ProjectDBService20_x64.dll" />
+    <Content Include="DLLsSupport\TransProcessOpr20_x64.dll" />
+    <Content Include="DLLsSupport\VirtualGrid20_x64.dll" />
     <Content Include="DLLs\PmSoft.Common.CADBase20_x64.dll" />
     <Content Include="DLLs\PmSoft.Common.CommonClass.dll" />
     <Content Include="DLLs\PmSoft.Common.Controls.dll" />
@@ -553,7 +587,7 @@
     <Content Include="DLLs\PmSoft.Common.RevitClass.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="DLLs\PmSoft.Common.UnManaged20_x64.dll" />
+    <Content Include="DLLsSupport\PmSoft.Common.UnManaged20_x64.dll" />
     <Content Include="DLLs\PmSoft.General.MFCDll20_x64.dll" />
     <Content Include="DLLs\PmSoft.MainModel.EntData.dll" />
     <Content Include="DLLs\PmSoft.MepProject.ControlService.dll">
