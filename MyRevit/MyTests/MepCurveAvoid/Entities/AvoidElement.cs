@@ -378,16 +378,28 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 trans.Start("临时");
                 var fi = doc.Create.NewFamilyInstance(XYZ.Zero, fs, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                var angleP = fi.GetParameters("角度").FirstOrDefault();
-                if (angleP == null)
+                #region 构件的角度处理
+                if (AvoidElementType == AvoidElementType.CableTray)
                 {
-                    angle = Math.PI / 2;
+                    angle = Math.PI / 4;
+                    var angleP = fi.GetParameters("角度").FirstOrDefault();
                     angleP.Set(angle);
                 }
                 else
                 {
-                    angle = angleP.AsDouble();
+                    var angleP = fi.GetParameters("角度").FirstOrDefault();
+                    if (angleP == null)
+                    {
+                        angle = Math.PI / 2;
+                        angleP.Set(angle);
+                    }
+                    else
+                    {
+                        angle = angleP.AsDouble();
+                    }
                 }
+                #endregion
+
                 foreach (Connector con in fi.MEPModel.ConnectorManager.Connectors)
                 {
                     if (mep is CableTray || (mep is Duct && con.Shape == ConnectorProfileType.Rectangular))

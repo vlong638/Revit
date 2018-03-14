@@ -40,18 +40,19 @@ namespace MyRevit.Entities
             try
             {
                 mouseHook.InstallHook();
-                //TODO 过滤选梁
+                //1TODO 过滤选梁
                 var selectedId = commandData.Application.ActiveUIDocument.Selection.PickObject(ObjectType.Element, new BeamFramingFilter()).ElementId.IntegerValue;
                 TaskDialog.Show("1", selectedId.ToString());
             }
             catch
-            {
+            { 
                 mouseHook.UninstallHook();
             }
             mouseHook.UninstallHook();
             return Result.Succeeded;
         }
     }
+
     public class BeamFramingFilter : ISelectionFilter
     {
         RevitLinkInstance rvtIns = null;
