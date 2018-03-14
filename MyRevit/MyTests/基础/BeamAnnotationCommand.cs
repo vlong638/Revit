@@ -302,7 +302,7 @@ namespace MyRevit.Entities
                 if (parameter == null)
                 {
                     string shareFilePath = @"E:\WorkingSpace\Tasks\0526标注\标注_共享参数(全).txt";
-                    var parameterHelper = new ShareParameter(shareFilePath);
+                    var parameterHelper = new Utilities.ShareParameter(shareFilePath);
                     foreach (var beamParameterName in beamParameterNames)
                     {
                         if (new List<string>() {

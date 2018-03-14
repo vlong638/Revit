@@ -462,7 +462,7 @@ namespace MyRevit.MyTests.PAA
             if (!VLTransactionHelper.DelegateTransaction(Document, "GenerateSinglePipe", (Func<bool>)(() =>
             {
                 //添加共享参数
-                var parameterHelper = new ShareParameter(VLSharedParameterHelper.GetShareFilePath());
+                var parameterHelper = new MyRevit.Utilities.ShareParameter(VLSharedParameterHelper.GetShareFilePath());
                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_PipeCurves), true, BuiltInParameterGroup.PG_TEXT);
                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_DuctCurves), true, BuiltInParameterGroup.PG_TEXT);
                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_CableTray), true, BuiltInParameterGroup.PG_TEXT);
@@ -875,7 +875,7 @@ namespace MyRevit.MyTests.PAA
             var element = Document.GetElement(TargetId);
             if (element.GetParameters(PAAContext.SharedParameterPL).Count == 0)
             {
-                var parameterHelper = new ShareParameter(VLSharedParameterHelper.GetShareFilePath());
+                var parameterHelper = new MyRevit.Utilities.ShareParameter(VLSharedParameterHelper.GetShareFilePath());
                 parameterHelper.AddShadeParameter(Document, PAAContext.SharedParameterGroupName, PAAContext.SharedParameterPL, element.Category, true, BuiltInParameterGroup.PG_TEXT);
             }
             element.GetParameters(PAAContext.SharedParameterPL).FirstOrDefault().Set(Model.GetFull_L(element));

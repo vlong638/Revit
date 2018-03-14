@@ -131,7 +131,6 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Newtonsoft.Json.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CADBase20_x64.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.CommonClass.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.Controls.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PMSoft.Common.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.MFCDll20_x64.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Common.RevitClass.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.MainModel.EntData.dll
@@ -139,11 +138,8 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\System.Data.SQLite.DLL
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\office.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.Vbe.Interop.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.Log.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.General.MFCDll20_x64.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\stdole.dll
-E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\Microsoft.WindowsAPICodePack.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\log4net.xml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\VL.Logger.pdb
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\PipeAttributesAnnotation\PAAWindow.baml
@@ -178,3 +174,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\RevitAPIUI.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\MEPCurveAutomaticTurn\ResourceDictionary.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\MEPCurveAutomaticTurn\Window.g.cs
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\MEPCurveAutomaticTurn\Window.baml
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache

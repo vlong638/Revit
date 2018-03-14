@@ -61,37 +61,37 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Work\last\2016\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PMSoft.Common, Version=2.0.0.4989, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PmSoft.Common.CADBase20_x64, Version=1.0.6351.18963, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PMSoft.Common.dll</HintPath>
+      <HintPath>DLLs\PmSoft.Common.CADBase20_x64.dll</HintPath>
     </Reference>
-    <Reference Include="PmSoft.Common.CADBase20_x64, Version=1.0.6346.15601, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="PmSoft.Common.CommonClass, Version=2.1.0.16525, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.Common.CADBase20_x64.dll</HintPath>
+      <HintPath>DLLs\PmSoft.Common.CommonClass.dll</HintPath>
     </Reference>
-    <Reference Include="PmSoft.Common.CommonClass, Version=1.2.0.9945, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PmSoft.Common.Controls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.Common.CommonClass.dll</HintPath>
-    </Reference>
-    <Reference Include="PmSoft.Common.Controls, Version=1.2.0.9945, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.Common.Controls.dll</HintPath>
+      <HintPath>DLLs\PmSoft.Common.Controls.dll</HintPath>
     </Reference>
     <Reference Include="PmSoft.Common.MFCDll20_x64, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.Common.MFCDll20_x64.dll</HintPath>
+      <HintPath>DLLs\PmSoft.Common.MFCDll20_x64.dll</HintPath>
     </Reference>
-    <Reference Include="PmSoft.Common.RevitClass, Version=1.2.0.9945, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PmSoft.Common.RevitClass, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.Common.RevitClass.dll</HintPath>
+      <HintPath>DLLs\PmSoft.Common.RevitClass.dll</HintPath>
     </Reference>
-    <Reference Include="PmSoft.MainModel.EntData, Version=1.2.0.9945, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PmSoft.General.MFCDll20_x64, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\export\Revit\2016\PmSoft.MainModel.EntData.dll</HintPath>
+      <HintPath>DLLs\PmSoft.General.MFCDll20_x64.dll</HintPath>
+    </Reference>
+    <Reference Include="PmSoft.MainModel.EntData, Version=2.1.0.16525, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>DLLs\PmSoft.MainModel.EntData.dll</HintPath>
     </Reference>
     <Reference Include="PmSoft.MepProject.ControlService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Work\RevitProject\2.ProjectSource\MepProject\PmSoft.MepProject.ControlService\bin\Debug_R2016\PmSoft.MepProject.ControlService.dll</HintPath>
+      <HintPath>DLLs\PmSoft.MepProject.ControlService.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -190,6 +190,7 @@
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Edit.cs" />
     <Compile Include="MyTests\MepCurveAvoid\调研_碰撞检测.cs" />
     <Compile Include="References\UnitTransUtils.cs" />
+    <Compile Include="Utilities\ShareParameter.cs" />
     <Compile Include="Utilities\VLElementIdComparer.cs" />
     <Compile Include="Utilities\VLPointPicker.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Command.cs" />
@@ -541,9 +542,20 @@
     </Content>
     <Content Include="AddIns\SubsidenceMonitor.addin" />
     <Content Include="AddIns\WarnSettings.addin" />
+    <Content Include="DLLs\PmBaseClass20_x64.dll" />
+    <Content Include="DLLs\PMBaseOpr20_x64.dll" />
+    <Content Include="DLLs\PmGeoBase20_x64.dll" />
+    <Content Include="DLLs\PmOdexBase20_x64.dll" />
+    <Content Include="DLLs\PmSoft.Common.CADBase20_x64.dll" />
+    <Content Include="DLLs\PmSoft.Common.CommonClass.dll" />
+    <Content Include="DLLs\PmSoft.Common.Controls.dll" />
+    <Content Include="DLLs\PmSoft.Common.MFCDll20_x64.dll" />
     <Content Include="DLLs\PmSoft.Common.RevitClass.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="DLLs\PmSoft.Common.UnManaged20_x64.dll" />
+    <Content Include="DLLs\PmSoft.General.MFCDll20_x64.dll" />
+    <Content Include="DLLs\PmSoft.MainModel.EntData.dll" />
     <Content Include="DLLs\PmSoft.MepProject.ControlService.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

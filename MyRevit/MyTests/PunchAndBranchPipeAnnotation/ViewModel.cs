@@ -242,7 +242,7 @@ namespace MyRevit.MyTests.PBPA
             if (!VLTransactionHelper.DelegateTransaction(Document, "PBPAViewModel", (Func<bool>)(() =>
             {
                 //添加共享参数
-                var parameterHelper = new ShareParameter(VLSharedParameterHelper.GetShareFilePath());
+                var parameterHelper = new MyRevit.Utilities.ShareParameter(VLSharedParameterHelper.GetShareFilePath());
                 parameterHelper.AddShadeParameter(Document, PBPAContext.SharedParameterGroupName, PBPAContext.SharedParameterPL, Document.Settings.Categories.get_Item(BuiltInCategory.OST_PipeAccessory), true, BuiltInParameterGroup.PG_TEXT);
                 return true;
             })))
