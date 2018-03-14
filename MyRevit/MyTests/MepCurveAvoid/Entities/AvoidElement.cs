@@ -457,7 +457,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public double Height { set; get; }
         public double GetSize()
         {
-            return -1;
+            return Width;
         }
         public void UpdateSize(Element element)
         {
