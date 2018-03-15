@@ -9,7 +9,9 @@ using MyRevit.Entities;
 using MyRevit.MyTests.MepCurveAvoid;
 using MyRevit.MyTests.Utilities;
 using MyRevit.Utilities;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace MyRevit.MyTests
@@ -45,7 +47,14 @@ namespace MyRevit.MyTests
             });
             VLTransactionHelper.DelegateTransaction(doc, "调研_单点避让", () =>
             {
-                var result = string.Join(",", manager.ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+                #region TEST
+                var result = string.Join("\r\n", manager.ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+                var directory = @"D:\AvoidElement\" + DateTime.Now.ToString("MM_dd_HH_mm");
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+                File.WriteAllText(directory + $"\\Connections.txt", result);
+                #endregion
+
                 var service = new MEPCurveConnectControlService(uiApp);
                 foreach (var ConnectionNode in manager.ConnectionNodes)
                     try

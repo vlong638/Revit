@@ -27,10 +27,18 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public AvoidElement ConflictEle { set; get; }
         public bool IsConnector { set; get; }
         private Connector Connector { set; get; }
-
+        /// <summary>
+        /// 待避让的对象高度
+        /// </summary>
         public double AvoidHeight { set; get; }
+        /// <summary>
+        /// 待避让的对象宽度
+        /// </summary>
         public double AvoidWidth { set; get; }
-
+        /// <summary>
+        /// 避让的高度
+        /// </summary>
+        public double OffsetHeight { set; get; }
 
         /// <summary>
         /// 构造函数
@@ -74,7 +82,6 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public XYZ MiddleEnd { set; get; }//中间段终结点
         public XYZ EndSplit { set; get; }//终结点切割端
         public XYZ ConnectorLocation { set; get; }//边界位置
-        public double Height { set; get; }//偏移高度
 
         internal double GetDistanceTo(ConflictElement next)
         {

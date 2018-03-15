@@ -8,6 +8,7 @@ using System.Linq;
 using MyRevit.Utilities;
 using System;
 using Autodesk.Revit.UI;
+using System.IO;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
@@ -91,7 +92,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 ValueNode.ValuedConflictNode.Compete(AvoidElements, ConflictLineSections_Collection);
             }
             var winners = ValueNodes.Where(c => c.ConflictLineSections.AvoidPriorityValue.CompeteType == CompeteType.Winner);
-            PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\AvoidElement.png", AvoidElements, winners);
+            //PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\AvoidElement.png", AvoidElements, winners);
+
+            #region TEST
+            var directory = @"D:\AvoidElement\" + DateTime.Now.ToString("MM_dd_HH_mm");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            PmSoft.Optimization.DrawingProduction.Utils.GraphicsDisplayerManager.Display(directory + @"\AvoidElement.png", AvoidElements, winners); 
+            #endregion
         }
 
         /// <summary>
@@ -113,7 +121,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
         public void LinkConnection(Document doc)
         {
             #region 连接点补充连接件
-            var result = string.Join(",", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+
+            #region TEST
+            var result = string.Join("\r\n", ConnectionNodes.Select(c => c.MEPCurve1.Id + "->" + c.MEPCurve2.Id));
+            var directory = @"D:\AvoidElement\" + DateTime.Now.ToString("MM_dd_HH_mm");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            File.WriteAllText(directory + $"\\Connections.txt", result); 
+            #endregion
+
             var service = new MEPCurveConnectControlService(uiApp);
             foreach (var ConnectionNode in ConnectionNodes)
                 service.NewTwoFitting(ConnectionNode.MEPCurve1, ConnectionNode.MEPCurve2, null);
@@ -130,8 +146,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
         private static void TransportConnections(Document doc, ConflictLineSections ConflictLineSections)
         {
             List<ElementId> elementsToMove = new List<ElementId>();
-            var height = ConflictLineSections.Height;
             var vector = ConflictLineSections.First().AvoidElement.GetVerticalVector(); //= new XYZ(0, 0, 1);
+            var height = ConflictLineSections.OffsetHeight;
             foreach (var ConflictLineSection in ConflictLineSections)
             {
                 if (ConflictLineSection.StartLinkedConnector != null && ConflictLineSection.NewStartElementId != null)
@@ -207,8 +223,8 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     if (!isContinuing)// 是否正在连续(用以确立连续段的起始位置)
                     {
                         isContinuing = true;
-                        if (winner.IsConnector)
-                            startPoint = winner.ConnectorLocation;
+                        //if (winner.IsConnector)
+                        //    startPoint = winner.ConnectorLocation;
                         startSplit = winner.StartSplit;
                         middleStart = winner.MiddleStart;
                         if (startSplit == null)//TODO 这部分待确定作用
@@ -233,28 +249,28 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 {
                     #region 不再连续
                     endAt = i;
-                    if (winner.IsConnector)//边界点是连接件
-                    {
-                        if (avoidElement.IsStartPoint(winner))//是起始点的连接件
-                            startPoint = winner.ConnectorLocation;
-                        else//是终结点的连接件
-                            endPoint = winner.ConnectorLocation;
+                    //if (winner.IsConnector)//边界点是连接件
+                    //{
+                    //    if (avoidElement.IsStartPoint(winner))//是起始点的连接件
+                    //        startPoint = winner.ConnectorLocation;
+                    //    else//是终结点的连接件
+                    //        endPoint = winner.ConnectorLocation;
 
-                        //和避让点的数量没有直接关系
-                        //if (winners.Count() - 1 == 0)//只有一个避让点
-                        //    if (avoidElement.IsStartPoint(winner))//是起始点的连接件
-                        //        startPoint = winner.ConnectorLocation;
-                        //    else//是终结点的连接件
-                        //        endPoint = winner.ConnectorLocation;
-                        //else if (i == 0)//是起始点连接件
-                        //    startPoint = winner.ConnectorLocation;
-                        //else if (i == winners.Count() - 1)//终结点连接件
-                        //    endPoint = winner.ConnectorLocation;
-                    }
+                    //    //和避让点的数量没有直接关系
+                    //    //if (winners.Count() - 1 == 0)//只有一个避让点
+                    //    //    if (avoidElement.IsStartPoint(winner))//是起始点的连接件
+                    //    //        startPoint = winner.ConnectorLocation;
+                    //    //    else//是终结点的连接件
+                    //    //        endPoint = winner.ConnectorLocation;
+                    //    //else if (i == 0)//是起始点连接件
+                    //    //    startPoint = winner.ConnectorLocation;
+                    //    //else if (i == winners.Count() - 1)//终结点连接件
+                    //    //    endPoint = winner.ConnectorLocation;
+                    //}
                     if (i == 0 && winner.IsConnector && avoidElement.IsStartPoint(winner))//起始点 单个连接件 Connector是否是起始点
                     {
                         //单点避让
-                        startPoint = winner.ConnectorLocation;
+                        //startPoint = winner.ConnectorLocation;
                         middleEnd = winner.MiddleEnd;
                         endSplit = winner.EndSplit;
                         var offsetMep = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
@@ -315,7 +331,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                             //单点避让
                             startSplit = winner.StartSplit;
                             middleStart = winner.MiddleStart;
-                            endPoint = winner.ConnectorLocation;
+                            //endPoint = winner.ConnectorLocation;
                         }
                         var mepStart = doc.GetElement(ElementTransformUtils.CopyElement(doc, avoidElement.MEPCurve.Id, new XYZ(0, 0, 0)).First()) as MEPCurve;
                         (mepStart.Location as LocationCurve).Curve = Line.CreateBound(startPoint, startSplit);
@@ -359,7 +375,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                         }
                         middleEnd = winner.MiddleEnd;
                         endSplit = winner.EndSplit;
-                        var compare = new XYZComparer();
+                        var compare = new XYComparer();
                         if (compare.Compare(startPoint, startSplit) <= 0)
                         {
                             if (i == winners.Count() - 1)

@@ -16,7 +16,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
     /// 右大上大
     /// 从右到左,从上到下
     /// </summary>
-    public class XYZComparer : IComparer<XYZ>
+    public class XYComparer : IComparer<XYZ>
     {
         public int Compare(XYZ a, XYZ b)
         {
@@ -130,7 +130,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var p1 = curve.GetEndPoint(0);
             var p2 = curve.GetEndPoint(1);
             var middle = (p1 + p2) / 2;
-            if (new XYZComparer().Compare(p1, p2) > 0)
+            if (new XYComparer().Compare(p1, p2) > 0)
             {
                 StartPoint = p1;
                 EndPoint = p2;
@@ -437,7 +437,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             end = null;
             if (c1 != null)
             {
-                if (new XYZComparer().Compare(c1.Origin, middle) > 0)
+                if (new XYComparer().Compare(c1.Origin, middle) > 0)
                     start = c1;
                 else
                     end = c1;
@@ -445,7 +445,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var c2 = mepCurve.ConnectorManager.Connectors.GetConnectorById(1);
             if (c2 != null)
             {
-                if (new XYZComparer().Compare(c2.Origin, middle) > 0)
+                if (new XYComparer().Compare(c2.Origin, middle) > 0)
                     start = c2;
                 else
                     end = c2;
@@ -499,8 +499,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             {
                 //VerticalVector = PriorityElementType == PriorityElementType.UnpressedPipe ? ;
                 var direction = ((MEPCurve.Location as LocationCurve).Curve as Line).Direction;
-                var normal = direction.GetNormal(new XYZ(0, 0, 1));
-                var verticalVector = direction.GetNormal(normal);
+                var normal = direction.CrossProduct(new XYZ(0, 0, 1));
+                var verticalVector = direction.CrossProduct(normal).Normalize();
+                //var normal = direction.GetNormal(new XYZ(0, 0, 1));
+                //var verticalVector = direction.GetNormal(normal);
                 if (PriorityElementType == PriorityElementType.UnpressedPipe)
                 {
                     if (verticalVector.Z > 0)
@@ -672,7 +674,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
 
         public void SortConflictElements()
         {
-            ConflictElements = ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer()).ToList();
+            ConflictElements = ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYComparer()).ToList();
         }
 
         /// <summary>

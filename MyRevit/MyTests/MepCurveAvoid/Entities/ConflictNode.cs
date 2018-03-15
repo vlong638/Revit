@@ -19,7 +19,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 组价值
         /// </summary>
         public PriorityValue GroupPriorityValue { set; get; }
-        public double Height { set; get; }
+        /// <summary>
+        /// 所有区段的偏移高度
+        /// </summary>
+        public double OffsetHeight { set; get; }
     }
     /// <summary>
     /// 碰撞区间的价值
@@ -146,6 +149,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
             return item;
         }
         #endregion
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("CompeteType:" + CompeteType);
+            foreach (var item in TypeNumber)
+                sb.AppendLine("Type:" + item.Key + ";Number:" + item.Value);
+            foreach (var item in TypeMaxLength)
+                sb.AppendLine("Type:" + item.Key + ";Length:" + item.Value);
+            return sb.ToString();
+        }
     }
 
     /// <summary>
@@ -368,7 +382,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     TopoConnector(conflictNodes, avoidElements, connector, conflictElement);
                 }
             }
-            conflictLineSection.ConflictElements = conflictLineSection.ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYZComparer()).ToList();
+            conflictLineSection.ConflictElements = conflictLineSection.ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYComparer()).ToList();
             ConflictLineSections.Add(conflictLineSection);
         }
 
