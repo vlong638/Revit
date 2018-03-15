@@ -220,13 +220,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     var diff = maxOffset - conflictElement.OffsetHeight;
                     if (!diff.IsMiniValue())
                     {
-                        conflictElement.StartSplit += diff * verticalDirection;
-                        conflictElement.MiddleStart += diff * verticalDirection;
-                        conflictElement.MiddleEnd += diff * verticalDirection;
-                        conflictElement.EndSplit += diff * verticalDirection;
-                        if (new XYComparer().Compare(conflictElement.StartSplit, avoidElement.StartPoint) > 0)
+                        if (conflictElement.StartSplit != null)
+                            conflictElement.StartSplit += diff * verticalDirection;
+                        if (conflictElement.MiddleStart != null)
+                            conflictElement.MiddleStart += diff * verticalDirection;
+                        if (conflictElement.MiddleEnd != null)
+                            conflictElement.MiddleEnd += diff * verticalDirection;
+                        if (conflictElement.EndSplit != null)
+                            conflictElement.EndSplit += diff * verticalDirection;
+                        if (conflictElement.StartSplit==null)
                             avoidElement.StartPoint += diff * verticalDirection;
-                        if (new XYComparer().Compare(conflictElement.EndSplit, avoidElement.EndPoint) < 0)
+                        if (conflictElement.EndSplit == null)
                             avoidElement.EndPoint += diff * verticalDirection;
                         conflictElement.OffsetHeight = maxOffset;
                     }
@@ -307,10 +311,21 @@ namespace MyRevit.MyTests.MepCurveAvoid
             conflictElement.MiddleStart = midPoint + parallelDirection * widthUp;
             conflictElement.MiddleEnd = midPoint - parallelDirection * widthUp;
             //过界修正,过界则做边界的垂直偏移
-            if (new XYComparer().Compare(conflictElement.StartSplit, pointStart) > 0)
+            var comparer = new XYComparer();
+            if (comparer.Compare(conflictElement.StartSplit, pointStart) > 0)
+            {
+                if (comparer.Compare(conflictElement.MiddleStart, pointStart) > 0)
+                    conflictElement.MiddleStart = null;
+                conflictElement.StartSplit = null;
                 avoidElement.StartPoint += height * verticalDirection;
-            if (new XYComparer().Compare(conflictElement.EndSplit, pointEnd)<0)
+            }
+            if (comparer.Compare(conflictElement.EndSplit, pointEnd) < 0)
+            {
+                if (comparer.Compare(conflictElement.MiddleEnd, pointEnd) < 0)
+                    conflictElement.MiddleEnd = null;
+                conflictElement.EndSplit = null;
                 avoidElement.EndPoint += height * verticalDirection;
+            }
             conflictElement.OffsetHeight = height;
         }
         #endregion

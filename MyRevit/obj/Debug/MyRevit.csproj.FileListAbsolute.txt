@@ -176,3 +176,4 @@ E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\MEPCurveAutomatic
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyTests\MEPCurveAutomaticTurn\Window.baml
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.MepProject.CADCal20_x64.dll
 E:\WorkingSpace\Repository\Git\Revit\MyRevit\bin\Debug\PmSoft.MainModel.CADCal20_x64.dll
+E:\WorkingSpace\Repository\Git\Revit\MyRevit\obj\Debug\MyRevit.csprojResolveAssemblyReference.cache
