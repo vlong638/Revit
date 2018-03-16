@@ -204,10 +204,10 @@ namespace MyRevit.MyTests.MepCurveAvoid
             MEPCurve preMepEnd = null;
 
             #region 管线重构处理
+            XYZ current = null, next = null;
             for (int iCurrent = 0; iCurrent < winners.Count(); iCurrent++)
             {
                 var winnerCurrent = winners[iCurrent];
-                XYZ current = null, next = null;
                 if (iCurrent == 0)
                     current = startPoint;
                 int iLast = iCurrent;

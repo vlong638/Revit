@@ -251,61 +251,17 @@ namespace MyRevit.MyTests.MepCurveAvoid
             else
                 return orientJumpLength / Math.Abs(Math.Sin(angle));
         }
-        private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement, double height = -1)
+        private static void CalculateLocations(AvoidElement avoidElement, ConflictElement conflictElement)
         {
             int id = avoidElement.MEPCurve.Id.IntegerValue;
+            double widthUp, widthDown, height;
+            height = GetUpAndDownWidth(avoidElement, conflictElement, out height, out widthUp, out widthDown);
             XYZ verticalDirection = avoidElement.GetVerticalVector();
-            double angleToTurn = avoidElement.AngleToTurn;
-            double miniConnectHeight = avoidElement.ConnectHeight;
-            double miniConnectWidth = avoidElement.ConnectWidth;
-            double offsetWidth = avoidElement.OffsetWidth;
-            var curve = (avoidElement.MEPCurve.Location as LocationCurve).Curve;
-            var pointStart = avoidElement.StartPoint;
-            var pointEnd = avoidElement.EndPoint;
-            XYZ parallelDirection = avoidElement.GetParallelVector();//由于起始点和终点在迭代的过程中会进行位置更新 (pointStart - pointEnd).Normalize();
-            var elementToAvoid = conflictElement.ConflictEle;
-            var elementToAvoidHeight = conflictElement.AvoidHeight;
-            var elementToAvoidWidth = conflictElement.AvoidWidth;
-            XYZ direction1 = (curve as Line).Direction;
-            double faceAngle = 0;
-            XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;//TODO 连接件的ElementToAvoid依旧需要填上 作为溯源数据源
-            faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
-            #region old
-            //if (conflictElement.IsConnector)
-            //{
-            //    faceAngle = Math.PI / 2;//问题出在 如果连接点作为
-            //    conflictElement.ConnectorLocation = conflictElement.ConflictLocation + height * verticalDirection;
-            //}
-            //else
-            //{
-            //    XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
-            //    faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
-            //} 
-            #endregion
-            //对象信息反填到基础模型中
-            //点位计算
-            var midPoint = conflictElement.ConflictLocation;
-            //max(垂直最短留白距离,最小斜边长度,最短切割距离) 
-            if (height == -1)
-            {
-                height = avoidElement.Height / 2 + elementToAvoidHeight / 2 + MiniSpace;
-                height = Math.Max(height, MiniMepLength + miniConnectHeight * 2);//考虑构件的最小高度需求
-            }
-            if (conflictElement.IsConnector)
-                conflictElement.ConnectorLocation = conflictElement.ConflictLocation + height * verticalDirection;
-            //TODO 考虑矩形的最佳方案
-            //if (avoidElement.Width!= avoidElement.Height|| elementToAvoidWidth!= elementToAvoidHeight)
-            //{
-            //}
-            var widthUp = MiniMepLength / 2 + offsetWidth;//构件最短需求
-            var diameterAvoid = Math.Max(avoidElement.Width, avoidElement.Height);
-            var diameterToAvoid = Math.Max(elementToAvoidWidth, elementToAvoidHeight);
-            var widthOffset = (angleToTurn - Math.PI / 2).IsMiniValue() ? 0 : height / Math.Tan(angleToTurn);
-            widthUp = (angleToTurn - Math.PI / 2).IsMiniValue() ? widthUp : Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
-            widthUp = Math.Max(widthUp, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);//直径最短需求
-            var widthDown = widthUp + widthOffset;//水平最短距离对应的水平偏移
-            widthUp = GetFixedJumpLength(widthUp, faceAngle);
-            widthDown = GetFixedJumpLength(widthDown, faceAngle);
+            XYZ parallelDirection = avoidElement.GetParallelVector();
+            XYZ pointStart = avoidElement.StartPoint;
+            XYZ pointEnd = avoidElement.EndPoint;
+            XYZ midPoint = conflictElement.ConflictLocation;
+
             if (widthUp.IsMiniValue())//偏移段为0说明偏移不足以实现,作整段偏移
             {
                 conflictElement.StartSplit = null;
@@ -356,6 +312,80 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 }
             }
             conflictElement.OffsetHeight = height;
+        }
+
+        public static double GetUpAndDownWidth(AvoidElement avoidElement, ConflictElement conflictElement,out double height, out double widthUp, out double widthDown)
+        {
+            XYZ verticalDirection = avoidElement.GetVerticalVector();
+            double angleToTurn = avoidElement.AngleToTurn;
+            double miniConnectHeight = avoidElement.ConnectHeight;
+            double miniConnectWidth = avoidElement.ConnectWidth;
+            double offsetWidth = avoidElement.OffsetWidth;
+            var curve = (avoidElement.MEPCurve.Location as LocationCurve).Curve;
+            XYZ parallelDirection = avoidElement.GetParallelVector();
+            var elementToAvoid = conflictElement.ConflictEle;
+            var elementToAvoidHeight = conflictElement.AvoidHeight;
+            var elementToAvoidWidth = conflictElement.AvoidWidth;
+            XYZ direction1 = (curve as Line).Direction;
+            double faceAngle = 0;
+            XYZ direction2 = ((elementToAvoid.MEPCurve.Location as LocationCurve).Curve as Line).Direction;//TODO 连接件的ElementToAvoid依旧需要填上 作为溯源数据源
+            faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
+            //对象信息反填到基础模型中
+            //点位计算
+            //max(垂直最短留白距离,最小斜边长度,最短切割距离) 
+            height = avoidElement.Height / 2 + elementToAvoidHeight / 2 + MiniSpace;
+            height = Math.Max(height, MiniMepLength + miniConnectHeight * 2);//考虑构件的最小高度需求
+            //TODO 考虑矩形的最佳方案
+            //if (avoidElement.Width!= avoidElement.Height|| elementToAvoidWidth!= elementToAvoidHeight)
+            //{
+            //}
+            widthUp = MiniMepLength / 2 + offsetWidth;
+            var diameterAvoid = Math.Max(avoidElement.Width, avoidElement.Height);
+            var diameterToAvoid = Math.Max(elementToAvoidWidth, elementToAvoidHeight);
+            var widthOffset = (angleToTurn - Math.PI / 2).IsMiniValue() ? 0 : height / Math.Tan(angleToTurn);
+            widthUp = (angleToTurn - Math.PI / 2).IsMiniValue() ? widthUp : Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
+            widthUp = Math.Max(widthUp, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);//直径最短需求
+            widthDown = widthUp + widthOffset;
+            widthUp = GetFixedJumpLength(widthUp, faceAngle);
+            widthDown = GetFixedJumpLength(widthDown, faceAngle);
+            return height;
+        }
+
+        public static void GetUpAndDownWidth_2(ConflictElement conflictElement, AvoidElement avoidElement, out double widthUp, out double widthDown, double height = -1)
+        {
+            double angleToTurn = avoidElement.AngleToTurn;
+            double miniConnectHeight = avoidElement.ConnectHeight;
+            double miniConnectWidth = avoidElement.ConnectWidth;
+            double offsetWidth = avoidElement.OffsetWidth;
+            var elementToAvoid = conflictElement.ConflictEle;
+            var elementToAvoidHeight = conflictElement.AvoidHeight;
+            var elementToAvoidWidth = conflictElement.AvoidWidth;
+            //对象信息反填到基础模型中
+            //点位计算
+            //max(垂直最短留白距离,最小斜边长度,最短切割距离) 
+            if (height==-1)
+            {
+                height = avoidElement.Height / 2 + elementToAvoidHeight / 2 + MiniSpace;
+                height = Math.Max(height, MiniMepLength + miniConnectHeight * 2);//考虑构件的最小高度需求
+            }
+            //TODO 考虑矩形的最佳方案
+            //if (avoidElement.Width!= avoidElement.Height|| elementToAvoidWidth!= elementToAvoidHeight)
+            //{
+            //}
+            widthUp = MiniMepLength / 2 + offsetWidth;//构件最短需求
+            var diameterAvoid = Math.Max(avoidElement.Width, avoidElement.Height);
+            var diameterToAvoid = Math.Max(elementToAvoidWidth, elementToAvoidHeight);
+            var widthOffset = (angleToTurn - Math.PI / 2).IsMiniValue() ? 0 : height / Math.Tan(angleToTurn);
+            widthUp = (angleToTurn - Math.PI / 2).IsMiniValue() ? widthUp : Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
+            widthUp = Math.Max(widthUp, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);//直径最短需求
+            widthDown = widthUp + widthOffset;//水平最短距离对应的水平偏移           
+            //相对倾斜修正
+            var curve = (avoidElement.MEPCurve.Location as LocationCurve).Curve;
+            var direction1 = (curve as Line).Direction;
+            var direction2 = ((conflictElement.ConflictEle.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+            var faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
+            widthUp = GetFixedJumpLength(widthUp, faceAngle);
+            widthDown = GetFixedJumpLength(widthDown, faceAngle);
         }
         #endregion
     }

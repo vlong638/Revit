@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using MyRevit.MyTests.Utilities;
+using MyRevit.Utilities;
 
 namespace MyRevit.MyTests.MepCurveAvoid
 {
@@ -203,7 +204,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         {
             if (ConflictLineSections.IsGrouped)
                 return;
-
+            var id = conflictElement.AvoidEle.MEPCurve.Id.IntegerValue;
             ConflictLineSections = new ConflictLineSections();
             SetupGroup(OrientAvoidElement, conflictElement, valuedConflictNodes, avoidElements);
             RenderGroupInfo(valuedConflictNodes);
@@ -316,8 +317,12 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// <param name="avoidElements"></param>
         private void SetupGroup(AvoidElement startElement, ConflictElement conflictElement, List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements)
         {
-            var currentGroupingDistance = GroupingDistance + startElement.ConnectWidth * 2;
-            XYZ direction1 = ((startElement.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+            double height;
+            double widthUp;
+            double widthDown;
+            ValuedConflictNode.GetUpAndDownWidth(startElement, conflictElement, out height, out widthUp, out widthDown);
+            var currentGroupingDistance = GroupingDistance + widthUp * 2 + widthDown;
+            var direction1 = ((startElement.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
             ConflictLineSection conflictLineSection = new ConflictLineSection(startElement);
             //碰撞点处理
             conflictLineSection.ConflictElements.Add(conflictElement);
@@ -331,7 +336,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 next = startElement.ConflictElements[i];
                 if (next.IsConnector)
                     break;
-                XYZ direction2 = ((next.ConflictEle.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+                var direction2 = ((next.ConflictEle.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
                 var faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
                 if (current.GetDistanceTo(next) > ValuedConflictNode.GetFixedJumpLength(currentGroupingDistance, faceAngle))
                     break;
@@ -361,7 +366,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 next = startElement.ConflictElements[i];
                 if (next.IsConnector)
                     break;
-                XYZ direction2 = ((next.ConflictEle.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
+                var direction2 = ((next.ConflictEle.MEPCurve.Location as LocationCurve).Curve as Line).Direction;
                 var faceAngle = direction1.AngleOnPlaneTo(direction2, new XYZ(0, 0, 1));
                 if (current.GetDistanceTo(next) > ValuedConflictNode.GetFixedJumpLength(currentGroupingDistance, faceAngle))
                     break;
@@ -385,6 +390,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             conflictLineSection.ConflictElements = conflictLineSection.ConflictElements.OrderByDescending(c => c.ConflictLocation, new XYComparer()).ToList();
             ConflictLineSections.Add(conflictLineSection);
         }
+
 
         private void TopoConnector(List<ValuedConflictNode> conflictNodes, List<AvoidElement> avoidElements, Connector connector,ConflictElement conflictElement)
         {
