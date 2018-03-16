@@ -947,6 +947,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
             if (current != null)
             {
                 next = winnerCurrent;
+                if (current.VL_XYZEqualTo(next))//TODO需要增加针对垂直的修正 垂直的管依旧没有偏移距离,暂时屏蔽处理
+                {
+                    current = next;
+                    preMEPCurve = null;
+                    needUpdateStartElement = false;
+                    needUpdateEndElement = false;
+                    return;
+                }
                 var newMEPCurve = AddMEPCurveNode(doc, avoidElement, current, next, preMEPCurve, isLean);
                 if (needUpdateStartElement)
                 {
