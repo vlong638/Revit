@@ -222,13 +222,14 @@ namespace MyRevit.MyTests.MepCurveAvoid
                 {
                     #region 单节点
                     bool isStart = iCurrent == 0;
-                    bool isEnd = iLast == winners.Count() - 1;
+                    bool isEnd = iLast == winners.Count() - 1;//单点或者两个连接点
+                    bool isBothEnd = (winners.Count == 2 && winners.FirstOrDefault(c => !c.IsConnector) == null);
                     bool needUpdateStartElement = isStart && winnerCurrent.IsConnector && avoidElement.IsStartPoint(winnerCurrent);
                     bool needUpdateEndElement = false;
                     MEPCurve startElement = null, endElement = null;
 
                     #region current
-                    if (isStart)
+                    if (isStart|| isBothEnd)
                     {
                         current = startPoint;
                     }
@@ -248,8 +249,15 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     {
                         AddMEPCurveWithEmptyCheck(doc, avoidElement, winnerCurrent.EndSplit, true, ref needUpdateStartElement, ref needUpdateEndElement, ref startElement, ref endElement, ref current, ref next, ref preMepEnd);
                     }
-                    if (isEnd)
+                    if (isEnd|| isBothEnd)
                     {
+                        needUpdateEndElement = isEnd && winnerCurrent.IsConnector && avoidElement.IsEndPoint(winnerCurrent);
+                        if (isBothEnd)
+                        {
+                            iCurrent = winners.Count() - 1;
+                            needUpdateStartElement = true;
+                            needUpdateEndElement = true;
+                        }
                         AddMEPCurveWithEmptyCheck(doc, avoidElement, endPoint, false, ref needUpdateStartElement, ref needUpdateEndElement, ref startElement, ref endElement, ref current, ref next, ref preMepEnd);
                     }
                     #endregion
@@ -257,7 +265,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     #region 连接件迁移
                     foreach (var ConflictLineSections in ConflictLineSections_Collection)
                     {
-                        if (startElement != null && endElement != null)
+                        if (startElement == null && endElement == null)
                             break;
                         if (startElement != null)
                         {
@@ -344,7 +352,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
                     #region 连接件迁移
                     foreach (var ConflictLineSections in ConflictLineSections_Collection)
                     {
-                        if (startElement != null && endElement != null)
+                        if (startElement == null && endElement == null)
                             break;
                         if (startElement != null)
                         {

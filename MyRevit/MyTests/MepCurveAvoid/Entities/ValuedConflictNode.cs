@@ -262,7 +262,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var curve = (avoidElement.MEPCurve.Location as LocationCurve).Curve;
             var pointStart = avoidElement.StartPoint;
             var pointEnd = avoidElement.EndPoint;
-            XYZ parallelDirection = (pointStart - pointEnd).Normalize();
+            XYZ parallelDirection = avoidElement.GetParallelVector();//由于起始点和终点在迭代的过程中会进行位置更新 (pointStart - pointEnd).Normalize();
             var elementToAvoid = conflictElement.ConflictEle;
             var elementToAvoidHeight = conflictElement.AvoidHeight;
             var elementToAvoidWidth = conflictElement.AvoidWidth;
@@ -300,31 +300,60 @@ namespace MyRevit.MyTests.MepCurveAvoid
             var widthUp = MiniMepLength / 2 + offsetWidth;//构件最短需求
             var diameterAvoid = Math.Max(avoidElement.Width, avoidElement.Height);
             var diameterToAvoid = Math.Max(elementToAvoidWidth, elementToAvoidHeight);
-            widthUp = Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
+            var widthOffset = (angleToTurn - Math.PI / 2).IsMiniValue() ? 0 : height / Math.Tan(angleToTurn);
+            widthUp = (angleToTurn - Math.PI / 2).IsMiniValue() ? widthUp : Math.Max(widthUp, (diameterAvoid / 2 + diameterToAvoid / 2 + MiniSpace) / Math.Sin(angleToTurn) - height * Math.Tan(angleToTurn));//斜边最短需求
             widthUp = Math.Max(widthUp, avoidElement.Width / 2 + elementToAvoidWidth / 2 + MiniSpace);//直径最短需求
-            var widthDown = widthUp + height / Math.Tan(angleToTurn);//水平最短距离对应的水平偏移
+            var widthDown = widthUp + widthOffset;//水平最短距离对应的水平偏移
             widthUp = GetFixedJumpLength(widthUp, faceAngle);
             widthDown = GetFixedJumpLength(widthDown, faceAngle);
-            conflictElement.StartSplit = midPoint + parallelDirection * widthDown;
-            conflictElement.EndSplit = midPoint - parallelDirection * widthDown;
-            midPoint += height * verticalDirection;
-            conflictElement.MiddleStart = midPoint + parallelDirection * widthUp;
-            conflictElement.MiddleEnd = midPoint - parallelDirection * widthUp;
-            //过界修正,过界则做边界的垂直偏移
-            var comparer = new XYComparer();
-            if (comparer.Compare(conflictElement.StartSplit, pointStart) > 0)
+            if (widthUp.IsMiniValue())//偏移段为0说明偏移不足以实现,作整段偏移
             {
-                if (comparer.Compare(conflictElement.MiddleStart, pointStart) > 0)
-                    conflictElement.MiddleStart = null;
                 conflictElement.StartSplit = null;
-                avoidElement.StartPoint += height * verticalDirection;
-            }
-            if (comparer.Compare(conflictElement.EndSplit, pointEnd) < 0)
-            {
-                if (comparer.Compare(conflictElement.MiddleEnd, pointEnd) < 0)
-                    conflictElement.MiddleEnd = null;
                 conflictElement.EndSplit = null;
-                avoidElement.EndPoint += height * verticalDirection;
+                conflictElement.MiddleStart = null;
+                conflictElement.MiddleEnd = null;
+                if (!avoidElement.IsHorizontalFixed_StartPoint)
+                {
+                    avoidElement.StartPoint += height * verticalDirection;
+                    avoidElement.IsHorizontalFixed_StartPoint = true;
+                }
+                if (!avoidElement.IsHorizontalFixed_EndPoint)
+                {
+                    avoidElement.EndPoint += height * verticalDirection;
+                    avoidElement.IsHorizontalFixed_EndPoint = true;
+                }
+            }
+            else
+            {
+                conflictElement.StartSplit = midPoint + parallelDirection * widthDown;
+                conflictElement.EndSplit = midPoint - parallelDirection * widthDown;
+                midPoint += height * verticalDirection;
+                conflictElement.MiddleStart = midPoint + parallelDirection * widthUp;
+                conflictElement.MiddleEnd = midPoint - parallelDirection * widthUp;
+                //过界修正,过界则做边界的垂直偏移
+                var comparer = new XYComparer();
+                if (comparer.Compare(conflictElement.StartSplit, pointStart) > 0)
+                {
+                    if (comparer.Compare(conflictElement.MiddleStart, pointStart) > 0)
+                        conflictElement.MiddleStart = null;
+                    conflictElement.StartSplit = null;
+                    if (!avoidElement.IsHorizontalFixed_StartPoint)
+                    {
+                        avoidElement.StartPoint += height * verticalDirection;
+                        avoidElement.IsHorizontalFixed_StartPoint = true;
+                    }
+                }
+                if (comparer.Compare(conflictElement.EndSplit, pointEnd) < 0)
+                {
+                    if (comparer.Compare(conflictElement.MiddleEnd, pointEnd) < 0)
+                        conflictElement.MiddleEnd = null;
+                    conflictElement.EndSplit = null;
+                    if (!avoidElement.IsHorizontalFixed_EndPoint)
+                    {
+                        avoidElement.EndPoint += height * verticalDirection;
+                        avoidElement.IsHorizontalFixed_EndPoint = true;
+                    }
+                }
             }
             conflictElement.OffsetHeight = height;
         }

@@ -604,6 +604,7 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 从大到小
         /// </summary>
         public XYZ StartPoint { set; get; }
+        public bool IsHorizontalFixed_StartPoint { set; get; }
         public bool IsStartPoint(ConflictElement conflictElement)
         {
             return StartPoint.VL_XYEqualTo(conflictElement.ConflictLocation);
@@ -612,9 +613,19 @@ namespace MyRevit.MyTests.MepCurveAvoid
         /// 从大到小
         /// </summary>
         public XYZ EndPoint { set; get; }
+        public bool IsHorizontalFixed_EndPoint { set; get; }
         public bool IsEndPoint(ConflictElement conflictElement)
         {
             return EndPoint.VL_XYEqualTo(conflictElement.ConflictLocation);
+        }
+        XYZ _ParallelVector;
+        public XYZ GetParallelVector()
+        {
+            if (_ParallelVector==null)
+            {
+                _ParallelVector= (StartPoint - EndPoint).Normalize();
+            }
+            return _ParallelVector;
         }
         #endregion
 
