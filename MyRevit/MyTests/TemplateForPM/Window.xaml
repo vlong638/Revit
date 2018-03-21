@@ -1,11 +1,10 @@
-﻿<local:VLWindow x:Class="PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn.MATWindow"
+﻿<local:VLWindow x:Class="PMSoft.ConstructionManagementV2.CMWindow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlforCMs.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PmSoft.Common.RevitClass.VLUtils;assembly=PmSoft.Common.RevitClass"
-             mc:Ignorable="d" Title="管线特性标注"
-             d:DesignHeight="260" d:DesignWidth="480"
+             Title="管线特性标注"
              Width="260" Height="480">
     <local:VLWindow.Resources>
         <ResourceDictionary>

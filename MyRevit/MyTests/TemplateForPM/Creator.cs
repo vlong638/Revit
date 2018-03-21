@@ -1,14 +1,14 @@
 ﻿using Autodesk.Revit.DB;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
-    public class MATCreator
+    public class CMCreator
     {
-        public void Generate(Document doc, MATModel model, Element element)
+        public void Generate(Document doc, CMModel model, Element element)
         {
             Generate(doc, model, element, null);
         }
-        public void Generate(Document doc, MATModel model, Element element, XYZ offset)
+        public void Generate(Document doc, CMModel model, Element element, XYZ offset)
         {
             //CompoundStructure compoundStructure = model.GetCompoundStructure(element);//获取文本载体
             //if (compoundStructure == null)
@@ -58,19 +58,19 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
             //    //GraphicsDisplayerManager.Display(@"E:\WorkingSpace\Outputs\Images\1023结构做法标注.png", lines, Model.TextLocations);
             //}
         }
-        public void Regenerate(Document doc, MATModel model, Element target)
+        public void Regenerate(Document doc, CMModel model, Element target)
         {
             //FamilyInstance line = doc.GetElement(model.LineId) as FamilyInstance;
-            //MATContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
+            //CMContext.Creator.Regenerate(doc, model, target, (line.Location as LocationPoint).Point - model.LineLocation);
         }
-        public void Regenerate(Document doc, MATModel model, Element target, XYZ offset)
+        public void Regenerate(Document doc, CMModel model, Element target, XYZ offset)
         {
             ////不是选取的文本类型 以Text的文本类型为准
             //if (model.TextNoteTypeElementId == null)
             //    model.TextNoteTypeElementId = (doc.GetElement(model.TextNoteIds[0]) as TextNote).TextNoteType.Id;
             //Generate(doc, model, target, offset);
         }
-        public void Clear(Document doc, MATModel model)
+        public void Clear(Document doc, CMModel model)
         {
             ////删除线
             //if (model.LineId != null && doc.GetElement(model.LineId) != null)

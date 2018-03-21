@@ -1,14 +1,14 @@
 ﻿using Autodesk.Revit.DB;
 using PmSoft.Common.RevitClass.VLUtils;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
     /// <summary>
     /// Model数据集合
     /// </summary>
-    public class MATModelCollection : VLModelCollection<MATModel>
+    public class CMModelCollection : VLModelCollection<CMModel>
     {
-        public MATModelCollection(string data) : base(data)
+        public CMModelCollection(string data) : base(data)
         {
         }
 
@@ -18,7 +18,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
         /// <param name="doc"></param>
         public void Save(Document doc)
         {
-            MATContext.SaveCollection(doc);
+            CMContext.SaveCollection(doc);
         }
     }
 }

@@ -1,27 +1,28 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using PmSoft.MainModel.EntData;
 using System;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
     /// <summary>
     /// 命令对象
     /// </summary>
-    public class MATSet : MepCToolCmd
+    public class CMSet : CToolCmd
     {
 
         public UIApplication UIApplication;
         public Document Document { get { return UIApplication.ActiveUIDocument.Document; } }
-        public MATViewModel ViewModel { set; get; }
+        public CMViewModel ViewModel { set; get; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="app"></param>
-        public MATSet(UIApplication app) : base(app)
+        public CMSet(UIApplication app) : base(app)
         {
             Init(app);
-            ViewModel = new MATViewModel(app);
+            ViewModel = new CMViewModel(app);
         }
         private void Init(UIApplication app)
         {

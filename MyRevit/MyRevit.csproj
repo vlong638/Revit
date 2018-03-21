@@ -189,6 +189,18 @@
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Delete.cs" />
     <Compile Include="MyTests\PunchAndBranchPipeAnnotation\Updater\Updater_Edit.cs" />
     <Compile Include="MyTests\MepCurveAvoid\调研_碰撞检测.cs" />
+    <Compile Include="MyTests\TemplateForPM\Command.cs" />
+    <Compile Include="MyTests\TemplateForPM\Context.cs" />
+    <Compile Include="MyTests\TemplateForPM\Creator.cs" />
+    <Compile Include="MyTests\TemplateForPM\Exe.cs" />
+    <Compile Include="MyTests\TemplateForPM\Model.cs" />
+    <Compile Include="MyTests\TemplateForPM\ModelCollection.cs" />
+    <Compile Include="MyTests\TemplateForPM\Set.cs" />
+    <Compile Include="MyTests\TemplateForPM\StorageEntity.cs" />
+    <Compile Include="MyTests\TemplateForPM\ViewModel.cs" />
+    <Compile Include="MyTests\TemplateForPM\Window.xaml.cs">
+      <DependentUpon>Window.xaml</DependentUpon>
+    </Compile>
     <Compile Include="References\UnitTransUtils.cs" />
     <Compile Include="Utilities\ShareParameter.cs" />
     <Compile Include="Utilities\VLElementIdComparer.cs" />
@@ -516,6 +528,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="MyTests\TemplateForPM\ResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MyTests\TemplateForPM\Window.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MyTests\Template\Window.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -615,9 +635,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MyTests\TemplateForPM\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,15 +1,15 @@
 ﻿using PmSoft.Common.RevitClass.VLUtils;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
     /// <summary>
-    /// MATWindow.xaml 的交互逻辑
+    /// CMWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MATWindow : VLWindow
+    public partial class CMWindow : VLWindow
     {
-        public new MATViewModel ViewModel { set; get; }
+        public new CMViewModel ViewModel { set; get; }
 
-        public MATWindow(MATViewModel viewModel) : base(viewModel)
+        public CMWindow(CMViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
 
@@ -21,7 +21,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = (int)MATViewType.PickSinglePipe_Pipe;
+            ViewModel.ViewType = (int)CMViewType.PickSinglePipe_Pipe;
             ViewModel.Execute();
         }
 
@@ -30,7 +30,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
             if (!ViewModel.IsIdling)
                 return;
 
-            ViewModel.ViewType = (int)MATViewType.PickMultiplePipes;
+            ViewModel.ViewType = (int)CMViewType.PickMultiplePipes;
             ViewModel.Execute();
         }
     }

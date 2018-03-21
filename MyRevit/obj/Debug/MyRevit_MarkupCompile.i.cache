@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;Revit2016
 
-12362833416
+14-484539897
 68-955373928
-250-432049486
+260-271121780
 361716173106
-MyTests\Analysis\Window.xaml;MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\MEPCurveAutomaticTurn\ResourceDictionary.xaml;MyTests\MEPCurveAutomaticTurn\Window.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\Window.xaml;MyTests\Template\Window.xaml;MyTests\Template\ResourceDictionary.xaml;Utilities\DrawAreaView.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
+MyTests\Analysis\Window.xaml;MyTests\CompoundStructureAnnotation\MyResourceDictionary.xaml;MyTests\MEPCurveAutomaticTurn\ResourceDictionary.xaml;MyTests\MEPCurveAutomaticTurn\Window.xaml;MyTests\PipeAttributesAnnotation\PAAWindow.xaml;MyTests\PipeAttributesAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\ResourceDictionary.xaml;MyTests\PunchAndBranchPipeAnnotation\Window.xaml;MyTests\TemplateForPM\ResourceDictionary.xaml;MyTests\TemplateForPM\Window.xaml;MyTests\Template\Window.xaml;MyTests\Template\ResourceDictionary.xaml;Utilities\DrawAreaView.xaml;MyTests\CompoundStructureAnnotation\CompoundStructureAnnotationWindow.xaml;
 
-False
+True
 

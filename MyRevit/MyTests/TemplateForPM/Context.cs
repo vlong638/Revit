@@ -1,41 +1,41 @@
 ﻿using Autodesk.Revit.DB;
 using PmSoft.Common.RevitClass.VLUtils;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
-    class MATContext
+    class CMContext
     {
         #region Creator
-        private static MATCreator _Creator = null;
-        public static MATCreator Creator
+        private static CMCreator _Creator = null;
+        public static CMCreator Creator
         {
             get
             {
-                return _Creator ?? (_Creator = new MATCreator());
+                return _Creator ?? (_Creator = new CMCreator());
             }
         }
         #endregion
 
         #region Storage
         public static bool IsEditing;
-        private static MATModelCollection Collection;
-        private static MATStorageEntity CStorageEntity = new MATStorageEntity();
+        private static CMModelCollection Collection;
+        private static CMStorageEntity CStorageEntity = new CMStorageEntity();
         /// <summary>
         /// 取数据Collection
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        public static MATModelCollection GetCollection(Document doc)
+        public static CMModelCollection GetCollection(Document doc)
         {
             Collection = VLDelegateHelper.DelegateTryCatch(
                 () =>
                 {
                     string data = ExtensibleStorageHelper.GetData(doc, CStorageEntity, CStorageEntity.FieldOfData);
-                    return new MATModelCollection(data);
+                    return new CMModelCollection(data);
                 },
                 () =>
                 {
-                    return new MATModelCollection("");
+                    return new CMModelCollection("");
                 }
             );
             return Collection;

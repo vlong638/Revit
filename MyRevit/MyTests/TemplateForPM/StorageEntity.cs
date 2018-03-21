@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
 
     /// <summary>
     /// PipeAnnotationEntityCollection扩展存储对象
     /// </summary>
-    public class MATStorageEntity : IExtensibleStorageEntity
+    public class CMStorageEntity : IExtensibleStorageEntity
     {
         public List<string> FieldNames { get { return new List<string>() { FieldOfData, FieldOfSetting }; } }
         public Guid SchemaId
@@ -19,9 +19,9 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
                 //return new Guid("4A622209-267D-4BA7-BFFD-55C3CDA0F809");
             }
         }
-        public string StorageName { get { return "MAT_Schema"; } }
-        public string SchemaName { get { return "MAT_Schema"; } }
-        public string FieldOfData { get { return "MAT_Collection"; } }
-        public string FieldOfSetting { get { return "MAT_Settings"; } }
+        public string StorageName { get { return "CM_Schema"; } }
+        public string SchemaName { get { return "CM_Schema"; } }
+        public string FieldOfData { get { return "CM_Collection"; } }
+        public string FieldOfSetting { get { return "CM_Settings"; } }
     }
 }

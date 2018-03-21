@@ -7,12 +7,12 @@ using PmSoft.Common.RevitClass.VLUtils;
 using System;
 using System.Collections.Generic;
 
-namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
+namespace PMSoft.ConstructionManagementV2
 {
     /// <summary>
     /// 标注对象
     /// </summary>
-    public enum MATTargetType
+    public enum CMTargetType
     {
         /// <summary>
         /// 管道
@@ -34,7 +34,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
     /// <summary>
     /// 标记样式
     /// </summary>
-    public enum MATAnnotationType
+    public enum CMAnnotationType
     {
         /// <summary>
         /// 系统缩写 管道尺寸 离地高度
@@ -52,7 +52,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
     /// <summary>
     /// 离地模式
     /// </summary>
-    public enum MATLocationType
+    public enum CMLocationType
     {
         /// <summary>
         /// 中心离地
@@ -70,7 +70,7 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
     /// <summary>
     /// 文字方式
     /// </summary>
-    public enum MATTextType
+    public enum CMTextType
     {
         /// <summary>
         /// 文字在线上
@@ -82,20 +82,20 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
         TextType_OnEdgeOrOnMiddle,
     }
 
-    public class MATModel : VLModel
+    public class CMModel : VLModel
     {
-        public MATTargetType TargetType { set; get; }//标注对象
-        public MATAnnotationType AnnotationType { set; get; }//标记样式
-        public MATLocationType LocationType { set; get; }//离地模式
-        public MATTextType TextType { set; get; }//文字方式
+        public CMTargetType TargetType { set; get; }//标注对象
+        public CMAnnotationType AnnotationType { set; get; }//标记样式
+        public CMLocationType LocationType { set; get; }//离地模式
+        public CMTextType TextType { set; get; }//文字方式
 
         public List<ElementId> TargetIds { set; get; }//标记的目标对象
         public string AnnotationPrefix { get; internal set; }//标注前缀
 
-        public MATModel() : base("")
+        public CMModel() : base("")
         {
         }
-        public MATModel(string data) : base(data)
+        public CMModel(string data) : base(data)
         {
         }
 
@@ -149,13 +149,13 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
         {
             switch (TargetType)
             {
-                case MATTargetType.Pipe:
+                case CMTargetType.Pipe:
                     return new VLClassFilter(typeof(Pipe));
-                case MATTargetType.Duct:
+                case CMTargetType.Duct:
                     return new VLClassFilter(typeof(Duct));
-                case MATTargetType.CableTray:
+                case CMTargetType.CableTray:
                     return new VLClassFilter(typeof(CableTray));
-                case MATTargetType.Conduit:
+                case CMTargetType.Conduit:
                     return new VLClassFilter(typeof(Conduit));
                 default:
                     throw new NotImplementedException("未支持该类型的过滤:" + TargetType.ToString());
@@ -166,43 +166,43 @@ namespace PmSoft.MepProject.MepWork.FullFunctions.MEPCurveAutomaticTurn
         {
             switch (TargetType)
             {
-                case MATTargetType.Pipe:
+                case CMTargetType.Pipe:
                     switch (AnnotationType)
                     {
-                        case MATAnnotationType.SPL:
+                        case CMAnnotationType.SPL:
                             return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.SL:
+                        case CMAnnotationType.SL:
                             return string.Format("如:ZP {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.PL:
+                        case CMAnnotationType.PL:
                             return string.Format("如:DN100 {0}2600", AnnotationPrefix);
                         default:
                             throw new NotImplementedException("未支持该类型的");
                     }
-                case MATTargetType.Duct:
+                case CMTargetType.Duct:
                     switch (AnnotationType)
                     {
-                        case MATAnnotationType.SPL:
+                        case CMAnnotationType.SPL:
                             return string.Format("如:SF 400mmx400mm {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.SL:
+                        case CMAnnotationType.SL:
                             return string.Format("如:SF {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.PL:
+                        case CMAnnotationType.PL:
                             return string.Format("如:400mmx400mm {0}2600", AnnotationPrefix);
                         default:
                             throw new NotImplementedException("未支持该类型的");
                     }
-                case MATTargetType.CableTray:
+                case CMTargetType.CableTray:
                     switch (AnnotationType)
                     {
-                        case MATAnnotationType.SPL:
+                        case CMAnnotationType.SPL:
                             return string.Format("如:ZP DN100 {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.SL:
+                        case CMAnnotationType.SL:
                             return string.Format("如:ZP {0}2600", AnnotationPrefix);
-                        case MATAnnotationType.PL:
+                        case CMAnnotationType.PL:
                             return string.Format("如:DN100 {0}2600", AnnotationPrefix);
                         default:
                             throw new NotImplementedException("未支持该类型的");
                     }
-                case MATTargetType.Conduit:
+                case CMTargetType.Conduit:
                 default:
                     throw new NotImplementedException("未支持该类型的");
             }
